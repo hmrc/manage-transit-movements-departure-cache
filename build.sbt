@@ -11,6 +11,7 @@ lazy val microservice = Project(appName, file("."))
     majorVersion                     := 0,
     scalaVersion                     := "2.12.15",
     libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
+    ThisBuild / scalafmtOnCompile := true,
     // ***************
     // Use the silencer plugin to suppress warnings
     scalacOptions += "-P:silencer:pathFilters=routes",
@@ -23,5 +24,6 @@ lazy val microservice = Project(appName, file("."))
   .settings(publishingSettings: _*)
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)
+  .settings(inConfig(IntegrationTest)(org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings): _*)
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)
