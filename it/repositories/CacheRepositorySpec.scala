@@ -18,8 +18,9 @@ package repositories
 
 import itbase.ItSpecBase
 import models.UserAnswers
-import org.mongodb.scala.MongoWriteException
+import org.mongodb.scala.bson.{BsonDocument, BsonInt64, BsonString}
 import org.mongodb.scala.model.Filters
+import org.mongodb.scala.{Document, MongoWriteException}
 import play.api.libs.json.Json
 
 import java.util.UUID
@@ -135,6 +136,24 @@ class CacheRepositorySpec extends ItSpecBase {
       val removeResult = repository.remove(userAnswers3.lrn, userAnswers3.eoriNumber).futureValue
 
       removeResult shouldBe true
+    }
+  }
+
+  "ensureIndexes" must {
+    "ensure the correct indexes" in {
+      val indexes = repository.collection.listIndexes.toFuture().futureValue
+      indexes.length shouldBe 3
+
+      indexes.head.get("name").get shouldBe BsonString("_id_")
+
+      def findIndex(name: String): Document = indexes.find(_.get("name").get == BsonString(name)).get
+
+      val lastUpdatedIndex = findIndex("user-answers-last-updated-index")
+      lastUpdatedIndex.get("key").get shouldBe BsonDocument("lastUpdated" -> 1)
+      lastUpdatedIndex.get("expireAfterSeconds").get shouldBe BsonInt64(2592000)
+
+      val eoriLrnIndex = findIndex("eoriNumber-lrn-index")
+      eoriLrnIndex.get("key").get shouldBe BsonDocument("eoriNumber" -> 1, "lrn" -> 1)
     }
   }
 }
