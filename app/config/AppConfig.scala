@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.managetransitmovementsdeparturecache.config
+package config
+
+import play.api.Configuration
 
 import javax.inject.{Inject, Singleton}
-import play.api.Configuration
 
 @Singleton
 class AppConfig @Inject() (config: Configuration) {
