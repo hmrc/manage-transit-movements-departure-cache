@@ -14,23 +14,28 @@
  * limitations under the License.
  */
 
-package controllers
+package base
 
+import models.UserAnswers
+import org.mockito.Mockito.reset
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import play.api.http.Status
-import play.api.test.Helpers._
-import play.api.test.{FakeRequest, Helpers}
+import org.scalatestplus.mockito.MockitoSugar
+import repositories.CacheRepository
 
-class MicroserviceHelloWorldControllerSpec extends AnyWordSpec with Matchers {
+trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
 
-  private val fakeRequest = FakeRequest("GET", "/")
-  private val controller  = new MicroserviceHelloWorldController(Helpers.stubControllerComponents())
+  val lrn  = "lrn"
+  val eori = "eori"
 
-  "GET /" should {
-    "return 200" in {
-      val result = controller.hello()(fakeRequest)
-      status(result) shouldBe Status.OK
-    }
+  val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eori)
+
+  val mockCacheRepository: CacheRepository = mock[CacheRepository]
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockCacheRepository)
   }
+
 }

@@ -29,15 +29,15 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class SessionRepository @Inject() (
+class CacheRepository @Inject() (
   mongoComponent: MongoComponent,
   appConfig: AppConfig
 )(implicit ec: ExecutionContext)
     extends PlayMongoRepository[UserAnswers](
       mongoComponent = mongoComponent,
-      collectionName = "user-answers",
+      collectionName = CacheRepository.collectionName,
       domainFormat = UserAnswers.format,
-      indexes = SessionRepository.indexes(appConfig)
+      indexes = CacheRepository.indexes(appConfig)
     ) {
 
   def get(lrn: String, eoriNumber: String): Future[Option[UserAnswers]] = {
@@ -79,7 +79,9 @@ class SessionRepository @Inject() (
 
 }
 
-object SessionRepository {
+object CacheRepository {
+
+  val collectionName: String = "user-answers"
 
   def indexes(appConfig: AppConfig): Seq[IndexModel] = {
     val userAnswersLastUpdatedIndex: IndexModel = IndexModel(

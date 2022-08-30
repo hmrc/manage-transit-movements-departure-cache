@@ -30,7 +30,7 @@ import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class SessionRepositorySpec
+class CacheRepositorySpec
     extends AnyFreeSpec
     with Matchers
     with BeforeAndAfterEach
@@ -40,7 +40,7 @@ class SessionRepositorySpec
 
   private val config: AppConfig = app.injector.instanceOf[AppConfig]
 
-  override protected def repository = new SessionRepository(mongoComponent, config)
+  override protected def repository = new CacheRepository(mongoComponent, config)
 
   private lazy val userAnswers1 = UserAnswers("ABCD1111111111111", "EoriNumber1")
   private lazy val userAnswers2 = UserAnswers("ABCD2222222222222", "EoriNumber2")

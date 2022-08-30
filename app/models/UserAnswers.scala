@@ -43,7 +43,7 @@ object UserAnswers {
         (__ \ "_id").read[UUID]
     )(UserAnswers.apply _)
 
-  implicit lazy val writes: OWrites[UserAnswers] =
+  implicit lazy val writes: Writes[UserAnswers] =
     (
       (__ \ "lrn").write[String] and
         (__ \ "eoriNumber").write[String] and
