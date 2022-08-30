@@ -16,31 +16,15 @@
 
 package repositories
 
-import config.AppConfig
+import itbase.ItSpecBase
 import models.UserAnswers
 import org.mongodb.scala.MongoWriteException
 import org.mongodb.scala.model.Filters
-import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.must.Matchers
-import org.scalatest.{BeforeAndAfterEach, OptionValues}
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.libs.json.Json
-import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import java.util.UUID
-import scala.concurrent.ExecutionContext.Implicits.global
 
-class CacheRepositorySpec
-    extends AnyFreeSpec
-    with Matchers
-    with BeforeAndAfterEach
-    with GuiceOneAppPerSuite
-    with OptionValues
-    with DefaultPlayMongoRepositorySupport[UserAnswers] {
-
-  private val config: AppConfig = app.injector.instanceOf[AppConfig]
-
-  override protected def repository = new CacheRepository(mongoComponent, config)
+class CacheRepositorySpec extends ItSpecBase {
 
   private lazy val userAnswers1 = UserAnswers("ABCD1111111111111", "EoriNumber1")
   private lazy val userAnswers2 = UserAnswers("ABCD2222222222222", "EoriNumber2")
@@ -60,100 +44,97 @@ class CacheRepositorySpec
       )
     ).futureValue.headOption
 
-  "SessionRepository" - {
+  "get" must {
 
-    "get" - {
+    "return UserAnswers when given an LocalReferenceNumber and EoriNumber" in {
 
-      "must return UserAnswers when given an LocalReferenceNumber and EoriNumber" in {
+      val result = repository.get(userAnswers1.lrn, userAnswers1.eoriNumber).futureValue
 
-        val result = repository.get(userAnswers1.lrn, userAnswers1.eoriNumber).futureValue
-
-        result.value.lrn mustBe userAnswers1.lrn
-        result.value.eoriNumber mustBe userAnswers1.eoriNumber
-        result.value.data mustBe userAnswers1.data
-      }
-
-      "must return None when no UserAnswers match LocalReferenceNumber" in {
-
-        val result = repository.get(userAnswers3.lrn, userAnswers1.eoriNumber).futureValue
-
-        result mustBe None
-      }
-
-      "must return None when no UserAnswers match EoriNumber" in {
-
-        val result = repository.get(userAnswers1.lrn, userAnswers3.eoriNumber).futureValue
-
-        result mustBe None
-      }
+      result.value.lrn shouldBe userAnswers1.lrn
+      result.value.eoriNumber shouldBe userAnswers1.eoriNumber
+      result.value.data shouldBe userAnswers1.data
     }
 
-    "set" - {
+    "return None when no UserAnswers match LocalReferenceNumber" in {
 
-      "must create new document when given valid UserAnswers" in {
+      val result = repository.get(userAnswers3.lrn, userAnswers1.eoriNumber).futureValue
 
-        findOne(userAnswers3.lrn, userAnswers3.eoriNumber) must not be defined
-
-        val setResult = repository.set(userAnswers3).futureValue
-
-        setResult mustBe true
-
-        val getResult = findOne(userAnswers3.lrn, userAnswers3.eoriNumber).get
-
-        getResult.lrn mustBe userAnswers3.lrn
-        getResult.eoriNumber mustBe userAnswers3.eoriNumber
-        getResult.data mustBe userAnswers3.data
-      }
-
-      "must update document when it already exists" in {
-
-        val firstGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
-
-        val setResult = repository.set(userAnswers1.copy(data = Json.obj("foo" -> "bar"))).futureValue
-
-        setResult mustBe true
-
-        val secondGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
-
-        firstGet.id mustBe secondGet.id
-        firstGet.lrn mustBe secondGet.lrn
-        firstGet.eoriNumber mustBe secondGet.eoriNumber
-        firstGet.data mustNot equal(secondGet.data)
-        firstGet.lastUpdated isBefore secondGet.lastUpdated mustBe true
-      }
-
-      "must fail when attempting to set using an existing LocalReferenceNumber and EoriNumber with a different Id" in {
-
-        val setResult = repository.set(userAnswers1.copy(id = UUID.randomUUID()))
-
-        whenReady(setResult.failed) {
-          e =>
-            e mustBe a[MongoWriteException]
-        }
-      }
+      result shouldBe None
     }
 
-    "remove" - {
+    "return None when no UserAnswers match EoriNumber" in {
 
-      "must remove document when given a valid LocalReferenceNumber and EoriNumber" in {
+      val result = repository.get(userAnswers1.lrn, userAnswers3.eoriNumber).futureValue
 
-        findOne(userAnswers1.lrn, userAnswers1.eoriNumber) mustBe defined
+      result shouldBe None
+    }
+  }
 
-        val removeResult = repository.remove(userAnswers1.lrn, userAnswers1.eoriNumber).futureValue
+  "set" must {
 
-        removeResult mustBe true
+    "create new document when given valid UserAnswers" in {
 
-        findOne(userAnswers1.lrn, userAnswers1.eoriNumber) must not be defined
+      findOne(userAnswers3.lrn, userAnswers3.eoriNumber) should not be defined
+
+      val setResult = repository.set(userAnswers3).futureValue
+
+      setResult shouldBe true
+
+      val getResult = findOne(userAnswers3.lrn, userAnswers3.eoriNumber).get
+
+      getResult.lrn shouldBe userAnswers3.lrn
+      getResult.eoriNumber shouldBe userAnswers3.eoriNumber
+      getResult.data shouldBe userAnswers3.data
+    }
+
+    "update document when it already exists" in {
+
+      val firstGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
+
+      val setResult = repository.set(userAnswers1.copy(data = Json.obj("foo" -> "bar"))).futureValue
+
+      setResult shouldBe true
+
+      val secondGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
+
+      firstGet.id shouldBe secondGet.id
+      firstGet.lrn shouldBe secondGet.lrn
+      firstGet.eoriNumber shouldBe secondGet.eoriNumber
+      firstGet.data shouldNot equal(secondGet.data)
+      firstGet.lastUpdated isBefore secondGet.lastUpdated shouldBe true
+    }
+
+    "fail when attempting to set using an existing LocalReferenceNumber and EoriNumber with a different Id" in {
+
+      val setResult = repository.set(userAnswers1.copy(id = UUID.randomUUID()))
+
+      whenReady(setResult.failed) {
+        e =>
+          e shouldBe a[MongoWriteException]
       }
+    }
+  }
 
-      "must not fail if document does not exist" in {
+  "remove" must {
 
-        findOne(userAnswers3.lrn, userAnswers3.eoriNumber) must not be defined
+    "remove document when given a valid LocalReferenceNumber and EoriNumber" in {
 
-        val removeResult = repository.remove(userAnswers3.lrn, userAnswers3.eoriNumber).futureValue
+      findOne(userAnswers1.lrn, userAnswers1.eoriNumber) shouldBe defined
 
-        removeResult mustBe true
-      }
+      val removeResult = repository.remove(userAnswers1.lrn, userAnswers1.eoriNumber).futureValue
+
+      removeResult shouldBe true
+
+      findOne(userAnswers1.lrn, userAnswers1.eoriNumber) should not be defined
+    }
+
+    "not fail if document does not exist" in {
+
+      findOne(userAnswers3.lrn, userAnswers3.eoriNumber) should not be defined
+
+      val removeResult = repository.remove(userAnswers3.lrn, userAnswers3.eoriNumber).futureValue
+
+      removeResult shouldBe true
     }
   }
 }
