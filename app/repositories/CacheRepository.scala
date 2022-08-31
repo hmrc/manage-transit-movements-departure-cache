@@ -17,7 +17,7 @@
 package repositories
 
 import config.AppConfig
-import models.UserAnswers
+import models.{Frontend, UserAnswers}
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
 import org.mongodb.scala.model._
 import uk.gov.hmrc.mongo.MongoComponent
@@ -28,14 +28,14 @@ import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton
-class CacheRepository @Inject() (
+class CacheRepository(
   mongoComponent: MongoComponent,
-  appConfig: AppConfig
+  appConfig: AppConfig,
+  frontend: Frontend
 )(implicit ec: ExecutionContext)
     extends PlayMongoRepository[UserAnswers](
       mongoComponent = mongoComponent,
-      collectionName = CacheRepository.collectionName,
+      collectionName = frontend.collectionName,
       domainFormat = UserAnswers.format,
       indexes = CacheRepository.indexes(appConfig)
     ) {
@@ -81,8 +81,6 @@ class CacheRepository @Inject() (
 
 object CacheRepository {
 
-  val collectionName: String = "user-answers"
-
   def indexes(appConfig: AppConfig): Seq[IndexModel] = {
     val userAnswersLastUpdatedIndex: IndexModel = IndexModel(
       keys = Indexes.ascending("lastUpdated"),
@@ -95,6 +93,16 @@ object CacheRepository {
     )
 
     Seq(userAnswersLastUpdatedIndex, eoriNumberAndLrnCompoundIndex)
+  }
+
+  @Singleton
+  class CacheRepositoryProvider @Inject() (
+    mongoComponent: MongoComponent,
+    appConfig: AppConfig
+  )(implicit ec: ExecutionContext) {
+
+    def apply(frontend: Frontend): CacheRepository =
+      new CacheRepository(mongoComponent, appConfig, frontend)
   }
 
 }

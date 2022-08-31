@@ -25,7 +25,7 @@ class CacheControllerSpec extends ItSpecBase {
 
   "GET /user-answers/lrn/:lrn/eori/:eori" when {
 
-    val url = s"$baseUrl/manage-transit-movements-departure-cache/user-answers/lrn/$lrn/eori/$eori"
+    val url = s"$baseUrl/manage-transit-movements-departure-cache/$frontend/user-answers/lrn/$lrn/eori/$eori"
 
     "document does not exist" should {
       "respond with 404 status" in {
@@ -57,7 +57,7 @@ class CacheControllerSpec extends ItSpecBase {
 
   "POST /user-answers" when {
 
-    val url = s"$baseUrl/manage-transit-movements-departure-cache/user-answers"
+    val url = s"$baseUrl/manage-transit-movements-departure-cache/$frontend/user-answers"
 
     "document successfully written to mongo" should {
       "respond with 200 status" in {

@@ -1,3 +1,4 @@
+import play.sbt.routes.RoutesKeys
 import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
@@ -13,6 +14,7 @@ lazy val microservice = Project(appName, file("."))
     PlayKeys.playDefaultPort         := 10126,
     libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
     ThisBuild / scalafmtOnCompile := true,
+    RoutesKeys.routesImport ++= Seq("models.Frontend"),
     // ***************
     // Use the silencer plugin to suppress warnings
     scalacOptions += "-P:silencer:pathFilters=routes",
@@ -25,6 +27,13 @@ lazy val microservice = Project(appName, file("."))
   .settings(publishingSettings: _*)
   .configs(IntegrationTest)
   .settings(integrationTestSettings(): _*)
+  .settings(inConfig(IntegrationTest)(itSettings): _*)
   .settings(inConfig(IntegrationTest)(org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings): _*)
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)
+
+lazy val itSettings = Seq(
+  unmanagedSourceDirectories ++= Seq(
+    baseDirectory.value / "test" / "generators"
+  )
+)

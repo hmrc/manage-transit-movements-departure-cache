@@ -16,11 +16,11 @@
 
 package controllers
 
-import models.UserAnswers
+import models.{Frontend, UserAnswers}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import repositories.CacheRepository
+import repositories.CacheRepository.CacheRepositoryProvider
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -29,16 +29,16 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton()
 class CacheController @Inject() (
   cc: ControllerComponents,
-  cacheRepository: CacheRepository
+  cacheRepositoryProvider: CacheRepositoryProvider
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
 
   // TODO - add authentication
 
-  def get(lrn: String, eoriNumber: String): Action[AnyContent] = Action.async {
+  def get(frontend: Frontend, lrn: String, eoriNumber: String): Action[AnyContent] = Action.async {
     _ =>
-      cacheRepository
+      cacheRepositoryProvider(frontend)
         .get(lrn, eoriNumber)
         .map {
           case Some(userAnswers) => Ok(Json.toJson(userAnswers))
@@ -53,11 +53,11 @@ class CacheController @Inject() (
         }
   }
 
-  def post(): Action[JsValue] = Action(parse.json).async {
+  def post(frontend: Frontend): Action[JsValue] = Action(parse.json).async {
     implicit request =>
       request.body.validate[UserAnswers] match {
         case JsSuccess(userAnswers, _) =>
-          cacheRepository
+          cacheRepositoryProvider(frontend)
             .set(userAnswers)
             .map {
               case true => Ok

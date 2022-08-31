@@ -17,25 +17,30 @@
 package base
 
 import models.UserAnswers
-import org.mockito.Mockito.reset
-import org.scalatest.BeforeAndAfterEach
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.{reset, when}
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
+import org.scalatest.{BeforeAndAfterEach, EitherValues, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
 import repositories.CacheRepository
+import repositories.CacheRepository.CacheRepositoryProvider
 
-trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach {
+trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach with OptionValues with EitherValues {
 
   val lrn  = "lrn"
   val eori = "eori"
 
   val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eori)
 
-  val mockCacheRepository: CacheRepository = mock[CacheRepository]
+  val mockCacheRepositoryProvider: CacheRepositoryProvider = mock[CacheRepositoryProvider]
+  val mockCacheRepository: CacheRepository                 = mock[CacheRepository]
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    reset(mockCacheRepository)
+    reset(mockCacheRepositoryProvider, mockCacheRepository)
+
+    when(mockCacheRepositoryProvider.apply(any())).thenReturn(mockCacheRepository)
   }
 
 }
