@@ -16,6 +16,7 @@
 
 package itbase
 
+import controllers.actions.{AuthenticateActionProvider, FakeAuthenticateActionProvider}
 import generators.Generators
 import models.{Frontend, UserAnswers}
 import org.scalacheck.Arbitrary.arbitrary
@@ -47,10 +48,10 @@ trait ItSpecBase
   override protected def repository: CacheRepository =
     app.injector.instanceOf[CacheRepositoryProvider].apply(frontend)
 
-  val lrn  = "lrn"
-  val eori = "eori"
+  val lrn        = "lrn"
+  val eoriNumber = "eori"
 
-  val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eori)
+  val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber)
 
   val wsClient: WSClient = app.injector.instanceOf[WSClient]
   val baseUrl            = s"http://localhost:$port"
@@ -59,5 +60,6 @@ trait ItSpecBase
     GuiceApplicationBuilder()
       .configure("metrics.enabled" -> false)
       .overrides(bind[MongoComponent].toInstance(mongoComponent))
+      .overrides(bind[AuthenticateActionProvider].toInstance(new FakeAuthenticateActionProvider(eoriNumber)))
       .build()
 }

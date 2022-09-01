@@ -30,10 +30,10 @@ import repositories.CacheRepository.CacheRepositoryProvider
 
 trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach with OptionValues with EitherValues {
 
-  val lrn  = "lrn"
-  val eori = "eori"
+  val lrn        = "lrn"
+  val eoriNumber = "eori"
 
-  val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eori)
+  val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber)
 
   val mockCacheRepositoryProvider: CacheRepositoryProvider = mock[CacheRepositoryProvider]
   val mockCacheRepository: CacheRepository                 = mock[CacheRepository]

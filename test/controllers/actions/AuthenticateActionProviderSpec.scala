@@ -42,10 +42,9 @@ class AuthenticateActionProviderSpec extends SpecBase {
     }
   }
 
-  private val enrolmentKey             = "HMRC-CTC-ORG"
-  private val enrolmentIdentifierKey   = "EORINumber"
-  private val enrolmentIdentifierValue = "GB1234567890"
-  private val state                    = "Activated"
+  private val enrolmentKey           = "HMRC-CTC-ORG"
+  private val enrolmentIdentifierKey = "EORINumber"
+  private val state                  = "Activated"
 
   private val validEnrolment: Enrolment =
     Enrolment(
@@ -53,7 +52,7 @@ class AuthenticateActionProviderSpec extends SpecBase {
       identifiers = Seq(
         EnrolmentIdentifier(
           enrolmentIdentifierKey,
-          enrolmentIdentifierValue
+          eoriNumber
         )
       ),
       state = state
@@ -91,7 +90,7 @@ class AuthenticateActionProviderSpec extends SpecBase {
         val result     = controller.action()(fakeRequest)
 
         status(result) shouldBe OK
-        contentAsString(result) shouldBe enrolmentIdentifierValue
+        contentAsString(result) shouldBe eoriNumber
       }
     }
 

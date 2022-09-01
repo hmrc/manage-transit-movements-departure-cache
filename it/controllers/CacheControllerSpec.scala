@@ -23,9 +23,9 @@ import play.api.libs.json.{JsString, Json}
 
 class CacheControllerSpec extends ItSpecBase {
 
-  "GET /user-answers/lrn/:lrn/eori/:eori" when {
+  "GET /user-answers/lrn/:lrn" when {
 
-    val url = s"$baseUrl/manage-transit-movements-departure-cache/$frontend/user-answers/lrn/$lrn/eori/$eori"
+    val url = s"$baseUrl/manage-transit-movements-departure-cache/$frontend/user-answers/lrn/$lrn"
 
     "document does not exist" should {
       "respond with 404 status" in {

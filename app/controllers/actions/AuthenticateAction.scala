@@ -30,7 +30,7 @@ import uk.gov.hmrc.play.http.HeaderCarrierConverter
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-private[actions] class AuthenticateAction @Inject() (
+class AuthenticateAction @Inject() (
   override val authConnector: AuthConnector,
   val metrics: Metrics,
   appConfig: AppConfig
@@ -47,15 +47,15 @@ private[actions] class AuthenticateAction @Inject() (
           enrolment  <- enrolments.getEnrolment(appConfig.enrolmentKey)
           identifier <- enrolment.getIdentifier(appConfig.enrolmentIdentifier)
         } yield Future.successful(Right(AuthenticatedRequest(request, identifier.value)))).getOrElse {
-          Future.failed(InsufficientEnrolments(s"Unable to retrieve enrolment for either ${appConfig.enrolmentKey}"))
+          Future.failed(InsufficientEnrolments(s"Unable to retrieve ${appConfig.enrolmentKey} enrolment"))
         }
     }
   }.recover {
     case e: InsufficientEnrolments =>
-      logger.warn(s"Failed to authorise due to insufficient enrolments", e)
+      logger.warn("Failed to authorise due to insufficient enrolments", e)
       Left(Forbidden)
     case e: AuthorisationException =>
-      logger.warn(s"Failed to authorise", e)
+      logger.warn("Failed to authorise", e)
       Left(Unauthorized)
   }
 }

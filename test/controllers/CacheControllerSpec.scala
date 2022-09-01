@@ -17,6 +17,7 @@
 package controllers
 
 import base.SpecBase
+import controllers.actions.FakeAuthenticateActionProvider
 import generators.Generators
 import models.Frontend
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -31,8 +32,13 @@ import scala.concurrent.Future
 
 class CacheControllerSpec extends SpecBase with Generators {
 
-  private val controller = new CacheController(Helpers.stubControllerComponents(), mockCacheRepositoryProvider)
-  private val frontend   = arbitrary[Frontend].sample.value
+  private val controller = new CacheController(
+    Helpers.stubControllerComponents(),
+    new FakeAuthenticateActionProvider(eoriNumber),
+    mockCacheRepositoryProvider
+  )
+
+  private val frontend = arbitrary[Frontend].sample.value
 
   "get" should {
 
@@ -42,28 +48,28 @@ class CacheControllerSpec extends SpecBase with Generators {
       "read from mongo is successful" in {
         val userAnswers = emptyUserAnswers
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
-        val result = controller.get(frontend, lrn, eori)(fakeRequest)
+        val result = controller.get(frontend, lrn)(fakeRequest)
         status(result) shouldBe OK
         contentAsJson(result) shouldBe Json.toJson(userAnswers)
-        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eori))
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
       }
     }
 
     "return 404" when {
       "document not found in mongo for given lrn and eori number" in {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
-        val result = controller.get(frontend, lrn, eori)(fakeRequest)
+        val result = controller.get(frontend, lrn)(fakeRequest)
         status(result) shouldBe NOT_FOUND
-        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eori))
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
       }
     }
 
     "return 500" when {
       "read from mongo fails" in {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.failed(new Throwable()))
-        val result = controller.get(frontend, lrn, eori)(fakeRequest)
+        val result = controller.get(frontend, lrn)(fakeRequest)
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eori))
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
       }
     }
   }

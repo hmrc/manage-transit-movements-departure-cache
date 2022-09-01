@@ -16,6 +16,7 @@
 
 package controllers
 
+import controllers.actions.AuthenticateActionProvider
 import models.{Frontend, UserAnswers}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
@@ -29,21 +30,20 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton()
 class CacheController @Inject() (
   cc: ControllerComponents,
+  authenticate: AuthenticateActionProvider,
   cacheRepositoryProvider: CacheRepositoryProvider
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
 
-  // TODO - add authentication
-
-  def get(frontend: Frontend, lrn: String, eoriNumber: String): Action[AnyContent] = Action.async {
-    _ =>
+  def get(frontend: Frontend, lrn: String): Action[AnyContent] = authenticate().async {
+    implicit request =>
       cacheRepositoryProvider(frontend)
-        .get(lrn, eoriNumber)
+        .get(lrn, request.eoriNumber)
         .map {
           case Some(userAnswers) => Ok(Json.toJson(userAnswers))
           case None =>
-            logger.error(s"No document found for LRN '$lrn' and EORI '$eoriNumber''")
+            logger.error(s"No document found for LRN '$lrn' and EORI '${request.eoriNumber}'")
             NotFound
         }
         .recover {
@@ -53,7 +53,7 @@ class CacheController @Inject() (
         }
   }
 
-  def post(frontend: Frontend): Action[JsValue] = Action(parse.json).async {
+  def post(frontend: Frontend): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[UserAnswers] match {
         case JsSuccess(userAnswers, _) =>

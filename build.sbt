@@ -25,15 +25,8 @@ lazy val microservice = Project(appName, file("."))
     // ***************
   )
   .settings(publishingSettings: _*)
-  .configs(IntegrationTest)
+  .configs(IntegrationTest extend Test)
   .settings(integrationTestSettings(): _*)
-  .settings(inConfig(IntegrationTest)(itSettings): _*)
   .settings(inConfig(IntegrationTest)(org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings): _*)
   .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings: _*)
-
-lazy val itSettings = Seq(
-  unmanagedSourceDirectories ++= Seq(
-    baseDirectory.value / "test" / "generators"
-  )
-)
