@@ -20,24 +20,22 @@ import play.api.mvc.PathBindable
 
 sealed trait Frontend {
   val collectionName: String
-  val binder: String
 
-  override def toString: String = binder
+  override def toString: String = collectionName
 }
 
 object Frontend {
 
   case object Hub extends Frontend {
     override val collectionName: String = "manage-transit-movements-departure-frontend"
-    override val binder: String         = "hub"
   }
 
   implicit def pathBindable: PathBindable[Frontend] = new PathBindable[Frontend] {
 
     override def bind(key: String, value: String): Either[String, Frontend] =
       (value match {
-        case Hub.binder => Some(Hub)
-        case _          => None
+        case Hub.collectionName => Some(Hub)
+        case _                  => None
       }).toRight("Invalid frontend")
 
     override def unbind(key: String, value: Frontend): String =

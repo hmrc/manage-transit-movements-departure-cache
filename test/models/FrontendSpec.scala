@@ -31,7 +31,7 @@ class FrontendSpec extends SpecBase with ScalaCheckPropertyChecks with Generator
     "bind from a url when valid value provided" in {
       forAll(arbitrary[Frontend]) {
         frontend =>
-          val result: Either[String, Frontend] = pathBindable.bind("frontend", frontend.binder)
+          val result: Either[String, Frontend] = pathBindable.bind("frontend", frontend.toString)
           result.value shouldBe frontend
       }
     }
@@ -45,7 +45,7 @@ class FrontendSpec extends SpecBase with ScalaCheckPropertyChecks with Generator
       forAll(arbitrary[Frontend]) {
         frontend =>
           val result: String = pathBindable.unbind("frontend", frontend)
-          result shouldBe frontend.binder
+          result shouldBe frontend.toString
       }
     }
   }
