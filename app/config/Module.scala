@@ -16,16 +16,15 @@
 
 package config
 
-import play.api.Configuration
+import com.google.inject.AbstractModule
+import controllers.actions.AuthenticateActionProvider.AuthenticateActionProviderImpl
+import controllers.actions._
 
-import javax.inject.{Inject, Singleton}
+class Module extends AbstractModule {
 
-@Singleton
-class AppConfig @Inject() (config: Configuration) {
+  override def configure(): Unit = {
+    bind(classOf[AppConfig]).asEagerSingleton()
+    bind(classOf[AuthenticateActionProvider]).to(classOf[AuthenticateActionProviderImpl]).asEagerSingleton()
+  }
 
-  val appName: String     = config.get[String]("appName")
-  val mongoTtlInDays: Int = config.get[Int]("mongodb.ttlInDays")
-
-  val enrolmentKey: String        = config.get[String]("enrolment.key")
-  val enrolmentIdentifier: String = config.get[String]("enrolment.identifier")
 }

@@ -14,18 +14,8 @@
  * limitations under the License.
  */
 
-package config
+package models.request
 
-import play.api.Configuration
+import play.api.mvc.{Request, WrappedRequest}
 
-import javax.inject.{Inject, Singleton}
-
-@Singleton
-class AppConfig @Inject() (config: Configuration) {
-
-  val appName: String     = config.get[String]("appName")
-  val mongoTtlInDays: Int = config.get[Int]("mongodb.ttlInDays")
-
-  val enrolmentKey: String        = config.get[String]("enrolment.key")
-  val enrolmentIdentifier: String = config.get[String]("enrolment.identifier")
-}
+case class AuthenticatedRequest[A](request: Request[A], eoriNumber: String) extends WrappedRequest[A](request)

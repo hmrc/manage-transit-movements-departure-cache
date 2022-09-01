@@ -23,6 +23,8 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterEach, EitherValues, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.mvc.AnyContentAsEmpty
+import play.api.test.FakeRequest
 import repositories.CacheRepository
 import repositories.CacheRepository.CacheRepositoryProvider
 
@@ -39,8 +41,9 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockCacheRepositoryProvider, mockCacheRepository)
-
     when(mockCacheRepositoryProvider.apply(any())).thenReturn(mockCacheRepository)
   }
+
+  def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
 
 }

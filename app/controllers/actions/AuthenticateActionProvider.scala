@@ -14,18 +14,25 @@
  * limitations under the License.
  */
 
-package config
+package controllers.actions
 
-import play.api.Configuration
+import models.request.AuthenticatedRequest
+import play.api.mvc.{ActionBuilder, AnyContent, DefaultActionBuilder}
 
-import javax.inject.{Inject, Singleton}
+import javax.inject.Inject
 
-@Singleton
-class AppConfig @Inject() (config: Configuration) {
+trait AuthenticateActionProvider {
+  def apply(): ActionBuilder[AuthenticatedRequest, AnyContent]
+}
 
-  val appName: String     = config.get[String]("appName")
-  val mongoTtlInDays: Int = config.get[Int]("mongodb.ttlInDays")
+object AuthenticateActionProvider {
 
-  val enrolmentKey: String        = config.get[String]("enrolment.key")
-  val enrolmentIdentifier: String = config.get[String]("enrolment.identifier")
+  class AuthenticateActionProviderImpl @Inject() (
+    authenticate: AuthenticateAction,
+    buildDefault: DefaultActionBuilder
+  ) extends AuthenticateActionProvider {
+
+    override def apply(): ActionBuilder[AuthenticatedRequest, AnyContent] =
+      buildDefault andThen authenticate
+  }
 }
