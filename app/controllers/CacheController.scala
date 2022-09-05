@@ -57,19 +57,24 @@ class CacheController @Inject() (
     implicit request =>
       request.body.validate[UserAnswers] match {
         case JsSuccess(userAnswers, _) =>
-          cacheRepositoryProvider(frontend)
-            .set(userAnswers)
-            .map {
-              case true => Ok
-              case false =>
-                logger.error("Write was not acknowledged")
-                InternalServerError
-            }
-            .recover {
-              case e =>
-                logger.error("Failed to write user answers to mongo", e)
-                InternalServerError
-            }
+          if (request.eoriNumber == userAnswers.eoriNumber) {
+            cacheRepositoryProvider(frontend)
+              .set(userAnswers)
+              .map {
+                case true => Ok
+                case false =>
+                  logger.error("Write was not acknowledged")
+                  InternalServerError
+              }
+              .recover {
+                case e =>
+                  logger.error("Failed to write user answers to mongo", e)
+                  InternalServerError
+              }
+          } else {
+            logger.error(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${userAnswers.eoriNumber})")
+            Future.successful(Forbidden)
+          }
         case JsError(errors) =>
           logger.error(s"Failed to validate request body as UserAnswers: $errors")
           Future.successful(BadRequest)

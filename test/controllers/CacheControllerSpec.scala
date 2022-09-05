@@ -103,6 +103,16 @@ class CacheControllerSpec extends SpecBase with Generators {
       }
     }
 
+    "return 403" when {
+      "the EORI in the enrolment and the EORI in user answers do not match" in {
+        val userAnswers = emptyUserAnswers.copy(eoriNumber = "different eori")
+        val fakeRequest = FakeRequest("POST", "/").withBody(Json.toJson(userAnswers))
+        val result      = controller.post(frontend)(fakeRequest)
+        status(result) shouldBe FORBIDDEN
+        verify(mockCacheRepository, never()).set(any())
+      }
+    }
+
     "return 500" when {
       "write to mongo was not acknowledged" in {
         val userAnswers = emptyUserAnswers

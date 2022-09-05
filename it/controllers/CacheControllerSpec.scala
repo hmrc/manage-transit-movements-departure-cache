@@ -23,9 +23,9 @@ import play.api.libs.json.{JsString, Json}
 
 class CacheControllerSpec extends ItSpecBase {
 
-  "GET /user-answers/lrn/:lrn" when {
+  "GET /user-answers/:lrn" when {
 
-    val url = s"$baseUrl/manage-transit-movements-departure-cache/$frontend/user-answers/lrn/$lrn"
+    val url = s"$baseUrl/manage-transit-movements-departure-cache/$frontend/user-answers/$lrn"
 
     "document does not exist" should {
       "respond with 404 status" in {
@@ -100,6 +100,19 @@ class CacheControllerSpec extends ItSpecBase {
           .futureValue
 
         response.status shouldBe 400
+      }
+    }
+
+    "the EORI in the enrolment and the EORI in user answers do not match" should {
+      "respond with 403 status" in {
+        val userAnswers = emptyUserAnswers.copy(eoriNumber = "different eori")
+
+        val response = wsClient
+          .url(url)
+          .post(Json.toJson(userAnswers))
+          .futureValue
+
+        response.status shouldBe 403
       }
     }
   }
