@@ -14,13 +14,20 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.managetransitmovementsdeparturecache.config
+package controllers.actions
 
-import javax.inject.{Inject, Singleton}
-import play.api.Configuration
+import models.request.AuthenticatedRequest
+import play.api.mvc._
+import play.api.test.Helpers
 
-@Singleton
-class AppConfig @Inject() (config: Configuration) {
+import scala.concurrent.ExecutionContext.Implicits.global
 
-  val appName: String = config.get[String]("appName")
+class FakeAuthenticateActionProvider(eoriNumber: String) extends AuthenticateActionProvider {
+
+  override def apply(): ActionBuilder[AuthenticatedRequest, AnyContent] = {
+    val defaultActionBuilder = DefaultActionBuilder(Helpers.stubBodyParser())
+    val authenticate         = new FakeAuthenticateAction(eoriNumber)
+
+    defaultActionBuilder andThen authenticate
+  }
 }

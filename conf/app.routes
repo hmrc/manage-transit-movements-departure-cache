@@ -1,3 +1,4 @@
 # microservice specific routes
 
-GET        /hello-world             uk.gov.hmrc.managetransitmovementsdeparturecache.controllers.MicroserviceHelloWorldController.hello
+GET        /:frontend/user-answers/:lrn                         controllers.CacheController.get(frontend: Frontend, lrn: String)
+POST       /:frontend/user-answers                              controllers.CacheController.post(frontend: Frontend)
