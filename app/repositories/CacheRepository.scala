@@ -36,7 +36,7 @@ class CacheRepository(
     extends PlayMongoRepository[UserAnswers](
       mongoComponent = mongoComponent,
       collectionName = frontend.collectionName,
-      domainFormat = UserAnswers.format,
+      domainFormat = UserAnswers.mongoFormat,
       indexes = CacheRepository.indexes(appConfig)
     ) {
 
