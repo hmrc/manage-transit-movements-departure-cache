@@ -34,23 +34,27 @@ object UserAnswers {
 
   import play.api.libs.functional.syntax._
 
-  implicit lazy val reads: Reads[UserAnswers] =
-    (
-      (__ \ "lrn").read[String] and
-        (__ \ "eoriNumber").read[String] and
-        (__ \ "data").read[JsObject] and
-        (__ \ "lastUpdated").read(MongoJavatimeFormats.localDateTimeReads) and
-        (__ \ "_id").read[UUID]
-    )(UserAnswers.apply _)
+  implicit lazy val reads: Reads[UserAnswers]   = customReads(implicitly)
+  implicit lazy val writes: Writes[UserAnswers] = customWrites(implicitly)
 
-  implicit lazy val writes: Writes[UserAnswers] =
-    (
-      (__ \ "lrn").write[String] and
-        (__ \ "eoriNumber").write[String] and
-        (__ \ "data").write[JsObject] and
-        (__ \ "lastUpdated").write(MongoJavatimeFormats.localDateTimeWrites) and
-        (__ \ "_id").write[UUID]
-    )(unlift(UserAnswers.unapply))
+  private def customReads(implicit localDateTimeReads: Reads[LocalDateTime]): Reads[UserAnswers] = (
+    (__ \ "lrn").read[String] and
+      (__ \ "eoriNumber").read[String] and
+      (__ \ "data").read[JsObject] and
+      (__ \ "lastUpdated").read[LocalDateTime] and
+      (__ \ "_id").read[UUID]
+  )(UserAnswers.apply _)
 
-  implicit lazy val format: Format[UserAnswers] = Format(reads, writes)
+  private def customWrites(implicit localDateTimeWrites: Writes[LocalDateTime]): Writes[UserAnswers] = (
+    (__ \ "lrn").write[String] and
+      (__ \ "eoriNumber").write[String] and
+      (__ \ "data").write[JsObject] and
+      (__ \ "lastUpdated").write[LocalDateTime] and
+      (__ \ "_id").write[UUID]
+  )(unlift(UserAnswers.unapply))
+
+  lazy val mongoFormat: Format[UserAnswers] = Format(
+    customReads(MongoJavatimeFormats.localDateTimeReads),
+    customWrites(MongoJavatimeFormats.localDateTimeWrites)
+  )
 }
