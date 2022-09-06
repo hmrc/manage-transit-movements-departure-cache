@@ -22,6 +22,7 @@ import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
 import org.mongodb.scala.model._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import uk.gov.hmrc.mongo.transaction.{TransactionConfiguration, Transactions}
 
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
@@ -97,12 +98,27 @@ object CacheRepository {
 
   @Singleton
   class CacheRepositoryProvider @Inject() (
-    mongoComponent: MongoComponent,
+    override val mongoComponent: MongoComponent,
     appConfig: AppConfig
-  )(implicit ec: ExecutionContext) {
+  )(implicit ec: ExecutionContext)
+      extends Transactions {
 
     def apply(frontend: Frontend): CacheRepository =
       new CacheRepository(mongoComponent, appConfig, frontend)
+
+    def deleteForAllCollections(lrn: String, eoriNumber: String): Future[Seq[Boolean]] = {
+      implicit val tc: TransactionConfiguration = TransactionConfiguration.strict
+      withSessionAndTransaction {
+        _ =>
+          Future
+            .sequence {
+              Frontend.values.map {
+                apply(_)
+                  .remove(lrn, eoriNumber)
+              }
+            }
+      }
+    }
   }
 
 }

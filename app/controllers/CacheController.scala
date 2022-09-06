@@ -83,15 +83,15 @@ class CacheController @Inject() (
 
   def delete(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
-      Future
-        .sequence {
-          Frontend.values.map {
-            cacheRepositoryProvider(_)
-              .remove(lrn, request.eoriNumber)
-          }
-        }
+      cacheRepositoryProvider
+        .deleteForAllCollections(lrn, request.eoriNumber)
         .map {
           _ => Ok
+        }
+        .recover {
+          case e =>
+            logger.error("Failed to delete draft", e)
+            InternalServerError
         }
   }
 }

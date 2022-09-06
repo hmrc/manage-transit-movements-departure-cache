@@ -21,7 +21,7 @@ import controllers.actions.FakeAuthenticateActionProvider
 import generators.Generators
 import models.Frontend
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{never, times, verify, when}
+import org.mockito.Mockito.{never, verify, when}
 import org.scalacheck.Arbitrary.arbitrary
 import play.api.libs.json.{JsString, Json}
 import play.api.test.Helpers._
@@ -142,10 +142,17 @@ class CacheControllerSpec extends SpecBase with Generators {
 
     "return 200" when {
       "documents successfully deleted" in {
-        when(mockCacheRepository.remove(any(), any())).thenReturn(Future.successful(true))
+        when(mockCacheRepositoryProvider.deleteForAllCollections(any(), any())).thenReturn(Future.successful(Seq(true)))
         val result = controller.delete(lrn)(fakeRequest)
         status(result) shouldBe OK
-        verify(mockCacheRepository, times(Frontend.values.size)).remove(eqTo(lrn), eqTo(eoriNumber))
+      }
+    }
+
+    "return 500" when {
+      "documents unsuccessfully deleted" in {
+        when(mockCacheRepositoryProvider.deleteForAllCollections(any(), any())).thenReturn(Future.failed(new Throwable()))
+        val result = controller.delete(lrn)(fakeRequest)
+        status(result) shouldBe INTERNAL_SERVER_ERROR
       }
     }
   }
