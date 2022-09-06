@@ -17,13 +17,12 @@
 package generators
 
 import models.Frontend
-import models.Frontend._
 import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
 
   implicit lazy val arbitraryFrontend: Arbitrary[Frontend] = Arbitrary {
-    Gen.const(Hub)
+    Gen.oneOf(Frontend.values)
   }
 
 }

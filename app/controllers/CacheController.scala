@@ -80,4 +80,18 @@ class CacheController @Inject() (
           Future.successful(BadRequest)
       }
   }
+
+  def delete(lrn: String): Action[AnyContent] = authenticate().async {
+    implicit request =>
+      Future
+        .sequence {
+          Frontend.values.map {
+            cacheRepositoryProvider(_)
+              .remove(lrn, request.eoriNumber)
+          }
+        }
+        .map {
+          _ => Ok
+        }
+  }
 }

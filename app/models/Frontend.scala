@@ -26,6 +26,10 @@ sealed trait Frontend {
 
 object Frontend {
 
+  val values: Seq[Frontend] = Seq(
+    Hub
+  )
+
   case object Hub extends Frontend {
     override val collectionName: String = "manage-transit-movements-departure-frontend"
   }

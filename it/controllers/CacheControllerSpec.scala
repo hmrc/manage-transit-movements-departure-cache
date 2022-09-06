@@ -23,7 +23,7 @@ import play.api.libs.json.{JsString, Json}
 
 class CacheControllerSpec extends ItSpecBase {
 
-  "GET /user-answers/:lrn" when {
+  "GET /:frontend/user-answers/:lrn" when {
 
     val url = s"$baseUrl/manage-transit-movements-departure-cache/$frontend/user-answers/$lrn"
 
@@ -55,7 +55,7 @@ class CacheControllerSpec extends ItSpecBase {
     }
   }
 
-  "POST /user-answers" when {
+  "POST /:frontend/user-answers" when {
 
     val url = s"$baseUrl/manage-transit-movements-departure-cache/$frontend/user-answers"
 
@@ -113,6 +113,37 @@ class CacheControllerSpec extends ItSpecBase {
           .futureValue
 
         response.status shouldBe 403
+      }
+    }
+  }
+
+  "DELETE /user-answers/:lrn" when {
+
+    val url = s"$baseUrl/manage-transit-movements-departure-cache/user-answers/$lrn"
+
+    "document exists" should {
+      "remove document and respond with 200 status" in {
+        insert(emptyUserAnswers).futureValue
+
+        val response = wsClient
+          .url(url)
+          .delete()
+          .futureValue
+
+        response.status shouldBe 200
+
+        findAll().futureValue shouldBe empty
+      }
+    }
+
+    "document does not exist" should {
+      "respond with 200 status" in {
+        val response = wsClient
+          .url(url)
+          .delete()
+          .futureValue
+
+        response.status shouldBe 200
       }
     }
   }
