@@ -80,4 +80,18 @@ class CacheController @Inject() (
           Future.successful(BadRequest)
       }
   }
+
+  def delete(lrn: String): Action[AnyContent] = authenticate().async {
+    implicit request =>
+      cacheRepositoryProvider
+        .deleteForAllCollections(lrn, request.eoriNumber)
+        .map {
+          _ => Ok
+        }
+        .recover {
+          case e =>
+            logger.error("Failed to delete draft", e)
+            InternalServerError
+        }
+  }
 }

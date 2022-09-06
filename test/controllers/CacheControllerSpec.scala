@@ -76,10 +76,12 @@ class CacheControllerSpec extends SpecBase with Generators {
 
   "post" should {
 
+    val baseRequest = FakeRequest("POST", "/")
+
     "return 200" when {
       "write to mongo was acknowledged" in {
         val userAnswers = emptyUserAnswers
-        val fakeRequest = FakeRequest("POST", "/").withBody(Json.toJson(userAnswers))
+        val fakeRequest = baseRequest.withBody(Json.toJson(userAnswers))
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(true))
         val result = controller.post(frontend)(fakeRequest)
         status(result) shouldBe OK
@@ -89,14 +91,14 @@ class CacheControllerSpec extends SpecBase with Generators {
 
     "return 400" when {
       "request body is invalid" in {
-        val fakeRequest = FakeRequest("POST", "/").withBody(JsString("foo"))
+        val fakeRequest = baseRequest.withBody(JsString("foo"))
         val result      = controller.post(frontend)(fakeRequest)
         status(result) shouldBe BAD_REQUEST
         verify(mockCacheRepository, never()).set(any())
       }
 
       "request body is empty" in {
-        val fakeRequest = FakeRequest("POST", "/").withBody(Json.obj())
+        val fakeRequest = baseRequest.withBody(Json.obj())
         val result      = controller.post(frontend)(fakeRequest)
         status(result) shouldBe BAD_REQUEST
         verify(mockCacheRepository, never()).set(any())
@@ -106,7 +108,7 @@ class CacheControllerSpec extends SpecBase with Generators {
     "return 403" when {
       "the EORI in the enrolment and the EORI in user answers do not match" in {
         val userAnswers = emptyUserAnswers.copy(eoriNumber = "different eori")
-        val fakeRequest = FakeRequest("POST", "/").withBody(Json.toJson(userAnswers))
+        val fakeRequest = baseRequest.withBody(Json.toJson(userAnswers))
         val result      = controller.post(frontend)(fakeRequest)
         status(result) shouldBe FORBIDDEN
         verify(mockCacheRepository, never()).set(any())
@@ -116,7 +118,7 @@ class CacheControllerSpec extends SpecBase with Generators {
     "return 500" when {
       "write to mongo was not acknowledged" in {
         val userAnswers = emptyUserAnswers
-        val fakeRequest = FakeRequest("POST", "/").withBody(Json.toJson(userAnswers))
+        val fakeRequest = baseRequest.withBody(Json.toJson(userAnswers))
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(false))
         val result = controller.post(frontend)(fakeRequest)
         status(result) shouldBe INTERNAL_SERVER_ERROR
@@ -125,11 +127,32 @@ class CacheControllerSpec extends SpecBase with Generators {
 
       "write to mongo fails" in {
         val userAnswers = emptyUserAnswers
-        val fakeRequest = FakeRequest("POST", "/").withBody(Json.toJson(userAnswers))
+        val fakeRequest = baseRequest.withBody(Json.toJson(userAnswers))
         when(mockCacheRepository.set(any())).thenReturn(Future.failed(new Throwable()))
         val result = controller.post(frontend)(fakeRequest)
         status(result) shouldBe INTERNAL_SERVER_ERROR
         verify(mockCacheRepository).set(eqTo(userAnswers))
+      }
+    }
+  }
+
+  "delete" should {
+
+    val fakeRequest = FakeRequest("DELETE", "/")
+
+    "return 200" when {
+      "documents successfully deleted" in {
+        when(mockCacheRepositoryProvider.deleteForAllCollections(any(), any())).thenReturn(Future.successful(Seq(true)))
+        val result = controller.delete(lrn)(fakeRequest)
+        status(result) shouldBe OK
+      }
+    }
+
+    "return 500" when {
+      "documents unsuccessfully deleted" in {
+        when(mockCacheRepositoryProvider.deleteForAllCollections(any(), any())).thenReturn(Future.failed(new Throwable()))
+        val result = controller.delete(lrn)(fakeRequest)
+        status(result) shouldBe INTERNAL_SERVER_ERROR
       }
     }
   }
