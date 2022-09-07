@@ -78,6 +78,7 @@ class CacheControllerSpec extends ItSpecBase {
         result.eoriNumber shouldBe userAnswers.eoriNumber
         result.data shouldBe userAnswers.data
         result.createdAt shouldBe userAnswers.createdAt
+        result.lastUpdated isAfter userAnswers.lastUpdated shouldBe true
       }
     }
 

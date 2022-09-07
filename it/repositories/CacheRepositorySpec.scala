@@ -103,6 +103,7 @@ class CacheRepositorySpec extends ItSpecBase {
       firstGet.eoriNumber shouldBe secondGet.eoriNumber
       firstGet.data shouldNot equal(secondGet.data)
       firstGet.createdAt shouldBe secondGet.createdAt
+      firstGet.lastUpdated isBefore secondGet.lastUpdated shouldBe true
     }
 
     "fail when attempting to set using an existing LocalReferenceNumber and EoriNumber with a different Id" in {
