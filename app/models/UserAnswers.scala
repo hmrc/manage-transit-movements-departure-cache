@@ -26,6 +26,7 @@ case class UserAnswers(
   lrn: String,
   eoriNumber: String,
   data: JsObject = Json.obj(),
+  createdAt: LocalDateTime = LocalDateTime.now,
   lastUpdated: LocalDateTime = LocalDateTime.now,
   id: UUID = UUID.randomUUID()
 )
@@ -41,6 +42,7 @@ object UserAnswers {
     (__ \ "lrn").read[String] and
       (__ \ "eoriNumber").read[String] and
       (__ \ "data").read[JsObject] and
+      (__ \ "createdAt").read[LocalDateTime] and
       (__ \ "lastUpdated").read[LocalDateTime] and
       (__ \ "_id").read[UUID]
   )(UserAnswers.apply _)
@@ -49,6 +51,7 @@ object UserAnswers {
     (__ \ "lrn").write[String] and
       (__ \ "eoriNumber").write[String] and
       (__ \ "data").write[JsObject] and
+      (__ \ "createdAt").write[LocalDateTime] and
       (__ \ "lastUpdated").write[LocalDateTime] and
       (__ \ "_id").write[UUID]
   )(unlift(UserAnswers.unapply))

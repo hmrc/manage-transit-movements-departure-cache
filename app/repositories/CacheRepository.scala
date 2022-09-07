@@ -83,9 +83,9 @@ class CacheRepository(
 object CacheRepository {
 
   def indexes(appConfig: AppConfig): Seq[IndexModel] = {
-    val userAnswersLastUpdatedIndex: IndexModel = IndexModel(
-      keys = Indexes.ascending("lastUpdated"),
-      indexOptions = IndexOptions().name("user-answers-last-updated-index").expireAfter(appConfig.mongoTtlInDays, TimeUnit.DAYS)
+    val userAnswersCreatedAtIndex: IndexModel = IndexModel(
+      keys = Indexes.ascending("createdAt"),
+      indexOptions = IndexOptions().name("user-answers-created-at-index").expireAfter(appConfig.mongoTtlInDays, TimeUnit.DAYS)
     )
 
     val eoriNumberAndLrnCompoundIndex: IndexModel = IndexModel(
@@ -93,7 +93,7 @@ object CacheRepository {
       indexOptions = IndexOptions().name("eoriNumber-lrn-index")
     )
 
-    Seq(userAnswersLastUpdatedIndex, eoriNumberAndLrnCompoundIndex)
+    Seq(userAnswersCreatedAtIndex, eoriNumberAndLrnCompoundIndex)
   }
 
   @Singleton

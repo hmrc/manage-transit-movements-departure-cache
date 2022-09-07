@@ -30,7 +30,8 @@ class UserAnswersSpec extends SpecBase {
     lrn = lrn,
     eoriNumber = eoriNumber,
     data = Json.obj(),
-    lastUpdated = LocalDateTime.of(2022: Int, 9: Int, 5: Int, 15: Int, 58: Int, 44: Int, 188000000: Int),
+    createdAt = LocalDateTime.of(2022: Int, 9: Int, 5: Int, 15: Int, 58: Int, 44: Int, 188000000: Int),
+    lastUpdated = LocalDateTime.of(2022: Int, 9: Int, 7: Int, 10: Int, 33: Int, 23: Int, 472000000: Int),
     id = UUID.fromString(uuid)
   )
 
@@ -44,7 +45,8 @@ class UserAnswersSpec extends SpecBase {
           |    "lrn" : "$lrn",
           |    "eoriNumber" : "$eoriNumber",
           |    "data" : {},
-          |    "lastUpdated" : "2022-09-05T15:58:44.188"
+          |    "createdAt" : "2022-09-05T15:58:44.188",
+          |    "lastUpdated" : "2022-09-07T10:33:23.472"
           |}
           |""".stripMargin)
 
@@ -67,9 +69,14 @@ class UserAnswersSpec extends SpecBase {
           |    "lrn" : "$lrn",
           |    "eoriNumber" : "$eoriNumber",
           |    "data" : {},
-          |    "lastUpdated" : {
+          |    "createdAt" : {
           |        "$$date" : {
           |            "$$numberLong" : "1662393524188"
+          |        }
+          |    },
+          |    "lastUpdated" : {
+          |        "$$date" : {
+          |            "$$numberLong" : "1662546803472"
           |        }
           |    }
           |}
