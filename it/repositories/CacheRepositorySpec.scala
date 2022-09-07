@@ -102,7 +102,7 @@ class CacheRepositorySpec extends ItSpecBase {
       firstGet.lrn shouldBe secondGet.lrn
       firstGet.eoriNumber shouldBe secondGet.eoriNumber
       firstGet.data shouldNot equal(secondGet.data)
-      firstGet.lastUpdated isBefore secondGet.lastUpdated shouldBe true
+      firstGet.createdAt shouldBe secondGet.createdAt
     }
 
     "fail when attempting to set using an existing LocalReferenceNumber and EoriNumber with a different Id" in {
@@ -148,9 +148,9 @@ class CacheRepositorySpec extends ItSpecBase {
 
       def findIndex(name: String): Document = indexes.find(_.get("name").get == BsonString(name)).get
 
-      val lastUpdatedIndex = findIndex("user-answers-last-updated-index")
-      lastUpdatedIndex.get("key").get shouldBe BsonDocument("lastUpdated" -> 1)
-      lastUpdatedIndex.get("expireAfterSeconds").get shouldBe BsonInt64(2592000)
+      val createdAtIndex = findIndex("user-answers-created-at-index")
+      createdAtIndex.get("key").get shouldBe BsonDocument("createdAt" -> 1)
+      createdAtIndex.get("expireAfterSeconds").get shouldBe BsonInt64(2592000)
 
       val eoriLrnIndex = findIndex("eoriNumber-lrn-index")
       eoriLrnIndex.get("key").get shouldBe BsonDocument("eoriNumber" -> 1, "lrn" -> 1)
