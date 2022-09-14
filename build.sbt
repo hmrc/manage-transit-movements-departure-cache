@@ -4,7 +4,7 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
 val appName = "manage-transit-movements-departure-cache"
 
-val silencerVersion = "1.7.7"
+val silencerVersion = "1.7.9"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
