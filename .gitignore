@@ -37,3 +37,4 @@ target
 test-result
 tmp
 .vscode/
+.java-version
