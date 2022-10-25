@@ -105,7 +105,7 @@ class AuthenticateActionProviderSpec extends SpecBase {
         val application = baseApplication
           .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
 
-        val actionProvider = application.injector.instanceOf[AuthenticateActionProvider]
+        val actionProvider = application.injector().instanceOf[AuthenticateActionProvider]
 
         val controller = new Harness(actionProvider)
         val result     = controller.action()(fakeRequest)
@@ -125,7 +125,7 @@ class AuthenticateActionProviderSpec extends SpecBase {
         val application = baseApplication
           .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
 
-        val actionProvider = application.injector.instanceOf[AuthenticateActionProvider]
+        val actionProvider = application.injector().instanceOf[AuthenticateActionProvider]
 
         val controller = new Harness(actionProvider)
         val result     = controller.action()(fakeRequest)

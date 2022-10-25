@@ -40,7 +40,7 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    reset(mockCacheRepositoryProvider, mockCacheRepository)
+    reset(mockCacheRepositoryProvider); reset(mockCacheRepository)
     when(mockCacheRepositoryProvider.apply(any())).thenReturn(mockCacheRepository)
   }
 

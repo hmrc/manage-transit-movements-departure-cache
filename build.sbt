@@ -4,25 +4,18 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
 val appName = "manage-transit-movements-departure-cache"
 
-val silencerVersion = "1.7.9"
-
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
   .settings(
     majorVersion                     := 0,
-    scalaVersion                     := "2.12.15",
+    scalaVersion                     := "2.13.8",
     PlayKeys.playDefaultPort         := 10126,
     libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
     ThisBuild / scalafmtOnCompile := true,
     RoutesKeys.routesImport ++= Seq("models.Frontend"),
-    // ***************
-    // Use the silencer plugin to suppress warnings
-    scalacOptions += "-P:silencer:pathFilters=routes",
-    libraryDependencies ++= Seq(
-      compilerPlugin("com.github.ghik" % "silencer-plugin" % silencerVersion cross CrossVersion.full),
-      "com.github.ghik" % "silencer-lib" % silencerVersion % Provided cross CrossVersion.full
+    scalacOptions ++= Seq(
+      "-Wconf:src=routes/.*:s"
     )
-    // ***************
   )
   .settings(publishingSettings: _*)
   .configs(IntegrationTest extend Test)
