@@ -142,7 +142,7 @@ class CacheRepositorySpec extends ItSpecBase {
 
   "ensureIndexes" must {
     "ensure the correct indexes" in {
-      val indexes = repository.collection.listIndexes.toFuture().futureValue
+      val indexes = repository.collection.listIndexes().toFuture().futureValue
       indexes.length shouldBe 3
 
       indexes.head.get("name").get shouldBe BsonString("_id_")
