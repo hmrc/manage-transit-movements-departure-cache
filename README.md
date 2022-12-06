@@ -17,7 +17,7 @@
 * A document is found in the `user-answers` collection for the given LRN (the EORI number is extracted from the enrolment)
 * The response JSON has the following fields:
   * `lrn` - The local reference number associated with the departure application
-  * `eoriNumber` - The EORI number of the trader
+  * `eoriNumber` - The EORI number linked to the user's enrolment
   * `data` - The user's answers
   * `createdAt` - The date and time that the application was started. The user has 30 days from this point to complete and submit the application
   * `lastUpdated` - The date and time that the application was last updated
@@ -32,7 +32,7 @@
 * User has insufficient enrolments
 
 #### 404 NOT_FOUND
-* User has a valid enrolment and EORI number but no documents were found for the given LRN
+* No documents were found for the given LRN
 
 #### 500 INTERNAL_SERVER_ERROR
 * An error occurred in the mongo client
