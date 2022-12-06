@@ -1,5 +1,5 @@
 # microservice specific routes
 
-GET        /:frontend/user-answers/:lrn                         controllers.CacheController.get(frontend: Frontend, lrn: String)
-POST       /:frontend/user-answers                              controllers.CacheController.post(frontend: Frontend)
+GET        /user-answers/:lrn                                   controllers.CacheController.get(lrn: String)
+POST       /user-answers                                        controllers.CacheController.post()
 DELETE     /user-answers/:lrn                                   controllers.CacheController.delete(lrn: String)

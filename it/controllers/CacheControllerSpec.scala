@@ -23,9 +23,9 @@ import play.api.libs.json.{JsString, Json}
 
 class CacheControllerSpec extends ItSpecBase {
 
-  "GET /:frontend/user-answers/:lrn" when {
+  "GET /user-answers/:lrn" when {
 
-    val url = s"$baseUrl/manage-transit-movements-departure-cache/$frontend/user-answers/$lrn"
+    val url = s"$baseUrl/manage-transit-movements-departure-cache/user-answers/$lrn"
 
     "document does not exist" should {
       "respond with 404 status" in {
@@ -63,9 +63,9 @@ class CacheControllerSpec extends ItSpecBase {
     }
   }
 
-  "POST /:frontend/user-answers" when {
+  "POST /user-answers" when {
 
-    val url = s"$baseUrl/manage-transit-movements-departure-cache/$frontend/user-answers"
+    val url = s"$baseUrl/manage-transit-movements-departure-cache/user-answers"
 
     "document successfully written to mongo" should {
       "respond with 200 status" in {

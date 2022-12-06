@@ -1,4 +1,3 @@
-import play.sbt.routes.RoutesKeys
 import uk.gov.hmrc.DefaultBuildSettings.integrationTestSettings
 import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 
@@ -12,7 +11,6 @@ lazy val microservice = Project(appName, file("."))
     PlayKeys.playDefaultPort         := 10126,
     libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
     ThisBuild / scalafmtOnCompile := true,
-    RoutesKeys.routesImport ++= Seq("models.Frontend"),
     scalacOptions ++= Seq(
       "-Wconf:src=routes/.*:s"
     )

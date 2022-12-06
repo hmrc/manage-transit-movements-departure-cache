@@ -17,11 +17,11 @@
 package controllers
 
 import controllers.actions.AuthenticateActionProvider
-import models.{Frontend, UserAnswers}
+import models.UserAnswers
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import repositories.CacheRepository.CacheRepositoryProvider
+import repositories.CacheRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -31,14 +31,14 @@ import scala.concurrent.{ExecutionContext, Future}
 class CacheController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
-  cacheRepositoryProvider: CacheRepositoryProvider
+  cacheRepository: CacheRepository
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
 
-  def get(frontend: Frontend, lrn: String): Action[AnyContent] = authenticate().async {
+  def get(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
-      cacheRepositoryProvider(frontend)
+      cacheRepository
         .get(lrn, request.eoriNumber)
         .map {
           case Some(userAnswers) => Ok(Json.toJson(userAnswers))
@@ -53,12 +53,12 @@ class CacheController @Inject() (
         }
   }
 
-  def post(frontend: Frontend): Action[JsValue] = authenticate().async(parse.json) {
+  def post(): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[UserAnswers] match {
         case JsSuccess(userAnswers, _) =>
           if (request.eoriNumber == userAnswers.eoriNumber) {
-            cacheRepositoryProvider(frontend)
+            cacheRepository
               .set(userAnswers)
               .map {
                 case true => Ok
@@ -83,8 +83,8 @@ class CacheController @Inject() (
 
   def delete(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
-      cacheRepositoryProvider
-        .deleteForAllCollections(lrn, request.eoriNumber)
+      cacheRepository
+        .remove(lrn, request.eoriNumber)
         .map {
           _ => Ok
         }

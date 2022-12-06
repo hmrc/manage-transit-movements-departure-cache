@@ -17,8 +17,7 @@
 package base
 
 import models.UserAnswers
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.{reset, when}
+import org.mockito.Mockito.reset
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterEach, EitherValues, OptionValues}
@@ -26,7 +25,6 @@ import org.scalatestplus.mockito.MockitoSugar
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import repositories.CacheRepository
-import repositories.CacheRepository.CacheRepositoryProvider
 
 trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach with OptionValues with EitherValues {
 
@@ -35,13 +33,11 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
 
   val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber)
 
-  val mockCacheRepositoryProvider: CacheRepositoryProvider = mock[CacheRepositoryProvider]
-  val mockCacheRepository: CacheRepository                 = mock[CacheRepository]
+  val mockCacheRepository: CacheRepository = mock[CacheRepository]
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    reset(mockCacheRepositoryProvider); reset(mockCacheRepository)
-    when(mockCacheRepositoryProvider.apply(any())).thenReturn(mockCacheRepository)
+    reset(mockCacheRepository)
   }
 
   def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
