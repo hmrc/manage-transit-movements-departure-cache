@@ -32,7 +32,7 @@
 * User has insufficient enrolments
 
 #### 404 NOT_FOUND
-* No documents were found for the given LRN
+* No document was found for the given LRN
 
 #### 500 INTERNAL_SERVER_ERROR
 * An error occurred in the mongo client
@@ -77,7 +77,7 @@
 
 #### 200 OK
 
-* A call is made to the `POST` endpoint with:
+* A call is made to the `DELETE` endpoint with:
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
 * A document is deleted from the `user-answers` collection for the given LRN (the EORI number is extracted from the enrolment)
