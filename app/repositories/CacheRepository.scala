@@ -17,26 +17,25 @@
 package repositories
 
 import config.AppConfig
-import models.{Frontend, UserAnswers}
+import models.UserAnswers
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
 import org.mongodb.scala.model._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
-import uk.gov.hmrc.mongo.transaction.{TransactionConfiguration, Transactions}
 
 import java.time.LocalDateTime
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-class CacheRepository(
+@Singleton
+class CacheRepository @Inject() (
   mongoComponent: MongoComponent,
-  appConfig: AppConfig,
-  frontend: Frontend
+  appConfig: AppConfig
 )(implicit ec: ExecutionContext)
     extends PlayMongoRepository[UserAnswers](
       mongoComponent = mongoComponent,
-      collectionName = frontend.collectionName,
+      collectionName = CacheRepository.collectionName,
       domainFormat = UserAnswers.mongoFormat,
       indexes = CacheRepository.indexes(appConfig)
     ) {
@@ -82,6 +81,8 @@ class CacheRepository(
 
 object CacheRepository {
 
+  val collectionName: String = "user-answers"
+
   def indexes(appConfig: AppConfig): Seq[IndexModel] = {
     val userAnswersCreatedAtIndex: IndexModel = IndexModel(
       keys = Indexes.ascending("createdAt"),
@@ -95,30 +96,4 @@ object CacheRepository {
 
     Seq(userAnswersCreatedAtIndex, eoriNumberAndLrnCompoundIndex)
   }
-
-  @Singleton
-  class CacheRepositoryProvider @Inject() (
-    override val mongoComponent: MongoComponent,
-    appConfig: AppConfig
-  )(implicit ec: ExecutionContext)
-      extends Transactions {
-
-    def apply(frontend: Frontend): CacheRepository =
-      new CacheRepository(mongoComponent, appConfig, frontend)
-
-    def deleteForAllCollections(lrn: String, eoriNumber: String): Future[Seq[Boolean]] = {
-      implicit val tc: TransactionConfiguration = TransactionConfiguration.strict
-      withSessionAndTransaction {
-        _ =>
-          Future
-            .sequence {
-              Frontend.values.map {
-                apply(_)
-                  .remove(lrn, eoriNumber)
-              }
-            }
-      }
-    }
-  }
-
 }
