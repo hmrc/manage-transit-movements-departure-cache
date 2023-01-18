@@ -17,19 +17,39 @@
 package models
 
 import play.api.libs.json._
+import queries.Gettable
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.LocalDateTime
 import java.util.UUID
 
-case class UserAnswers(
+final case class UserAnswers(
   lrn: String,
   eoriNumber: String,
   data: JsObject = Json.obj(),
   createdAt: LocalDateTime = LocalDateTime.now,
   lastUpdated: LocalDateTime = LocalDateTime.now,
   id: UUID = UUID.randomUUID()
-)
+) {
+
+  def getOptional[A](gettable: Gettable[A])(implicit reads: Reads[A]): Either[String, Option[A]] =
+    Reads
+      .optionNoError(Reads.at(gettable.path))
+      .reads(data)
+      .asOpt
+      .toRight(
+        "Something went wrong"
+      )
+
+  def getAsEither[A](gettable: Gettable[A])(implicit reads: Reads[A]): Either[String, A] =
+    Reads
+      .optionNoError(Reads.at(gettable.path))
+      .reads(data)
+      .getOrElse(None)
+      .toRight(
+        "Something went wrong"
+      )
+}
 
 object UserAnswers {
 

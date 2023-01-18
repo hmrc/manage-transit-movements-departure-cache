@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package config
+package Gettables
 
-import play.api.Configuration
+import play.api.libs.json.JsPath
+import sections.TraderDetailsConsignmentSection
 
-import javax.inject.{Inject, Singleton}
-
-@Singleton
-class AppConfig @Inject() (config: Configuration) {
-
-  val appName: String     = config.get[String]("appName")
-  val mongoTtlInDays: Int = config.get[Int]("mongodb.ttlInDays")
-
-  val enrolmentKey: String        = config.get[String]("enrolment.key")
-  val enrolmentIdentifier: String = config.get[String]("enrolment.identifier")
-
-  val apiUrl: String = "TODO"
+case object ApprovedOperatorGettable extends QuestionGettable[Boolean] {
+  override def path: JsPath     = TraderDetailsConsignmentSection.path \ toString
+  override def toString: String = "approvedOperator"
 }

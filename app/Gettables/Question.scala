@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package config
+package Gettables
 
-import play.api.Configuration
+trait Question
 
-import javax.inject.{Inject, Singleton}
+object Question {
 
-@Singleton
-class AppConfig @Inject() (config: Configuration) {
-
-  val appName: String     = config.get[String]("appName")
-  val mongoTtlInDays: Int = config.get[Int]("mongodb.ttlInDays")
-
-  val enrolmentKey: String        = config.get[String]("enrolment.key")
-  val enrolmentIdentifier: String = config.get[String]("enrolment.identifier")
-
-  val apiUrl: String = "TODO"
+  implicit def toString(question: Question): String =
+    question.toString
 }

@@ -14,20 +14,13 @@
  * limitations under the License.
  */
 
-package config
+package sections
 
-import play.api.Configuration
+import play.api.libs.json.{JsObject, JsPath}
 
-import javax.inject.{Inject, Singleton}
+case object PreTaskListSection extends Section[JsObject] {
 
-@Singleton
-class AppConfig @Inject() (config: Configuration) {
+  override def path: JsPath = JsPath \ toString
 
-  val appName: String     = config.get[String]("appName")
-  val mongoTtlInDays: Int = config.get[Int]("mongodb.ttlInDays")
-
-  val enrolmentKey: String        = config.get[String]("enrolment.key")
-  val enrolmentIdentifier: String = config.get[String]("enrolment.identifier")
-
-  val apiUrl: String = "TODO"
+  override def toString: String = "preTaskList"
 }

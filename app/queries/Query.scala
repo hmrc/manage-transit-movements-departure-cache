@@ -14,20 +14,15 @@
  * limitations under the License.
  */
 
-package config
+package queries
 
-import play.api.Configuration
+import Gettables.Question
+import play.api.libs.json.JsPath
 
-import javax.inject.{Inject, Singleton}
-
-@Singleton
-class AppConfig @Inject() (config: Configuration) {
-
-  val appName: String     = config.get[String]("appName")
-  val mongoTtlInDays: Int = config.get[Int]("mongodb.ttlInDays")
-
-  val enrolmentKey: String        = config.get[String]("enrolment.key")
-  val enrolmentIdentifier: String = config.get[String]("enrolment.identifier")
-
-  val apiUrl: String = "TODO"
+sealed trait Query extends Question {
+  def path: JsPath
 }
+
+trait Gettable[A] extends Query
+
+trait Settable[A] extends Query

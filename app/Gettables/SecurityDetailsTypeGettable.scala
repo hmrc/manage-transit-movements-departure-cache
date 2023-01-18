@@ -14,20 +14,12 @@
  * limitations under the License.
  */
 
-package config
+package Gettables
 
-import play.api.Configuration
+import play.api.libs.json.JsPath
+import sections.PreTaskListSection
 
-import javax.inject.{Inject, Singleton}
-
-@Singleton
-class AppConfig @Inject() (config: Configuration) {
-
-  val appName: String     = config.get[String]("appName")
-  val mongoTtlInDays: Int = config.get[Int]("mongodb.ttlInDays")
-
-  val enrolmentKey: String        = config.get[String]("enrolment.key")
-  val enrolmentIdentifier: String = config.get[String]("enrolment.identifier")
-
-  val apiUrl: String = "TODO"
+case object SecurityDetailsTypeGettable extends QuestionGettable[String] {
+  override def path: JsPath     = PreTaskListSection.path \ toString
+  override def toString: String = "securityDetailsType"
 }
