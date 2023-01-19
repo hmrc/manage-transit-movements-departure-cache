@@ -16,7 +16,6 @@
 
 package base
 
-import com.fasterxml.jackson.databind.introspect.AnnotationCollector.OneAnnotation
 import models.UserAnswers
 import org.mockito.Mockito.reset
 import org.scalatest.concurrent.ScalaFutures
@@ -24,8 +23,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterEach, EitherValues, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.OneAppPerSuite
-import org.scalatestplus.play.guice.GuiceFakeApplicationFactory
+import org.scalatestplus.play.guice.{GuiceFakeApplicationFactory, GuiceOneAppPerSuite}
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -39,7 +37,7 @@ trait SpecBase
     with Matchers
     with MockitoSugar
     with BeforeAndAfterEach
-    with OneAppPerSuite
+    with GuiceOneAppPerSuite
     with OptionValues
     with EitherValues
     with ScalaFutures

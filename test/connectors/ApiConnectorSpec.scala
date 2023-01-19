@@ -27,6 +27,7 @@ import uk.gov.hmrc.http.{BadRequestException, HttpResponse, UpstreamErrorRespons
 
 class ApiConnectorSpec extends SpecBase with WireMockServerHandler {
 
+  // TODO - can we load this json from a file? We can't generate it as in the front end as that would mean pulling over the domain models (bloat)
   val testData = Json
     .parse("""{
              |  "preTaskList": {

@@ -88,8 +88,10 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
     val declarationUrl = s"${appConfig.apiUrl}/movements/departures"
 
     createSubmission(userAnswers) match {
-      case Left(msg)    => throw new BadRequestException(msg)
-      case Right(value) => httpClient.POSTString(declarationUrl, value, requestHeaders)
+      case Left(msg) => throw new BadRequestException(msg)
+      case Right(value) =>
+        println(s"ACHI: $value")
+        httpClient.POSTString(declarationUrl, value, requestHeaders)
     }
 
   }

@@ -3,3 +3,6 @@
 GET        /user-answers/:lrn                                   controllers.CacheController.get(lrn: String)
 POST       /user-answers                                        controllers.CacheController.post()
 DELETE     /user-answers/:lrn                                   controllers.CacheController.delete(lrn: String)
+
+# Submission
+GET        /submit-declaration/:lrn                             controllers.SubmissionController.submit(lrn: String)
