@@ -1,0 +1,130 @@
+{
+  "preTaskList": {
+    "officeOfDeparture": {
+      "id": "D8bZSS9wQhMooUn",
+      "name": "1JQ3YrJ2aHra6DgGoyniBNYy"
+    },
+    "procedureType": "simplified",
+    "declarationType": "T2",
+    "securityDetailsType": "entrySummaryDeclaration",
+    "detailsConfirmed": true
+  },
+  "traderDetails": {
+    "holderOfTransit": {
+      "eoriYesNo": false,
+      "name": "8o4iwz5UzgpOYRHu",
+      "country": {
+        "code": "QX",
+        "description": "ZXFioiNknvWLKWkhsc5f3vJV"
+      },
+      "address": {
+        "numberAndStreet": "KDMxpWcrhYmMXQriyWubJXrRWh39pvTrXFWbbzOe2CbxvImgGYAEaC",
+        "city": "ivb4KG8TrybpBSDwccSg2t0PE9JJ",
+        "postalCode": "EjXN8YNQt8d8G"
+      },
+      "addContact": false
+    },
+    "actingAsRepresentative": true,
+    "representative": {
+      "eori": "CW4yfKpDGQaa1eNEzHtUdFiTHjmILJQMxnt0d7B8COJluFfWzc2VidYMbZFB0NBAycflFVczhXWZZ3u7DUwM",
+      "name": "dJkEu1cmAo0bmu1WXPS",
+      "capacity": "direct",
+      "telephoneNumber": "m0dNF3NL7Rxee1zjo60nugCXReaJIQQ4OR0f"
+    },
+    "consignment": {
+      "approvedOperator": false,
+      "consignor": {
+        "eoriYesNo": true,
+        "eori": "bdf6J3goc2jLsY8",
+        "name": "AvfatXKWnRBA7A0xkSGmBRhSnSYKbFKa9kPNpkBII7MfiB5LBCRKVhneNr6GihUxs",
+        "country": {
+          "code": "XZ",
+          "description": "cCadhO0n3NVuqKSwHqBsRlYAOWUAcqRoO2"
+        },
+        "address": {
+          "numberAndStreet": "3LaSpKvnZmvcMwDtb7EHR6emoX0oZ2bo5V1ZfnfgdH2",
+          "city": "6O",
+          "postalCode": "fmV7pGlo"
+        },
+        "addContact": false
+      },
+      "moreThanOneConsignee": true
+    }
+  },
+  "routeDetails": {
+    "routing": {
+      "countryOfDestination": {
+        "code": "WK",
+        "description": "fyYQn4b"
+      },
+      "officeOfDestination": {
+        "id": "ShmyNcCwLxyrUpR142W9IFbE",
+        "name": "yADhpUzrsUWQlDuZk1QgDVbdzFIj",
+        "phoneNumber": "19ZbweMvGUNREGkkuaQVuyjT2K4H7l77U3Ic9QRBCMozflk6iDUvF2S8SXe"
+      },
+      "bindingItinerary": false,
+      "countriesOfRouting": [
+        {
+          "countryOfRouting": {
+            "code": "WZ",
+            "description": "hYdZmDI"
+          }
+        }
+      ]
+    },
+    "transit": {
+      "officesOfTransit": [
+        {
+          "officeOfTransitCountry": {
+            "code": "ZX",
+            "description": "gpTxnHMrWO"
+          },
+          "officeOfTransit": {
+            "id": "fEx2zFF5dBa3Qxp",
+            "name": "v0Uv1mBQ1t59qif0rfYESOfjqywr",
+            "phoneNumber": "NPXjplIU3AoQyaKbBB404Sgl0jgupqxctScg6"
+          },
+          "addOfficeOfTransitETAYesNo": false
+        }
+      ]
+    },
+    "locationOfGoods": {
+      "typeOfLocation": "approvedPlace",
+      "qualifierOfIdentification": "postalCode",
+      "identifier": {
+        "postalCode": {
+          "streetNumber": "17zQcCxLRqZix23xT",
+          "postalCode": "J78MqcN0NIMfn7",
+          "country": {
+            "code": "VN",
+            "description": "193VDAbT5tsU1Y6Wb"
+          }
+        },
+        "addContact": false
+      }
+    },
+    "loading": {
+      "addUnLocodeYesNo": true,
+      "unLocode": {
+        "unLocodeExtendedCode": "tSzEpyqrEmDQIizIQaTpnd",
+        "name": "k1UZC"
+      },
+      "addLocationYesNo": true,
+      "additionalInformation": {
+        "country": {
+          "code": "WY",
+          "description": "xZVNadnJW34k0pHiCmMf0avxinds"
+        },
+        "location": "TtxJHvnhf8O2Sg9GojkGSFmmHRhL4yEtGFlA0h6pm4QsBXhLnew01K5vgDCW9Br9XWvq5PeG"
+      }
+    },
+    "unloading": {
+      "addUnLocodeYesNo": true,
+      "unLocode": {
+        "unLocodeExtendedCode": "aWvoz3oV3",
+        "name": "G7VPBQclcNgVd11HQ3775"
+      },
+      "addExtraInformationYesNo": false
+    }
+  }
+}

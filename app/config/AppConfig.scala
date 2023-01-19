@@ -29,5 +29,5 @@ class AppConfig @Inject() (config: Configuration) {
   val enrolmentKey: String        = config.get[String]("enrolment.key")
   val enrolmentIdentifier: String = config.get[String]("enrolment.identifier")
 
-  val apiUrl: String = "TODO"
+  lazy val apiUrl = config.get[Service]("microservice.services.common-transit-convention-traders").baseUrl
 }

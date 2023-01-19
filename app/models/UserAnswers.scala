@@ -49,6 +49,9 @@ final case class UserAnswers(
       .toRight(
         "Something went wrong"
       )
+
+  def get[A](page: Gettable[A])(implicit rds: Reads[A]): Option[A] =
+    Reads.optionNoError(Reads.at(page.path)).reads(data).getOrElse(None)
 }
 
 object UserAnswers {
