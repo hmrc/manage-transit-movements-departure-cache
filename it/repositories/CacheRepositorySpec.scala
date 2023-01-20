@@ -27,9 +27,9 @@ import java.util.UUID
 
 class CacheRepositorySpec extends ItSpecBase {
 
-  private lazy val userAnswers1 = UserAnswers("ABCD1111111111111", "EoriNumber1")
-  private lazy val userAnswers2 = UserAnswers("ABCD2222222222222", "EoriNumber2")
-  private lazy val userAnswers3 = UserAnswers("ABCD3333333333333", "EoriNumber3")
+  private lazy val userAnswers1 = emptyUserAnswers.copy(lrn = "ABCD1111111111111", eoriNumber = "EoriNumber1")
+  private lazy val userAnswers2 = emptyUserAnswers.copy(lrn = "ABCD2222222222222", eoriNumber = "EoriNumber2")
+  private lazy val userAnswers3 = emptyUserAnswers.copy(lrn = "ABCD3333333333333", eoriNumber = "EoriNumber3")
 
   override def beforeEach(): Unit = {
     super.beforeEach()

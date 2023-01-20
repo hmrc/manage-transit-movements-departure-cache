@@ -85,6 +85,7 @@ class CacheControllerSpec extends ItSpecBase {
         result.lrn shouldBe userAnswers.lrn
         result.eoriNumber shouldBe userAnswers.eoriNumber
         result.data shouldBe userAnswers.data
+        result.tasks shouldBe userAnswers.tasks
         result.createdAt shouldBe userAnswers.createdAt.truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
 
         result.lastUpdated isAfter userAnswers.lastUpdated.truncatedTo(

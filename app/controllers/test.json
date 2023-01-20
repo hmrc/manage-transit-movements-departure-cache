@@ -1,0 +1,13 @@
+{
+  "tasks": [
+    {
+      "name": "TraderDetails",
+      "status": "Completed"
+    },
+    {
+      "name": "Items",
+      "status": "InProgress"
+    }
+  ],
+  "lastUpdated": "<date-time>"
+}

@@ -25,10 +25,11 @@ import java.util.UUID
 case class UserAnswers(
   lrn: String,
   eoriNumber: String,
-  data: JsObject = Json.obj(),
-  createdAt: LocalDateTime = LocalDateTime.now,
-  lastUpdated: LocalDateTime = LocalDateTime.now,
-  id: UUID = UUID.randomUUID()
+  data: JsObject,
+  tasks: Seq[Task],
+  createdAt: LocalDateTime,
+  lastUpdated: LocalDateTime,
+  id: UUID
 )
 
 object UserAnswers {
@@ -42,6 +43,7 @@ object UserAnswers {
     (__ \ "lrn").read[String] and
       (__ \ "eoriNumber").read[String] and
       (__ \ "data").read[JsObject] and
+      (__ \ "tasks").read[Seq[Task]] and
       (__ \ "createdAt").read[LocalDateTime] and
       (__ \ "lastUpdated").read[LocalDateTime] and
       (__ \ "_id").read[UUID]
@@ -51,6 +53,7 @@ object UserAnswers {
     (__ \ "lrn").write[String] and
       (__ \ "eoriNumber").write[String] and
       (__ \ "data").write[JsObject] and
+      (__ \ "tasks").write[Seq[Task]] and
       (__ \ "createdAt").write[LocalDateTime] and
       (__ \ "lastUpdated").write[LocalDateTime] and
       (__ \ "_id").write[UUID]
