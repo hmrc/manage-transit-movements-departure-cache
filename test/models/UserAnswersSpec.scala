@@ -31,10 +31,10 @@ class UserAnswersSpec extends SpecBase {
     eoriNumber = eoriNumber,
     data = Json.obj(),
     tasks = Seq(
-      Task("task1", Status.Completed),
-      Task("task2", Status.InProgress),
-      Task("task3", Status.NotStarted),
-      Task("task4", Status.CannotStartYet)
+      Task("task1", Status.Completed, Some("#1")),
+      Task("task2", Status.InProgress, Some("#2")),
+      Task("task3", Status.NotStarted, None),
+      Task("task4", Status.CannotStartYet, None)
     ),
     createdAt = LocalDateTime.of(2022: Int, 9: Int, 5: Int, 15: Int, 58: Int, 44: Int, 188000000: Int),
     lastUpdated = LocalDateTime.of(2022: Int, 9: Int, 7: Int, 10: Int, 33: Int, 23: Int, 472000000: Int),
@@ -54,11 +54,13 @@ class UserAnswersSpec extends SpecBase {
           |    "tasks" : [
           |        {
           |            "section" : "task1",
-          |            "status" : "completed"
+          |            "status" : "completed",
+          |            "href" : "#1"
           |        },
           |        {
           |            "section" : "task2",
-          |            "status" : "in-progress"
+          |            "status" : "in-progress",
+          |            "href" : "#2"
           |        },
           |        {
           |            "section" : "task3",
@@ -96,11 +98,13 @@ class UserAnswersSpec extends SpecBase {
           |    "tasks" : [
           |        {
           |            "section" : "task1",
-          |            "status" : "completed"
+          |            "status" : "completed",
+          |            "href" : "#1"
           |        },
           |        {
           |            "section" : "task2",
-          |            "status" : "in-progress"
+          |            "status" : "in-progress",
+          |            "href" : "#2"
           |        },
           |        {
           |            "section" : "task3",
