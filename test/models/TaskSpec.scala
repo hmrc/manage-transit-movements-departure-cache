@@ -21,54 +21,26 @@ import play.api.libs.json.Json
 
 class TaskSpec extends SpecBase {
 
-  "must serialise to json" when {
-    "href defined" in {
-      val task   = Task("section", Status.Completed, Some("#"))
-      val result = Json.toJson(task)
-      result shouldBe Json.parse("""
-          |{
-          |  "section" : "section",
-          |  "status" : "completed",
-          |  "href" : "#"
-          |}
-          |""".stripMargin)
-    }
-
-    "href undefined" in {
-      val task   = Task("section", Status.Completed, None)
-      val result = Json.toJson(task)
-      result shouldBe Json.parse("""
-          |{
-          |  "section" : "section",
-          |  "status" : "completed"
-          |}
-          |""".stripMargin)
-    }
+  "must serialise to json" in {
+    val task   = Task("section", Status.Completed)
+    val result = Json.toJson(task)
+    result shouldBe Json.parse("""
+        |{
+        |  "section" : "section",
+        |  "status" : "completed"
+        |}
+        |""".stripMargin)
   }
 
-  "must deserialise from json" when {
-    "href defined" in {
-      val json   = Json.parse("""
-          |{
-          |  "section" : "section",
-          |  "status" : "completed",
-          |  "href" : "#"
-          |}
-          |""".stripMargin)
-      val result = json.as[Task]
-      result shouldBe Task("section", Status.Completed, Some("#"))
-    }
-
-    "href undefined" in {
-      val json   = Json.parse("""
-          |{
-          |  "section" : "section",
-          |  "status" : "completed"
-          |}
-          |""".stripMargin)
-      val result = json.as[Task]
-      result shouldBe Task("section", Status.Completed, None)
-    }
+  "must deserialise from json" in {
+    val json   = Json.parse("""
+        |{
+        |  "section" : "section",
+        |  "status" : "completed"
+        |}
+        |""".stripMargin)
+    val result = json.as[Task]
+    result shouldBe Task("section", Status.Completed)
   }
 
 }

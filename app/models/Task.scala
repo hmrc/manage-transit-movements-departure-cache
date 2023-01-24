@@ -20,8 +20,7 @@ import play.api.libs.json.{Format, Json}
 
 case class Task(
   section: String,
-  status: Status.Value,
-  href: Option[String]
+  status: Status.Value
 )
 
 object Task {
