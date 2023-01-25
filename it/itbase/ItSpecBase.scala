@@ -49,7 +49,7 @@ trait ItSpecBase
   val lrn        = "lrn"
   val eoriNumber = "eori"
 
-  def emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Json.obj(), Nil, LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
+  def emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
 
   val wsClient: WSClient = app.injector.instanceOf[WSClient]
   val baseUrl            = s"http://localhost:$port"

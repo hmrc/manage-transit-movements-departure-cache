@@ -35,7 +35,7 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
   val lrn        = "lrn"
   val eoriNumber = "eori"
 
-  val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Json.obj(), Nil, LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
+  val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
 
   val mockCacheRepository: CacheRepository = mock[CacheRepository]
 
