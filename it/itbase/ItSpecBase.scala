@@ -26,10 +26,14 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import repositories.CacheRepository
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
+
+import java.time.LocalDateTime
+import java.util.UUID
 
 trait ItSpecBase
     extends AnyWordSpec
@@ -45,7 +49,7 @@ trait ItSpecBase
   val lrn        = "lrn"
   val eoriNumber = "eori"
 
-  val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber)
+  def emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
 
   val wsClient: WSClient = app.injector.instanceOf[WSClient]
   val baseUrl            = s"http://localhost:$port"

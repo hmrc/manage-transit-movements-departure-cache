@@ -30,6 +30,12 @@ class UserAnswersSpec extends SpecBase {
     lrn = lrn,
     eoriNumber = eoriNumber,
     data = Json.obj(),
+    tasks = Map(
+      "task1" -> Status.Completed,
+      "task2" -> Status.InProgress,
+      "task3" -> Status.NotStarted,
+      "task4" -> Status.CannotStartYet
+    ),
     createdAt = LocalDateTime.of(2022: Int, 9: Int, 5: Int, 15: Int, 58: Int, 44: Int, 188000000: Int),
     lastUpdated = LocalDateTime.of(2022: Int, 9: Int, 7: Int, 10: Int, 33: Int, 23: Int, 472000000: Int),
     id = UUID.fromString(uuid)
@@ -45,6 +51,12 @@ class UserAnswersSpec extends SpecBase {
           |    "lrn" : "$lrn",
           |    "eoriNumber" : "$eoriNumber",
           |    "data" : {},
+          |    "tasks" : {
+          |        "task1" : "completed",
+          |        "task2" : "in-progress",
+          |        "task3" : "not-started",
+          |        "task4" : "cannot-start-yet"
+          |    },
           |    "createdAt" : "2022-09-05T15:58:44.188",
           |    "lastUpdated" : "2022-09-07T10:33:23.472"
           |}
@@ -69,6 +81,12 @@ class UserAnswersSpec extends SpecBase {
           |    "lrn" : "$lrn",
           |    "eoriNumber" : "$eoriNumber",
           |    "data" : {},
+          |    "tasks" : {
+          |        "task1" : "completed",
+          |        "task2" : "in-progress",
+          |        "task3" : "not-started",
+          |        "task4" : "cannot-start-yet"
+          |    },
           |    "createdAt" : {
           |        "$$date" : {
           |            "$$numberLong" : "1662393524188"

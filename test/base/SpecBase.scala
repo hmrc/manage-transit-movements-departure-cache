@@ -22,16 +22,20 @@ import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterEach, EitherValues, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import repositories.CacheRepository
+
+import java.time.LocalDateTime
+import java.util.UUID
 
 trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach with OptionValues with EitherValues {
 
   val lrn        = "lrn"
   val eoriNumber = "eori"
 
-  val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber)
+  val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
 
   val mockCacheRepository: CacheRepository = mock[CacheRepository]
 
