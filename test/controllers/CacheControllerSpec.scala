@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import controllers.actions.FakeAuthenticateActionProvider
-import models.{HateoasUserAnswerSummary, UserAnswers}
+import models.{HateoasUserAnswersSummary, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, verify, when}
 import play.api.libs.json.{JsString, Json}
@@ -171,7 +171,7 @@ class CacheControllerSpec extends SpecBase {
         val result = controller.getAll()(fakeRequest)
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe HateoasUserAnswerSummary(eoriNumber, Seq(userAnswer1, userAnswer2))
+        contentAsJson(result) shouldBe HateoasUserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2))
         verify(mockCacheRepository).getAll(eqTo(eoriNumber))
       }
     }

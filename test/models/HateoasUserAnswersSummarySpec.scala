@@ -22,7 +22,7 @@ import play.api.libs.json.Json
 import java.time.LocalDateTime
 import java.util.UUID
 
-class HateoasUserAnswerSummarySpec extends SpecBase {
+class HateoasUserAnswersSummarySpec extends SpecBase {
 
   "apply" must {
 
@@ -60,7 +60,7 @@ class HateoasUserAnswerSummarySpec extends SpecBase {
           )
         )
 
-      HateoasUserAnswerSummary(eoriNumber, Seq(userAnswers1, userAnswers2)) shouldBe expectedResult
+      HateoasUserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2)) shouldBe expectedResult
 
     }
   }
