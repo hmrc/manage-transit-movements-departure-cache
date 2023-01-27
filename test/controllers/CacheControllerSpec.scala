@@ -166,31 +166,31 @@ class CacheControllerSpec extends SpecBase {
         val userAnswer1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
         val userAnswer2 = UserAnswers("CD123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
 
-        when(mockCacheRepository.getAll(any())).thenReturn(Future.successful(Seq(userAnswer1, userAnswer2)))
+        when(mockCacheRepository.getAll(any(), any())).thenReturn(Future.successful(Seq(userAnswer1, userAnswer2)))
 
         val result = controller.getAll()(fakeRequest)
 
         status(result) shouldBe OK
         contentAsJson(result) shouldBe HateoasUserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2))
-        verify(mockCacheRepository).getAll(eqTo(eoriNumber))
+        verify(mockCacheRepository).getAll(eqTo(eoriNumber), any())
       }
     }
 
     "return 404" when {
       "document not found in mongo for given eori number" in {
-        when(mockCacheRepository.getAll(any())).thenReturn(Future.successful(Seq.empty))
+        when(mockCacheRepository.getAll(any(), any())).thenReturn(Future.successful(Seq.empty))
         val result = controller.getAll()(fakeRequest)
         status(result) shouldBe NOT_FOUND
-        verify(mockCacheRepository).getAll(eqTo(eoriNumber))
+        verify(mockCacheRepository).getAll(eqTo(eoriNumber), any())
       }
     }
 
     "return 500" when {
       "read from mongo fails" in {
-        when(mockCacheRepository.getAll(any())).thenReturn(Future.failed(new Throwable()))
+        when(mockCacheRepository.getAll(any(), any())).thenReturn(Future.failed(new Throwable()))
         val result = controller.getAll()(fakeRequest)
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockCacheRepository).getAll(eqTo(eoriNumber))
+        verify(mockCacheRepository).getAll(eqTo(eoriNumber), any())
       }
     }
   }

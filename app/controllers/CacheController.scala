@@ -96,10 +96,10 @@ class CacheController @Inject() (
         }
   }
 
-  def getAll(): Action[AnyContent] = authenticate().async {
+  def getAll(lrn: Option[String] = None): Action[AnyContent] = authenticate().async {
     implicit request =>
       cacheRepository
-        .getAll(request.eoriNumber)
+        .getAll(request.eoriNumber, lrn)
         .map {
           case result if result.nonEmpty => Ok(HateoasUserAnswersSummary(request.eoriNumber, result))
           case _ =>

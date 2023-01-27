@@ -5,7 +5,13 @@
 
 ---
 
-## `GET /user-answers`
+## `GET /user-answers?lrn=[Option[String]]`
+
+#### Params
+
+* Optional param list for user answers endpoint
+  * lrn - Filters documents for partial or matching Local Reference Number of all user answers for given eori number
+
 
 ### Successful response
 
