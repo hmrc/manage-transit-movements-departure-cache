@@ -31,10 +31,15 @@ class CacheRepositorySpec extends ItSpecBase {
   private lazy val userAnswers2 = emptyUserAnswers.copy(lrn = "ABCD2222222222222", eoriNumber = "EoriNumber2")
   private lazy val userAnswers3 = emptyUserAnswers.copy(lrn = "ABCD3333333333333", eoriNumber = "EoriNumber3")
 
+  private lazy val userAnswers4 = emptyUserAnswers.copy(lrn = "ABCD1111111111111", eoriNumber = "EoriNumber4")
+  private lazy val userAnswers5 = emptyUserAnswers.copy(lrn = "ABCD2222222222222", eoriNumber = "EoriNumber4")
+
   override def beforeEach(): Unit = {
     super.beforeEach()
     insert(userAnswers1).futureValue
     insert(userAnswers2).futureValue
+    insert(userAnswers4).futureValue
+    insert(userAnswers5).futureValue
   }
 
   private def findOne(lrn: String, eoriNumber: String): Option[UserAnswers] =
@@ -138,6 +143,28 @@ class CacheRepositorySpec extends ItSpecBase {
 
       removeResult shouldBe true
     }
+  }
+
+  "getAll" must {
+
+    "return sequence of userAnswers when given an EoriNumber" in {
+
+      val result = repository.getAll(userAnswers4.eoriNumber).futureValue
+
+      result.length shouldBe 2
+      result.head.lrn shouldBe userAnswers4.lrn
+      result.head.eoriNumber shouldBe userAnswers4.eoriNumber
+      result(1).lrn shouldBe userAnswers5.lrn
+      result(1).eoriNumber shouldBe userAnswers5.eoriNumber
+    }
+
+    "return empty sequence when given an EoriNumber with no entries" in {
+
+      val result = repository.getAll(userAnswers3.eoriNumber).futureValue
+
+      result shouldBe Seq.empty
+    }
+
   }
 
   "ensureIndexes" must {

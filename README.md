@@ -5,6 +5,71 @@
 
 ---
 
+## `GET /user-answers`
+
+### Successful response
+
+#### 200 OK
+
+* A call is made to the `GET` endpoint with:
+  * a valid bearer token
+  * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
+* A list of documents are found in the `user-answers` collection for the given EORI number from enrolment
+* The response JSON will have a summary list of each user answer with the following fields:
+  * `lrn` - The local reference number associated with the departure application
+  * `_links` - Links used to retrieve the full data for a specific lrn
+  * `createdAt` - The date and time that the application was started. The user has 30 days from this point to complete and submit the application
+  * `lastUpdated` - The date and time that the application was last updated
+  * `id` - a UUID
+
+#### Sample response
+
+```
+{
+  "eoriNumber": "1234567",
+  "userAnswers": [
+      {
+        "lrn": "AB123",
+        "_links": {
+          "self": {
+            "href": "/manage-transit-movements-departure-cache/user-answers/AB123"
+        }
+      },
+      "createdAt": "2023-01-26T10:32:15.648",
+      "lastUpdated": "2023-01-27T08:43:17.064",
+      "_id": "27e687a9-4544-4e22-937e-74e699d855f8"
+      },
+      {
+        "lrn": "CD123",
+        "_links": {
+        "self": {
+          "href": "/manage-transit-movements-departure-cache/user-answers/CD123"
+      }
+    },
+    "createdAt": "2023-01-26T10:32:36.96",
+    "lastUpdated": "2023-01-26T10:32:41.377",
+    "_id": "750f1f92-6c61-4a3b-ad3e-95d8c7418eb4"
+    }
+  ]
+}
+```
+
+### Unsuccessful responses (with possible causes)
+
+#### 401 UNAUTHORIZED
+* A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
+
+#### 403 FORBIDDEN
+* User has insufficient enrolments
+
+#### 404 NOT_FOUND
+* No documents were found for EORI number
+
+#### 500 INTERNAL_SERVER_ERROR
+* An error occurred in the mongo client
+
+---
+
 ## `GET /user-answers/:lrn`
 
 ### Successful response

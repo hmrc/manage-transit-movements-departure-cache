@@ -18,12 +18,15 @@ package controllers
 
 import base.SpecBase
 import controllers.actions.FakeAuthenticateActionProvider
+import models.{HateoasMessageSummary, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, verify, when}
 import play.api.libs.json.{JsString, Json}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 
+import java.time.LocalDateTime
+import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
@@ -151,4 +154,45 @@ class CacheControllerSpec extends SpecBase {
       }
     }
   }
+
+  "getAll" should {
+
+    val fakeRequest = FakeRequest("GET", "/")
+
+    "return 200" when {
+
+      "read from mongo is successful" in {
+
+        val userAnswer1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
+        val userAnswer2 = UserAnswers("CD123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
+
+        when(mockCacheRepository.getAll(any())).thenReturn(Future.successful(Seq(userAnswer1, userAnswer2)))
+
+        val result = controller.getAll()(fakeRequest)
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe HateoasMessageSummary(eoriNumber, Seq(userAnswer1, userAnswer2))
+        verify(mockCacheRepository).getAll(eqTo(eoriNumber))
+      }
+    }
+
+    "return 404" when {
+      "document not found in mongo for given eori number" in {
+        when(mockCacheRepository.getAll(any())).thenReturn(Future.successful(Seq.empty))
+        val result = controller.getAll()(fakeRequest)
+        status(result) shouldBe NOT_FOUND
+        verify(mockCacheRepository).getAll(eqTo(eoriNumber))
+      }
+    }
+
+    "return 500" when {
+      "read from mongo fails" in {
+        when(mockCacheRepository.getAll(any())).thenReturn(Future.failed(new Throwable()))
+        val result = controller.getAll()(fakeRequest)
+        status(result) shouldBe INTERNAL_SERVER_ERROR
+        verify(mockCacheRepository).getAll(eqTo(eoriNumber))
+      }
+    }
+  }
+
 }

@@ -19,7 +19,10 @@ package controllers
 import itbase.ItSpecBase
 import models.UserAnswers
 import org.mongodb.scala.model.Filters
-import play.api.libs.json.{JsString, Json}
+import play.api.libs.json.{JsObject, JsString, Json}
+
+import java.time.LocalDateTime
+import java.util.UUID
 
 class CacheControllerSpec extends ItSpecBase {
 
@@ -157,6 +160,51 @@ class CacheControllerSpec extends ItSpecBase {
           .futureValue
 
         response.status shouldBe 200
+      }
+    }
+  }
+
+  "GET /user-answers" when {
+
+    val url = s"$baseUrl/manage-transit-movements-departure-cache/user-answers"
+
+    "documents do not exist" should {
+      "respond with 404 status" in {
+        val response = wsClient
+          .url(url)
+          .get()
+          .futureValue
+
+        response.status shouldBe 404
+      }
+    }
+
+    "documents do exist" should {
+      "respond with 200 status" in {
+        val userAnswers1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
+        val userAnswers2 = UserAnswers("CD123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
+
+        insert(userAnswers1).futureValue
+        insert(userAnswers2).futureValue
+
+        val response = wsClient
+          .url(url)
+          .get()
+          .futureValue
+
+        response.status shouldBe 200
+
+        (response.json \ "userAnswers").as[Seq[JsObject]].length shouldBe 2
+
+        val lrnResults = response.json \ "userAnswers" \\ "lrn"
+
+        lrnResults.head.validate[String].get shouldBe "AB123"
+        lrnResults(1).validate[String].get shouldBe "CD123"
+
+        val urlResults = response.json \ "userAnswers" \\ "_links"
+
+        (urlResults.head \ "self" \ "href").validate[String].get shouldBe controllers.routes.CacheController.get("AB123").url
+        (urlResults(1) \ "self" \ "href").validate[String].get shouldBe controllers.routes.CacheController.get("CD123").url
       }
     }
   }
