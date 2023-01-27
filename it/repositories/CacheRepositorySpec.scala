@@ -33,6 +33,7 @@ class CacheRepositorySpec extends ItSpecBase {
 
   private lazy val userAnswers4 = emptyUserAnswers.copy(lrn = "ABCD1111111111111", eoriNumber = "EoriNumber4")
   private lazy val userAnswers5 = emptyUserAnswers.copy(lrn = "ABCD2222222222222", eoriNumber = "EoriNumber4")
+  private lazy val userAnswers6 = emptyUserAnswers.copy(lrn = "EFGH3333333333333", eoriNumber = "EoriNumber4")
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -147,24 +148,60 @@ class CacheRepositorySpec extends ItSpecBase {
 
   "getAll" must {
 
-    "return sequence of userAnswers when given an EoriNumber" in {
+    "when given no params" should {
 
-      val result = repository.getAll(userAnswers4.eoriNumber).futureValue
+      "return sequence of userAnswers" in {
 
-      result.length shouldBe 2
-      result.head.lrn shouldBe userAnswers4.lrn
-      result.head.eoriNumber shouldBe userAnswers4.eoriNumber
-      result(1).lrn shouldBe userAnswers5.lrn
-      result(1).eoriNumber shouldBe userAnswers5.eoriNumber
+        val result = repository.getAll(userAnswers4.eoriNumber).futureValue
+
+        result.length shouldBe 2
+        result.head.lrn shouldBe userAnswers4.lrn
+        result.head.eoriNumber shouldBe userAnswers4.eoriNumber
+        result(1).lrn shouldBe userAnswers5.lrn
+        result(1).eoriNumber shouldBe userAnswers5.eoriNumber
+      }
+
+      "return empty sequence when given an EoriNumber with no entries" in {
+
+        val result = repository.getAll(userAnswers3.eoriNumber).futureValue
+
+        result shouldBe Seq.empty
+      }
     }
 
-    "return empty sequence when given an EoriNumber with no entries" in {
+    "when given an lrn param" should {
 
-      val result = repository.getAll(userAnswers3.eoriNumber).futureValue
+      "return sequence of userAnswers that match a full LRN" in {
 
-      result shouldBe Seq.empty
+        insert(userAnswers6).futureValue
+
+        val result = repository.getAll(userAnswers4.eoriNumber, Some(userAnswers4.lrn)).futureValue
+
+        result.length shouldBe 1
+        result.head.lrn shouldBe userAnswers4.lrn
+        result.head.eoriNumber shouldBe userAnswers4.eoriNumber
+      }
+
+      "return sequence of userAnswers that match a partial LRN" in {
+
+        insert(userAnswers6).futureValue
+
+        val result = repository.getAll(userAnswers4.eoriNumber, Some("ABCD")).futureValue
+
+        result.length shouldBe 2
+        result.head.lrn shouldBe userAnswers4.lrn
+        result.head.eoriNumber shouldBe userAnswers4.eoriNumber
+        result(1).lrn shouldBe userAnswers5.lrn
+        result(1).eoriNumber shouldBe userAnswers5.eoriNumber
+      }
+
+      "return empty sequence when given an EoriNumber with no entries" in {
+
+        val result = repository.getAll(userAnswers4.eoriNumber, Some("INVALID_SEARCH")).futureValue
+
+        result shouldBe Seq.empty
+      }
     }
-
   }
 
   "ensureIndexes" must {

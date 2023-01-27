@@ -16,11 +16,14 @@
 
 package repositories
 
-import com.mongodb.client.model.Filters.{and => mAnd, eq => mEq}
+import com.mongodb.client.model.Filters.{in, regex, and => mAnd, eq => mEq}
 import config.AppConfig
 import models.UserAnswers
+import org.bson.BsonDocument
+import org.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
 import org.mongodb.scala.model._
+import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
@@ -78,10 +81,11 @@ class CacheRepository @Inject() (
       .map(_.wasAcknowledged())
   }
 
-  def getAll(eoriNumber: String): Future[Seq[UserAnswers]] = {
+  def getAll(eoriNumber: String, lrn: Option[String] = None): Future[Seq[UserAnswers]] = {
 
-    val selector = mAnd(
-      mEq("eoriNumber", eoriNumber)
+    val selector: Bson = mAnd(
+      mEq("eoriNumber", eoriNumber),
+      regex("lrn", lrn.getOrElse(""))
     )
 
     val aggregates =
