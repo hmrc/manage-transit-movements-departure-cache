@@ -16,6 +16,7 @@
 
 package repositories
 
+import com.mongodb.client.model.Filters.{and => mAnd, eq => mEq}
 import config.AppConfig
 import models.UserAnswers
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
@@ -75,6 +76,20 @@ class CacheRepository @Inject() (
       .deleteOne(filter)
       .toFuture()
       .map(_.wasAcknowledged())
+  }
+
+  def getAll(eoriNumber: String): Future[Seq[UserAnswers]] = {
+
+    val selector = mAnd(
+      mEq("eoriNumber", eoriNumber)
+    )
+
+    val aggregates =
+      Seq(
+        Aggregates.filter(selector)
+      )
+
+    collection.aggregate[UserAnswers](aggregates).toFuture()
   }
 
 }

@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.AuthenticateActionProvider
-import models.UserAnswers
+import models.{HateoasUserAnswersSummary, UserAnswers}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -36,6 +36,7 @@ class CacheController @Inject() (
     extends BackendController(cc)
     with Logging {
 
+  // TODO replace with getAll when param's are added
   def get(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
       cacheRepository
@@ -91,6 +92,23 @@ class CacheController @Inject() (
         .recover {
           case e =>
             logger.error("Failed to delete draft", e)
+            InternalServerError
+        }
+  }
+
+  def getAll(): Action[AnyContent] = authenticate().async {
+    implicit request =>
+      cacheRepository
+        .getAll(request.eoriNumber)
+        .map {
+          case result if result.nonEmpty => Ok(HateoasUserAnswersSummary(request.eoriNumber, result))
+          case _ =>
+            logger.warn(s"No documents found for EORI: '${request.eoriNumber}'")
+            NotFound
+        }
+        .recover {
+          case e =>
+            logger.error("Failed to read user answers summary from mongo", e)
             InternalServerError
         }
   }
