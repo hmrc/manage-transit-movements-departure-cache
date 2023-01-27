@@ -18,7 +18,7 @@ package models
 
 import play.api.libs.json.{JsObject, Json}
 
-object HateoasMessageSummary {
+object HateoasUserAnswerSummary {
 
   def apply(eoriNumber: String, usersAnswers: Seq[UserAnswers]): JsObject =
     Json.obj(
