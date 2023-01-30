@@ -23,6 +23,7 @@ import org.mongodb.scala.model.Filters
 import org.mongodb.scala.{Document, MongoWriteException}
 import play.api.libs.json.Json
 
+import java.time.LocalDateTime
 import java.util.UUID
 
 class CacheRepositorySpec extends ItSpecBase {
@@ -30,9 +31,8 @@ class CacheRepositorySpec extends ItSpecBase {
   private lazy val userAnswers1 = emptyUserAnswers.copy(lrn = "ABCD1111111111111", eoriNumber = "EoriNumber1")
   private lazy val userAnswers2 = emptyUserAnswers.copy(lrn = "ABCD2222222222222", eoriNumber = "EoriNumber2")
   private lazy val userAnswers3 = emptyUserAnswers.copy(lrn = "ABCD3333333333333", eoriNumber = "EoriNumber3")
-
-  private lazy val userAnswers4 = emptyUserAnswers.copy(lrn = "ABCD1111111111111", eoriNumber = "EoriNumber4")
-  private lazy val userAnswers5 = emptyUserAnswers.copy(lrn = "ABCD2222222222222", eoriNumber = "EoriNumber4")
+  private lazy val userAnswers4 = emptyUserAnswers.copy(lrn = "ABCD1111111111111", eoriNumber = "EoriNumber4", createdAt = LocalDateTime.now())
+  private lazy val userAnswers5 = emptyUserAnswers.copy(lrn = "ABCD2222222222222", eoriNumber = "EoriNumber4", createdAt = LocalDateTime.now().minusHours(1))
   private lazy val userAnswers6 = emptyUserAnswers.copy(lrn = "EFGH3333333333333", eoriNumber = "EoriNumber4")
 
   override def beforeEach(): Unit = {
@@ -200,6 +200,110 @@ class CacheRepositorySpec extends ItSpecBase {
         val result = repository.getAll(userAnswers4.eoriNumber, Some("INVALID_SEARCH")).futureValue
 
         result shouldBe Seq.empty
+      }
+    }
+
+    "when given limit param" should {
+
+      "return sequence of userAnswers to limit sorted by createdDate" in {
+
+        val userAnswers1 = emptyUserAnswers.copy(lrn = "XI1111111111111", eoriNumber = "AB123", createdAt = LocalDateTime.now())
+        val userAnswers2 = emptyUserAnswers.copy(lrn = "X22222222222222", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusHours(1))
+        val userAnswers3 = emptyUserAnswers.copy(lrn = "GB13333333333333", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(2))
+        val userAnswers4 = emptyUserAnswers.copy(lrn = "GB24444444444444", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(1))
+
+        insert(userAnswers1).futureValue
+        insert(userAnswers2).futureValue
+        insert(userAnswers3).futureValue
+        insert(userAnswers4).futureValue
+
+        val result = repository.getAll(userAnswers1.eoriNumber, limit = Some(2)).futureValue
+
+        result.length shouldBe 2
+        result.head.lrn shouldBe userAnswers1.lrn
+        result(1).lrn shouldBe userAnswers2.lrn
+      }
+
+      "return sequence of userAnswers to limit and to lrn param sorted by createdDate" in {
+
+        val userAnswers1 = emptyUserAnswers.copy(lrn = "XI1111111111111", eoriNumber = "AB123", createdAt = LocalDateTime.now())
+        val userAnswers2 = emptyUserAnswers.copy(lrn = "XI2222222222222", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusHours(1))
+        val userAnswers3 = emptyUserAnswers.copy(lrn = "XI3333333333333", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusHours(2))
+        val userAnswers4 = emptyUserAnswers.copy(lrn = "GB1111111111111", eoriNumber = "AB123", createdAt = LocalDateTime.now())
+        val userAnswers5 = emptyUserAnswers.copy(lrn = "GB2222222222222", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(1))
+        val userAnswers6 = emptyUserAnswers.copy(lrn = "GB3333333333333", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(2))
+
+        insert(userAnswers1).futureValue
+        insert(userAnswers2).futureValue
+        insert(userAnswers3).futureValue
+        insert(userAnswers4).futureValue
+        insert(userAnswers5).futureValue
+        insert(userAnswers6).futureValue
+
+        val result = repository.getAll(userAnswers1.eoriNumber, lrn = Some("GB"), limit = Some(2)).futureValue
+
+        result.length shouldBe 2
+        result.head.lrn shouldBe userAnswers4.lrn
+        result(1).lrn shouldBe userAnswers5.lrn
+      }
+    }
+
+    "when given skip param" should {
+
+      "return sequence of userAnswers, skipping based on skip param and limit param" in {
+
+        val userAnswers1 = emptyUserAnswers.copy(lrn = "GB111", eoriNumber = "AB123", createdAt = LocalDateTime.now())
+        val userAnswers2 = emptyUserAnswers.copy(lrn = "GB222", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusHours(1))
+        val userAnswers3 = emptyUserAnswers.copy(lrn = "GB333", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(1))
+        val userAnswers4 = emptyUserAnswers.copy(lrn = "GB444", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(2))
+        val userAnswers5 = emptyUserAnswers.copy(lrn = "GB555", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(3))
+        val userAnswers6 = emptyUserAnswers.copy(lrn = "GB666", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(4))
+
+        insert(userAnswers1).futureValue
+        insert(userAnswers2).futureValue
+        insert(userAnswers3).futureValue
+        insert(userAnswers4).futureValue
+        insert(userAnswers5).futureValue
+        insert(userAnswers6).futureValue
+
+        val result1 = repository.getAll(userAnswers1.eoriNumber, limit = Some(2), skip = Some(1)).futureValue
+        val result2 = repository.getAll(userAnswers1.eoriNumber, limit = Some(2), skip = Some(2)).futureValue
+        val result3 = repository.getAll(userAnswers1.eoriNumber, limit = Some(3), skip = Some(1)).futureValue
+
+        result1.length shouldBe 2
+        result1.head.lrn shouldBe userAnswers3.lrn
+        result1(1).lrn shouldBe userAnswers4.lrn
+
+        result2.length shouldBe 2
+        result2.head.lrn shouldBe userAnswers5.lrn
+        result2(1).lrn shouldBe userAnswers6.lrn
+
+        result3.length shouldBe 3
+        result3.head.lrn shouldBe userAnswers4.lrn
+        result3(1).lrn shouldBe userAnswers5.lrn
+        result3(2).lrn shouldBe userAnswers6.lrn
+      }
+
+      "return sequence of userAnswers to limit, lrn and skip param sorted by createdDate" in {
+
+        val userAnswers1 = emptyUserAnswers.copy(lrn = "XI1111111111111", eoriNumber = "AB123", createdAt = LocalDateTime.now())
+        val userAnswers2 = emptyUserAnswers.copy(lrn = "XI2222222222222", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusHours(1))
+        val userAnswers3 = emptyUserAnswers.copy(lrn = "XI3333333333333", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusHours(2))
+        val userAnswers4 = emptyUserAnswers.copy(lrn = "GB1111111111111", eoriNumber = "AB123", createdAt = LocalDateTime.now())
+        val userAnswers5 = emptyUserAnswers.copy(lrn = "GB2222222222222", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(1))
+        val userAnswers6 = emptyUserAnswers.copy(lrn = "GB3333333333333", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(2))
+
+        insert(userAnswers1).futureValue
+        insert(userAnswers2).futureValue
+        insert(userAnswers3).futureValue
+        insert(userAnswers4).futureValue
+        insert(userAnswers5).futureValue
+        insert(userAnswers6).futureValue
+
+        val result = repository.getAll(userAnswers1.eoriNumber, lrn = Some("GB"), limit = Some(2), skip = Some(1)).futureValue
+
+        result.length shouldBe 1
+        result.head.lrn shouldBe userAnswers6.lrn
       }
     }
   }

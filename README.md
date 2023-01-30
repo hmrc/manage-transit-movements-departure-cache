@@ -5,13 +5,14 @@
 
 ---
 
-## `GET /user-answers?lrn=[Option[String]]`
+## `GET /user-answers?lrn=[Option[String]]&limit=[Option[Int]]&skip=[Option[Int]]`
 
 #### Params
 
 * Optional param list for user answers endpoint
   * lrn - Filters documents for partial or matching Local Reference Number of all user answers for given eori number
-
+  * limit - Sets the maximum number of returned documents 
+  * skip - Sets the increment of skipped documents for pagination purposes. The number of documents skipped is worked out as 'skip * limit'
 
 ### Successful response
 

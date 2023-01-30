@@ -23,8 +23,9 @@ import javax.inject.{Inject, Singleton}
 @Singleton
 class AppConfig @Inject() (config: Configuration) {
 
-  val appName: String     = config.get[String]("appName")
-  val mongoTtlInDays: Int = config.get[Int]("mongodb.ttlInDays")
+  val appName: String      = config.get[String]("appName")
+  val mongoTtlInDays: Int  = config.get[Int]("mongodb.ttlInDays")
+  val maxRowsReturned: Int = config.get[Int]("mongodb.maxRowsReturned")
 
   val enrolmentKey: String        = config.get[String]("enrolment.key")
   val enrolmentIdentifier: String = config.get[String]("enrolment.identifier")

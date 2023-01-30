@@ -16,14 +16,12 @@
 
 package repositories
 
-import com.mongodb.client.model.Filters.{in, regex, and => mAnd, eq => mEq}
+import com.mongodb.client.model.Filters.{regex, and => mAnd, eq => mEq}
 import config.AppConfig
 import models.UserAnswers
-import org.bson.BsonDocument
 import org.bson.conversions.Bson
-import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
+import org.mongodb.scala.model.Indexes.{ascending, compoundIndex, descending}
 import org.mongodb.scala.model._
-import play.api.libs.json.{JsObject, Json}
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
@@ -81,17 +79,29 @@ class CacheRepository @Inject() (
       .map(_.wasAcknowledged())
   }
 
-  def getAll(eoriNumber: String, lrn: Option[String] = None): Future[Seq[UserAnswers]] = {
+  def getAll(
+    eoriNumber: String,
+    lrn: Option[String] = None,
+    limit: Option[Int] = None,
+    skip: Option[Int] = None
+  ): Future[Seq[UserAnswers]] = {
+
+    val skipIndex: Int   = skip.getOrElse(0)
+    val returnLimit: Int = limit.getOrElse(appConfig.maxRowsReturned)
+    val skipLimit: Int   = skipIndex * returnLimit
+    val lrnRegex         = lrn.map(_.replace(" ", "")).getOrElse("")
 
     val selector: Bson = mAnd(
       mEq("eoriNumber", eoriNumber),
-      regex("lrn", lrn.getOrElse(""))
+      regex("lrn", lrnRegex)
     )
 
-    val aggregates =
-      Seq(
-        Aggregates.filter(selector)
-      )
+    val aggregates = Seq(
+      Aggregates.filter(selector),
+      Aggregates.sort(descending("createdAt")),
+      Aggregates.skip(skipLimit),
+      Aggregates.limit(returnLimit)
+    )
 
     collection.aggregate[UserAnswers](aggregates).toFuture()
   }
