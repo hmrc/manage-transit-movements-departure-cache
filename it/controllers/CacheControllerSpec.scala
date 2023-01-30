@@ -182,7 +182,8 @@ class CacheControllerSpec extends ItSpecBase {
     "documents do exist" should {
       "respond with 200 status" in {
         val userAnswers1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
-        val userAnswers2 = UserAnswers("CD123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
+        val userAnswers2 =
+          UserAnswers("CD123", eoriNumber, Json.obj(), Map(), LocalDateTime.now().minusDays(1), LocalDateTime.now().minusDays(1), UUID.randomUUID())
 
         insert(userAnswers1).futureValue
         insert(userAnswers2).futureValue
