@@ -22,11 +22,11 @@ import play.api.test.Helpers
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class FakeAuthenticateActionProvider(eoriNumber: String) extends AuthenticateActionProvider {
+class FakeAuthenticateActionProvider extends AuthenticateActionProvider {
 
   override def apply(): ActionBuilder[AuthenticatedRequest, AnyContent] = {
     val defaultActionBuilder = DefaultActionBuilder(Helpers.stubBodyParser())
-    val authenticate         = new FakeAuthenticateAction(eoriNumber)
+    val authenticate         = new FakeAuthenticateAction("eori")
 
     defaultActionBuilder andThen authenticate
   }

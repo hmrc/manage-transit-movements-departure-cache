@@ -32,6 +32,8 @@ class HateoasUserAnswersSummarySpec extends SpecBase {
       val id1     = UUID.randomUUID()
       val id2     = UUID.randomUUID()
 
+      val ttlInDay = 30
+
       val userAnswers1 = UserAnswers("AB123", eoriNumber, Json.obj(), Status.Draft, Map(), dateNow, dateNow, id1)
       val userAnswers2 = UserAnswers("CD123", eoriNumber, Json.obj(), Status.Draft, Map(), dateNow.minusDays(1), dateNow.minusDays(1), id2)
 
@@ -44,23 +46,25 @@ class HateoasUserAnswersSummarySpec extends SpecBase {
               "_links" -> Json.obj(
                 "self" -> Json.obj("href" -> controllers.routes.CacheController.get("AB123").url)
               ),
-              "createdAt"   -> dateNow,
-              "lastUpdated" -> dateNow,
-              "_id"         -> id1
+              "createdAt"     -> dateNow,
+              "lastUpdated"   -> dateNow,
+              "expiresInDays" -> 30,
+              "_id"           -> id1
             ),
             Json.obj(
               "lrn" -> "CD123",
               "_links" -> Json.obj(
                 "self" -> Json.obj("href" -> controllers.routes.CacheController.get("CD123").url)
               ),
-              "createdAt"   -> dateNow.minusDays(1),
-              "lastUpdated" -> dateNow.minusDays(1),
-              "_id"         -> id2
+              "createdAt"     -> dateNow.minusDays(1),
+              "lastUpdated"   -> dateNow.minusDays(1),
+              "expiresInDays" -> 29,
+              "_id"           -> id2
             )
           )
         )
 
-      HateoasUserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2)) shouldBe expectedResult
+      HateoasUserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2), ttlInDay) shouldBe expectedResult
 
     }
   }
