@@ -32,6 +32,8 @@ class HateoasUserAnswersSummarySpec extends SpecBase {
       val id1     = UUID.randomUUID()
       val id2     = UUID.randomUUID()
 
+      val ttlInDay = 30
+
       val userAnswers1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), dateNow, dateNow, id1)
       val userAnswers2 = UserAnswers("CD123", eoriNumber, Json.obj(), Map(), dateNow.minusDays(1), dateNow.minusDays(1), id2)
 
@@ -46,6 +48,7 @@ class HateoasUserAnswersSummarySpec extends SpecBase {
               ),
               "createdAt"   -> dateNow,
               "lastUpdated" -> dateNow,
+              "expires"     -> dateNow.plusDays(ttlInDay),
               "_id"         -> id1
             ),
             Json.obj(
@@ -55,12 +58,13 @@ class HateoasUserAnswersSummarySpec extends SpecBase {
               ),
               "createdAt"   -> dateNow.minusDays(1),
               "lastUpdated" -> dateNow.minusDays(1),
+              "expires"     -> dateNow.minusDays(1).plusDays(ttlInDay),
               "_id"         -> id2
             )
           )
         )
 
-      HateoasUserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2)) shouldBe expectedResult
+      HateoasUserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2), ttlInDay) shouldBe expectedResult
 
     }
   }

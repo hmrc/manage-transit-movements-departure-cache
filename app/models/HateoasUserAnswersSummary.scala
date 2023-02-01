@@ -20,7 +20,7 @@ import play.api.libs.json.{JsObject, Json}
 
 object HateoasUserAnswersSummary {
 
-  def apply(eoriNumber: String, usersAnswers: Seq[UserAnswers]): JsObject =
+  def apply(eoriNumber: String, usersAnswers: Seq[UserAnswers], ttlInDays: Int): JsObject =
     Json.obj(
       "eoriNumber" -> eoriNumber,
       "userAnswers" -> usersAnswers.map {
@@ -32,6 +32,7 @@ object HateoasUserAnswersSummary {
             ),
             "createdAt"   -> userAnswer.createdAt,
             "lastUpdated" -> userAnswer.lastUpdated,
+            "expires"     -> userAnswer.createdAt.plusDays(ttlInDays),
             "_id"         -> userAnswer.id
           )
       }
