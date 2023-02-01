@@ -18,13 +18,12 @@ package models
 
 import play.api.libs.json.{JsObject, Json}
 
-import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit.DAYS
+import java.time.{Duration, LocalDateTime}
 
 object HateoasUserAnswersSummary {
 
   private def expiresInDays(ttlInDays: Int, createdAt: LocalDateTime): Long =
-    DAYS.between(LocalDateTime.now(), createdAt.plusDays(ttlInDays))
+    Duration.between(LocalDateTime.now(), createdAt.plusDays(ttlInDays)).toDays + 1
 
   def apply(eoriNumber: String, usersAnswers: Seq[UserAnswers], ttlInDays: Int): JsObject =
     Json.obj(
