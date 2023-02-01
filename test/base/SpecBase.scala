@@ -16,7 +16,7 @@
 
 package base
 
-import models.UserAnswers
+import models.{Status, UserAnswers}
 import org.mockito.Mockito.reset
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -35,7 +35,7 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
   val lrn        = "lrn"
   val eoriNumber = "eori"
 
-  val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
+  val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Json.obj(), Status.Draft, Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
 
   val mockCacheRepository: CacheRepository = mock[CacheRepository]
 

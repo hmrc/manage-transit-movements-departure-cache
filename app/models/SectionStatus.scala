@@ -18,15 +18,16 @@ package models
 
 import play.api.libs.json.{Format, Json}
 
-sealed trait Status
+sealed trait SectionStatus
 
-object Status extends Enumeration {
+object SectionStatus extends Enumeration {
 
   type Status = Value
 
-  val Draft: Status     = Value("draft")
-  val Submitted: Status = Value("submitted")
-  val rejected: Status  = Value("rejected")
+  val Completed: Status      = Value("completed")
+  val InProgress: Status     = Value("in-progress")
+  val NotStarted: Status     = Value("not-started")
+  val CannotStartYet: Status = Value("cannot-start-yet")
 
   implicit val format: Format[Status] = Json.formatEnum(this)
 }

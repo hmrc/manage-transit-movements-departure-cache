@@ -30,11 +30,12 @@ class UserAnswersSpec extends SpecBase {
     lrn = lrn,
     eoriNumber = eoriNumber,
     data = Json.obj(),
+    Status.Draft,
     tasks = Map(
-      "task1" -> Status.Completed,
-      "task2" -> Status.InProgress,
-      "task3" -> Status.NotStarted,
-      "task4" -> Status.CannotStartYet
+      "task1" -> SectionStatus.Completed,
+      "task2" -> SectionStatus.InProgress,
+      "task3" -> SectionStatus.NotStarted,
+      "task4" -> SectionStatus.CannotStartYet
     ),
     createdAt = LocalDateTime.of(2022: Int, 9: Int, 5: Int, 15: Int, 58: Int, 44: Int, 188000000: Int),
     lastUpdated = LocalDateTime.of(2022: Int, 9: Int, 7: Int, 10: Int, 33: Int, 23: Int, 472000000: Int),
@@ -51,6 +52,7 @@ class UserAnswersSpec extends SpecBase {
           |    "lrn" : "$lrn",
           |    "eoriNumber" : "$eoriNumber",
           |    "data" : {},
+          |    "status":"draft",
           |    "tasks" : {
           |        "task1" : "completed",
           |        "task2" : "in-progress",
@@ -81,6 +83,7 @@ class UserAnswersSpec extends SpecBase {
           |    "lrn" : "$lrn",
           |    "eoriNumber" : "$eoriNumber",
           |    "data" : {},
+          |    "status":"draft",
           |    "tasks" : {
           |        "task1" : "completed",
           |        "task2" : "in-progress",

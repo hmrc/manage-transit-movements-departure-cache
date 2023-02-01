@@ -19,29 +19,29 @@ package models
 import base.SpecBase
 import play.api.libs.json.{JsString, Json}
 
-class StatusSpec extends SpecBase {
+class SectionStatusSpec extends SpecBase {
 
   "must serialise to json" when {
     "Completed" in {
-      val status = Status.Completed
+      val status = SectionStatus.Completed
       val result = Json.toJson(status)
       result shouldBe JsString("completed")
     }
 
     "InProgress" in {
-      val status = Status.InProgress
+      val status = SectionStatus.InProgress
       val result = Json.toJson(status)
       result shouldBe JsString("in-progress")
     }
 
     "NotStarted" in {
-      val status = Status.NotStarted
+      val status = SectionStatus.NotStarted
       val result = Json.toJson(status)
       result shouldBe JsString("not-started")
     }
 
     "CannotStartYet" in {
-      val status = Status.CannotStartYet
+      val status = SectionStatus.CannotStartYet
       val result = Json.toJson(status)
       result shouldBe JsString("cannot-start-yet")
     }
@@ -50,26 +50,26 @@ class StatusSpec extends SpecBase {
   "must deserialise from json" when {
     "Completed" in {
       val json   = JsString("completed")
-      val result = json.as[Status.Value]
-      result shouldBe Status.Completed
+      val result = json.as[SectionStatus.Value]
+      result shouldBe SectionStatus.Completed
     }
 
     "InProgress" in {
       val json   = JsString("in-progress")
-      val result = json.as[Status.Value]
-      result shouldBe Status.InProgress
+      val result = json.as[SectionStatus.Value]
+      result shouldBe SectionStatus.InProgress
     }
 
     "NotStarted" in {
       val json   = JsString("not-started")
-      val result = json.as[Status.Value]
-      result shouldBe Status.NotStarted
+      val result = json.as[SectionStatus.Value]
+      result shouldBe SectionStatus.NotStarted
     }
 
     "CannotStartYet" in {
       val json   = JsString("cannot-start-yet")
-      val result = json.as[Status.Value]
-      result shouldBe Status.CannotStartYet
+      val result = json.as[SectionStatus.Value]
+      result shouldBe SectionStatus.CannotStartYet
     }
   }
 

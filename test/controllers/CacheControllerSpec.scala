@@ -18,7 +18,7 @@ package controllers
 
 import base.SpecBase
 import controllers.actions.FakeAuthenticateActionProvider
-import models.{HateoasUserAnswersSummary, UserAnswers}
+import models.{HateoasUserAnswersSummary, Status, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, verify, when}
 import play.api.libs.json.{JsString, Json}
@@ -163,8 +163,8 @@ class CacheControllerSpec extends SpecBase {
 
       "read from mongo is successful" in {
 
-        val userAnswer1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
-        val userAnswer2 = UserAnswers("CD123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
+        val userAnswer1 = UserAnswers("AB123", eoriNumber, Json.obj(), Status.Draft, Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
+        val userAnswer2 = UserAnswers("CD123", eoriNumber, Json.obj(), Status.Draft, Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
 
         when(mockCacheRepository.getAll(any(), any(), any(), any())).thenReturn(Future.successful(Seq(userAnswer1, userAnswer2)))
 

@@ -32,8 +32,8 @@ class HateoasUserAnswersSummarySpec extends SpecBase {
       val id1     = UUID.randomUUID()
       val id2     = UUID.randomUUID()
 
-      val userAnswers1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), dateNow, dateNow, id1)
-      val userAnswers2 = UserAnswers("CD123", eoriNumber, Json.obj(), Map(), dateNow.minusDays(1), dateNow.minusDays(1), id2)
+      val userAnswers1 = UserAnswers("AB123", eoriNumber, Json.obj(), Status.Draft, Map(), dateNow, dateNow, id1)
+      val userAnswers2 = UserAnswers("CD123", eoriNumber, Json.obj(), Status.Draft, Map(), dateNow.minusDays(1), dateNow.minusDays(1), id2)
 
       val expectedResult =
         Json.obj(
