@@ -16,12 +16,15 @@
 
 package base
 
+import config.AppConfig
 import models.UserAnswers
 import org.mockito.Mockito.reset
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{BeforeAndAfterEach, EitherValues, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
@@ -30,7 +33,7 @@ import repositories.CacheRepository
 import java.time.LocalDateTime
 import java.util.UUID
 
-trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach with OptionValues with EitherValues {
+trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach with OptionValues with EitherValues with AppWithDefaultMockFixtures {
 
   val lrn        = "lrn"
   val eoriNumber = "eori"
@@ -44,6 +47,15 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
     reset(mockCacheRepository)
   }
 
+  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
+    super
+      .guiceApplicationBuilder()
+      .overrides(
+        bind[CacheRepository].toInstance(mockCacheRepository)
+      )
+
   def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
+
+  val appConfig: Any = app.injector.instanceOf[AppConfig]
 
 }

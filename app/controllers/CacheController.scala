@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.AppConfig
 import controllers.actions.AuthenticateActionProvider
 import models.{HateoasUserAnswersSummary, UserAnswers}
 import play.api.Logging
@@ -31,7 +32,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class CacheController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
-  cacheRepository: CacheRepository
+  cacheRepository: CacheRepository,
+  appConfig: AppConfig
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
@@ -101,7 +103,7 @@ class CacheController @Inject() (
       cacheRepository
         .getAll(request.eoriNumber, lrn, limit, skip)
         .map {
-          case result if result.nonEmpty => Ok(HateoasUserAnswersSummary(request.eoriNumber, result))
+          case result if result.nonEmpty => Ok(HateoasUserAnswersSummary(request.eoriNumber, result, appConfig.mongoTtlInDays))
           case _ =>
             logger.warn(s"No documents found for EORI: '${request.eoriNumber}'")
             NotFound
