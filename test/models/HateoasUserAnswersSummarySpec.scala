@@ -46,20 +46,20 @@ class HateoasUserAnswersSummarySpec extends SpecBase {
               "_links" -> Json.obj(
                 "self" -> Json.obj("href" -> controllers.routes.CacheController.get("AB123").url)
               ),
-              "createdAt"   -> dateNow,
-              "lastUpdated" -> dateNow,
-              "expires"     -> dateNow.plusDays(ttlInDay),
-              "_id"         -> id1
+              "createdAt"     -> dateNow,
+              "lastUpdated"   -> dateNow,
+              "expiresInDays" -> 29,
+              "_id"           -> id1
             ),
             Json.obj(
               "lrn" -> "CD123",
               "_links" -> Json.obj(
                 "self" -> Json.obj("href" -> controllers.routes.CacheController.get("CD123").url)
               ),
-              "createdAt"   -> dateNow.minusDays(1),
-              "lastUpdated" -> dateNow.minusDays(1),
-              "expires"     -> dateNow.minusDays(1).plusDays(ttlInDay),
-              "_id"         -> id2
+              "createdAt"     -> dateNow.minusDays(1),
+              "lastUpdated"   -> dateNow.minusDays(1),
+              "expiresInDays" -> 28,
+              "_id"           -> id2
             )
           )
         )

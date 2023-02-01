@@ -18,7 +18,13 @@ package models
 
 import play.api.libs.json.{JsObject, Json}
 
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit.DAYS
+
 object HateoasUserAnswersSummary {
+
+  private def expiresInDays(ttlInDays: Int, createdAt: LocalDateTime): Long =
+    DAYS.between(LocalDateTime.now(), createdAt.plusDays(ttlInDays))
 
   def apply(eoriNumber: String, usersAnswers: Seq[UserAnswers], ttlInDays: Int): JsObject =
     Json.obj(
@@ -30,10 +36,10 @@ object HateoasUserAnswersSummary {
             "_links" -> Json.obj(
               "self" -> Json.obj("href" -> controllers.routes.CacheController.get(userAnswer.lrn).url)
             ),
-            "createdAt"   -> userAnswer.createdAt,
-            "lastUpdated" -> userAnswer.lastUpdated,
-            "expires"     -> userAnswer.createdAt.plusDays(ttlInDays),
-            "_id"         -> userAnswer.id
+            "createdAt"     -> userAnswer.createdAt,
+            "lastUpdated"   -> userAnswer.lastUpdated,
+            "expiresInDays" -> expiresInDays(ttlInDays, userAnswer.createdAt),
+            "_id"           -> userAnswer.id
           )
       }
     )
