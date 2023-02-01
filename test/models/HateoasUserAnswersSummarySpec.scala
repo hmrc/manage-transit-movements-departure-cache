@@ -48,7 +48,7 @@ class HateoasUserAnswersSummarySpec extends SpecBase {
               ),
               "createdAt"     -> dateNow,
               "lastUpdated"   -> dateNow,
-              "expiresInDays" -> 29,
+              "expiresInDays" -> 30,
               "_id"           -> id1
             ),
             Json.obj(
@@ -58,7 +58,7 @@ class HateoasUserAnswersSummarySpec extends SpecBase {
               ),
               "createdAt"     -> dateNow.minusDays(1),
               "lastUpdated"   -> dateNow.minusDays(1),
-              "expiresInDays" -> 28,
+              "expiresInDays" -> 29,
               "_id"           -> id2
             )
           )
