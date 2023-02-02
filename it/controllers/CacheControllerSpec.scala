@@ -17,7 +17,7 @@
 package controllers
 
 import itbase.ItSpecBase
-import models.UserAnswers
+import models.{Status, UserAnswers}
 import org.mongodb.scala.model.Filters
 import play.api.libs.json.{JsObject, JsString, Json}
 
@@ -88,6 +88,7 @@ class CacheControllerSpec extends ItSpecBase {
         result.lrn shouldBe userAnswers.lrn
         result.eoriNumber shouldBe userAnswers.eoriNumber
         result.data shouldBe userAnswers.data
+        result.status shouldBe Status.Draft
         result.tasks shouldBe userAnswers.tasks
         result.createdAt shouldBe userAnswers.createdAt.truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
 
@@ -181,9 +182,17 @@ class CacheControllerSpec extends ItSpecBase {
 
     "documents do exist" should {
       "respond with 200 status" in {
-        val userAnswers1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
+        val userAnswers1 = UserAnswers("AB123", eoriNumber, Json.obj(), Status.Draft, Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
         val userAnswers2 =
-          UserAnswers("CD123", eoriNumber, Json.obj(), Map(), LocalDateTime.now().minusDays(1), LocalDateTime.now().minusDays(1), UUID.randomUUID())
+          UserAnswers("CD123",
+                      eoriNumber,
+                      Json.obj(),
+                      Status.Draft,
+                      Map(),
+                      LocalDateTime.now().minusDays(1),
+                      LocalDateTime.now().minusDays(1),
+                      UUID.randomUUID()
+          )
 
         insert(userAnswers1).futureValue
         insert(userAnswers2).futureValue

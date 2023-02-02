@@ -17,7 +17,7 @@
 package itbase
 
 import controllers.actions.{AuthenticateActionProvider, FakeAuthenticateActionProvider}
-import models.UserAnswers
+import models.{Status, UserAnswers}
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -49,7 +49,7 @@ trait ItSpecBase
   val lrn        = "lrn"
   val eoriNumber = "eori"
 
-  def emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
+  def emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Json.obj(), Status.Draft, Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
 
   val wsClient: WSClient = app.injector.instanceOf[WSClient]
   val baseUrl            = s"http://localhost:$port"
