@@ -58,6 +58,6 @@ trait ItSpecBase
     GuiceApplicationBuilder()
       .configure("metrics.enabled" -> false)
       .overrides(bind[MongoComponent].toInstance(mongoComponent))
-      .overrides(bind[AuthenticateActionProvider].toInstance(new FakeAuthenticateActionProvider(eoriNumber)))
+      .overrides(bind[AuthenticateActionProvider].toInstance(new FakeAuthenticateActionProvider))
       .build()
 }
