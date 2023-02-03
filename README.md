@@ -143,6 +143,34 @@
 
 ---
 
+##  `PUT /user-answers`
+
+### Successful response
+
+#### 200 OK
+
+* A call is made to the `PUT` endpoint with:
+  * a valid bearer token
+  * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
+  * a valid `String` request body representing the LRN
+* Then, for the given LRN in the request body and EORI number in the enrolment, a new document gets created with an empty user answers
+
+### Unsuccessful responses (with possible causes)
+
+#### 400 BAD_REQUEST
+* Request body could not be validated as a `String'
+
+#### 401 UNAUTHORIZED
+* A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
+
+#### 403 FORBIDDEN
+* User has insufficient enrolments
+
+#### 500 INTERNAL_SERVER_ERROR
+* An error occurred in the mongo client
+
+---
+
 ##  `DELETE /user-answers/:lrn`
 
 ### Successful response

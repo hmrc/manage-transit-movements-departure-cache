@@ -74,19 +74,25 @@ class CacheController @Inject() (
       }
   }
 
-  def put(lrn: String): Action[AnyContent] = authenticate().async {
+  def put(): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
-      val now = LocalDateTime.now(clock)
-      val userAnswers = UserAnswers(
-        lrn = lrn,
-        eoriNumber = request.eoriNumber,
-        data = Json.obj(),
-        tasks = Map.empty,
-        createdAt = now,
-        lastUpdated = now,
-        id = UUID.randomUUID()
-      )
-      set(userAnswers)
+      request.body.validate[String] match {
+        case JsSuccess(lrn, _) =>
+          val now = LocalDateTime.now(clock)
+          val userAnswers = UserAnswers(
+            lrn = lrn,
+            eoriNumber = request.eoriNumber,
+            data = Json.obj(),
+            tasks = Map.empty,
+            createdAt = now,
+            lastUpdated = now,
+            id = UUID.randomUUID()
+          )
+          set(userAnswers)
+        case JsError(errors) =>
+          logger.error(s"Failed to validate request body as String: $errors")
+          Future.successful(BadRequest)
+      }
   }
 
   private def set(userAnswers: UserAnswers): Future[Status] =

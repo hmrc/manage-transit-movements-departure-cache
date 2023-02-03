@@ -20,7 +20,6 @@ import itbase.ItSpecBase
 import models.UserAnswers
 import org.mongodb.scala.model.Filters
 import play.api.libs.json.{JsObject, JsString, Json}
-import play.api.libs.ws.EmptyBody
 
 import java.time.LocalDateTime
 import java.util.UUID
@@ -134,15 +133,15 @@ class CacheControllerSpec extends ItSpecBase {
     }
   }
 
-  "PUT /user-answers/:lrn" when {
+  "PUT /user-answers" when {
 
-    val url = s"$baseUrl/manage-transit-movements-departure-cache/user-answers/$lrn"
+    val url = s"$baseUrl/manage-transit-movements-departure-cache/user-answers"
 
     "document successfully written to mongo" should {
       "respond with 200 status" in {
         val response = wsClient
           .url(url)
-          .put(EmptyBody)
+          .put(JsString(lrn))
           .futureValue
 
         response.status shouldBe 200
@@ -153,6 +152,28 @@ class CacheControllerSpec extends ItSpecBase {
         )
         val results = find(filters).futureValue
         results.size shouldBe 1
+      }
+    }
+
+    "empty request body" should {
+      "respond with 400 status" in {
+        val response = wsClient
+          .url(url)
+          .put(Json.obj())
+          .futureValue
+
+        response.status shouldBe 400
+      }
+    }
+
+    "invalid request body" should {
+      "respond with 400 status" in {
+        val response = wsClient
+          .url(url)
+          .put(Json.obj("foo" -> "bar"))
+          .futureValue
+
+        response.status shouldBe 400
       }
     }
   }
