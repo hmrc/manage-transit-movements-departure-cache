@@ -28,7 +28,7 @@ class HateoasUserAnswersSummarySpec extends SpecBase {
 
     "turn a list of user answers into a HateoasMessageSummary" in {
 
-      val dateNow = LocalDateTime.now()
+      val dateNow = LocalDateTime.now(clock)
       val id1     = UUID.randomUUID()
       val id2     = UUID.randomUUID()
 
