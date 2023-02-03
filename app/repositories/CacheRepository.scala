@@ -47,10 +47,11 @@ class CacheRepository @Inject() (
       Filters.eq("lrn", lrn),
       Filters.eq("eoriNumber", eoriNumber)
     )
-    val update = Updates.set("lastUpdated", LocalDateTime.now())
+    val update  = Updates.set("lastUpdated", LocalDateTime.now())
+    val options = FindOneAndUpdateOptions().upsert(false).sort(Sorts.descending("createdAt"))
 
     collection
-      .findOneAndUpdate(filter, update, FindOneAndUpdateOptions().upsert(false))
+      .findOneAndUpdate(filter, update, options)
       .toFutureOption()
   }
 

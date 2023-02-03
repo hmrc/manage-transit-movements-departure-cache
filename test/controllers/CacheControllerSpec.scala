@@ -19,13 +19,14 @@ package controllers
 import base.SpecBase
 import controllers.actions.FakeAuthenticateActionProvider
 import models.{HateoasUserAnswersSummary, UserAnswers}
+import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, verify, when}
 import play.api.libs.json.{JsString, Json}
 import play.api.test.Helpers._
 import play.api.test.{FakeRequest, Helpers}
 
-import java.time.LocalDateTime
+import java.time.{Clock, LocalDateTime}
 import java.util.UUID
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -35,7 +36,8 @@ class CacheControllerSpec extends SpecBase {
   private val controller = new CacheController(
     Helpers.stubControllerComponents(),
     new FakeAuthenticateActionProvider(eoriNumber),
-    mockCacheRepository
+    mockCacheRepository,
+    Clock.systemUTC()
   )
 
   "get" should {
@@ -130,6 +132,42 @@ class CacheControllerSpec extends SpecBase {
         val result = controller.post()(fakeRequest)
         status(result) shouldBe INTERNAL_SERVER_ERROR
         verify(mockCacheRepository).set(eqTo(userAnswers))
+      }
+    }
+  }
+
+  "put" should {
+
+    val fakeRequest = FakeRequest("PUT", "/")
+
+    "return 200" when {
+      "write to mongo was acknowledged" in {
+        when(mockCacheRepository.set(any())).thenReturn(Future.successful(true))
+        val result = controller.put(lrn)(fakeRequest)
+        status(result) shouldBe OK
+        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        verify(mockCacheRepository).set(userAnswersCaptor.capture())
+        userAnswersCaptor.getValue.lrn shouldBe lrn
+      }
+    }
+
+    "return 500" when {
+      "write to mongo was not acknowledged" in {
+        when(mockCacheRepository.set(any())).thenReturn(Future.successful(false))
+        val result = controller.put(lrn)(fakeRequest)
+        status(result) shouldBe INTERNAL_SERVER_ERROR
+        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        verify(mockCacheRepository).set(userAnswersCaptor.capture())
+        userAnswersCaptor.getValue.lrn shouldBe lrn
+      }
+
+      "write to mongo fails" in {
+        when(mockCacheRepository.set(any())).thenReturn(Future.failed(new Throwable()))
+        val result = controller.put(lrn)(fakeRequest)
+        status(result) shouldBe INTERNAL_SERVER_ERROR
+        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        verify(mockCacheRepository).set(userAnswersCaptor.capture())
+        userAnswersCaptor.getValue.lrn shouldBe lrn
       }
     }
   }

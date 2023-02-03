@@ -20,6 +20,7 @@ import itbase.ItSpecBase
 import models.UserAnswers
 import org.mongodb.scala.model.Filters
 import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.libs.ws.EmptyBody
 
 import java.time.LocalDateTime
 import java.util.UUID
@@ -129,6 +130,29 @@ class CacheControllerSpec extends ItSpecBase {
           .futureValue
 
         response.status shouldBe 403
+      }
+    }
+  }
+
+  "PUT /user-answers/:lrn" when {
+
+    val url = s"$baseUrl/manage-transit-movements-departure-cache/user-answers/$lrn"
+
+    "document successfully written to mongo" should {
+      "respond with 200 status" in {
+        val response = wsClient
+          .url(url)
+          .put(EmptyBody)
+          .futureValue
+
+        response.status shouldBe 200
+
+        val filters = Filters.and(
+          Filters.eq("lrn", lrn),
+          Filters.eq("eoriNumber", eoriNumber)
+        )
+        val results = find(filters).futureValue
+        results.size shouldBe 1
       }
     }
   }
