@@ -18,14 +18,15 @@ package models
 
 import play.api.libs.json.{JsObject, Json}
 
-import java.time.{Duration, LocalDateTime}
+import java.time.{Clock, Duration, LocalDateTime}
 
 object HateoasUserAnswersSummary {
 
-  private def expiresInDays(ttlInDays: Int, createdAt: LocalDateTime): Long =
-    Duration.between(LocalDateTime.now(), createdAt.plusDays(ttlInDays)).toDays + 1
+  def apply(eoriNumber: String, usersAnswers: Seq[UserAnswers], ttlInDays: Int)(implicit clock: Clock): JsObject = {
 
-  def apply(eoriNumber: String, usersAnswers: Seq[UserAnswers], ttlInDays: Int): JsObject =
+    def expiresInDays(ttlInDays: Int, createdAt: LocalDateTime): Long =
+      Duration.between(LocalDateTime.now(clock), createdAt.plusDays(ttlInDays)).toDays + 1
+
     Json.obj(
       "eoriNumber" -> eoriNumber,
       "userAnswers" -> usersAnswers.map {
@@ -42,5 +43,6 @@ object HateoasUserAnswersSummary {
           )
       }
     )
+  }
 
 }

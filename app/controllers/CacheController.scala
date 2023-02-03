@@ -35,9 +35,8 @@ class CacheController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
   cacheRepository: CacheRepository,
-  appConfig: AppConfig,
-  clock: Clock
-)(implicit ec: ExecutionContext)
+  appConfig: AppConfig
+)(implicit ec: ExecutionContext, clock: Clock)
     extends BackendController(cc)
     with Logging {
 
