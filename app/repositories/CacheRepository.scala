@@ -18,7 +18,7 @@ package repositories
 
 import com.mongodb.client.model.Filters.{regex, and => mAnd, eq => mEq}
 import config.AppConfig
-import models.UserAnswers
+import models.{UserAnswers, UserAnswersSummary}
 import org.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex, descending}
 import org.mongodb.scala.model._
@@ -84,28 +84,30 @@ class CacheRepository @Inject() (
     lrn: Option[String] = None,
     limit: Option[Int] = None,
     skip: Option[Int] = None
-  ): Future[Seq[UserAnswers]] = {
+  ): Future[UserAnswersSummary] = {
 
     val skipIndex: Int   = skip.getOrElse(0)
     val returnLimit: Int = limit.getOrElse(appConfig.maxRowsReturned)
     val skipLimit: Int   = skipIndex * returnLimit
     val lrnRegex         = lrn.map(_.replace(" ", "")).getOrElse("")
 
-    val selector: Bson = mAnd(
-      mEq("eoriNumber", eoriNumber),
-      regex("lrn", lrnRegex)
-    )
-
     val aggregates = Seq(
-      Aggregates.filter(selector),
+      Aggregates.filter(
+        mAnd(
+          mEq("eoriNumber", eoriNumber),
+          regex("lrn", lrnRegex)
+        )
+      ),
       Aggregates.sort(descending("createdAt")),
       Aggregates.skip(skipLimit),
       Aggregates.limit(returnLimit)
     )
 
-    collection.aggregate[UserAnswers](aggregates).toFuture()
+    for {
+      countResult     <- collection.countDocuments(mEq("eoriNumber", eoriNumber)).toFuture()
+      aggregateResult <- collection.aggregate[UserAnswers](aggregates).toFuture()
+    } yield UserAnswersSummary(eoriNumber, aggregateResult, appConfig.mongoTtlInDays, countResult.toInt)
   }
-
 }
 
 object CacheRepository {

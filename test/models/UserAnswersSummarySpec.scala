@@ -22,11 +22,11 @@ import play.api.libs.json.Json
 import java.time.LocalDateTime
 import java.util.UUID
 
-class HateoasUserAnswersSummarySpec extends SpecBase {
+class UserAnswersSummarySpec extends SpecBase {
 
-  "apply" must {
+  "toHateoas" must {
 
-    "turn a list of user answers into a HateoasMessageSummary" in {
+    "turn an UserAnswersSummary to hateos jjobject" in {
 
       val dateNow = LocalDateTime.now()
       val id1     = UUID.randomUUID()
@@ -37,9 +37,12 @@ class HateoasUserAnswersSummarySpec extends SpecBase {
       val userAnswers1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), dateNow, dateNow, id1)
       val userAnswers2 = UserAnswers("CD123", eoriNumber, Json.obj(), Map(), dateNow.minusDays(1), dateNow.minusDays(1), id2)
 
+      val userAnswersSummary = UserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2), ttlInDay, 2)
+
       val expectedResult =
         Json.obj(
-          "eoriNumber" -> eoriNumber,
+          "eoriNumber"     -> eoriNumber,
+          "totalMovements" -> 2,
           "userAnswers" -> Json.arr(
             Json.obj(
               "lrn" -> "AB123",
@@ -64,8 +67,7 @@ class HateoasUserAnswersSummarySpec extends SpecBase {
           )
         )
 
-      HateoasUserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2), ttlInDay) shouldBe expectedResult
-
+      userAnswersSummary.toHateoas() shouldBe expectedResult
     }
   }
 }
