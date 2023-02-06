@@ -19,7 +19,6 @@ package repositories
 import com.mongodb.client.model.Filters.{regex, and => mAnd, eq => mEq}
 import config.AppConfig
 import models.{UserAnswers, UserAnswersSummary}
-import org.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex, descending}
 import org.mongodb.scala.model._
 import uk.gov.hmrc.mongo.MongoComponent
