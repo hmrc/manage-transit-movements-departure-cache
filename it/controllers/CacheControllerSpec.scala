@@ -133,6 +133,51 @@ class CacheControllerSpec extends ItSpecBase {
     }
   }
 
+  "PUT /user-answers" when {
+
+    val url = s"$baseUrl/manage-transit-movements-departure-cache/user-answers"
+
+    "document successfully written to mongo" should {
+      "respond with 200 status" in {
+        val response = wsClient
+          .url(url)
+          .put(JsString(lrn))
+          .futureValue
+
+        response.status shouldBe 200
+
+        val filters = Filters.and(
+          Filters.eq("lrn", lrn),
+          Filters.eq("eoriNumber", eoriNumber)
+        )
+        val results = find(filters).futureValue
+        results.size shouldBe 1
+      }
+    }
+
+    "empty request body" should {
+      "respond with 400 status" in {
+        val response = wsClient
+          .url(url)
+          .put(Json.obj())
+          .futureValue
+
+        response.status shouldBe 400
+      }
+    }
+
+    "invalid request body" should {
+      "respond with 400 status" in {
+        val response = wsClient
+          .url(url)
+          .put(Json.obj("foo" -> "bar"))
+          .futureValue
+
+        response.status shouldBe 400
+      }
+    }
+  }
+
   "DELETE /user-answers/:lrn" when {
 
     val url = s"$baseUrl/manage-transit-movements-departure-cache/user-answers/$lrn"

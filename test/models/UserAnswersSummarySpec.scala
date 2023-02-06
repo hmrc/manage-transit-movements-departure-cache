@@ -28,7 +28,7 @@ class UserAnswersSummarySpec extends SpecBase {
 
     "turn an UserAnswersSummary to hateos jjobject" in {
 
-      val dateNow = LocalDateTime.now()
+      val dateNow = LocalDateTime.now(clock)
       val id1     = UUID.randomUUID()
       val id2     = UUID.randomUUID()
 

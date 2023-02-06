@@ -18,16 +18,17 @@ package models
 
 import play.api.libs.json.{JsObject, Json}
 
-import java.time.{Duration, LocalDateTime}
+import java.time.{Clock, Duration, LocalDateTime}
 
 case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers], ttlInDays: Int, totalMovements: Int) {
 
-  private def expiresInDays(ttlInDays: Int, createdAt: LocalDateTime): Long =
-    Duration.between(LocalDateTime.now(), createdAt.plusDays(ttlInDays)).toDays + 1
+  def toHateoas(eoriNumber: String, usersAnswers: Seq[UserAnswers], ttlInDays: Int)(implicit clock: Clock): JsObject = {
 
-  def toHateoas(): JsObject =
+    def expiresInDays(ttlInDays: Int, createdAt: LocalDateTime): Long =
+      Duration.between(LocalDateTime.now(clock), createdAt.plusDays(ttlInDays)).toDays + 1
+
     Json.obj(
-      "eoriNumber"     -> eoriNumber,
+      "eoriNumber" -> eoriNumber,
       "totalMovements" -> totalMovements,
       "userAnswers" -> userAnswers.map {
         userAnswer =>
@@ -36,12 +37,13 @@ case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers],
             "_links" -> Json.obj(
               "self" -> Json.obj("href" -> controllers.routes.CacheController.get(userAnswer.lrn).url)
             ),
-            "createdAt"     -> userAnswer.createdAt,
-            "lastUpdated"   -> userAnswer.lastUpdated,
+            "createdAt" -> userAnswer.createdAt,
+            "lastUpdated" -> userAnswer.lastUpdated,
             "expiresInDays" -> expiresInDays(ttlInDays, userAnswer.createdAt),
-            "_id"           -> userAnswer.id
+            "_id" -> userAnswer.id
           )
       }
     )
+  }
 
 }
