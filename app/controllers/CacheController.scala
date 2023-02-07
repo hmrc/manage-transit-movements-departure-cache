@@ -18,7 +18,7 @@ package controllers
 
 import config.AppConfig
 import controllers.actions.AuthenticateActionProvider
-import models.{HateoasUserAnswersSummary, UserAnswers}
+import models.UserAnswers
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -129,7 +129,7 @@ class CacheController @Inject() (
       cacheRepository
         .getAll(request.eoriNumber, lrn, limit, skip)
         .map {
-          case result if result.nonEmpty => Ok(HateoasUserAnswersSummary(request.eoriNumber, result, appConfig.mongoTtlInDays))
+          case result if result.userAnswers.nonEmpty => Ok(result.toHateoas())
           case _ =>
             logger.warn(s"No documents found for EORI: '${request.eoriNumber}'")
             NotFound
