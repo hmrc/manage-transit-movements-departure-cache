@@ -257,13 +257,13 @@ class CacheControllerSpec extends SpecBase {
         val userAnswer2 = UserAnswers("CD123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
 
         when(mockCacheRepository.getAll(any(), any(), any(), any()))
-          .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 30, 2)))
+          .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 30, 2, 2)))
 
         val request = FakeRequest(GET, routes.CacheController.getAll().url)
         val result  = route(app, request).value
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 30, 2).toHateoas()
+        contentAsJson(result) shouldBe UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 30, 2, 2).toHateoas()
         verify(mockCacheRepository).getAll(eqTo(eoriNumber), any(), any(), any())
       }
     }
@@ -271,7 +271,7 @@ class CacheControllerSpec extends SpecBase {
     "return 404" when {
       "document not found in mongo for given eori number" in {
         when(mockCacheRepository.getAll(any(), any(), any(), any()))
-          .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, Seq.empty, 30, 2)))
+          .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, Seq.empty, 30, 2, 2)))
 
         val request = FakeRequest(GET, routes.CacheController.getAll().url)
         val result  = route(app, request).value
