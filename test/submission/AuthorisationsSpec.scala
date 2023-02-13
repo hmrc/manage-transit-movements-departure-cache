@@ -26,50 +26,45 @@ class AuthorisationsSpec extends SpecBase {
 
   "Authorisations" when {
 
-    "transform is called" when {
+    "transform is called" must {
 
-      "will convert to API format" in {
+      "convert to API format" in {
 
         val json: JsValue = Json.parse(s"""
              |{
-             |    "_id" : "$uuid",
-             |    "lrn" : "$lrn",
-             |    "eoriNumber" : "$eoriNumber",
-             |    "data" : {
-             |      "transportDetails" : {
-             |        "authorisationsAndLimit" : {
-             |          "limit": {
-             |            "limitDate": "2023-01-26T15:39:32.578+0000"
+             |  "_id" : "$uuid",
+             |  "lrn" : "$lrn",
+             |  "eoriNumber" : "$eoriNumber",
+             |  "data" : {
+             |    "transportDetails" : {
+             |      "authorisationsAndLimit" : {
+             |        "limit": {
+             |          "limitDate": "2023-01-26T15:39:32.578+0000"
+             |        },
+             |        "authorisations" : [
+             |          {
+             |            "authorisationType" : "FOO",
+             |            "authorisationReferenceNumber" : "TRD123"
              |          },
-             |          "authorisations" : [
-             |            {
-             |              "authorisationType" : "FOO",
-             |              "authorisationReferenceNumber" : "TRD123"
-             |            },
-             |            {
-             |              "authorisationType" : "BAR",
-             |              "authorisationReferenceNumber" : "TRD223"
-             |            }
-             |          ]
-             |        }
+             |          {
+             |            "authorisationType" : "BAR",
+             |            "authorisationReferenceNumber" : "TRD223"
+             |          }
+             |        ]
              |      }
-             |    },
-             |    "tasks" : {
-             |        "task1" : "completed",
-             |        "task2" : "in-progress",
-             |        "task3" : "not-started",
-             |        "task4" : "cannot-start-yet"
-             |    },
-             |    "createdAt" : {
-             |        "$$date" : {
-             |            "$$numberLong" : "1662393524188"
-             |        }
-             |    },
-             |    "lastUpdated" : {
-             |        "$$date" : {
-             |            "$$numberLong" : "1662546803472"
-             |        }
              |    }
+             |  },
+             |  "tasks" : {},
+             |  "createdAt" : {
+             |    "$$date" : {
+             |      "$$numberLong" : "1662393524188"
+             |    }
+             |  },
+             |  "lastUpdated" : {
+             |    "$$date" : {
+             |      "$$numberLong" : "1662546803472"
+             |    }
+             |  }
              |}
              |""".stripMargin)
 

@@ -19,32 +19,33 @@ package api.submission
 import generated.AuthorisationType03
 import gettables.sections.AuthorisationsSection
 import models.UserAnswers
-import play.api.libs.json.Json
-
-case class AuthorisationType(authorisationType: String, authorisationReferenceNumber: String)
-
-object AuthorisationType {
-  implicit val formats = Json.format[AuthorisationType]
-}
+import play.api.libs.functional.syntax._
+import play.api.libs.json.{__, Reads}
 
 object Authorisations {
 
   def transform(uA: UserAnswers): Seq[AuthorisationType03] =
     uA.get(AuthorisationsSection)
-      .map(
-        x => x.value
-      )
-      .map(
-        y =>
-          y.map(
-            a =>
-              AuthorisationType03(
-                y.indexOf(a).toString,
-                a.as[AuthorisationType].authorisationType,
-                a.as[AuthorisationType].authorisationReferenceNumber
-              )
-          )
-      )
+      .map {
+        _.value.zipWithIndex.map {
+          case (value, i) => value.as[AuthorisationType03](AuthorisationType03.reads(i))
+        }
+      }
       .getOrElse(Seq.empty)
       .toSeq
+}
+
+object AuthorisationType03 {
+
+  def apply(
+    typeValue: String,
+    referenceNumber: String
+  )(
+    sequenceNumber: String
+  ): AuthorisationType03 = new AuthorisationType03(sequenceNumber, typeValue, referenceNumber)
+
+  def reads(index: Int): Reads[AuthorisationType03] = (
+    (__ \ "authorisationType").read[String] and
+      (__ \ "authorisationReferenceNumber").read[String]
+  ).tupled.map((AuthorisationType03.apply _).tupled).map(_(index.toString))
 }

@@ -16,70 +16,57 @@
 
 package api.submission
 
-import generated._
+import generated.{GuaranteeReferenceType03, GuaranteeType02}
+import gettables.sections.GuaranteeDetailsSection
 import models.UserAnswers
-//import models.journeyDomain.guaranteeDetails.{GuaranteeDetailsDomain, GuaranteeDomain}
+import play.api.libs.functional.syntax._
+import play.api.libs.json.{__, Reads}
 
 object Guarantee {
 
-//  def transform(uA: UserAnswers): Seq[GuaranteeType02] =
-//    domain.guarantees.map {
-//      case guaranteeDomain @ GuaranteeDomain.GuaranteeOfTypesAB(guaranteeType) =>
-//        GuaranteeType02(
-//          guaranteeDomain.index.position.toString,
-//          guaranteeType.toString,
-//          None
-//        )
-//      case guaranteeDomain @ GuaranteeDomain.GuaranteeOfTypes01249(guaranteeType, grn, currency, liabilityAmount, accessCode) =>
-//        GuaranteeType02(
-//          guaranteeDomain.index.position.toString,
-//          guaranteeType.toString,
-//          None,
-//          Seq(GuaranteeReferenceType03(guaranteeDomain.index.position.toString, Some(grn), Some(accessCode), Some(liabilityAmount), Some(currency.currency)))
-//        )
-//      case guaranteeDomain @ GuaranteeDomain.GuaranteeOfType5(guaranteeType, currency, liabilityAmount) =>
-//        GuaranteeType02(
-//          guaranteeDomain.index.position.toString,
-//          guaranteeType.toString,
-//          None,
-//          Seq(GuaranteeReferenceType03(guaranteeDomain.index.position.toString, None, None, Some(liabilityAmount), Some(currency.currency)))
-//        )
-//      case guaranteeDomain @ GuaranteeDomain.GuaranteeOfType8(guaranteeType, otherReference, currencyCode, liabilityAmount) =>
-//        GuaranteeType02(
-//          guaranteeDomain.index.position.toString,
-//          guaranteeType.toString,
-//          Some(otherReference),
-//          Seq(
-//            GuaranteeReferenceType03(
-//              guaranteeDomain.index.position.toString,
-//              None,
-//              None,
-//              Some(liabilityAmount),
-//              Some(currencyCode.currency)
-//            )
-//          )
-//        )
-//      case guaranteeDomain @ GuaranteeDomain.GuaranteeOfType3WithReference(guaranteeType, otherReference, currencyCode, liabilityAmount) =>
-//        GuaranteeType02(
-//          guaranteeDomain.index.position.toString,
-//          guaranteeType.toString,
-//          Some(otherReference),
-//          Seq(
-//            GuaranteeReferenceType03(
-//              guaranteeDomain.index.position.toString,
-//              None,
-//              None,
-//              Some(liabilityAmount),
-//              Some(currencyCode.currency)
-//            )
-//          )
-//        )
-//      case guaranteeDomain @ GuaranteeDomain.GuaranteeOfType3WithoutReference(guaranteeType) =>
-//        GuaranteeType02(
-//          guaranteeDomain.index.position.toString,
-//          guaranteeType.toString,
-//          None,
-//          Seq.empty
-//        )
-//    }
+  def transform(uA: UserAnswers): Seq[GuaranteeType02] =
+    uA.get(GuaranteeDetailsSection)
+      .map {
+        _.value.zipWithIndex.map {
+          case (value, i) => value.as[GuaranteeType02](GuaranteeType02.reads(i))
+        }
+      }
+      .getOrElse(Seq.empty)
+      .toSeq
+}
+
+object GuaranteeType02 {
+
+  def apply(
+    guaranteeType: String,
+    otherGuaranteeReference: Option[String] = None,
+    GuaranteeReference: Seq[GuaranteeReferenceType03]
+  )(
+    sequenceNumber: String
+  ): GuaranteeType02 = new GuaranteeType02(sequenceNumber, guaranteeType, otherGuaranteeReference, GuaranteeReference)
+
+  def reads(index: Int): Reads[GuaranteeType02] = (
+    (__ \ "guaranteeType").read[String] and
+      (__ \ "otherReference").readNullable[String] and
+      __.read[GuaranteeReferenceType03](GuaranteeReferenceType03.reads(index)).map(Seq(_))
+  ).tupled.map((GuaranteeType02.apply _).tupled).map(_(index.toString))
+}
+
+object GuaranteeReferenceType03 {
+
+  def apply(
+    GRN: Option[String] = None,
+    accessCode: Option[String] = None,
+    amountToBeCovered: Option[BigDecimal] = None,
+    currency: Option[String] = None
+  )(
+    sequenceNumber: String
+  ): GuaranteeReferenceType03 = new GuaranteeReferenceType03(sequenceNumber, GRN, accessCode, amountToBeCovered, currency)
+
+  def reads(index: Int): Reads[GuaranteeReferenceType03] = (
+    (__ \ "referenceNumber").readNullable[String] and
+      (__ \ "accessCode").readNullable[String] and
+      (__ \ "liabilityAmount").readNullable[BigDecimal] and
+      (__ \ "currency" \ "currency").readNullable[String]
+  ).tupled.map((GuaranteeReferenceType03.apply _).tupled).map(_(index.toString))
 }
