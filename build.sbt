@@ -4,7 +4,7 @@ import uk.gov.hmrc.sbtdistributables.SbtDistributablesPlugin.publishingSettings
 val appName = "manage-transit-movements-departure-cache"
 
 lazy val microservice = Project(appName, file("."))
-  .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin)
+  .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin, ScalaxbPlugin)
   .settings(
     majorVersion                     := 0,
     scalaVersion                     := "2.13.8",
@@ -15,6 +15,10 @@ lazy val microservice = Project(appName, file("."))
       "-Wconf:src=routes/.*:s"
     )
   )
+  .settings(
+    Compile / scalaxb / scalaxbXsdSource := new File("./conf/xsd"),
+    Compile / scalaxb / scalaxbDispatchVersion := "1.1.3",
+    Compile / scalaxb / scalaxbPackageName := "generated")
   .settings(publishingSettings: _*)
   .configs(IntegrationTest extend Test)
   .settings(integrationTestSettings(): _*)
