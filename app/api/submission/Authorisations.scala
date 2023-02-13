@@ -46,4 +46,5 @@ object Authorisations {
           )
       )
       .getOrElse(Seq.empty)
+      .toSeq
 }

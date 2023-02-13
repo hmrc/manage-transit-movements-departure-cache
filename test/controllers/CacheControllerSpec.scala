@@ -19,13 +19,10 @@ package controllers
 import base.SpecBase
 import models.{HateoasUserAnswersSummary, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{never, reset, verify, when}
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
+import org.mockito.Mockito.{never, verify, when}
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import repositories.CacheRepository
 
 import java.time.LocalDateTime
 import java.util.UUID
