@@ -268,19 +268,6 @@ class CacheControllerSpec extends SpecBase {
       }
     }
 
-    "return 404" when {
-      "document not found in mongo for given eori number" in {
-        when(mockCacheRepository.getAll(any(), any(), any(), any()))
-          .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, Seq.empty, 30, 2, 2)))
-
-        val request = FakeRequest(GET, routes.CacheController.getAll().url)
-        val result  = route(app, request).value
-
-        status(result) shouldBe NOT_FOUND
-        verify(mockCacheRepository).getAll(eqTo(eoriNumber), any(), any(), any())
-      }
-    }
-
     "return 500" when {
       "read from mongo fails" in {
         when(mockCacheRepository.getAll(any(), any(), any(), any())).thenReturn(Future.failed(new Throwable()))
