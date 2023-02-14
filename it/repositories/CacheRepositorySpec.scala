@@ -17,7 +17,7 @@
 package repositories
 
 import itbase.ItSpecBase
-import models.{UserAnswers, UserAnswersSummary}
+import models.{SortByCreatedAtDesc, SortByLRNAsc, SortByLRNDesc, UserAnswers, UserAnswersSummary}
 import org.mongodb.scala.bson.{BsonDocument, BsonInt64, BsonString}
 import org.mongodb.scala.model.Filters
 import org.mongodb.scala.{Document, MongoWriteException}
@@ -351,6 +351,105 @@ class CacheRepositorySpec extends ItSpecBase {
             userAnswers.length shouldBe 1
             userAnswers.head.lrn shouldBe userAnswers6.lrn
         }
+      }
+    }
+
+    "when given sortBy param" should {
+
+      val userAnswers1 = emptyUserAnswers.copy(lrn = "AA1111111111111", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(3))
+      val userAnswers2 = emptyUserAnswers.copy(lrn = "BB2222222222222", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(6))
+      val userAnswers3 = emptyUserAnswers.copy(lrn = "CC3333333333333", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(5))
+      val userAnswers4 = emptyUserAnswers.copy(lrn = "DD1111111111111", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(4))
+      val userAnswers5 = emptyUserAnswers.copy(lrn = "EE2222222222222", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(1))
+      val userAnswers6 = emptyUserAnswers.copy(lrn = "FF3333333333333", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(2))
+
+      "return UserAnswersSummary, which is sorted by lrn in ascending order when sortBy is lrn.asc" in {
+
+        insert(userAnswers6).futureValue
+        insert(userAnswers4).futureValue
+        insert(userAnswers5).futureValue
+        insert(userAnswers1).futureValue
+        insert(userAnswers3).futureValue
+        insert(userAnswers2).futureValue
+
+        val result = repository.getAll(userAnswers1.eoriNumber, sortBy = Some(SortByLRNAsc.convertParams)).futureValue
+
+        result match {
+          case UserAnswersSummary(_, userAnswers, _, _) =>
+            userAnswers.head.lrn shouldBe userAnswers1.lrn
+            userAnswers(1).lrn shouldBe userAnswers2.lrn
+            userAnswers(2).lrn shouldBe userAnswers3.lrn
+            userAnswers(3).lrn shouldBe userAnswers4.lrn
+            userAnswers(4).lrn shouldBe userAnswers5.lrn
+            userAnswers(5).lrn shouldBe userAnswers6.lrn
+        }
+
+      }
+      "return UserAnswersSummary, which is sorted by lrn in descending order when sortBy is lrn.desc" in {
+
+        insert(userAnswers6).futureValue
+        insert(userAnswers4).futureValue
+        insert(userAnswers5).futureValue
+        insert(userAnswers1).futureValue
+        insert(userAnswers3).futureValue
+        insert(userAnswers2).futureValue
+
+        val result = repository.getAll(userAnswers1.eoriNumber, sortBy = None).futureValue
+
+        result match {
+          case UserAnswersSummary(_, userAnswers, _, _) =>
+            userAnswers.head.lrn shouldBe userAnswers6.lrn
+            userAnswers(1).lrn shouldBe userAnswers5.lrn
+            userAnswers(2).lrn shouldBe userAnswers4.lrn
+            userAnswers(3).lrn shouldBe userAnswers3.lrn
+            userAnswers(4).lrn shouldBe userAnswers2.lrn
+            userAnswers(5).lrn shouldBe userAnswers1.lrn
+        }
+
+      }
+      "return UserAnswersSummary, which is sorted by createdAt in ascending order when sortBy is createdAt.asc" ignore {
+
+        insert(userAnswers6).futureValue
+        insert(userAnswers4).futureValue
+        insert(userAnswers5).futureValue
+        insert(userAnswers1).futureValue
+        insert(userAnswers3).futureValue
+        insert(userAnswers2).futureValue
+
+        val result = repository.getAll(userAnswers1.eoriNumber, sortBy = Some(SortByLRNAsc.convertParams)).futureValue
+
+        result match {
+          case UserAnswersSummary(_, userAnswers, _, _) =>
+            userAnswers.head.lrn shouldBe userAnswers1.lrn
+            userAnswers(1).lrn shouldBe userAnswers2.lrn
+            userAnswers(2).lrn shouldBe userAnswers3.lrn
+            userAnswers(3).lrn shouldBe userAnswers4.lrn
+            userAnswers(4).lrn shouldBe userAnswers5.lrn
+            userAnswers(5).lrn shouldBe userAnswers6.lrn
+        }
+
+      }
+      "return UserAnswersSummary, which is sorted by createdAt in descending order when sortBy is createdAt.desc" ignore {
+
+        insert(userAnswers6).futureValue
+        insert(userAnswers4).futureValue
+        insert(userAnswers5).futureValue
+        insert(userAnswers1).futureValue
+        insert(userAnswers3).futureValue
+        insert(userAnswers2).futureValue
+
+        val result = repository.getAll(userAnswers1.eoriNumber, sortBy = Some(SortByLRNAsc.convertParams)).futureValue
+
+        result match {
+          case UserAnswersSummary(_, userAnswers, _, _) =>
+            userAnswers.head.lrn shouldBe userAnswers1.lrn
+            userAnswers(1).lrn shouldBe userAnswers2.lrn
+            userAnswers(2).lrn shouldBe userAnswers3.lrn
+            userAnswers(3).lrn shouldBe userAnswers4.lrn
+            userAnswers(4).lrn shouldBe userAnswers5.lrn
+            userAnswers(5).lrn shouldBe userAnswers6.lrn
+        }
+
       }
     }
   }

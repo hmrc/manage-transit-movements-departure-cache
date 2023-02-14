@@ -16,7 +16,7 @@ lazy val microservice = Project(appName, file("."))
     scalacOptions ++= Seq(
       "-Wconf:src=routes/.*:s"
     ),
-      RoutesKeys.routesImport ++= Seq("models._","models.OptionBinder._")
+      RoutesKeys.routesImport ++= Seq("models._","models.Sort._")
   )
   .settings(publishingSettings: _*)
   .configs(IntegrationTest extend Test)

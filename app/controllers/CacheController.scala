@@ -18,7 +18,7 @@ package controllers
 
 import config.AppConfig
 import controllers.actions.AuthenticateActionProvider
-import models.{Sort, UserAnswers}
+import models.{Sort, SortByCreatedAtDesc, UserAnswers}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -124,7 +124,7 @@ class CacheController @Inject() (
         }
   }
 
-  def getAll(lrn: Option[String] = None, limit: Option[Int] = None, skip: Option[Int] = None, sortBy: Option[Sort] = None): Action[AnyContent] =
+  def getAll(lrn: Option[String] = None, limit: Option[Int] = None, skip: Option[Int] = None, sortBy: Option[String] = None): Action[AnyContent] =
     authenticate().async {
       implicit request =>
         cacheRepository

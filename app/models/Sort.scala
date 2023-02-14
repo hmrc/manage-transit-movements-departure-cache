@@ -16,54 +16,70 @@
 
 package models
 
+import models.SortByLRNAsc.{field, orderBy}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Aggregates.sort
 import org.mongodb.scala.model.Indexes.{ascending, descending}
-import play.api.mvc.{JavascriptLiteral, PathBindable, QueryStringBindable}
+import play.api.mvc.QueryStringBindable
 
 trait Sort {
   val field: String
   val orderBy: String
 
   val toBSON: Bson = orderBy match {
-    case "asc"  => sort(ascending(field))
-    case "desc" => sort(descending(field))
+    case "asc"  => ascending(field)
+    case "desc" => descending(field)
   }
-  val convertParams: String = s"$field.$orderBy"
+
+  val convertParams: String
+  override def toString: String = s"$field.$orderBy"
 }
 
 object SortByLRNAsc extends Sort {
   val field: String   = "lrn"
   val orderBy: String = "asc"
+  val convertParams   = s"$field.$orderBy"
 }
 
 object SortByLRNDesc extends Sort {
   val field: String   = "lrn"
   val orderBy: String = "desc"
+  val convertParams   = s"$field.$orderBy"
 }
 
 object SortByCreatedAtAsc extends Sort {
   val field: String   = "createdAt"
   val orderBy: String = "asc"
+  val convertParams   = s"$field.$orderBy"
 }
 
 object SortByCreatedAtDesc extends Sort {
   val field: String   = "createdAt"
   val orderBy: String = "desc"
+  val convertParams   = s"$field.$orderBy"
 }
 
 object Sort {
 
-  implicit def queryStringBindable(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[Sort] = new QueryStringBindable[Sort] {
-
-    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Sort]] = stringBinder.bind("sortBy", params) map {
-      case Right(SortByLRNAsc.convertParams)        => Right(SortByLRNAsc)
-      case Right(SortByLRNDesc.convertParams)       => Right(SortByLRNDesc)
-      case Right(SortByCreatedAtAsc.convertParams)  => Right(SortByCreatedAtAsc)
-      case Right(SortByCreatedAtDesc.convertParams) => Right(SortByCreatedAtDesc)
-      case _                                        => Left("Invalid sort parameters")
-    }
-
-    override def unbind(key: String, value: Sort): String = stringBinder.unbind("sortBy", value.convertParams)
+  def apply(sortParams: Option[String]): Sort = sortParams match {
+    case Some(SortByLRNAsc.convertParams)       => SortByLRNAsc
+    case Some(SortByLRNDesc.convertParams)      => SortByLRNDesc
+    case Some(SortByCreatedAtAsc.convertParams) => SortByCreatedAtAsc
+    case _                                      => SortByCreatedAtDesc
   }
+
+//  implicit def queryStringBindable(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[Sort] = new QueryStringBindable[Sort] {
+//
+//    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Sort]] =
+//      Option(stringBinder.bind("sortBy", params) match {
+//        case Some(Right(SortByLRNAsc.convertParams))        => Right(SortByLRNAsc)
+//        case Some(Right(SortByLRNDesc.convertParams))       => Right(SortByLRNDesc)
+//        case Some(Right(SortByCreatedAtAsc.convertParams))  => Right(SortByCreatedAtAsc)
+//        case Some(Right(SortByCreatedAtDesc.convertParams)) => Right(SortByCreatedAtDesc)
+//        case _                                              => Left("Invalid sort parameters")
+//      })
+//
+//    override def unbind(key: String, value: Sort): String = stringBinder.unbind("sortBy", value.convertParams)
+//
+//  }
 }
