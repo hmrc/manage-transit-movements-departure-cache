@@ -25,14 +25,7 @@ import play.api.libs.json.{__, Reads}
 object Authorisations {
 
   def transform(uA: UserAnswers): Seq[AuthorisationType03] =
-    uA.get(AuthorisationsSection)
-      .map {
-        _.value.zipWithIndex.map {
-          case (value, i) => value.as[AuthorisationType03](AuthorisationType03.reads(i))
-        }
-      }
-      .getOrElse(Seq.empty)
-      .toSeq
+    uA.get(AuthorisationsSection).readValuesAs[AuthorisationType03](AuthorisationType03.reads)
 }
 
 object AuthorisationType03 {
@@ -44,6 +37,7 @@ object AuthorisationType03 {
     sequenceNumber: String
   ): AuthorisationType03 = new AuthorisationType03(sequenceNumber, typeValue, referenceNumber)
 
+  // TODO - authorisation type has an inferred reader in the frontend (i.e. won't always be populated in user answers)
   def reads(index: Int): Reads[AuthorisationType03] = (
     (__ \ "authorisationType").read[String] and
       (__ \ "authorisationReferenceNumber").read[String]

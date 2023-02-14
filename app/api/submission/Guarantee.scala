@@ -17,22 +17,14 @@
 package api.submission
 
 import generated.{GuaranteeReferenceType03, GuaranteeType02}
-import gettables.sections.GuaranteeDetailsSection
 import models.UserAnswers
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{__, Reads}
+import play.api.libs.json.{__, JsArray, Reads}
 
 object Guarantee {
 
   def transform(uA: UserAnswers): Seq[GuaranteeType02] =
-    uA.get(GuaranteeDetailsSection)
-      .map {
-        _.value.zipWithIndex.map {
-          case (value, i) => value.as[GuaranteeType02](GuaranteeType02.reads(i))
-        }
-      }
-      .getOrElse(Seq.empty)
-      .toSeq
+    uA.get[JsArray](__ \ "guaranteeDetails").readValuesAs[GuaranteeType02](GuaranteeType02.reads)
 }
 
 object GuaranteeType02 {
