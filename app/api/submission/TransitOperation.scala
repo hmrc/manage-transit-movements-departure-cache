@@ -46,11 +46,11 @@ object TransitOperationType06 {
         declarationType = declarationType,
         additionalDeclarationType = "A",
         TIRCarnetNumber = TIRCarnetNumber,
-        presentationOfTheGoodsDateAndTime = None,
+        presentationOfTheGoodsDateAndTime = None, // TODO - do we collect this?
         security = convertSecurity(security),
         reducedDatasetIndicator = reducedDatasetIndicator,
-        specificCircumstanceIndicator = None,
-        communicationLanguageAtDeparture = None,
+        specificCircumstanceIndicator = None, // TODO - do we collect this?
+        communicationLanguageAtDeparture = None, // TODO - do we collect this?
         bindingItinerary = bindingItinerary,
         limitDate = limitDate
       )
