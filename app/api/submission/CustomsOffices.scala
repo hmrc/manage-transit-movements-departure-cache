@@ -16,41 +16,19 @@
 
 package api.submission
 
+import generated.{
+  CustomsOfficeOfDepartureType03,
+  CustomsOfficeOfDestinationDeclaredType01,
+  CustomsOfficeOfExitForTransitDeclaredType02,
+  CustomsOfficeOfTransitDeclaredType03
+}
+import models.UserAnswers
+
 object CustomsOffices {
 
-//  def transformOfficeOfDeparture(uA: UserAnswers): CustomsOfficeOfDepartureType03 =
-//    CustomsOfficeOfDepartureType03(customsOffice.id)
-//
-//  def transformOfficeOfDestination(uA: UserAnswers): CustomsOfficeOfDestinationDeclaredType01 =
-//    CustomsOfficeOfDestinationDeclaredType01(customsOffice.id)
-//
-//  def transformOfficeOfTransit(uA: UserAnswers): Seq[CustomsOfficeOfTransitDeclaredType03] =
-//    domain
-//      .map(
-//        transitDomain =>
-//          transitDomain.officesOfTransit
-//            .map(
-//              officeOfTransitDomain =>
-//                CustomsOfficeOfTransitDeclaredType03(
-//                  transitDomain.officesOfTransit.indexOf(officeOfTransitDomain.customsOffice).toString,
-//                  officeOfTransitDomain.customsOffice.id
-//                )
-//            )
-//      )
-//      .getOrElse(Seq.empty)
-//
-//  def transformOfficeOfExit(uA: UserAnswers): Seq[CustomsOfficeOfExitForTransitDeclaredType02] =
-//    domain
-//      .map(
-//        transitDomain =>
-//          transitDomain.officesOfExit
-//            .map(
-//              officeOfExitDomain =>
-//                CustomsOfficeOfExitForTransitDeclaredType02(
-//                  transitDomain.officesOfExit.indexOf(officeOfExitDomain).toString,
-//                  officeOfExitDomain.customsOffice.id
-//                )
-//            )
-//      )
-//      .getOrElse(Seq.empty)
+  def transformOfficeOfDeparture(uA: UserAnswers): CustomsOfficeOfDepartureType03              = ??? // TODO custom reads
+  def transformOfficeOfDestination(uA: UserAnswers): CustomsOfficeOfDestinationDeclaredType01  = ??? // TODO custom reads
+  def transformOfficeOfTransit(uA: UserAnswers): Seq[CustomsOfficeOfTransitDeclaredType03]     = ??? // TODO custom reads
+  def transformOfficeOfExit(uA: UserAnswers): Seq[CustomsOfficeOfExitForTransitDeclaredType02] = ??? // TODO custom reads
+
 }

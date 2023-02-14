@@ -16,17 +16,11 @@
 
 package api.submission
 
+import generated.RepresentativeType05
+import models.UserAnswers
+
 object Representative {
 
-//  def transform(uA: UserAnswers): Option[RepresentativeType05] =
-//    domain.representative.map {
-//      r =>
-//        RepresentativeType05(
-//          r.eori.value,
-//          "2",
-//          r.representativeDetails.map(
-//            x => ContactPersonType05(x.name, x.telephoneNumber, None)
-//          )
-//        )
-//    }
+  def transform(uA: UserAnswers): Option[RepresentativeType05] = ??? // TODO custom reads
+
 }
