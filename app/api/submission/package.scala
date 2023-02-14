@@ -57,6 +57,21 @@ package object submission {
           }
         }
         .getOrElse(Nil)
+
+    def flatMapWithIndex[T](f: (JsValue, Int) => Option[T]): Seq[T] =
+      arr
+        .map {
+          _.zipWithIndex.flatMap {
+            case (value, i) => f(value, i)
+          }
+        }
+        .getOrElse(Nil)
+  }
+
+  implicit class RichOptionalJsObject(obj: Option[JsObject]) {
+
+    def readValueAs[T](implicit reads: Reads[T]): Option[T] =
+      obj.map(_.as[T])
   }
 
   implicit def boolToFlag(x: Boolean): Flag = if (x) Number1 else Number0

@@ -16,11 +16,49 @@
 
 package api.submission
 
-import generated.RepresentativeType05
+import generated.{ContactPersonType05, RepresentativeType05}
 import models.UserAnswers
+import play.api.libs.functional.syntax._
+import play.api.libs.json.{__, JsObject, Reads}
 
 object Representative {
 
-  def transform(uA: UserAnswers): Option[RepresentativeType05] = ??? // TODO custom reads
+  def transform(uA: UserAnswers): Option[RepresentativeType05] =
+    uA
+      .get[JsObject](traderDetailsPath \ "representative")
+      .readValueAs[RepresentativeType05](RepresentativeType05.reads)
 
+}
+
+object RepresentativeType05 {
+
+  implicit val reads: Reads[RepresentativeType05] = (
+    (__ \ "eori").read[String] and
+      __.read[Option[ContactPersonType05]](ContactPersonType05.reads)
+  ).apply {
+    (identificationNumber, ContactPerson) =>
+      new RepresentativeType05(
+        identificationNumber = identificationNumber,
+        status = "2",
+        ContactPerson = ContactPerson
+      )
+  }
+}
+
+object ContactPersonType05 {
+
+  implicit val reads: Reads[Option[ContactPersonType05]] = (
+    (__ \ "name").readNullable[String] and
+      (__ \ "telephoneNumber").readNullable[String]
+  ).tupled.map {
+    case (Some(name), Some(phoneNumber)) =>
+      Some(
+        new ContactPersonType05(
+          name = name,
+          phoneNumber = phoneNumber,
+          eMailAddress = None
+        )
+      )
+    case _ => None
+  }
 }
