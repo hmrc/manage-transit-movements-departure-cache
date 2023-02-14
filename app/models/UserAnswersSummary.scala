@@ -20,7 +20,7 @@ import play.api.libs.json.{JsObject, Json}
 
 import java.time.{Clock, Duration, LocalDateTime}
 
-case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers], ttlInDays: Int, totalMovements: Int) {
+case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers], ttlInDays: Int, totalMovements: Int, totalMatchingMovements: Int) {
 
   def toHateoas()(implicit clock: Clock): JsObject = {
 
@@ -28,8 +28,9 @@ case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers],
       Duration.between(LocalDateTime.now(clock), createdAt.plusDays(ttlInDays)).toDays + 1
 
     Json.obj(
-      "eoriNumber"     -> eoriNumber,
-      "totalMovements" -> totalMovements,
+      "eoriNumber"             -> eoriNumber,
+      "totalMovements"         -> totalMovements,
+      "totalMatchingMovements" -> totalMatchingMovements,
       "userAnswers" -> userAnswers.map {
         userAnswer =>
           Json.obj(

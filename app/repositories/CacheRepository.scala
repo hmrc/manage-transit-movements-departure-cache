@@ -19,6 +19,7 @@ package repositories
 import com.mongodb.client.model.Filters.{regex, and => mAnd, eq => mEq}
 import config.AppConfig
 import models.{UserAnswers, UserAnswersSummary}
+import org.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex, descending}
 import org.mongodb.scala.model._
 import uk.gov.hmrc.mongo.MongoComponent
@@ -92,22 +93,29 @@ class CacheRepository @Inject() (
     val skipLimit: Int   = skipIndex * returnLimit
     val lrnRegex         = lrn.map(_.replace(" ", "")).getOrElse("")
 
-    val aggregates = Seq(
-      Aggregates.filter(
-        mAnd(
-          mEq("eoriNumber", eoriNumber),
-          regex("lrn", lrnRegex)
-        )
-      ),
+    val eoriFilter: Bson = mEq("eoriNumber", eoriNumber)
+    val lrnFilter: Bson  = regex("lrn", lrnRegex)
+
+    val primaryFilter = Aggregates.filter(mAnd(eoriFilter, lrnFilter))
+
+    val aggregates: Seq[Bson] = Seq(
+      primaryFilter,
       Aggregates.sort(descending("createdAt")),
       Aggregates.skip(skipLimit),
       Aggregates.limit(returnLimit)
     )
 
     for {
-      countResult     <- collection.countDocuments(mEq("eoriNumber", eoriNumber)).toFuture()
-      aggregateResult <- collection.aggregate[UserAnswers](aggregates).toFuture()
-    } yield UserAnswersSummary(eoriNumber, aggregateResult, appConfig.mongoTtlInDays, countResult.toInt)
+      totalDocuments         <- collection.countDocuments(eoriFilter).toFuture()
+      totalMatchingDocuments <- collection.aggregate[UserAnswers](Seq(primaryFilter)).toFuture().map(_.length)
+      aggregateResult        <- collection.aggregate[UserAnswers](aggregates).toFuture()
+    } yield UserAnswersSummary(
+      eoriNumber,
+      aggregateResult,
+      appConfig.mongoTtlInDays,
+      totalDocuments.toInt,
+      totalMatchingDocuments
+    )
   }
 }
 
@@ -128,4 +136,5 @@ object CacheRepository {
 
     Seq(userAnswersCreatedAtIndex, eoriNumberAndLrnCompoundIndex)
   }
+
 }
