@@ -16,9 +16,6 @@
 
 package api.submission
 
-import generated._
-import models.UserAnswers
-
 object Representative {
 
 //  def transform(uA: UserAnswers): Option[RepresentativeType05] =

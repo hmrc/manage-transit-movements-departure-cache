@@ -17,15 +17,14 @@
 package api.submission
 
 import generated.AuthorisationType03
-import gettables.sections.AuthorisationsSection
 import models.UserAnswers
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{__, Reads}
+import play.api.libs.json.{__, JsArray, Reads}
 
 object Authorisations {
 
   def transform(uA: UserAnswers): Seq[AuthorisationType03] =
-    uA.get(AuthorisationsSection).readValuesAs[AuthorisationType03](AuthorisationType03.reads)
+    uA.get[JsArray](authorisationsPath).readValuesAs[AuthorisationType03](AuthorisationType03.reads)
 }
 
 object AuthorisationType03 {

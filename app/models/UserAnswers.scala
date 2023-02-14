@@ -16,7 +16,6 @@
 
 package models
 
-import gettables.Gettable
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
@@ -32,9 +31,6 @@ final case class UserAnswers(
   lastUpdated: LocalDateTime,
   id: UUID
 ) {
-
-  def get[A](page: Gettable[A])(implicit rds: Reads[A]): Option[A] =
-    get(page.path)
 
   def get[A](path: JsPath)(implicit rds: Reads[A]): Option[A] =
     Reads.optionNoError(Reads.at(path)).reads(data).getOrElse(None)

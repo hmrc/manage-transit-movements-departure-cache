@@ -16,9 +16,6 @@
 
 package api.submission
 
-import generated._
-import models.UserAnswers
-
 object CustomsOffices {
 
 //  def transformOfficeOfDeparture(uA: UserAnswers): CustomsOfficeOfDepartureType03 =

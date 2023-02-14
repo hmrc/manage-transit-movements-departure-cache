@@ -16,9 +16,25 @@
 
 package api
 
-import play.api.libs.json.{JsArray, JsValue, Reads}
+import generated.{Flag, Number0, Number1}
+import play.api.libs.json._
+
+import java.time.LocalDate
+import javax.xml.datatype.{DatatypeFactory, XMLGregorianCalendar}
+import scala.language.implicitConversions
 
 package object submission {
+
+  lazy val preTaskListPath: JsPath = __ \ "preTaskList"
+
+  lazy val traderDetailsPath: JsPath = __ \ "traderDetails"
+
+  lazy val routeDetailsPath: JsPath = __ \ "routeDetails"
+
+  lazy val transportDetailsPath: JsPath = __ \ "transportDetails"
+  lazy val authorisationsPath: JsPath   = transportDetailsPath \ "authorisationsAndLimit" \ "authorisations"
+
+  lazy val guaranteesPath: JsPath = __ \ "guaranteeDetails"
 
   implicit class RichJsArray(arr: JsArray) {
 
@@ -41,5 +57,18 @@ package object submission {
         }
         .getOrElse(Nil)
   }
+
+  implicit def boolToFlag(x: Boolean): Flag = if (x) Number1 else Number0
+
+  implicit def toDate(date: LocalDate): XMLGregorianCalendar =
+    toDate(date.toString)
+
+  implicit def toDate(date: String): XMLGregorianCalendar =
+    DatatypeFactory
+      .newInstance()
+      .newXMLGregorianCalendar(date.replace("Z", ""))
+
+  implicit def toDate(date: Option[LocalDate]): Option[XMLGregorianCalendar] =
+    date.map(toDate)
 
 }

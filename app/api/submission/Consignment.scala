@@ -16,10 +16,6 @@
 
 package api.submission
 
-import api.ApiXmlHelper
-import generated._
-import models.UserAnswers
-
 object Consignment {
 
 //  def transform(uA: UserAnswers): ConsignmentType20 =

@@ -16,7 +16,6 @@
 
 package api.submission
 
-import api.ApiXmlHelper
 import generated.{CORRELATION_IDENTIFIERSequence, MESSAGE_1Sequence, MESSAGE_FROM_TRADERSequence, MessageType015}
 import org.joda.time.DateTime
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter}
@@ -33,7 +32,7 @@ object Header extends {
       None,
       MESSAGE_1Sequence(
         "NCTS",
-        ApiXmlHelper.toDate(DateTime.now().toString(formatterNoMillis)),
+        toDate(DateTime.now().toString(formatterNoMillis)),
         "CC015C" // TODO - check this with API team? What should this be set to?
       )
     )

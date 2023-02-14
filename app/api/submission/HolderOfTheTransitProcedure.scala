@@ -16,9 +16,6 @@
 
 package api.submission
 
-import generated._
-import models.UserAnswers
-
 object HolderOfTheTransitProcedure {
 
 //  def transform(uA: UserAnswers): HolderOfTheTransitProcedureType14 =

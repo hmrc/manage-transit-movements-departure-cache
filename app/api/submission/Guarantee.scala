@@ -24,7 +24,7 @@ import play.api.libs.json.{__, JsArray, Reads}
 object Guarantee {
 
   def transform(uA: UserAnswers): Seq[GuaranteeType02] =
-    uA.get[JsArray](__ \ "guaranteeDetails").readValuesAs[GuaranteeType02](GuaranteeType02.reads)
+    uA.get[JsArray](guaranteesPath).readValuesAs[GuaranteeType02](GuaranteeType02.reads)
 }
 
 object GuaranteeType02 {

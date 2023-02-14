@@ -31,42 +31,37 @@ class TransitOperationSpec extends SpecBase {
       "will convert to API format" in {
 
         val json: JsValue = Json.parse(s"""
-                                          |{
-                                          |    "_id" : "$uuid",
-                                          |    "lrn" : "$lrn",
-                                          |    "eoriNumber" : "$eoriNumber",
-                                          |    "data" : {
-                                          |      "preTaskList" : {
-                                          |        "officeOfDeparture" : {
-                                          |          "id" : "XI000142",
-                                          |          "name" : "Belfast EPU",
-                                          |          "phoneNumber" : "+44 (0)02896 931537"
-                                          |        },
-                                          |        "procedureType" : "normal",
-                                          |        "declarationType" : "TIR",
-                                          |        "tirCarnetReference" : "1234567",
-                                          |        "securityDetailsType" : "entrySummaryDeclaration",
-                                          |        "detailsConfirmed" : true
-                                          |      }
-                                          |    },
-                                          |    "tasks" : {
-                                          |        "task1" : "completed",
-                                          |        "task2" : "in-progress",
-                                          |        "task3" : "not-started",
-                                          |        "task4" : "cannot-start-yet"
-                                          |    },
-                                          |    "createdAt" : {
-                                          |        "$$date" : {
-                                          |            "$$numberLong" : "1662393524188"
-                                          |        }
-                                          |    },
-                                          |    "lastUpdated" : {
-                                          |        "$$date" : {
-                                          |            "$$numberLong" : "1662546803472"
-                                          |        }
-                                          |    }
-                                          |}
-                                          |""".stripMargin)
+            |{
+            |  "_id" : "$uuid",
+            |  "lrn" : "$lrn",
+            |  "eoriNumber" : "$eoriNumber",
+            |  "data" : {
+            |    "preTaskList" : {
+            |      "officeOfDeparture" : {
+            |        "id" : "XI000142",
+            |        "name" : "Belfast EPU",
+            |        "phoneNumber" : "+44 (0)02896 931537"
+            |      },
+            |      "procedureType" : "normal",
+            |      "declarationType" : "TIR",
+            |      "tirCarnetReference" : "1234567",
+            |      "securityDetailsType" : "entrySummaryDeclaration",
+            |      "detailsConfirmed" : true
+            |    }
+            |  },
+            |  "tasks" : {},
+            |  "createdAt" : {
+            |    "$$date" : {
+            |      "$$numberLong" : "1662393524188"
+            |    }
+            |  },
+            |  "lastUpdated" : {
+            |    "$$date" : {
+            |      "$$numberLong" : "1662546803472"
+            |    }
+            |  }
+            |}
+            |""".stripMargin)
 
         val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
 
