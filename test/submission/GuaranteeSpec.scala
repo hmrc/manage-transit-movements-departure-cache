@@ -31,49 +31,49 @@ class GuaranteeSpec extends SpecBase {
       "convert to API format" in {
 
         val json: JsValue = Json.parse(s"""
-             |{
-             |  "_id" : "$uuid",
-             |  "lrn" : "$lrn",
-             |  "eoriNumber" : "$eoriNumber",
-             |  "data" : {
-             |    "guaranteeDetails" : [
-             |      {
-             |        "guaranteeType" : "FOO",
-             |        "otherReference" : "otherRefNo1",
-             |        "referenceNumber" : "refNo1",
-             |        "accessCode" : "1234",
-             |        "liabilityAmount" : 1000,
-             |        "currency" : {
-             |          "currency" : "GBP",
-             |          "description" : "Sterling"
-             |        }
-             |      },
-             |      {
-             |        "guaranteeType" : "BAR",
-             |        "otherReference" : "otherRefNo2",
-             |        "referenceNumber" : "refNo2",
-             |        "accessCode" : "5678",
-             |        "liabilityAmount" : 2000,
-             |        "currency" : {
-             |          "currency" : "EUR",
-             |          "description" : "Euro"
-             |        }
-             |      }
-             |    ]
-             |  },
-             |  "tasks" : {},
-             |  "createdAt" : {
-             |    "$$date" : {
-             |      "$$numberLong" : "1662393524188"
-             |    }
-             |  },
-             |  "lastUpdated" : {
-             |    "$$date" : {
-             |      "$$numberLong" : "1662546803472"
-             |    }
-             |  }
-             |}
-             |""".stripMargin)
+            |{
+            |  "_id" : "$uuid",
+            |  "lrn" : "$lrn",
+            |  "eoriNumber" : "$eoriNumber",
+            |  "data" : {
+            |    "guaranteeDetails" : [
+            |      {
+            |        "guaranteeType" : "FOO",
+            |        "otherReference" : "otherRefNo1",
+            |        "referenceNumber" : "refNo1",
+            |        "accessCode" : "1234",
+            |        "liabilityAmount" : 1000,
+            |        "currency" : {
+            |          "currency" : "GBP",
+            |          "description" : "Sterling"
+            |        }
+            |      },
+            |      {
+            |        "guaranteeType" : "BAR",
+            |        "otherReference" : "otherRefNo2",
+            |        "referenceNumber" : "refNo2",
+            |        "accessCode" : "5678",
+            |        "liabilityAmount" : 2000,
+            |        "currency" : {
+            |          "currency" : "EUR",
+            |          "description" : "Euro"
+            |        }
+            |      }
+            |    ]
+            |  },
+            |  "tasks" : {},
+            |  "createdAt" : {
+            |    "$$date" : {
+            |      "$$numberLong" : "1662393524188"
+            |    }
+            |  },
+            |  "lastUpdated" : {
+            |    "$$date" : {
+            |      "$$numberLong" : "1662546803472"
+            |    }
+            |  }
+            |}
+            |""".stripMargin)
 
         val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
 

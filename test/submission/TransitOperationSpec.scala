@@ -21,14 +21,15 @@ import base.SpecBase
 import generated.{Number0, TransitOperationType06}
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
+import scalaxb.XMLCalendar
 
 class TransitOperationSpec extends SpecBase {
 
   "TransitOperation" when {
 
-    "transform is called" when {
+    "transform is called" must {
 
-      "will convert to API format" in {
+      "convert to API format" in {
 
         val json: JsValue = Json.parse(s"""
             |{
@@ -47,6 +48,13 @@ class TransitOperationSpec extends SpecBase {
             |      "tirCarnetReference" : "1234567",
             |      "securityDetailsType" : "entrySummaryDeclaration",
             |      "detailsConfirmed" : true
+            |    },
+            |    "transportDetails" : {
+            |      "authorisationsAndLimit" : {
+            |        "limit": {
+            |          "limitDate": "2022-07-15"
+            |        }
+            |      }
             |    }
             |  },
             |  "tasks" : {},
@@ -65,15 +73,25 @@ class TransitOperationSpec extends SpecBase {
 
         val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
 
-        val expected = TransitOperationType06("lrn", "TIR", "A", Some("1234567"), None, "entrySummaryDeclaration", Number0, None, None, Number0, None)
+        val expected =
+          TransitOperationType06(
+            LRN = lrn,
+            declarationType = "TIR",
+            additionalDeclarationType = "A",
+            TIRCarnetNumber = Some("1234567"),
+            presentationOfTheGoodsDateAndTime = None,
+            security = "1",
+            reducedDatasetIndicator = Number0,
+            specificCircumstanceIndicator = None,
+            communicationLanguageAtDeparture = None,
+            bindingItinerary = Number0,
+            limitDate = Some(XMLCalendar("2022-07-15"))
+          )
 
         val converted = TransitOperation.transform(uA)
 
         converted shouldBe expected
-
       }
-
     }
-
   }
 }

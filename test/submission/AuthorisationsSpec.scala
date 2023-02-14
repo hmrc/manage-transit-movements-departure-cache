@@ -31,42 +31,42 @@ class AuthorisationsSpec extends SpecBase {
       "convert to API format" in {
 
         val json: JsValue = Json.parse(s"""
-             |{
-             |  "_id" : "$uuid",
-             |  "lrn" : "$lrn",
-             |  "eoriNumber" : "$eoriNumber",
-             |  "data" : {
-             |    "transportDetails" : {
-             |      "authorisationsAndLimit" : {
-             |        "limit": {
-             |          "limitDate": "2023-01-26T15:39:32.578+0000"
-             |        },
-             |        "authorisations" : [
-             |          {
-             |            "authorisationType" : "FOO",
-             |            "authorisationReferenceNumber" : "TRD123"
-             |          },
-             |          {
-             |            "authorisationType" : "BAR",
-             |            "authorisationReferenceNumber" : "TRD223"
-             |          }
-             |        ]
-             |      }
-             |    }
-             |  },
-             |  "tasks" : {},
-             |  "createdAt" : {
-             |    "$$date" : {
-             |      "$$numberLong" : "1662393524188"
-             |    }
-             |  },
-             |  "lastUpdated" : {
-             |    "$$date" : {
-             |      "$$numberLong" : "1662546803472"
-             |    }
-             |  }
-             |}
-             |""".stripMargin)
+            |{
+            |  "_id" : "$uuid",
+            |  "lrn" : "$lrn",
+            |  "eoriNumber" : "$eoriNumber",
+            |  "data" : {
+            |    "transportDetails" : {
+            |      "authorisationsAndLimit" : {
+            |        "limit": {
+            |          "limitDate": "2023-01-26T15:39:32.578+0000"
+            |        },
+            |        "authorisations" : [
+            |          {
+            |            "authorisationType" : "FOO",
+            |            "authorisationReferenceNumber" : "TRD123"
+            |          },
+            |          {
+            |            "authorisationType" : "BAR",
+            |            "authorisationReferenceNumber" : "TRD223"
+            |          }
+            |        ]
+            |      }
+            |    }
+            |  },
+            |  "tasks" : {},
+            |  "createdAt" : {
+            |    "$$date" : {
+            |      "$$numberLong" : "1662393524188"
+            |    }
+            |  },
+            |  "lastUpdated" : {
+            |    "$$date" : {
+            |      "$$numberLong" : "1662546803472"
+            |    }
+            |  }
+            |}
+            |""".stripMargin)
 
         val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
 

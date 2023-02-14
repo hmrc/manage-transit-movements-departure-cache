@@ -19,16 +19,15 @@ package api.submission
 import generated.TransitOperationType06
 import models.UserAnswers
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{JsError, JsSuccess, Reads}
+import play.api.libs.json.Reads
 
 import java.time.LocalDate
 
 object TransitOperation {
 
-  def transform(uA: UserAnswers): TransitOperationType06 = uA.data.validate(TransitOperationType06.reads(uA.lrn)) match {
-    case JsSuccess(value, _) => value
-    case JsError(errors)     => ???
-  }
+  def transform(uA: UserAnswers): TransitOperationType06 =
+    uA.data.as[TransitOperationType06](TransitOperationType06.reads(uA.lrn))
+
 }
 
 object TransitOperationType06 {
@@ -48,12 +47,19 @@ object TransitOperationType06 {
         additionalDeclarationType = "A",
         TIRCarnetNumber = TIRCarnetNumber,
         presentationOfTheGoodsDateAndTime = None,
-        security = security,
+        security = convertSecurity(security),
         reducedDatasetIndicator = reducedDatasetIndicator,
         specificCircumstanceIndicator = None,
         communicationLanguageAtDeparture = None,
         bindingItinerary = bindingItinerary,
         limitDate = limitDate
       )
+  }
+
+  private val convertSecurity: String => String = {
+    case "noSecurity"                     => "0"
+    case "entrySummaryDeclaration"        => "1"
+    case "exitSummaryDeclaration"         => "2"
+    case "entryAndExitSummaryDeclaration" => "3"
   }
 }

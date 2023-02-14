@@ -18,9 +18,10 @@ package api
 
 import generated.{Flag, Number0, Number1}
 import play.api.libs.json._
+import scalaxb.XMLCalendar
 
 import java.time.LocalDate
-import javax.xml.datatype.{DatatypeFactory, XMLGregorianCalendar}
+import javax.xml.datatype.XMLGregorianCalendar
 import scala.language.implicitConversions
 
 package object submission {
@@ -60,15 +61,13 @@ package object submission {
 
   implicit def boolToFlag(x: Boolean): Flag = if (x) Number1 else Number0
 
+  implicit def toDate(date: Option[LocalDate]): Option[XMLGregorianCalendar] =
+    date.map(toDate)
+
   implicit def toDate(date: LocalDate): XMLGregorianCalendar =
     toDate(date.toString)
 
   implicit def toDate(date: String): XMLGregorianCalendar =
-    DatatypeFactory
-      .newInstance()
-      .newXMLGregorianCalendar(date.replace("Z", ""))
-
-  implicit def toDate(date: Option[LocalDate]): Option[XMLGregorianCalendar] =
-    date.map(toDate)
+    XMLCalendar(date.replace("Z", ""))
 
 }
