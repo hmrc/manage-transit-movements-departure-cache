@@ -6,3 +6,4 @@ POST       /user-answers                                        controllers.Cach
 PUT        /user-answers                                        controllers.CacheController.put()
 DELETE     /user-answers/:lrn                                   controllers.CacheController.delete(lrn: String)
 
+POST       /users-answers/:sessionId/lock                       controllers.
