@@ -18,7 +18,7 @@ package repositories
 
 import com.mongodb.client.model.Filters.{regex, and => mAnd, eq => mEq}
 import config.AppConfig
-import models.{Sort, UserAnswers, UserAnswersSummary}
+import models.{Sort, SortByCreatedAtDesc, UserAnswers, UserAnswersSummary}
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex, descending}
 import org.mongodb.scala.model._
 import uk.gov.hmrc.mongo.MongoComponent
@@ -85,22 +85,13 @@ class CacheRepository @Inject() (
     lrn: Option[String] = None,
     limit: Option[Int] = None,
     skip: Option[Int] = None,
-    sortBy: Option[Sort] = None
+    sortBy: Sort = SortByCreatedAtDesc
   ): Future[UserAnswersSummary] = {
 
     val skipIndex: Int   = skip.getOrElse(0)
     val returnLimit: Int = limit.getOrElse(appConfig.maxRowsReturned)
     val skipLimit: Int   = skipIndex * returnLimit
     val lrnRegex         = lrn.map(_.replace(" ", "")).getOrElse("")
-
-    val fieldToSort: String = sortBy match {
-      case Some(x) => x.field
-      case None    => "createdAt"
-    }
-    val sortByAscending: Boolean = sortBy match {
-      case Some(x) if x.orderBy == "asc" => true
-      case _                             => false
-    }
 
     val aggregates = Seq(
       Aggregates.filter(
@@ -109,7 +100,7 @@ class CacheRepository @Inject() (
           regex("lrn", lrnRegex)
         )
       ),
-      if (sortByAscending) Aggregates.sort(ascending(fieldToSort)) else Aggregates.sort(descending(fieldToSort)),
+      Aggregates.sort(sortBy.toBSON),
       Aggregates.skip(skipLimit),
       Aggregates.limit(returnLimit)
     )

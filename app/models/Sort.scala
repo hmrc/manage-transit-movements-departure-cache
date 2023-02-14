@@ -16,15 +16,54 @@
 
 package models
 
-case class Sort(field: String, orderBy: String)
+import org.mongodb.scala.bson.conversions.Bson
+import org.mongodb.scala.model.Aggregates.sort
+import org.mongodb.scala.model.Indexes.{ascending, descending}
+import play.api.mvc.{JavascriptLiteral, PathBindable}
+
+trait Sort {
+  val field: String
+  val orderBy: String
+
+  val toBSON: Bson = orderBy match {
+    case "asc"  => sort(ascending(field))
+    case "desc" => sort(descending(field))
+  }
+  override def toString: String = s"$field.$orderBy"
+}
+
+object SortByLRNAsc extends Sort {
+  val field: String   = "lrn"
+  val orderBy: String = "asc"
+}
+
+object SortByLRNDesc extends Sort {
+  val field: String   = "lrn"
+  val orderBy: String = "desc"
+}
+
+object SortByCreatedAtAsc extends Sort {
+  val field: String   = "createdAt"
+  val orderBy: String = "asc"
+}
+
+object SortByCreatedAtDesc extends Sort {
+  val field: String   = "createdAt"
+  val orderBy: String = "desc"
+}
 
 object Sort {
 
-  def apply(sortParams: Option[String] = None): Option[Sort] =
-    sortParams match {
-      case Some(string) =>
-        val split = string.split('.')
-        Some(Sort(split(0), split(1)))
-      case None => None
+  implicit def pathBindable: PathBindable[Sort] = new PathBindable[Sort] {
+
+    override def bind(key: String, value: String): Either[String, Sort] = value match {
+      case SortByLRNAsc.toString       => Right(SortByLRNAsc)
+      case SortByLRNDesc.toString      => Right(SortByLRNDesc)
+      case SortByCreatedAtAsc.toString => Right(SortByCreatedAtAsc)
+      case _                           => Right(SortByCreatedAtDesc)
     }
+
+    override def unbind(key: String, value: Sort): String = s"$key=${value.toString}"
+  }
+
 }

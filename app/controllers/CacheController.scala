@@ -124,11 +124,11 @@ class CacheController @Inject() (
         }
   }
 
-  def getAll(lrn: Option[String] = None, limit: Option[Int] = None, skip: Option[Int] = None, sortBy: Option[String] = None): Action[AnyContent] =
+  def getAll(lrn: Option[String] = None, limit: Option[Int] = None, skip: Option[Int] = None, sortBy: Sort): Action[AnyContent] =
     authenticate().async {
       implicit request =>
         cacheRepository
-          .getAll(request.eoriNumber, lrn, limit, skip, Sort(sortBy))
+          .getAll(request.eoriNumber, lrn, limit, skip, sortBy)
           .map {
             case result if result.userAnswers.nonEmpty => Ok(result.toHateoas())
             case _ =>
