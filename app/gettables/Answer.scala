@@ -20,6 +20,6 @@ trait Answer
 
 object Answer {
 
-  implicit def toString(page: Answer): String =
-    page.toString
+  implicit def toString(answer: Answer): String =
+    answer.toString
 }

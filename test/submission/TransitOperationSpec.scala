@@ -16,6 +16,7 @@
 
 package submission
 
+import api.ApiXmlHelper
 import api.submission.TransitOperation
 import base.SpecBase
 import generated.{Number0, TransitOperationType06}
@@ -47,6 +48,13 @@ class TransitOperationSpec extends SpecBase {
                                           |        "tirCarnetReference" : "1234567",
                                           |        "securityDetailsType" : "entrySummaryDeclaration",
                                           |        "detailsConfirmed" : true
+                                          |      },
+                                          |      "transportDetails" : {
+                                          |        "authorisationsAndLimit" : {
+                                          |          "limit": {
+                                          |            "limitDate": "2022-07-15"
+                                          |          }
+                                          |        }
                                           |      }
                                           |    },
                                           |    "tasks" : {
@@ -70,7 +78,8 @@ class TransitOperationSpec extends SpecBase {
 
         val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
 
-        val expected = TransitOperationType06("lrn", "TIR", "A", Some("1234567"), None, "entrySummaryDeclaration", Number0, None, None, Number0, None)
+        val expected =
+          TransitOperationType06("lrn", "TIR", "A", Some("1234567"), None, "1", Number0, None, None, Number0, Some(ApiXmlHelper.toDate("2022-07-15")))
 
         val converted = TransitOperation.transform(uA)
 
