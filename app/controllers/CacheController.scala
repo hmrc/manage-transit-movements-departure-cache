@@ -124,7 +124,7 @@ class CacheController @Inject() (
         }
   }
 
-  def getAll(lrn: Option[String] = None, limit: Option[Int] = None, skip: Option[Int] = None, sortBy: Sort): Action[AnyContent] =
+  def getAll(lrn: Option[String] = None, limit: Option[Int] = None, skip: Option[Int] = None, sortBy: Option[Sort] = None): Action[AnyContent] =
     authenticate().async {
       implicit request =>
         cacheRepository

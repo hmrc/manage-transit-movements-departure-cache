@@ -19,7 +19,7 @@ package repositories
 import com.mongodb.client.model.Filters.{regex, and => mAnd, eq => mEq}
 import config.AppConfig
 import models.{Sort, SortByCreatedAtDesc, UserAnswers, UserAnswersSummary}
-import org.mongodb.scala.model.Indexes.{ascending, compoundIndex, descending}
+import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
 import org.mongodb.scala.model._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
@@ -85,13 +85,14 @@ class CacheRepository @Inject() (
     lrn: Option[String] = None,
     limit: Option[Int] = None,
     skip: Option[Int] = None,
-    sortBy: Sort = SortByCreatedAtDesc
+    sortBy: Option[Sort] = None
   ): Future[UserAnswersSummary] = {
 
     val skipIndex: Int   = skip.getOrElse(0)
     val returnLimit: Int = limit.getOrElse(appConfig.maxRowsReturned)
     val skipLimit: Int   = skipIndex * returnLimit
     val lrnRegex         = lrn.map(_.replace(" ", "")).getOrElse("")
+    val someSortBy       = sortBy.getOrElse(SortByCreatedAtDesc)
 
     val aggregates = Seq(
       Aggregates.filter(
@@ -100,7 +101,7 @@ class CacheRepository @Inject() (
           regex("lrn", lrnRegex)
         )
       ),
-      Aggregates.sort(sortBy.toBSON),
+      Aggregates.sort(someSortBy.toBSON),
       Aggregates.skip(skipLimit),
       Aggregates.limit(returnLimit)
     )

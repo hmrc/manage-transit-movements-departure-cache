@@ -19,7 +19,7 @@ package models
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Aggregates.sort
 import org.mongodb.scala.model.Indexes.{ascending, descending}
-import play.api.mvc.{JavascriptLiteral, PathBindable}
+import play.api.mvc.{JavascriptLiteral, PathBindable, QueryStringBindable}
 
 trait Sort {
   val field: String
@@ -29,7 +29,7 @@ trait Sort {
     case "asc"  => sort(ascending(field))
     case "desc" => sort(descending(field))
   }
-  override def toString: String = s"$field.$orderBy"
+  val convertParams: String = s"$field.$orderBy"
 }
 
 object SortByLRNAsc extends Sort {
@@ -54,16 +54,16 @@ object SortByCreatedAtDesc extends Sort {
 
 object Sort {
 
-  implicit def pathBindable: PathBindable[Sort] = new PathBindable[Sort] {
+  implicit def queryStringBindable(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[Sort] = new QueryStringBindable[Sort] {
 
-    override def bind(key: String, value: String): Either[String, Sort] = value match {
-      case SortByLRNAsc.toString       => Right(SortByLRNAsc)
-      case SortByLRNDesc.toString      => Right(SortByLRNDesc)
-      case SortByCreatedAtAsc.toString => Right(SortByCreatedAtAsc)
-      case _                           => Right(SortByCreatedAtDesc)
+    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Sort]] = stringBinder.bind("sortBy", params) map {
+      case Right(SortByLRNAsc.convertParams)        => Right(SortByLRNAsc)
+      case Right(SortByLRNDesc.convertParams)       => Right(SortByLRNDesc)
+      case Right(SortByCreatedAtAsc.convertParams)  => Right(SortByCreatedAtAsc)
+      case Right(SortByCreatedAtDesc.convertParams) => Right(SortByCreatedAtDesc)
+      case _                                        => Left("Invalid sort parameters")
     }
 
-    override def unbind(key: String, value: Sort): String = s"$key=${value.toString}"
+    override def unbind(key: String, value: Sort): String = stringBinder.unbind("sortBy", value.convertParams)
   }
-
 }
