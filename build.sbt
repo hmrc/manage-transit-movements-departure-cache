@@ -12,7 +12,8 @@ lazy val microservice = Project(appName, file("."))
     libraryDependencies              ++= AppDependencies.compile ++ AppDependencies.test,
     ThisBuild / scalafmtOnCompile := true,
     scalacOptions ++= Seq(
-      "-Wconf:src=routes/.*:s"
+      "-Wconf:src=routes/.*:s",
+      "-Wconf:src=src_managed/.*:s"
     )
   )
   .settings(
