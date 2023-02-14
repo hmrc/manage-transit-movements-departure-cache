@@ -21,34 +21,6 @@ import models.UserAnswers
 
 object HolderOfTheTransitProcedure {
 
-//  def transform(uA: UserAnswers): HolderOfTheTransitProcedureType14 =
-//    domain.holderOfTransit match {
-//      case HolderOfTransitDomain.HolderOfTransitEori(eori, name, country, address, additionalContact) =>
-//        holderOfTheTransitProcedure(eori.map(
-//                                      x => x.value
-//                                    ),
-//                                    Some(name),
-//                                    country,
-//                                    address,
-//                                    additionalContact
-//        )
-//      case HolderOfTransitDomain.HolderOfTransitTIR(tir, name, country, address, additionalContact) =>
-//        holderOfTheTransitProcedure(tir, Some(name), country, address, additionalContact)
-//    }
-//
-//  private def holderOfTheTransitProcedure(id: Option[String],
-//                                          name: Option[String],
-//                                          country: Country,
-//                                          address: DynamicAddress,
-//                                          additionalContact: Option[AdditionalContactDomain]
-//  ) =
-//    HolderOfTheTransitProcedureType14(
-//      identificationNumber = id,
-//      TIRHolderIdentificationNumber = None,
-//      name = name,
-//      Address = Some(AddressType17(address.numberAndStreet, address.postalCode, address.city, country.code.code)),
-//      ContactPerson = additionalContact.map(
-//        x => ContactPersonType05(x.name, x.telephoneNumber, None)
-//      )
-//    )
+  def transform(uA: UserAnswers): HolderOfTheTransitProcedureType14 = ??? // TODO custom reads
+
 }
