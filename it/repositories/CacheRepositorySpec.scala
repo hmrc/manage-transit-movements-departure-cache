@@ -17,7 +17,8 @@
 package repositories
 
 import itbase.ItSpecBase
-import models.{SortByCreatedAtDesc, SortByLRNAsc, SortByLRNDesc, UserAnswers, UserAnswersSummary}
+import models.Sort.{SortByCreatedAtAsc, SortByCreatedAtDesc, SortByLRNAsc, SortByLRNDesc}
+import models.{UserAnswers, UserAnswersSummary}
 import org.mongodb.scala.bson.{BsonDocument, BsonInt64, BsonString}
 import org.mongodb.scala.model.Filters
 import org.mongodb.scala.{Document, MongoWriteException}
@@ -394,7 +395,7 @@ class CacheRepositorySpec extends ItSpecBase {
         insert(userAnswers3).futureValue
         insert(userAnswers2).futureValue
 
-        val result = repository.getAll(userAnswers1.eoriNumber, sortBy = None).futureValue
+        val result = repository.getAll(userAnswers1.eoriNumber, sortBy = Some(SortByLRNDesc.convertParams)).futureValue
 
         result match {
           case UserAnswersSummary(_, userAnswers, _, _) =>
@@ -407,7 +408,7 @@ class CacheRepositorySpec extends ItSpecBase {
         }
 
       }
-      "return UserAnswersSummary, which is sorted by createdAt in ascending order when sortBy is createdAt.asc" ignore {
+      "return UserAnswersSummary, which is sorted by createdAt in ascending order when sortBy is createdAt.asc" in {
 
         insert(userAnswers6).futureValue
         insert(userAnswers4).futureValue
@@ -416,20 +417,20 @@ class CacheRepositorySpec extends ItSpecBase {
         insert(userAnswers3).futureValue
         insert(userAnswers2).futureValue
 
-        val result = repository.getAll(userAnswers1.eoriNumber, sortBy = Some(SortByLRNAsc.convertParams)).futureValue
+        val result = repository.getAll(userAnswers1.eoriNumber, sortBy = Some(SortByCreatedAtAsc.convertParams)).futureValue
 
         result match {
           case UserAnswersSummary(_, userAnswers, _, _) =>
-            userAnswers.head.lrn shouldBe userAnswers1.lrn
-            userAnswers(1).lrn shouldBe userAnswers2.lrn
-            userAnswers(2).lrn shouldBe userAnswers3.lrn
-            userAnswers(3).lrn shouldBe userAnswers4.lrn
-            userAnswers(4).lrn shouldBe userAnswers5.lrn
-            userAnswers(5).lrn shouldBe userAnswers6.lrn
+            userAnswers.head.lrn shouldBe userAnswers2.lrn
+            userAnswers(1).lrn shouldBe userAnswers3.lrn
+            userAnswers(2).lrn shouldBe userAnswers4.lrn
+            userAnswers(3).lrn shouldBe userAnswers1.lrn
+            userAnswers(4).lrn shouldBe userAnswers6.lrn
+            userAnswers(5).lrn shouldBe userAnswers5.lrn
         }
 
       }
-      "return UserAnswersSummary, which is sorted by createdAt in descending order when sortBy is createdAt.desc" ignore {
+      "return UserAnswersSummary, which is sorted by createdAt in descending order when sortBy is createdAt.desc" in {
 
         insert(userAnswers6).futureValue
         insert(userAnswers4).futureValue
@@ -438,16 +439,39 @@ class CacheRepositorySpec extends ItSpecBase {
         insert(userAnswers3).futureValue
         insert(userAnswers2).futureValue
 
-        val result = repository.getAll(userAnswers1.eoriNumber, sortBy = Some(SortByLRNAsc.convertParams)).futureValue
+        val result = repository.getAll(userAnswers1.eoriNumber, sortBy = Some(SortByCreatedAtDesc.convertParams)).futureValue
 
         result match {
           case UserAnswersSummary(_, userAnswers, _, _) =>
-            userAnswers.head.lrn shouldBe userAnswers1.lrn
-            userAnswers(1).lrn shouldBe userAnswers2.lrn
-            userAnswers(2).lrn shouldBe userAnswers3.lrn
+            userAnswers.head.lrn shouldBe userAnswers5.lrn
+            userAnswers(1).lrn shouldBe userAnswers6.lrn
+            userAnswers(2).lrn shouldBe userAnswers1.lrn
             userAnswers(3).lrn shouldBe userAnswers4.lrn
-            userAnswers(4).lrn shouldBe userAnswers5.lrn
-            userAnswers(5).lrn shouldBe userAnswers6.lrn
+            userAnswers(4).lrn shouldBe userAnswers3.lrn
+            userAnswers(5).lrn shouldBe userAnswers2.lrn
+        }
+
+      }
+
+      "return UserAnswersSummary, which is sorted by createdAt in descending order when sortBy is None" in {
+
+        insert(userAnswers6).futureValue
+        insert(userAnswers4).futureValue
+        insert(userAnswers5).futureValue
+        insert(userAnswers1).futureValue
+        insert(userAnswers3).futureValue
+        insert(userAnswers2).futureValue
+
+        val result = repository.getAll(userAnswers1.eoriNumber, sortBy = None).futureValue
+
+        result match {
+          case UserAnswersSummary(_, userAnswers, _, _) =>
+            userAnswers.head.lrn shouldBe userAnswers5.lrn
+            userAnswers(1).lrn shouldBe userAnswers6.lrn
+            userAnswers(2).lrn shouldBe userAnswers1.lrn
+            userAnswers(3).lrn shouldBe userAnswers4.lrn
+            userAnswers(4).lrn shouldBe userAnswers3.lrn
+            userAnswers(5).lrn shouldBe userAnswers2.lrn
         }
 
       }

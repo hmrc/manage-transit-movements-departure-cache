@@ -17,8 +17,8 @@
 package controllers
 
 import base.SpecBase
+import models.{UserAnswers, UserAnswersSummary}
 import org.mockito.ArgumentCaptor
-import models.{SortByCreatedAtDesc, UserAnswers, UserAnswersSummary}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, verify, when}
 import play.api.libs.json.{JsString, Json}
