@@ -18,7 +18,7 @@ package controllers
 
 import config.AppConfig
 import controllers.actions.AuthenticateActionProvider
-import models.UserAnswers
+import models.{Sort, UserAnswers}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -124,20 +124,21 @@ class CacheController @Inject() (
         }
   }
 
-  def getAll(lrn: Option[String] = None, limit: Option[Int] = None, skip: Option[Int] = None): Action[AnyContent] = authenticate().async {
-    implicit request =>
-      cacheRepository
-        .getAll(request.eoriNumber, lrn, limit, skip)
-        .map {
-          case result if result.userAnswers.nonEmpty => Ok(result.toHateoas())
-          case _ =>
-            logger.warn(s"No documents found for EORI: '${request.eoriNumber}'")
-            NotFound
-        }
-        .recover {
-          case e =>
-            logger.error("Failed to read user answers summary from mongo", e)
-            InternalServerError
-        }
-  }
+  def getAll(lrn: Option[String] = None, limit: Option[Int] = None, skip: Option[Int] = None, sortBy: Option[String] = None): Action[AnyContent] =
+    authenticate().async {
+      implicit request =>
+        cacheRepository
+          .getAll(request.eoriNumber, lrn, limit, skip, Sort(sortBy))
+          .map {
+            case result if result.userAnswers.nonEmpty => Ok(result.toHateoas())
+            case _ =>
+              logger.warn(s"No documents found for EORI: '${request.eoriNumber}'")
+              NotFound
+          }
+          .recover {
+            case e =>
+              logger.error("Failed to read user answers summary from mongo", e)
+              InternalServerError
+          }
+    }
 }
