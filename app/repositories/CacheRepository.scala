@@ -18,7 +18,9 @@ package repositories
 
 import com.mongodb.client.model.Filters.{regex, and => mAnd, eq => mEq}
 import config.AppConfig
-import models.{Sort, SortByCreatedAtDesc, UserAnswers, UserAnswersSummary}
+import models.Sort._
+import models.{Sort, UserAnswers, UserAnswersSummary}
+import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex, descending}
 import org.mongodb.scala.model._
 import uk.gov.hmrc.mongo.MongoComponent
@@ -93,7 +95,6 @@ class CacheRepository @Inject() (
     val skipLimit: Int   = skipIndex * returnLimit
     val lrnRegex         = lrn.map(_.replace(" ", "")).getOrElse("")
 
-    // Sort(sortBy).toBSON
     val aggregates = Seq(
       Aggregates.filter(
         mAnd(
@@ -101,7 +102,7 @@ class CacheRepository @Inject() (
           regex("lrn", lrnRegex)
         )
       ),
-      Aggregates.sort(descending("createdAt")),
+      Aggregates.sort(Sort(sortBy).toBson),
       Aggregates.skip(skipLimit),
       Aggregates.limit(returnLimit)
     )

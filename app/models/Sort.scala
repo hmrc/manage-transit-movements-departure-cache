@@ -16,50 +16,47 @@
 
 package models
 
-import models.SortByLRNAsc.{field, orderBy}
 import org.mongodb.scala.bson.conversions.Bson
-import org.mongodb.scala.model.Aggregates.sort
 import org.mongodb.scala.model.Indexes.{ascending, descending}
-import play.api.mvc.QueryStringBindable
 
-trait Sort {
+sealed trait Sort {
   val field: String
   val orderBy: String
-
-  val toBSON: Bson = orderBy match {
-    case "asc"  => ascending(field)
-    case "desc" => descending(field)
-  }
-
   val convertParams: String
+  val toBson: Bson
+
   override def toString: String = s"$field.$orderBy"
 }
 
-object SortByLRNAsc extends Sort {
-  val field: String   = "lrn"
-  val orderBy: String = "asc"
-  val convertParams   = s"$field.$orderBy"
-}
-
-object SortByLRNDesc extends Sort {
-  val field: String   = "lrn"
-  val orderBy: String = "desc"
-  val convertParams   = s"$field.$orderBy"
-}
-
-object SortByCreatedAtAsc extends Sort {
-  val field: String   = "createdAt"
-  val orderBy: String = "asc"
-  val convertParams   = s"$field.$orderBy"
-}
-
-object SortByCreatedAtDesc extends Sort {
-  val field: String   = "createdAt"
-  val orderBy: String = "desc"
-  val convertParams   = s"$field.$orderBy"
-}
-
 object Sort {
+
+  case object SortByLRNAsc extends Sort {
+    val field: String   = "lrn"
+    val orderBy: String = "asc"
+    val convertParams   = s"$field.$orderBy"
+    val toBson: Bson    = ascending(field)
+  }
+
+  case object SortByLRNDesc extends Sort {
+    val field: String   = "lrn"
+    val orderBy: String = "dsc"
+    val convertParams   = s"$field.$orderBy"
+    val toBson: Bson    = descending(field)
+  }
+
+  case object SortByCreatedAtAsc extends Sort {
+    val field: String   = "createdAt"
+    val orderBy: String = "asc"
+    val convertParams   = s"$field.$orderBy"
+    val toBson: Bson    = ascending(field)
+  }
+
+  case object SortByCreatedAtDesc extends Sort {
+    val field: String   = "createdAt"
+    val orderBy: String = "dsc"
+    val convertParams   = s"$field.$orderBy"
+    val toBson: Bson    = descending(field)
+  }
 
   def apply(sortParams: Option[String]): Sort = sortParams match {
     case Some(SortByLRNAsc.convertParams)       => SortByLRNAsc
