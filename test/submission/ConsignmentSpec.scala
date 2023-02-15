@@ -182,7 +182,30 @@ class ConsignmentSpec extends SpecBase {
             |          "supplyChainActorType" : "warehouseKeeper",
             |          "identificationNumber" : "sca4"
             |        }
-            |      ]
+            |      ],
+            |      "equipmentsAndCharges" : {
+            |        "equipments" : [
+            |          {
+            |            "containerIdentificationNumber" : "container id 1",
+            |            "seals" : [
+            |              {
+            |                "identificationNumber" : "seal 1"
+            |              },
+            |              {
+            |                "identificationNumber" : "seal 2"
+            |              }
+            |            ],
+            |            "itemNumbers" : [
+            |              {
+            |                "itemNumber" : "1"
+            |              },
+            |              {
+            |                "itemNumber" : "2"
+            |              }
+            |            ]
+            |          }
+            |        ]
+            |      }
             |    }
             |  },
             |  "tasks" : {},
@@ -281,6 +304,34 @@ class ConsignmentSpec extends SpecBase {
             sequenceNumber = "3",
             role = "WH",
             identificationNumber = "sca4"
+          )
+        )
+
+        converted.TransportEquipment shouldBe Seq(
+          TransportEquipmentType06(
+            sequenceNumber = "0",
+            containerIdentificationNumber = Some("container id 1"),
+            numberOfSeals = 2,
+            Seal = Seq(
+              SealType05(
+                sequenceNumber = "0",
+                identifier = "seal 1"
+              ),
+              SealType05(
+                sequenceNumber = "1",
+                identifier = "seal 2"
+              )
+            ),
+            GoodsReference = Seq(
+              GoodsReferenceType02(
+                sequenceNumber = "0",
+                declarationGoodsItemNumber = 1
+              ),
+              GoodsReferenceType02(
+                sequenceNumber = "1",
+                declarationGoodsItemNumber = 2
+              )
+            )
           )
         )
 

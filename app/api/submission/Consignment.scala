@@ -40,10 +40,11 @@ object consignmentType20 {
       (consignmentPath \ "consignor").readNullable[ConsignorType07](consignorType07.reads) and
       (consignmentPath \ "consignee").readNullable[ConsigneeType05](consigneeType05.reads) and
       (transportDetailsPath \ "supplyChainActors").readArray[AdditionalSupplyChainActorType](additionalSupplyChainActorType.reads) and
+      equipmentsPath.readArray[TransportEquipmentType06](transportEquipmentType06.reads) and
+      (routeDetailsPath \ "locationOfGoods").readNullable[LocationOfGoodsType05](locationOfGoodsType05.reads) and
       (routeDetailsPath \ "routing" \ "countriesOfRouting").readArray[CountryOfRoutingOfConsignmentType01](countryOfRoutingOfConsignmentType01.reads) and
       (routeDetailsPath \ "loading").readNullable[PlaceOfLoadingType03](placeOfLoadingType03.reads) and
-      (routeDetailsPath \ "unloading").readNullable[PlaceOfUnloadingType01](placeOfUnloadingType01.reads) and
-      (routeDetailsPath \ "locationOfGoods").readNullable[LocationOfGoodsType05](locationOfGoodsType05.reads)
+      (routeDetailsPath \ "unloading").readNullable[PlaceOfUnloadingType01](placeOfUnloadingType01.reads)
   ).apply {
     (
       countryOfDispatch,
@@ -56,10 +57,11 @@ object consignmentType20 {
       Consignor,
       Consignee,
       AdditionalSupplyChainActor,
+      TransportEquipment,
+      LocationOfGoods,
       CountryOfRoutingOfConsignment,
       PlaceOfLoading,
-      PlaceOfUnloading,
-      LocationOfGoods
+      PlaceOfUnloading
     ) =>
       ConsignmentType20(
         countryOfDispatch = countryOfDispatch,
@@ -73,7 +75,7 @@ object consignmentType20 {
         Consignor = Consignor,
         Consignee = Consignee,
         AdditionalSupplyChainActor = AdditionalSupplyChainActor,
-        TransportEquipment = Nil, // TODO
+        TransportEquipment = TransportEquipment,
         LocationOfGoods = LocationOfGoods,
         DepartureTransportMeans = Nil, // TODO
         CountryOfRoutingOfConsignment = CountryOfRoutingOfConsignment,
@@ -151,7 +153,41 @@ object additionalSupplyChainActorType {
   }
 }
 
-object transportEquipmentType06 {}
+object transportEquipmentType06 {
+
+  def apply(containerIdentificationNumber: Option[String], Seal: Seq[SealType05], GoodsReference: Seq[GoodsReferenceType02])(
+    sequenceNumber: Int
+  ): TransportEquipmentType06 =
+    TransportEquipmentType06(sequenceNumber.toString, containerIdentificationNumber, Seal.length, Seal, GoodsReference)
+
+  def reads(index: Int): Reads[TransportEquipmentType06] = (
+    (__ \ "containerIdentificationNumber").readNullable[String] and
+      (__ \ "seals").readArray[SealType05](sealType05.reads) and
+      (__ \ "itemNumbers").readArray[GoodsReferenceType02](goodsReferenceType02.reads)
+  ).tupled.map((transportEquipmentType06.apply _).tupled).map(_(index))
+}
+
+object sealType05 {
+
+  def apply(identifier: String)(
+    sequenceNumber: Int
+  ): SealType05 =
+    SealType05(sequenceNumber.toString, identifier)
+
+  def reads(index: Int): Reads[SealType05] =
+    (__ \ "identificationNumber").read[String].map(sealType05(_)(index))
+}
+
+object goodsReferenceType02 {
+
+  def apply(declarationGoodsItemNumber: String)(
+    sequenceNumber: Int
+  ): GoodsReferenceType02 =
+    GoodsReferenceType02(sequenceNumber.toString, BigInt(declarationGoodsItemNumber))
+
+  def reads(index: Int): Reads[GoodsReferenceType02] =
+    (__ \ "itemNumber").read[String].map(goodsReferenceType02(_)(index))
+}
 
 object locationOfGoodsType05 {
 
