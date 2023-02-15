@@ -228,7 +228,8 @@ class ConsignmentSpec extends SpecBase {
             |              }
             |            ]
             |          }
-            |        ]
+            |        ],
+            |        "paymentMethod" : "cash"
             |      }
             |    }
             |  },
@@ -444,6 +445,10 @@ class ConsignmentSpec extends SpecBase {
             Some("Unloading country"),
             Some("Unloading location")
           )
+        )
+
+        converted.TransportCharges shouldBe Some(
+          TransportChargesType("A")
         )
       }
     }

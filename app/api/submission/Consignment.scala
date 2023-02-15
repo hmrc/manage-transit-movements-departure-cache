@@ -19,7 +19,7 @@ package api.submission
 import generated._
 import models.UserAnswers
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{Reads, __}
+import play.api.libs.json.{__, Reads}
 
 object Consignment {
 
@@ -46,7 +46,8 @@ object consignmentType20 {
       (routeDetailsPath \ "routing" \ "countriesOfRouting").readArray[CountryOfRoutingOfConsignmentType01](countryOfRoutingOfConsignmentType01.reads) and
       transportDetailsPath.readWithDefault[Seq[ActiveBorderTransportMeansType02]](Nil)(activeBorderTransportMeansReads) and
       (routeDetailsPath \ "loading").readNullable[PlaceOfLoadingType03](placeOfLoadingType03.reads) and
-      (routeDetailsPath \ "unloading").readNullable[PlaceOfUnloadingType01](placeOfUnloadingType01.reads)
+      (routeDetailsPath \ "unloading").readNullable[PlaceOfUnloadingType01](placeOfUnloadingType01.reads) and
+      (equipmentsAndChargesPath \ "paymentMethod").readNullable[TransportChargesType](transportChargesType.reads)
   ).apply {
     (
       countryOfDispatch,
@@ -65,7 +66,8 @@ object consignmentType20 {
       CountryOfRoutingOfConsignment,
       ActiveBorderTransportMeans,
       PlaceOfLoading,
-      PlaceOfUnloading
+      PlaceOfUnloading,
+      TransportCharges
     ) =>
       ConsignmentType20(
         countryOfDispatch = countryOfDispatch,
@@ -91,7 +93,7 @@ object consignmentType20 {
         TransportDocument = Nil, // TODO
         AdditionalReference = Nil, // TODO
         AdditionalInformation = Nil, // TODO
-        TransportCharges = None, // TODO
+        TransportCharges = TransportCharges,
         HouseConsignment = Nil // TODO
       )
   }
@@ -387,6 +389,24 @@ object additionalReferenceType06 {}
 
 object additionalInformationType03 {}
 
-object transportChargesType {}
+object transportChargesType {
+
+  def apply(methodOfPayment: String): TransportChargesType =
+    TransportChargesType(convertMethodOfPayment(methodOfPayment))
+
+  implicit val reads: Reads[TransportChargesType] =
+    __.read[String].map(transportChargesType(_))
+
+  private val convertMethodOfPayment: String => String = {
+    case "cash"                     => "A"
+    case "creditCard"               => "B"
+    case "cheque"                   => "C"
+    case "electronicCreditTransfer" => "D"
+    case "accountHolderWithCarrier" => "H"
+    case "notPrePaid"               => "Y"
+    case "other"                    => "Z"
+    case _                          => throw new Exception("Invalid method of payment value")
+  }
+}
 
 object houseConsignmentType10 {}
