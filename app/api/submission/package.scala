@@ -100,4 +100,8 @@ package object submission {
   implicit def stringToXMLGregorianCalendar(date: String): XMLGregorianCalendar =
     XMLCalendar(date.replace("Z", ""))
 
+  implicit def successfulReads[T](value: T): Reads[T] = Reads {
+    _ => JsSuccess(value)
+  }
+
 }

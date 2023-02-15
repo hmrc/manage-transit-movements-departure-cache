@@ -19,7 +19,7 @@ package api.submission
 import generated._
 import models.UserAnswers
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{__, Reads}
+import play.api.libs.json.{Reads, __}
 
 object Consignment {
 
@@ -44,6 +44,7 @@ object consignmentType20 {
       (routeDetailsPath \ "locationOfGoods").readNullable[LocationOfGoodsType05](locationOfGoodsType05.reads) and
       (transportDetailsPath \ "transportMeansDeparture").read[DepartureTransportMeansType03](departureTransportMeansType03.reads) and
       (routeDetailsPath \ "routing" \ "countriesOfRouting").readArray[CountryOfRoutingOfConsignmentType01](countryOfRoutingOfConsignmentType01.reads) and
+      transportDetailsPath.readWithDefault[Seq[ActiveBorderTransportMeansType02]](Nil)(activeBorderTransportMeansReads) and
       (routeDetailsPath \ "loading").readNullable[PlaceOfLoadingType03](placeOfLoadingType03.reads) and
       (routeDetailsPath \ "unloading").readNullable[PlaceOfUnloadingType01](placeOfUnloadingType01.reads)
   ).apply {
@@ -62,6 +63,7 @@ object consignmentType20 {
       LocationOfGoods,
       DepartureTransportMeans,
       CountryOfRoutingOfConsignment,
+      ActiveBorderTransportMeans,
       PlaceOfLoading,
       PlaceOfUnloading
     ) =>
@@ -81,7 +83,7 @@ object consignmentType20 {
         LocationOfGoods = LocationOfGoods,
         DepartureTransportMeans = Seq(DepartureTransportMeans),
         CountryOfRoutingOfConsignment = CountryOfRoutingOfConsignment,
-        ActiveBorderTransportMeans = Nil, // TODO
+        ActiveBorderTransportMeans = ActiveBorderTransportMeans,
         PlaceOfLoading = PlaceOfLoading,
         PlaceOfUnloading = PlaceOfUnloading,
         PreviousDocument = Nil, // TODO
@@ -93,6 +95,12 @@ object consignmentType20 {
         HouseConsignment = Nil // TODO
       )
   }
+
+  def activeBorderTransportMeansReads: Reads[Seq[ActiveBorderTransportMeansType02]] =
+    (__ \ "borderModeOfTransport").read[String] flatMap {
+      modeOfTransportAtTheBorder =>
+        (__ \ "transportMeansActiveList").readArray[ActiveBorderTransportMeansType02](activeBorderTransportMeansType02.reads(_, modeOfTransportAtTheBorder))
+    }
 
   private val convertModeOfTransport: Option[String] => Option[String] = _ map {
     case "maritime" => "1"
@@ -273,18 +281,9 @@ object economicOperatorType03 {
     __.read[String].map(EconomicOperatorType03)
 }
 
-object departureTransportMeansType03 {
+object transportMeans {
 
-  def apply(typeOfIdentification: Option[String], identificationNumber: Option[String], nationality: Option[String]): DepartureTransportMeansType03 =
-    DepartureTransportMeansType03("0", convertTypeOfIdentification(typeOfIdentification), identificationNumber, nationality)
-
-  implicit val reads: Reads[DepartureTransportMeansType03] = (
-    (__ \ "identification").readNullable[String] and
-      (__ \ "meansIdentificationNumber").readNullable[String] and
-      (__ \ "vehicleCountry" \ "code").readNullable[String]
-  )(departureTransportMeansType03.apply _)
-
-  private val convertTypeOfIdentification: Option[String] => Option[String] = _ map {
+  val convertTypeOfIdentification: Option[String] => Option[String] = _ map {
     case "imoShipIdNumber"        => "10"
     case "seaGoingVessel"         => "11"
     case "wagonNumber"            => "20"
@@ -300,6 +299,19 @@ object departureTransportMeansType03 {
   }
 }
 
+object departureTransportMeansType03 {
+  import transportMeans._
+
+  def apply(typeOfIdentification: Option[String], identificationNumber: Option[String], nationality: Option[String]): DepartureTransportMeansType03 =
+    DepartureTransportMeansType03("0", convertTypeOfIdentification(typeOfIdentification), identificationNumber, nationality)
+
+  implicit val reads: Reads[DepartureTransportMeansType03] = (
+    (__ \ "identification").readNullable[String] and
+      (__ \ "meansIdentificationNumber").readNullable[String] and
+      (__ \ "vehicleCountry" \ "code").readNullable[String]
+  )(departureTransportMeansType03.apply _)
+}
+
 object countryOfRoutingOfConsignmentType01 {
 
   def apply(country: String)(
@@ -311,7 +323,41 @@ object countryOfRoutingOfConsignmentType01 {
     (__ \ "countryOfRouting" \ "code").read[String].map(countryOfRoutingOfConsignmentType01(_)(index))
 }
 
-object activeBorderTransportMeansType02 {}
+object activeBorderTransportMeansType02 {
+  import transportMeans._
+
+  def apply(
+    customsOfficeAtBorderReferenceNumber: Option[String],
+    typeOfIdentification: Option[String],
+    identificationNumber: Option[String],
+    nationality: Option[String],
+    conveyanceReferenceNumber: Option[String]
+  )(
+    sequenceNumber: Int
+  ): ActiveBorderTransportMeansType02 =
+    ActiveBorderTransportMeansType02(
+      sequenceNumber = sequenceNumber.toString,
+      customsOfficeAtBorderReferenceNumber = customsOfficeAtBorderReferenceNumber,
+      typeOfIdentification = convertTypeOfIdentification(typeOfIdentification),
+      identificationNumber = identificationNumber,
+      nationality = nationality,
+      conveyanceReferenceNumber = conveyanceReferenceNumber
+    )
+
+  def reads(index: Int, borderModeOfTransport: String): Reads[ActiveBorderTransportMeansType02] = (
+    (__ \ "customsOfficeActiveBorder" \ "id").readNullable[String] and
+      __.read[Option[String]](typeOfIdentificationReads(borderModeOfTransport)) and
+      (__ \ "identificationNumber").readNullable[String] and
+      (__ \ "nationality" \ "code").readNullable[String] and
+      (__ \ "conveyanceReferenceNumber").readNullable[String]
+  ).tupled.map((activeBorderTransportMeansType02.apply _).tupled).map(_(index))
+
+  private def typeOfIdentificationReads(borderModeOfTransport: String): Reads[Option[String]] = borderModeOfTransport match {
+    case "rail" => Some("trainNumber")
+    case "road" => Some("regNumberRoadVehicle")
+    case _      => (__ \ "identification").readNullable[String]
+  }
+}
 
 object placeOfLoadingType03 {
 

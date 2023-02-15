@@ -156,7 +156,7 @@ class ConsignmentSpec extends SpecBase {
             |        "containerIndicator" : true
             |      },
             |      "inlandMode" : "maritime",
-            |      "borderModeOfTransport" : "rail",
+            |      "borderModeOfTransport" : "maritime",
             |      "carrierDetails" : {
             |        "identificationNumber" : "carrier1",
             |        "addContactYesNo" : true,
@@ -173,6 +173,22 @@ class ConsignmentSpec extends SpecBase {
             |          "desc" : "France"
             |        }
             |      },
+            |      "transportMeansActiveList" : [
+            |        {
+            |          "identification" : "seaGoingVessel",
+            |          "identificationNumber" : "active id number",
+            |          "customsOfficeActiveBorder" : {
+            |            "id" : "IT018101",
+            |            "name" : "Aeroporto Bari - Palese",
+            |            "phoneNumber" : "0039 0805316196"
+            |          },
+            |          "nationality" : {
+            |            "code" : "ES",
+            |            "desc" : "Spain"
+            |          },
+            |          "conveyanceReferenceNumber" : "conveyance ref number"
+            |        }
+            |      ],
             |      "supplyChainActors" : [
             |        {
             |          "supplyChainActorType" : "consolidator",
@@ -238,7 +254,7 @@ class ConsignmentSpec extends SpecBase {
         converted.countryOfDestination shouldBe Some("IT")
         converted.containerIndicator shouldBe Some(Number1)
         converted.inlandModeOfTransport shouldBe Some("1")
-        converted.modeOfTransportAtTheBorder shouldBe Some("2")
+        converted.modeOfTransportAtTheBorder shouldBe Some("1")
         converted.grossMass shouldBe 0
         converted.referenceNumberUCR shouldBe Some("ucr123")
 
@@ -392,6 +408,17 @@ class ConsignmentSpec extends SpecBase {
           )
         )
 
+        converted.ActiveBorderTransportMeans shouldBe Seq(
+          ActiveBorderTransportMeansType02(
+            sequenceNumber = "0",
+            customsOfficeAtBorderReferenceNumber = Some("IT018101"),
+            typeOfIdentification = Some("11"),
+            identificationNumber = Some("active id number"),
+            nationality = Some("ES"),
+            conveyanceReferenceNumber = Some("conveyance ref number")
+          )
+        )
+
         converted.CountryOfRoutingOfConsignment shouldBe Seq(
           CountryOfRoutingOfConsignmentType01(
             sequenceNumber = "0",
@@ -418,6 +445,141 @@ class ConsignmentSpec extends SpecBase {
             Some("Unloading location")
           )
         )
+      }
+    }
+
+    "activeBorderTransportMeansType02 reads is called" when {
+
+      "rail (2) border mode of transport" must {
+        "read type of identification as trainNumber (21)" in {
+          val json: JsValue = Json.parse(s"""
+              |{
+              |  "_id" : "$uuid",
+              |  "lrn" : "$lrn",
+              |  "eoriNumber" : "$eoriNumber",
+              |  "data" : {
+              |    "transportDetails" : {
+              |      "borderModeOfTransport" : "rail",
+              |      "transportMeansDeparture" : {
+              |        "identification" : "wagonNumber",
+              |        "meansIdentificationNumber" : "means id number",
+              |        "vehicleCountry" : {
+              |          "code" : "FR",
+              |          "desc" : "France"
+              |        }
+              |      },
+              |      "transportMeansActiveList" : [
+              |        {
+              |          "identificationNumber" : "active id number",
+              |          "customsOfficeActiveBorder" : {
+              |            "id" : "IT018101",
+              |            "name" : "Aeroporto Bari - Palese",
+              |            "phoneNumber" : "0039 0805316196"
+              |          },
+              |          "nationality" : {
+              |            "code" : "ES",
+              |            "desc" : "Spain"
+              |          },
+              |          "conveyanceReferenceNumber" : "conveyance ref number"
+              |        }
+              |      ]
+              |    }
+              |  },
+              |  "tasks" : {},
+              |  "createdAt" : {
+              |    "$$date" : {
+              |      "$$numberLong" : "1662393524188"
+              |    }
+              |  },
+              |  "lastUpdated" : {
+              |    "$$date" : {
+              |      "$$numberLong" : "1662546803472"
+              |    }
+              |  }
+              |}
+              |""".stripMargin)
+
+          val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+
+          val result: Seq[ActiveBorderTransportMeansType02] = Consignment.transform(uA).ActiveBorderTransportMeans
+
+          result shouldBe Seq(
+            ActiveBorderTransportMeansType02(
+              sequenceNumber = "0",
+              customsOfficeAtBorderReferenceNumber = Some("IT018101"),
+              typeOfIdentification = Some("21"),
+              identificationNumber = Some("active id number"),
+              nationality = Some("ES"),
+              conveyanceReferenceNumber = Some("conveyance ref number")
+            )
+          )
+        }
+      }
+
+      "road (3) border mode of transport" must {
+        "read type of identification as regNumberRoadVehicle (30)" in {
+          val json: JsValue = Json.parse(s"""
+              |{
+              |  "_id" : "$uuid",
+              |  "lrn" : "$lrn",
+              |  "eoriNumber" : "$eoriNumber",
+              |  "data" : {
+              |    "transportDetails" : {
+              |      "borderModeOfTransport" : "road",
+              |      "transportMeansDeparture" : {
+              |        "identification" : "regNumberRoadTrailer",
+              |        "meansIdentificationNumber" : "means id number",
+              |        "vehicleCountry" : {
+              |          "code" : "FR",
+              |          "desc" : "France"
+              |        }
+              |      },
+              |      "transportMeansActiveList" : [
+              |        {
+              |          "identificationNumber" : "active id number",
+              |          "customsOfficeActiveBorder" : {
+              |            "id" : "IT018101",
+              |            "name" : "Aeroporto Bari - Palese",
+              |            "phoneNumber" : "0039 0805316196"
+              |          },
+              |          "nationality" : {
+              |            "code" : "ES",
+              |            "desc" : "Spain"
+              |          },
+              |          "conveyanceReferenceNumber" : "conveyance ref number"
+              |        }
+              |      ]
+              |    }
+              |  },
+              |  "tasks" : {},
+              |  "createdAt" : {
+              |    "$$date" : {
+              |      "$$numberLong" : "1662393524188"
+              |    }
+              |  },
+              |  "lastUpdated" : {
+              |    "$$date" : {
+              |      "$$numberLong" : "1662546803472"
+              |    }
+              |  }
+              |}
+              |""".stripMargin)
+
+          val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+
+          val result: Seq[ActiveBorderTransportMeansType02] = Consignment.transform(uA).ActiveBorderTransportMeans
+
+          result shouldBe Seq(
+            ActiveBorderTransportMeansType02(
+              sequenceNumber = "0",
+              customsOfficeAtBorderReferenceNumber = Some("IT018101"),
+              typeOfIdentification = Some("30"),
+              identificationNumber = Some("active id number"),
+              nationality = Some("ES"),
+              conveyanceReferenceNumber = Some("conveyance ref number")
+            )
+          )
+        }
       }
     }
   }
