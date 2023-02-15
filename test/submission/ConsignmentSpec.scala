@@ -486,6 +486,9 @@ class ConsignmentSpec extends SpecBase {
               |            "desc" : "Spain"
               |          },
               |          "conveyanceReferenceNumber" : "conveyance ref number"
+              |        },
+              |        {
+              |          "identification" : "europeanVesselIdNumber"
               |        }
               |      ]
               |    }
@@ -516,6 +519,14 @@ class ConsignmentSpec extends SpecBase {
               identificationNumber = Some("active id number"),
               nationality = Some("ES"),
               conveyanceReferenceNumber = Some("conveyance ref number")
+            ),
+            ActiveBorderTransportMeansType02(
+              sequenceNumber = "1",
+              customsOfficeAtBorderReferenceNumber = None,
+              typeOfIdentification = Some("80"),
+              identificationNumber = None,
+              nationality = None,
+              conveyanceReferenceNumber = None
             )
           )
         }
@@ -552,6 +563,9 @@ class ConsignmentSpec extends SpecBase {
               |            "desc" : "Spain"
               |          },
               |          "conveyanceReferenceNumber" : "conveyance ref number"
+              |        },
+              |        {
+              |          "identification" : "iataFlightNumber"
               |        }
               |      ]
               |    }
@@ -582,6 +596,14 @@ class ConsignmentSpec extends SpecBase {
               identificationNumber = Some("active id number"),
               nationality = Some("ES"),
               conveyanceReferenceNumber = Some("conveyance ref number")
+            ),
+            ActiveBorderTransportMeansType02(
+              sequenceNumber = "1",
+              customsOfficeAtBorderReferenceNumber = None,
+              typeOfIdentification = Some("40"),
+              identificationNumber = None,
+              nationality = None,
+              conveyanceReferenceNumber = None
             )
           )
         }

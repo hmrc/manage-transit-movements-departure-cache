@@ -348,17 +348,18 @@ object activeBorderTransportMeansType02 {
 
   def reads(index: Int, borderModeOfTransport: String): Reads[ActiveBorderTransportMeansType02] = (
     (__ \ "customsOfficeActiveBorder" \ "id").readNullable[String] and
-      __.read[Option[String]](typeOfIdentificationReads(borderModeOfTransport)) and
+      __.read[Option[String]](typeOfIdentificationReads(index, borderModeOfTransport)) and
       (__ \ "identificationNumber").readNullable[String] and
       (__ \ "nationality" \ "code").readNullable[String] and
       (__ \ "conveyanceReferenceNumber").readNullable[String]
   ).tupled.map((activeBorderTransportMeansType02.apply _).tupled).map(_(index))
 
-  private def typeOfIdentificationReads(borderModeOfTransport: String): Reads[Option[String]] = borderModeOfTransport match {
-    case "rail" => Some("trainNumber")
-    case "road" => Some("regNumberRoadVehicle")
-    case _      => (__ \ "identification").readNullable[String]
-  }
+  private def typeOfIdentificationReads(index: Int, borderModeOfTransport: String): Reads[Option[String]] =
+    (index, borderModeOfTransport) match {
+      case (0, "rail") => Some("trainNumber")
+      case (0, "road") => Some("regNumberRoadVehicle")
+      case _           => (__ \ "identification").readNullable[String]
+    }
 }
 
 object placeOfLoadingType03 {
