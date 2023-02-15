@@ -75,5 +75,5 @@ object customsOfficeOfExitForTransitDeclaredType02 {
     CustomsOfficeOfExitForTransitDeclaredType02(sequenceNumber.toString, referenceNumber)
 
   def reads(index: Int): Reads[CustomsOfficeOfExitForTransitDeclaredType02] =
-    (__ \ "officeOfExit" \ "id").read[String].map(customsOfficeOfExitForTransitDeclaredType02.apply(_)(index))
+    (__ \ "officeOfExit" \ "id").read[String].map(customsOfficeOfExitForTransitDeclaredType02(_)(index))
 }

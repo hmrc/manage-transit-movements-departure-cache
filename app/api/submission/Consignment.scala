@@ -40,8 +40,10 @@ object consignmentType20 {
       (consignmentPath \ "consignor").readNullable[ConsignorType07](consignorType07.reads) and
       (consignmentPath \ "consignee").readNullable[ConsigneeType05](consigneeType05.reads) and
       (transportDetailsPath \ "supplyChainActors").readArray[AdditionalSupplyChainActorType](additionalSupplyChainActorType.reads) and
+      (routeDetailsPath \ "routing" \ "countriesOfRouting").readArray[CountryOfRoutingOfConsignmentType01](countryOfRoutingOfConsignmentType01.reads) and
       (routeDetailsPath \ "loading").readNullable[PlaceOfLoadingType03](placeOfLoadingType03.reads) and
-      (routeDetailsPath \ "unloading").readNullable[PlaceOfUnloadingType01](placeOfUnloadingType01.reads)
+      (routeDetailsPath \ "unloading").readNullable[PlaceOfUnloadingType01](placeOfUnloadingType01.reads) and
+      (routeDetailsPath \ "locationOfGoods").readNullable[LocationOfGoodsType05](locationOfGoodsType05.reads)
   ).apply {
     (
       countryOfDispatch,
@@ -54,8 +56,10 @@ object consignmentType20 {
       Consignor,
       Consignee,
       AdditionalSupplyChainActor,
+      CountryOfRoutingOfConsignment,
       PlaceOfLoading,
-      PlaceOfUnloading
+      PlaceOfUnloading,
+      LocationOfGoods
     ) =>
       ConsignmentType20(
         countryOfDispatch = countryOfDispatch,
@@ -70,9 +74,9 @@ object consignmentType20 {
         Consignee = Consignee,
         AdditionalSupplyChainActor = AdditionalSupplyChainActor,
         TransportEquipment = Nil, // TODO
-        LocationOfGoods = None, // TODO
+        LocationOfGoods = LocationOfGoods,
         DepartureTransportMeans = Nil, // TODO
-        CountryOfRoutingOfConsignment = Nil, // TODO
+        CountryOfRoutingOfConsignment = CountryOfRoutingOfConsignment,
         ActiveBorderTransportMeans = Nil, // TODO
         PlaceOfLoading = PlaceOfLoading,
         PlaceOfUnloading = PlaceOfUnloading,
@@ -149,11 +153,100 @@ object additionalSupplyChainActorType {
 
 object transportEquipmentType06 {}
 
-object locationOfGoodsType05 {}
+object locationOfGoodsType05 {
+
+  def apply(
+    typeOfLocation: String,
+    qualifierOfIdentification: String,
+    authorisationNumber: Option[String],
+    additionalIdentifier: Option[String],
+    UNLocode: Option[String],
+    CustomsOffice: Option[generated.CustomsOfficeType02],
+    GNSS: Option[generated.GNSSType],
+    EconomicOperator: Option[generated.EconomicOperatorType03],
+    Address: Option[generated.AddressType14],
+    PostcodeAddress: Option[generated.PostcodeAddressType02],
+    ContactPerson: Option[generated.ContactPersonType06]
+  ): LocationOfGoodsType05 = LocationOfGoodsType05(
+    typeOfLocation = convertTypeOfLocation(typeOfLocation),
+    qualifierOfIdentification = convertQualifierOfIdentification(qualifierOfIdentification),
+    authorisationNumber = authorisationNumber,
+    additionalIdentifier = additionalIdentifier,
+    UNLocode = UNLocode,
+    CustomsOffice = CustomsOffice,
+    GNSS = GNSS,
+    EconomicOperator = EconomicOperator,
+    Address = Address,
+    PostcodeAddress = PostcodeAddress,
+    ContactPerson = ContactPerson
+  )
+
+  implicit val reads: Reads[LocationOfGoodsType05] = (
+    (__ \ "typeOfLocation").read[String] and
+      (__ \ "qualifierOfIdentification").read[String] and
+      (__ \ "identifier" \ "authorisationNumber").readNullable[String] and
+      (__ \ "identifier" \ "additionalIdentifier").readNullable[String] and
+      (__ \ "identifier" \ "unLocode").readNullable[String] and
+      (__ \ "identifier" \ "customsOffice").readNullable[CustomsOfficeType02](customsOfficeType02.reads) and
+      (__ \ "identifier" \ "coordinates").readNullable[GNSSType](gnssType.reads) and
+      (__ \ "identifier" \ "eori").readNullable[EconomicOperatorType03](economicOperatorType03.reads) and
+      (__ \ "identifier").read[Option[AddressType14]](addressType14.optionalReads) and
+      (__ \ "identifier" \ "postalCode").readNullable[PostcodeAddressType02](postcodeAddressType02.reads) and
+      (__ \ "contact").readNullable[ContactPersonType06](contactPersonType06.reads)
+  )(locationOfGoodsType05.apply _)
+
+  private val convertTypeOfLocation: String => String = {
+    case "designatedLocation" => "A"
+    case "authorisedPlace"    => "B"
+    case "approvedPlace"      => "C"
+    case "other"              => "D"
+    case _                    => throw new Exception("Invalid type of location value")
+  }
+
+  private val convertQualifierOfIdentification: String => String = {
+    case "postalCode"              => "T"
+    case "unlocode"                => "U"
+    case "customsOfficeIdentifier" => "V"
+    case "coordinates"             => "W"
+    case "eoriNumber"              => "X"
+    case "authorisationNumber"     => "Y"
+    case "address"                 => "Z"
+    case _                         => throw new Exception("Invalid qualifier of identification value")
+  }
+}
+
+object customsOfficeType02 {
+
+  implicit val reads: Reads[CustomsOfficeType02] =
+    (__ \ "id").read[String].map(CustomsOfficeType02)
+}
+
+object gnssType {
+
+  implicit val reads: Reads[GNSSType] = (
+    (__ \ "latitude").read[String] and
+      (__ \ "longitude").read[String]
+  )(GNSSType.apply _)
+}
+
+object economicOperatorType03 {
+
+  implicit val reads: Reads[EconomicOperatorType03] =
+    __.read[String].map(EconomicOperatorType03)
+}
 
 object departureTransportMeansType03 {}
 
-object countryOfRoutingOfConsignmentType01 {}
+object countryOfRoutingOfConsignmentType01 {
+
+  def apply(country: String)(
+    sequenceNumber: Int
+  ): CountryOfRoutingOfConsignmentType01 =
+    CountryOfRoutingOfConsignmentType01(sequenceNumber.toString, country)
+
+  def reads(index: Int): Reads[CountryOfRoutingOfConsignmentType01] =
+    (__ \ "countryOfRouting" \ "code").read[String].map(countryOfRoutingOfConsignmentType01(_)(index))
+}
 
 object activeBorderTransportMeansType02 {}
 

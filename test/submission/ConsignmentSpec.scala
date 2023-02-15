@@ -75,6 +75,60 @@ class ConsignmentSpec extends SpecBase {
             |        "countryOfDestination" : {
             |          "code" : "IT",
             |          "description" : "Italy"
+            |        },
+            |        "countriesOfRouting" : [
+            |          {
+            |            "countryOfRouting" : {
+            |              "code" : "AD",
+            |              "description" : "Andorra"
+            |            }
+            |          },
+            |          {
+            |            "countryOfRouting" : {
+            |              "code" : "AR",
+            |              "description" : "Argentina"
+            |            }
+            |          }
+            |        ]
+            |      },
+            |      "locationOfGoods" : {
+            |        "typeOfLocation" : "designatedLocation",
+            |        "qualifierOfIdentification" : "postalCode",
+            |        "identifier" : {
+            |          "authorisationNumber" : "authorisation number",
+            |          "additionalIdentifier" : "additional identifier",
+            |          "unLocode" : "UNLOCODE",
+            |          "customsOffice" : {
+            |            "id" : "XI000142",
+            |            "name" : "Belfast EPU",
+            |            "phoneNumber" : "+44 (0)02896 931537"
+            |          },
+            |          "coordinates" : {
+            |            "latitude" : "lat",
+            |            "longitude" : "lon"
+            |          },
+            |          "eori" : "GB12345",
+            |          "country" : {
+            |            "code" : "ES",
+            |            "description" : "Spain"
+            |          },
+            |          "address" : {
+            |            "numberAndStreet" : "21 Test Camino",
+            |            "city" : "Madrid",
+            |            "postalCode" : "ES1 1SE"
+            |          },
+            |          "postalCode" : {
+            |            "streetNumber" : "21",
+            |            "postalCode" : "DE1 1DE",
+            |            "country" : {
+            |              "code" : "DE",
+            |              "description" : "Germany"
+            |            }
+            |          }
+            |        },
+            |        "contact" : {
+            |          "name" : "Location of goods Contact",
+            |          "telephoneNumber" : "+44 202 157 0192"
             |        }
             |      },
             |      "loading" : {
@@ -227,6 +281,57 @@ class ConsignmentSpec extends SpecBase {
             sequenceNumber = "3",
             role = "WH",
             identificationNumber = "sca4"
+          )
+        )
+
+        converted.LocationOfGoods shouldBe Some(
+          LocationOfGoodsType05(
+            typeOfLocation = "A",
+            qualifierOfIdentification = "T",
+            authorisationNumber = Some("authorisation number"),
+            additionalIdentifier = Some("additional identifier"),
+            UNLocode = Some("UNLOCODE"),
+            CustomsOffice = Some(CustomsOfficeType02(referenceNumber = "XI000142")),
+            GNSS = Some(
+              GNSSType(
+                latitude = "lat",
+                longitude = "lon"
+              )
+            ),
+            EconomicOperator = Some(EconomicOperatorType03(identificationNumber = "GB12345")),
+            Address = Some(
+              AddressType14(
+                streetAndNumber = "21 Test Camino",
+                postcode = Some("ES1 1SE"),
+                city = "Madrid",
+                country = "ES"
+              )
+            ),
+            PostcodeAddress = Some(
+              PostcodeAddressType02(
+                houseNumber = Some("21"),
+                postcode = "DE1 1DE",
+                country = "DE"
+              )
+            ),
+            ContactPerson = Some(
+              ContactPersonType06(
+                name = "Location of goods Contact",
+                phoneNumber = "+44 202 157 0192",
+                eMailAddress = None
+              )
+            )
+          )
+        )
+
+        converted.CountryOfRoutingOfConsignment shouldBe Seq(
+          CountryOfRoutingOfConsignmentType01(
+            sequenceNumber = "0",
+            country = "AD"
+          ),
+          CountryOfRoutingOfConsignmentType01(
+            sequenceNumber = "1",
+            country = "AR"
           )
         )
 

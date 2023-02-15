@@ -16,7 +16,7 @@
 
 package api.submission
 
-import generated.ContactPersonType05
+import generated.{ContactPersonType05, ContactPersonType06}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{__, Reads}
 
@@ -44,4 +44,22 @@ object contactPersonType05 {
     case (Some(name), Some(phoneNumber)) => Some(ContactPersonType05(name, phoneNumber))
     case _                               => None
   }
+}
+
+object contactPersonType06 {
+
+  def apply(
+    name: String,
+    phoneNumber: String
+  ): ContactPersonType06 =
+    ContactPersonType06(
+      name = name,
+      phoneNumber = phoneNumber,
+      eMailAddress = None
+    )
+
+  implicit val reads: Reads[ContactPersonType06] = (
+    (__ \ "name").read[String] and
+      (__ \ "telephoneNumber").read[String]
+  )(contactPersonType06.apply _)
 }
