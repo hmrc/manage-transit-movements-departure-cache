@@ -33,7 +33,7 @@ object consignmentType20 {
     (preRequisitesPath \ "countryOfDispatch" \ "code").readNullable[String] and
       (routeDetailsPath \ "routing" \ "countryOfDestination" \ "code").readNullable[String] and
       (preRequisitesPath \ "containerIndicator").readNullable[Boolean] and
-      (transportDetailsPath \ "inlandMode").readNullable[String] and
+      inlandModeReads.map(Some(_)) and
       (transportDetailsPath \ "borderModeOfTransport").readNullable[String] and
       (preRequisitesPath \ "uniqueConsignmentReference").readNullable[String] and
       (transportDetailsPath \ "carrierDetails").readNullable[CarrierType04](carrierType04.reads) and
@@ -98,6 +98,7 @@ object consignmentType20 {
       )
   }
 
+  // TODO - what if borderModeOfTransport is undefined?
   def activeBorderTransportMeansReads: Reads[Seq[ActiveBorderTransportMeansType02]] =
     (__ \ "borderModeOfTransport").read[String] flatMap {
       modeOfTransportAtTheBorder =>

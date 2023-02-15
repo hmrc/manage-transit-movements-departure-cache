@@ -35,7 +35,7 @@ object transitOperationType06 {
     (preTaskListPath \ "declarationType").read[String] and
       (preTaskListPath \ "tirCarnetReference").readNullable[String] and
       (preTaskListPath \ "securityDetailsType").read[String] and
-      (traderDetailsPath \ "consignment" \ "approvedOperator").readWithDefault[Boolean](false) and
+      reducedDatasetIndicatorReads and
       (routeDetailsPath \ "routing" \ "bindingItinerary").readWithDefault[Boolean](false) and
       (transportDetailsPath \ "authorisationsAndLimit" \ "limit" \ "limitDate").readNullable[LocalDate]
   ).apply {
