@@ -18,13 +18,15 @@ package controllers
 
 import config.AppConfig
 import controllers.actions.AuthenticateActionProvider
-import models.{HateoasUserAnswersSummary, UserAnswers}
+import models.UserAnswers
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
+import java.time.{Clock, LocalDateTime}
+import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -34,7 +36,7 @@ class CacheController @Inject() (
   authenticate: AuthenticateActionProvider,
   cacheRepository: CacheRepository,
   appConfig: AppConfig
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, clock: Clock)
     extends BackendController(cc)
     with Logging {
 
@@ -61,19 +63,7 @@ class CacheController @Inject() (
       request.body.validate[UserAnswers] match {
         case JsSuccess(userAnswers, _) =>
           if (request.eoriNumber == userAnswers.eoriNumber) {
-            cacheRepository
-              .set(userAnswers)
-              .map {
-                case true => Ok
-                case false =>
-                  logger.error("Write was not acknowledged")
-                  InternalServerError
-              }
-              .recover {
-                case e =>
-                  logger.error("Failed to write user answers to mongo", e)
-                  InternalServerError
-              }
+            set(userAnswers)
           } else {
             logger.error(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${userAnswers.eoriNumber})")
             Future.successful(Forbidden)
@@ -83,6 +73,42 @@ class CacheController @Inject() (
           Future.successful(BadRequest)
       }
   }
+
+  def put(): Action[JsValue] = authenticate().async(parse.json) {
+    implicit request =>
+      request.body.validate[String] match {
+        case JsSuccess(lrn, _) =>
+          val now = LocalDateTime.now(clock)
+          val userAnswers = UserAnswers(
+            lrn = lrn,
+            eoriNumber = request.eoriNumber,
+            data = Json.obj(),
+            tasks = Map.empty,
+            createdAt = now,
+            lastUpdated = now,
+            id = UUID.randomUUID()
+          )
+          set(userAnswers)
+        case JsError(errors) =>
+          logger.error(s"Failed to validate request body as String: $errors")
+          Future.successful(BadRequest)
+      }
+  }
+
+  private def set(userAnswers: UserAnswers): Future[Status] =
+    cacheRepository
+      .set(userAnswers)
+      .map {
+        case true => Ok
+        case false =>
+          logger.error("Write was not acknowledged")
+          InternalServerError
+      }
+      .recover {
+        case e =>
+          logger.error("Failed to write user answers to mongo", e)
+          InternalServerError
+      }
 
   def delete(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
@@ -102,12 +128,9 @@ class CacheController @Inject() (
     implicit request =>
       cacheRepository
         .getAll(request.eoriNumber, lrn, limit, skip)
-        .map {
-          case result if result.nonEmpty => Ok(HateoasUserAnswersSummary(request.eoriNumber, result, appConfig.mongoTtlInDays))
-          case _ =>
-            logger.warn(s"No documents found for EORI: '${request.eoriNumber}'")
-            NotFound
-        }
+        .map(
+          result => Ok(result.toHateoas())
+        )
         .recover {
           case e =>
             logger.error("Failed to read user answers summary from mongo", e)

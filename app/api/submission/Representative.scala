@@ -26,39 +26,20 @@ object Representative {
   def transform(uA: UserAnswers): Option[RepresentativeType05] =
     uA
       .get[JsObject](traderDetailsPath \ "representative")
-      .readValueAs[RepresentativeType05](RepresentativeType05.reads)
-
+      .readValueAs[RepresentativeType05](representativeType05.reads)
 }
 
-object RepresentativeType05 {
+object representativeType05 {
 
   implicit val reads: Reads[RepresentativeType05] = (
     (__ \ "eori").read[String] and
-      __.read[Option[ContactPersonType05]](ContactPersonType05.reads)
+      __.read[Option[ContactPersonType05]](contactPersonType05.optionalReads)
   ).apply {
     (identificationNumber, ContactPerson) =>
-      new RepresentativeType05(
+      RepresentativeType05(
         identificationNumber = identificationNumber,
         status = "2",
         ContactPerson = ContactPerson
       )
-  }
-}
-
-object ContactPersonType05 {
-
-  implicit val reads: Reads[Option[ContactPersonType05]] = (
-    (__ \ "name").readNullable[String] and
-      (__ \ "telephoneNumber").readNullable[String]
-  ).tupled.map {
-    case (Some(name), Some(phoneNumber)) =>
-      Some(
-        new ContactPersonType05(
-          name = name,
-          phoneNumber = phoneNumber,
-          eMailAddress = None
-        )
-      )
-    case _ => None
   }
 }

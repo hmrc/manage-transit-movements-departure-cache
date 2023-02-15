@@ -18,17 +18,20 @@ package models
 
 import play.api.libs.json.{JsObject, Json}
 
-import java.time.{Duration, LocalDateTime}
+import java.time.{Clock, Duration, LocalDateTime}
 
-object HateoasUserAnswersSummary {
+case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers], ttlInDays: Int, totalMovements: Int, totalMatchingMovements: Int) {
 
-  private def expiresInDays(ttlInDays: Int, createdAt: LocalDateTime): Long =
-    Duration.between(LocalDateTime.now(), createdAt.plusDays(ttlInDays)).toDays + 1
+  def toHateoas()(implicit clock: Clock): JsObject = {
 
-  def apply(eoriNumber: String, usersAnswers: Seq[UserAnswers], ttlInDays: Int): JsObject =
+    def expiresInDays(ttlInDays: Int, createdAt: LocalDateTime): Long =
+      Duration.between(LocalDateTime.now(clock), createdAt.plusDays(ttlInDays)).toDays + 1
+
     Json.obj(
-      "eoriNumber" -> eoriNumber,
-      "userAnswers" -> usersAnswers.map {
+      "eoriNumber"             -> eoriNumber,
+      "totalMovements"         -> totalMovements,
+      "totalMatchingMovements" -> totalMatchingMovements,
+      "userAnswers" -> userAnswers.map {
         userAnswer =>
           Json.obj(
             "lrn" -> userAnswer.lrn,
@@ -42,5 +45,6 @@ object HateoasUserAnswersSummary {
           )
       }
     )
+  }
 
 }

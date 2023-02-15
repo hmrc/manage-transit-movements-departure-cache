@@ -5,6 +5,7 @@ val appName = "manage-transit-movements-departure-cache"
 
 lazy val microservice = Project(appName, file("."))
   .enablePlugins(play.sbt.PlayScala, SbtDistributablesPlugin, ScalaxbPlugin)
+  .disablePlugins(JUnitXmlReportPlugin) //Required to prevent https://github.com/scalatest/scalatest/issues/1427
   .settings(
     majorVersion                     := 0,
     scalaVersion                     := "2.13.8",
@@ -19,7 +20,8 @@ lazy val microservice = Project(appName, file("."))
   .settings(
     Compile / scalaxb / scalaxbXsdSource := new File("./conf/xsd"),
     Compile / scalaxb / scalaxbDispatchVersion := "1.1.3",
-    Compile / scalaxb / scalaxbPackageName := "generated")
+    Compile / scalaxb / scalaxbPackageName := "generated"
+  )
   .settings(publishingSettings: _*)
   .configs(IntegrationTest extend Test)
   .settings(integrationTestSettings(): _*)

@@ -31,7 +31,7 @@ import play.api.test.FakeRequest
 import repositories.CacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.LocalDateTime
+import java.time.{Clock, LocalDateTime}
 import java.util.UUID
 
 trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach with OptionValues with EitherValues with AppWithDefaultMockFixtures {
@@ -60,6 +60,7 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
 
   def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
 
-  val appConfig: Any = app.injector.instanceOf[AppConfig]
+  val appConfig: AppConfig  = app.injector.instanceOf[AppConfig]
+  implicit val clock: Clock = app.injector.instanceOf[Clock]
 
 }

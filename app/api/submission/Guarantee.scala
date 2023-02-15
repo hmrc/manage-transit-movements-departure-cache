@@ -24,10 +24,10 @@ import play.api.libs.json.{__, JsArray, Reads}
 object Guarantee {
 
   def transform(uA: UserAnswers): Seq[GuaranteeType02] =
-    uA.get[JsArray](guaranteesPath).readValuesAs[GuaranteeType02](GuaranteeType02.reads)
+    uA.get[JsArray](guaranteesPath).readValuesAs[GuaranteeType02](guaranteeType02.reads)
 }
 
-object GuaranteeType02 {
+object guaranteeType02 {
 
   def apply(
     guaranteeType: String,
@@ -35,16 +35,16 @@ object GuaranteeType02 {
     GuaranteeReference: Seq[GuaranteeReferenceType03]
   )(
     sequenceNumber: String
-  ): GuaranteeType02 = new GuaranteeType02(sequenceNumber, guaranteeType, otherGuaranteeReference, GuaranteeReference)
+  ): GuaranteeType02 = GuaranteeType02(sequenceNumber, guaranteeType, otherGuaranteeReference, GuaranteeReference)
 
   def reads(index: Int): Reads[GuaranteeType02] = (
     (__ \ "guaranteeType").read[String] and
       (__ \ "otherReference").readNullable[String] and
-      __.read[GuaranteeReferenceType03](GuaranteeReferenceType03.reads(index)).map(Seq(_))
-  ).tupled.map((GuaranteeType02.apply _).tupled).map(_(index.toString))
+      __.read[GuaranteeReferenceType03](guaranteeReferenceType03.reads(index)).map(Seq(_))
+  ).tupled.map((guaranteeType02.apply _).tupled).map(_(index.toString))
 }
 
-object GuaranteeReferenceType03 {
+object guaranteeReferenceType03 {
 
   def apply(
     GRN: Option[String] = None,
@@ -53,12 +53,12 @@ object GuaranteeReferenceType03 {
     currency: Option[String] = None
   )(
     sequenceNumber: String
-  ): GuaranteeReferenceType03 = new GuaranteeReferenceType03(sequenceNumber, GRN, accessCode, amountToBeCovered, currency)
+  ): GuaranteeReferenceType03 = GuaranteeReferenceType03(sequenceNumber, GRN, accessCode, amountToBeCovered, currency)
 
   def reads(index: Int): Reads[GuaranteeReferenceType03] = (
     (__ \ "referenceNumber").readNullable[String] and
       (__ \ "accessCode").readNullable[String] and
       (__ \ "liabilityAmount").readNullable[BigDecimal] and
       (__ \ "currency" \ "currency").readNullable[String]
-  ).tupled.map((GuaranteeReferenceType03.apply _).tupled).map(_(index.toString))
+  ).tupled.map((guaranteeReferenceType03.apply _).tupled).map(_(index.toString))
 }

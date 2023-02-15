@@ -18,14 +18,14 @@ package repositories
 
 import com.mongodb.client.model.Filters.{regex, and => mAnd, eq => mEq}
 import config.AppConfig
-import models.UserAnswers
+import models.{UserAnswers, UserAnswersSummary}
 import org.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex, descending}
 import org.mongodb.scala.model._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
-import java.time.LocalDateTime
+import java.time.{Clock, LocalDateTime}
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -33,7 +33,8 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton
 class CacheRepository @Inject() (
   mongoComponent: MongoComponent,
-  appConfig: AppConfig
+  appConfig: AppConfig,
+  clock: Clock
 )(implicit ec: ExecutionContext)
     extends PlayMongoRepository[UserAnswers](
       mongoComponent = mongoComponent,
@@ -47,10 +48,11 @@ class CacheRepository @Inject() (
       Filters.eq("lrn", lrn),
       Filters.eq("eoriNumber", eoriNumber)
     )
-    val update = Updates.set("lastUpdated", LocalDateTime.now())
+    val update  = Updates.set("lastUpdated", LocalDateTime.now(clock))
+    val options = FindOneAndUpdateOptions().upsert(false).sort(Sorts.descending("createdAt"))
 
     collection
-      .findOneAndUpdate(filter, update, FindOneAndUpdateOptions().upsert(false))
+      .findOneAndUpdate(filter, update, options)
       .toFutureOption()
   }
 
@@ -59,7 +61,7 @@ class CacheRepository @Inject() (
       Filters.eq("lrn", userAnswers.lrn),
       Filters.eq("eoriNumber", userAnswers.eoriNumber)
     )
-    val updatedUserAnswers = userAnswers.copy(lastUpdated = LocalDateTime.now())
+    val updatedUserAnswers = userAnswers.copy(lastUpdated = LocalDateTime.now(clock))
 
     collection
       .replaceOne(filter, updatedUserAnswers, ReplaceOptions().upsert(true))
@@ -84,28 +86,37 @@ class CacheRepository @Inject() (
     lrn: Option[String] = None,
     limit: Option[Int] = None,
     skip: Option[Int] = None
-  ): Future[Seq[UserAnswers]] = {
+  ): Future[UserAnswersSummary] = {
 
     val skipIndex: Int   = skip.getOrElse(0)
     val returnLimit: Int = limit.getOrElse(appConfig.maxRowsReturned)
     val skipLimit: Int   = skipIndex * returnLimit
     val lrnRegex         = lrn.map(_.replace(" ", "")).getOrElse("")
 
-    val selector: Bson = mAnd(
-      mEq("eoriNumber", eoriNumber),
-      regex("lrn", lrnRegex)
-    )
+    val eoriFilter: Bson = mEq("eoriNumber", eoriNumber)
+    val lrnFilter: Bson  = regex("lrn", lrnRegex)
 
-    val aggregates = Seq(
-      Aggregates.filter(selector),
+    val primaryFilter = Aggregates.filter(mAnd(eoriFilter, lrnFilter))
+
+    val aggregates: Seq[Bson] = Seq(
+      primaryFilter,
       Aggregates.sort(descending("createdAt")),
       Aggregates.skip(skipLimit),
       Aggregates.limit(returnLimit)
     )
 
-    collection.aggregate[UserAnswers](aggregates).toFuture()
+    for {
+      totalDocuments         <- collection.countDocuments(eoriFilter).toFuture()
+      totalMatchingDocuments <- collection.aggregate[UserAnswers](Seq(primaryFilter)).toFuture().map(_.length)
+      aggregateResult        <- collection.aggregate[UserAnswers](aggregates).toFuture()
+    } yield UserAnswersSummary(
+      eoriNumber,
+      aggregateResult,
+      appConfig.mongoTtlInDays,
+      totalDocuments.toInt,
+      totalMatchingDocuments
+    )
   }
-
 }
 
 object CacheRepository {
@@ -125,4 +136,5 @@ object CacheRepository {
 
     Seq(userAnswersCreatedAtIndex, eoriNumberAndLrnCompoundIndex)
   }
+
 }
