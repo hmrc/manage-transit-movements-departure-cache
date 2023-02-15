@@ -45,18 +45,12 @@ object authorisationType03 {
       (__ \ "authorisationReferenceNumber").read[String]
   ).tupled.map((authorisationType03.apply _).tupled).map(_(index))
 
-  private def authorisationTypeReads(index: Int, procedureType: String, reducedDatasetIndicator: Boolean, inlandMode: String): Reads[String] = {
-    lazy val default: Reads[String] = (__ \ "authorisationType").read[String]
-    if (index == 0) {
-      (procedureType, reducedDatasetIndicator, inlandMode) match {
-        case (_, true, "maritime" | "rail" | "air") => "TRD"
-        case ("simplified", true, _)                => "ACR"
-        case _                                      => default
-      }
-    } else {
-      default
+  private def authorisationTypeReads(index: Int, procedureType: String, reducedDatasetIndicator: Boolean, inlandMode: String): Reads[String] =
+    (index, procedureType, reducedDatasetIndicator, inlandMode) match {
+      case (0, _, true, "maritime" | "rail" | "air") => "TRD"
+      case (0, "simplified", true, _)                => "ACR"
+      case _                                         => (__ \ "authorisationType").read[String]
     }
-  }
 
   private val convertTypeValue: String => String = {
     case "ACR" => "C521"

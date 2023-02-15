@@ -47,6 +47,9 @@ package object submission {
   lazy val inlandModeReads: Reads[String] =
     (transportDetailsPath \ "inlandMode").read[String]
 
+  lazy val borderModeOfTransportReads: Reads[Option[String]] =
+    (transportDetailsPath \ "borderModeOfTransport").readNullable[String]
+
   implicit class RichJsPath(path: JsPath) {
 
     def readArray[T](implicit reads: Int => Reads[T]): Reads[Seq[T]] =

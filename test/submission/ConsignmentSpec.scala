@@ -464,6 +464,7 @@ class ConsignmentSpec extends SpecBase {
               |  "eoriNumber" : "$eoriNumber",
               |  "data" : {
               |    "transportDetails" : {
+              |      "inlandMode" : "rail",
               |      "borderModeOfTransport" : "rail",
               |      "transportMeansDeparture" : {
               |        "identification" : "wagonNumber",
@@ -541,6 +542,7 @@ class ConsignmentSpec extends SpecBase {
               |  "eoriNumber" : "$eoriNumber",
               |  "data" : {
               |    "transportDetails" : {
+              |      "inlandMode" : "road",
               |      "borderModeOfTransport" : "road",
               |      "transportMeansDeparture" : {
               |        "identification" : "regNumberRoadTrailer",
@@ -607,6 +609,47 @@ class ConsignmentSpec extends SpecBase {
             )
           )
         }
+      }
+
+      "undefined border mode of transport" in {
+
+        val json: JsValue = Json.parse(s"""
+            |{
+            |  "_id" : "$uuid",
+            |  "lrn" : "$lrn",
+            |  "eoriNumber" : "$eoriNumber",
+            |  "data" : {
+            |    "transportDetails" : {
+            |      "inlandMode" : "mail",
+            |      "transportMeansDeparture" : {
+            |        "identification" : "regNumberRoadTrailer",
+            |        "meansIdentificationNumber" : "means id number",
+            |        "vehicleCountry" : {
+            |          "code" : "FR",
+            |          "desc" : "France"
+            |        }
+            |      }
+            |    }
+            |  },
+            |  "tasks" : {},
+            |  "createdAt" : {
+            |    "$$date" : {
+            |      "$$numberLong" : "1662393524188"
+            |    }
+            |  },
+            |  "lastUpdated" : {
+            |    "$$date" : {
+            |      "$$numberLong" : "1662546803472"
+            |    }
+            |  }
+            |}
+            |""".stripMargin)
+
+        val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+
+        val result: Seq[ActiveBorderTransportMeansType02] = Consignment.transform(uA).ActiveBorderTransportMeans
+
+        result shouldBe Nil
       }
     }
   }

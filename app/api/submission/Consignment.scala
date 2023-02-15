@@ -34,7 +34,7 @@ object consignmentType20 {
       (routeDetailsPath \ "routing" \ "countryOfDestination" \ "code").readNullable[String] and
       (preRequisitesPath \ "containerIndicator").readNullable[Boolean] and
       inlandModeReads.map(Some(_)) and
-      (transportDetailsPath \ "borderModeOfTransport").readNullable[String] and
+      borderModeOfTransportReads and
       (preRequisitesPath \ "uniqueConsignmentReference").readNullable[String] and
       (transportDetailsPath \ "carrierDetails").readNullable[CarrierType04](carrierType04.reads) and
       (consignmentPath \ "consignor").readNullable[ConsignorType07](consignorType07.reads) and
@@ -44,7 +44,7 @@ object consignmentType20 {
       (routeDetailsPath \ "locationOfGoods").readNullable[LocationOfGoodsType05](locationOfGoodsType05.reads) and
       (transportDetailsPath \ "transportMeansDeparture").read[DepartureTransportMeansType03](departureTransportMeansType03.reads) and
       (routeDetailsPath \ "routing" \ "countriesOfRouting").readArray[CountryOfRoutingOfConsignmentType01](countryOfRoutingOfConsignmentType01.reads) and
-      transportDetailsPath.readWithDefault[Seq[ActiveBorderTransportMeansType02]](Nil)(activeBorderTransportMeansReads) and
+      __.read[Seq[ActiveBorderTransportMeansType02]](activeBorderTransportMeansReads) and
       (routeDetailsPath \ "loading").readNullable[PlaceOfLoadingType03](placeOfLoadingType03.reads) and
       (routeDetailsPath \ "unloading").readNullable[PlaceOfUnloadingType01](placeOfUnloadingType01.reads) and
       (equipmentsAndChargesPath \ "paymentMethod").readNullable[TransportChargesType](transportChargesType.reads)
@@ -98,11 +98,14 @@ object consignmentType20 {
       )
   }
 
-  // TODO - what if borderModeOfTransport is undefined?
   def activeBorderTransportMeansReads: Reads[Seq[ActiveBorderTransportMeansType02]] =
-    (__ \ "borderModeOfTransport").read[String] flatMap {
-      modeOfTransportAtTheBorder =>
-        (__ \ "transportMeansActiveList").readArray[ActiveBorderTransportMeansType02](activeBorderTransportMeansType02.reads(_, modeOfTransportAtTheBorder))
+    borderModeOfTransportReads flatMap {
+      case Some(modeOfTransportAtTheBorder) =>
+        (transportDetailsPath \ "transportMeansActiveList").readArray[ActiveBorderTransportMeansType02](
+          activeBorderTransportMeansType02.reads(_, modeOfTransportAtTheBorder)
+        )
+      case _ =>
+        Nil
     }
 
   private val convertModeOfTransport: Option[String] => Option[String] = _ map {
