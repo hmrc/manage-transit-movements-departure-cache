@@ -42,6 +42,7 @@ object consignmentType20 {
       (transportDetailsPath \ "supplyChainActors").readArray[AdditionalSupplyChainActorType](additionalSupplyChainActorType.reads) and
       equipmentsPath.readArray[TransportEquipmentType06](transportEquipmentType06.reads) and
       (routeDetailsPath \ "locationOfGoods").readNullable[LocationOfGoodsType05](locationOfGoodsType05.reads) and
+      (transportDetailsPath \ "transportMeansDeparture").read[DepartureTransportMeansType03](departureTransportMeansType03.reads) and
       (routeDetailsPath \ "routing" \ "countriesOfRouting").readArray[CountryOfRoutingOfConsignmentType01](countryOfRoutingOfConsignmentType01.reads) and
       (routeDetailsPath \ "loading").readNullable[PlaceOfLoadingType03](placeOfLoadingType03.reads) and
       (routeDetailsPath \ "unloading").readNullable[PlaceOfUnloadingType01](placeOfUnloadingType01.reads)
@@ -59,6 +60,7 @@ object consignmentType20 {
       AdditionalSupplyChainActor,
       TransportEquipment,
       LocationOfGoods,
+      DepartureTransportMeans,
       CountryOfRoutingOfConsignment,
       PlaceOfLoading,
       PlaceOfUnloading
@@ -77,7 +79,7 @@ object consignmentType20 {
         AdditionalSupplyChainActor = AdditionalSupplyChainActor,
         TransportEquipment = TransportEquipment,
         LocationOfGoods = LocationOfGoods,
-        DepartureTransportMeans = Nil, // TODO
+        DepartureTransportMeans = Seq(DepartureTransportMeans),
         CountryOfRoutingOfConsignment = CountryOfRoutingOfConsignment,
         ActiveBorderTransportMeans = Nil, // TODO
         PlaceOfLoading = PlaceOfLoading,
@@ -271,7 +273,32 @@ object economicOperatorType03 {
     __.read[String].map(EconomicOperatorType03)
 }
 
-object departureTransportMeansType03 {}
+object departureTransportMeansType03 {
+
+  def apply(typeOfIdentification: Option[String], identificationNumber: Option[String], nationality: Option[String]): DepartureTransportMeansType03 =
+    DepartureTransportMeansType03("0", convertTypeOfIdentification(typeOfIdentification), identificationNumber, nationality)
+
+  implicit val reads: Reads[DepartureTransportMeansType03] = (
+    (__ \ "identification").readNullable[String] and
+      (__ \ "meansIdentificationNumber").readNullable[String] and
+      (__ \ "vehicleCountry" \ "code").readNullable[String]
+  )(departureTransportMeansType03.apply _)
+
+  private val convertTypeOfIdentification: Option[String] => Option[String] = _ map {
+    case "imoShipIdNumber"        => "10"
+    case "seaGoingVessel"         => "11"
+    case "wagonNumber"            => "20"
+    case "trainNumber"            => "21"
+    case "regNumberRoadVehicle"   => "30"
+    case "regNumberRoadTrailer"   => "31"
+    case "iataFlightNumber"       => "40"
+    case "regNumberAircraft"      => "41"
+    case "europeanVesselIdNumber" => "80"
+    case "inlandWaterwaysVehicle" => "81"
+    case "unknown"                => "99"
+    case _                        => throw new Exception("Invalid type of identification value")
+  }
+}
 
 object countryOfRoutingOfConsignmentType01 {
 

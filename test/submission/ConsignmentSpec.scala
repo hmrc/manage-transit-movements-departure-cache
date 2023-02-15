@@ -165,6 +165,14 @@ class ConsignmentSpec extends SpecBase {
             |          "telephoneNumber" : "+44 808 157 0192"
             |        }
             |      },
+            |      "transportMeansDeparture" : {
+            |        "identification" : "imoShipIdNumber",
+            |        "meansIdentificationNumber" : "means id number",
+            |        "vehicleCountry" : {
+            |          "code" : "FR",
+            |          "desc" : "France"
+            |        }
+            |      },
             |      "supplyChainActors" : [
             |        {
             |          "supplyChainActorType" : "consolidator",
@@ -372,6 +380,15 @@ class ConsignmentSpec extends SpecBase {
                 eMailAddress = None
               )
             )
+          )
+        )
+
+        converted.DepartureTransportMeans shouldBe Seq(
+          DepartureTransportMeansType03(
+            sequenceNumber = "0",
+            typeOfIdentification = Some("10"),
+            identificationNumber = Some("means id number"),
+            nationality = Some("FR")
           )
         )
 
