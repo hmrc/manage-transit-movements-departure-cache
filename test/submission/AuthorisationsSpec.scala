@@ -71,8 +71,16 @@ class AuthorisationsSpec extends SpecBase {
         val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
 
         val expected = Seq(
-          AuthorisationType03("0", "FOO", "TRD123"),
-          AuthorisationType03("1", "BAR", "TRD223")
+          AuthorisationType03(
+            sequenceNumber = "0",
+            typeValue = "FOO",
+            referenceNumber = "TRD123"
+          ),
+          AuthorisationType03(
+            sequenceNumber = "1",
+            typeValue = "BAR",
+            referenceNumber = "TRD223"
+          )
         )
 
         val converted: Seq[AuthorisationType03] = Authorisations.transform(uA)

@@ -29,17 +29,38 @@ package object submission {
   lazy val preTaskListPath: JsPath = __ \ "preTaskList"
 
   lazy val traderDetailsPath: JsPath = __ \ "traderDetails"
+  lazy val consignmentPath: JsPath   = traderDetailsPath \ "consignment"
 
   lazy val routeDetailsPath: JsPath = __ \ "routeDetails"
 
   lazy val transportDetailsPath: JsPath = __ \ "transportDetails"
+  lazy val preRequisitesPath: JsPath    = transportDetailsPath \ "preRequisites"
   lazy val authorisationsPath: JsPath   = transportDetailsPath \ "authorisationsAndLimit" \ "authorisations"
 
   lazy val guaranteesPath: JsPath = __ \ "guaranteeDetails"
 
+  implicit class RichJsPath(path: JsPath) {
+
+    def readArray[T](implicit reads: Int => Reads[T]): Reads[Seq[T]] =
+      path.readWithDefault[Seq[T]](Nil) {
+        case value: JsArray => JsSuccess(value.readValuesAs[T])
+        case _              => throw new Exception(s"$path did not contain an array")
+      }
+  }
+
   implicit class RichJsArray(arr: JsArray) {
 
     def zipWithIndex: List[(JsValue, Int)] = arr.value.toList.zipWithIndex
+
+    def readValuesAs[T](implicit reads: Int => Reads[T]): Seq[T] =
+      arr.mapWithIndex {
+        case (value, index) => value.as[T](reads(index))
+      }
+
+    def mapWithIndex[T](f: (JsValue, Int) => T): Seq[T] =
+      arr.zipWithIndex.map {
+        case (value, i) => f(value, i)
+      }
   }
 
   implicit class RichOptionalJsArray(arr: Option[JsArray]) {
@@ -50,22 +71,7 @@ package object submission {
       }
 
     def mapWithIndex[T](f: (JsValue, Int) => T): Seq[T] =
-      arr
-        .map {
-          _.zipWithIndex.map {
-            case (value, i) => f(value, i)
-          }
-        }
-        .getOrElse(Nil)
-
-    def flatMapWithIndex[T](f: (JsValue, Int) => Option[T]): Seq[T] =
-      arr
-        .map {
-          _.zipWithIndex.flatMap {
-            case (value, i) => f(value, i)
-          }
-        }
-        .getOrElse(Nil)
+      arr.map(_.mapWithIndex(f)).getOrElse(Nil)
   }
 
   implicit class RichOptionalJsObject(obj: Option[JsObject]) {
@@ -74,7 +80,11 @@ package object submission {
       obj.map(_.as[T])
   }
 
-  implicit def boolToFlag(x: Boolean): Flag = if (x) Number1 else Number0
+  implicit def boolToFlag(x: Option[Boolean]): Option[Flag] =
+    x.map(boolToFlag)
+
+  implicit def boolToFlag(x: Boolean): Flag =
+    if (x) Number1 else Number0
 
   implicit def localDateToXMLGregorianCalendar(date: Option[LocalDate]): Option[XMLGregorianCalendar] =
     date.map(localDateToXMLGregorianCalendar)

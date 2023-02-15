@@ -40,7 +40,7 @@ object transitOperationType06 {
       (transportDetailsPath \ "authorisationsAndLimit" \ "limit" \ "limitDate").readNullable[LocalDate]
   ).apply {
     (declarationType, TIRCarnetNumber, security, reducedDatasetIndicator, bindingItinerary, limitDate) =>
-      new TransitOperationType06(
+      TransitOperationType06(
         LRN = lrn,
         declarationType = declarationType,
         additionalDeclarationType = "A",
@@ -60,5 +60,6 @@ object transitOperationType06 {
     case "entrySummaryDeclaration"        => "1"
     case "exitSummaryDeclaration"         => "2"
     case "entryAndExitSummaryDeclaration" => "3"
+    case _                                => throw new Exception("Invalid security value")
   }
 }
