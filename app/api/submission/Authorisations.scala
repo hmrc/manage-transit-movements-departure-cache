@@ -23,22 +23,20 @@ import play.api.libs.json.{__, JsArray, Reads}
 
 object Authorisations {
 
-  def transform(uA: UserAnswers): Seq[AuthorisationType03] =
-    uA.get[JsArray](authorisationsPath).readValuesAs[AuthorisationType03](authorisationType03.reads)
+  def transform(uA: UserAnswers): Seq[AuthorisationType03] = uA
+    .get[JsArray](authorisationsPath)
+    .readValuesAs[AuthorisationType03](authorisationType03.reads)
 }
 
 object authorisationType03 {
 
-  def apply(
-    typeValue: String,
-    referenceNumber: String
-  )(
-    sequenceNumber: String
-  ): AuthorisationType03 = AuthorisationType03(sequenceNumber, typeValue, referenceNumber)
+  def apply(typeValue: String, referenceNumber: String)(
+    sequenceNumber: Int
+  ): AuthorisationType03 = AuthorisationType03(sequenceNumber.toString, typeValue, referenceNumber)
 
   // TODO - authorisation type has an inferred reader in the frontend (i.e. won't always be populated in user answers)
   def reads(index: Int): Reads[AuthorisationType03] = (
     (__ \ "authorisationType").read[String] and
       (__ \ "authorisationReferenceNumber").read[String]
-  ).tupled.map((authorisationType03.apply _).tupled).map(_(index.toString))
+  ).tupled.map((authorisationType03.apply _).tupled).map(_(index))
 }

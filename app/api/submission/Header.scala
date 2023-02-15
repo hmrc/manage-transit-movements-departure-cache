@@ -31,9 +31,9 @@ object Header extends {
     MESSAGE_FROM_TRADERSequence(
       None,
       MESSAGE_1Sequence(
-        "NCTS",
-        toDate(DateTime.now().toString(formatterNoMillis)),
-        "CC015C" // TODO - check this with API team? What should this be set to?
+        messageRecipient = "NCTS",
+        preparationDateAndTime = DateTime.now().toString(formatterNoMillis),
+        messageIdentification = "CC015C" // TODO - check this with API team? What should this be set to?
       )
     )
 

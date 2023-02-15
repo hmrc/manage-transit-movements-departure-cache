@@ -23,11 +23,10 @@ import play.api.libs.json.{__, JsObject, Reads}
 
 object HolderOfTheTransitProcedure {
 
-  def transform(uA: UserAnswers): HolderOfTheTransitProcedureType14 =
-    uA
-      .get[JsObject](traderDetailsPath \ "holderOfTransit")
-      .getOrElse(throw new Exception("User answers did not contain a holder of transit"))
-      .as[HolderOfTheTransitProcedureType14](holderOfTheTransitProcedureType14.reads)
+  def transform(uA: UserAnswers): HolderOfTheTransitProcedureType14 = uA
+    .get[JsObject](traderDetailsPath \ "holderOfTransit")
+    .getOrElse(throw new Exception("Json did not contain holder of transit answers"))
+    .as[HolderOfTheTransitProcedureType14](holderOfTheTransitProcedureType14.reads)
 }
 
 object holderOfTheTransitProcedureType14 {

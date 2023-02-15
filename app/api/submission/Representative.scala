@@ -23,10 +23,9 @@ import play.api.libs.json.{__, JsObject, Reads}
 
 object Representative {
 
-  def transform(uA: UserAnswers): Option[RepresentativeType05] =
-    uA
-      .get[JsObject](traderDetailsPath \ "representative")
-      .readValueAs[RepresentativeType05](representativeType05.reads)
+  def transform(uA: UserAnswers): Option[RepresentativeType05] = uA
+    .get[JsObject](traderDetailsPath \ "representative")
+    .readValueAs[RepresentativeType05](representativeType05.reads)
 }
 
 object representativeType05 {

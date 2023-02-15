@@ -23,7 +23,7 @@ import scalaxb.DataRecord
 
 object Declaration {
 
-  def transform(uA: UserAnswers) =
+  def transform(uA: UserAnswers): CC015CType =
     CC015CType(
       messagE_FROM_TRADERSequence1 = Header.message,
       messageType = Header.messageType,

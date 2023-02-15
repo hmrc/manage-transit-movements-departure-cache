@@ -76,13 +76,16 @@ package object submission {
 
   implicit def boolToFlag(x: Boolean): Flag = if (x) Number1 else Number0
 
-  implicit def toDate(date: Option[LocalDate]): Option[XMLGregorianCalendar] =
-    date.map(toDate)
+  implicit def localDateToXMLGregorianCalendar(date: Option[LocalDate]): Option[XMLGregorianCalendar] =
+    date.map(localDateToXMLGregorianCalendar)
 
-  implicit def toDate(date: LocalDate): XMLGregorianCalendar =
-    toDate(date.toString)
+  implicit def localDateToXMLGregorianCalendar(date: LocalDate): XMLGregorianCalendar =
+    stringToXMLGregorianCalendar(date.toString)
 
-  implicit def toDate(date: String): XMLGregorianCalendar =
+  implicit def stringToXMLGregorianCalendar(date: Option[String]): Option[XMLGregorianCalendar] =
+    date.map(stringToXMLGregorianCalendar)
+
+  implicit def stringToXMLGregorianCalendar(date: String): XMLGregorianCalendar =
     XMLCalendar(date.replace("Z", ""))
 
 }
