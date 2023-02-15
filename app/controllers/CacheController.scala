@@ -128,12 +128,9 @@ class CacheController @Inject() (
     implicit request =>
       cacheRepository
         .getAll(request.eoriNumber, lrn, limit, skip)
-        .map {
-          case result if result.userAnswers.nonEmpty => Ok(result.toHateoas())
-          case _ =>
-            logger.warn(s"No documents found for EORI: '${request.eoriNumber}'")
-            NotFound
-        }
+        .map(
+          result => Ok(result.toHateoas())
+        )
         .recover {
           case e =>
             logger.error("Failed to read user answers summary from mongo", e)

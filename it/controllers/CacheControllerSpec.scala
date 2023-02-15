@@ -213,17 +213,6 @@ class CacheControllerSpec extends ItSpecBase {
 
     val url = s"$baseUrl/manage-transit-movements-departure-cache/user-answers"
 
-    "documents do not exist" should {
-      "respond with 404 status" in {
-        val response = wsClient
-          .url(url)
-          .get()
-          .futureValue
-
-        response.status shouldBe 404
-      }
-    }
-
     "documents do exist" should {
       "respond with 200 status" in {
         val userAnswers1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
