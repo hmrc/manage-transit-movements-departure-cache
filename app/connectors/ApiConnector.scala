@@ -23,8 +23,9 @@ import generated._
 import models.UserAnswers
 import play.api.Logging
 import play.api.http.HeaderNames
+import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR}
 import scalaxb.`package`.toXML
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpResponse}
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -36,13 +37,22 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
     HeaderNames.CONTENT_TYPE -> "application/xml"
   )
 
-  def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Int, UserAnswers]] = {
 
     val declarationUrl  = s"${appConfig.apiUrl}/movements/departures"
     val payload: String = toXML[CC015CType](Declaration.transform(userAnswers), "ncts:CC015C", scope).toString
 
-    httpClient.POSTString(declarationUrl, payload, requestHeaders)
-
+    httpClient.POSTString(declarationUrl, payload, requestHeaders).map {
+      case response if is2xx(response.status) =>
+        // TODO log and audit
+        Right(userAnswers)
+      case response if is4xx(response.status) =>
+        // TODO log and audit
+        Left(BAD_REQUEST)
+      case e =>
+        // TODO log and audit
+        Left(INTERNAL_SERVER_ERROR)
+    }
   }
 
 }
