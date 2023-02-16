@@ -7,3 +7,4 @@ PUT        /user-answers                                        controllers.Cach
 DELETE     /user-answers/:lrn                                   controllers.CacheController.delete(lrn: String)
 
 GET        /user-answers/:lrn/lock                              controllers.LockController.checkLock(lrn: String)
+DELETE     /user-answers/:lrn/lock                              controllers.LockController.deleteLock(lrn: String)

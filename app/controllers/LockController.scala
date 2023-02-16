@@ -51,4 +51,18 @@ class LockController @Inject() (
         }
         .getOrElse(Future.successful(BadRequest))
   }
+
+  def deleteLock(lrn: String): Action[AnyContent] = authenticate().async {
+    implicit request =>
+      hc.sessionId
+        .map {
+          sessionId =>
+            lockRepository.unlock(request.eoriNumber, lrn, sessionId.value).map {
+              case true  => Ok
+              case false => InternalServerError
+            }
+        }
+        .getOrElse(Future.successful(BadRequest))
+
+  }
 }

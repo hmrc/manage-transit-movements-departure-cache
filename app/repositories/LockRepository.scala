@@ -69,7 +69,20 @@ class DefaultLockRepository @Inject() (mongoC: MongoComponent, appConfig: AppCon
   def findLocks(eoriNumber: String, lrn: String): Future[Option[Lock]] =
     collection.find(primaryFilter(eoriNumber, lrn)).headOption()
 
-  def unlock = ???
+  def unlock(eoriNumber: String, lrn: String, sessionId: String): Future[Boolean] = {
+    val filters = Filters.and(
+      Filters.eq("sessionId", sessionId),
+      Filters.eq("eoriNumber", eoriNumber),
+      Filters.eq("lrn", lrn)
+    )
+
+    collection
+      .deleteOne(filters)
+      .head()
+      .map(
+        deleteResult => deleteResult.wasAcknowledged()
+      )
+  }
 }
 
 object LockRepository {
