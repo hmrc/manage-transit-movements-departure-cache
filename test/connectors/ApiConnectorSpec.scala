@@ -24,6 +24,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
+import play.api.mvc.Results.{BadRequest, InternalServerError}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpResponse, UpstreamErrorResponse}
 
@@ -295,36 +296,28 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
 
       "for success" in {
 
-//        server.stubFor(post(urlEqualTo(uri)).willReturn(okJson(expected)))
-//
-//        val res: HttpResponse = await(connector.submitDeclaration(uA))
-//        res.status mustBe OK
+        server.stubFor(post(urlEqualTo(uri)).willReturn(okJson(expected)))
 
-        pending
+        val res = await(connector.submitDeclaration(uA))
+        res.toString mustBe Right(HttpResponse(OK, expected)).toString
 
       }
 
       "for bad request" in {
 
-//        server.stubFor(post(urlEqualTo(uri)).willReturn(badRequest()))
-//
-//        intercept[BadRequestException] {
-//          await(connector.submitDeclaration(uA))
-//        }
+        server.stubFor(post(urlEqualTo(uri)).willReturn(badRequest()))
 
-        pending
+        val res = await(connector.submitDeclaration(uA))
+        res mustBe Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
 
       }
 
       "for internal server error" in {
 
-//        server.stubFor(post(urlEqualTo(uri)).willReturn(serverError()))
-//
-//        intercept[UpstreamErrorResponse] {
-//          await(connector.submitDeclaration(uA))
-//        }
+        server.stubFor(post(urlEqualTo(uri)).willReturn(serverError()))
 
-        pending
+        val res = await(connector.submitDeclaration(uA))
+        res mustBe Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
 
       }
 

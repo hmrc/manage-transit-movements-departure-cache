@@ -75,7 +75,7 @@ object consignmentType20 {
         containerIndicator = containerIndicator,
         inlandModeOfTransport = inlandModeOfTransport,
         modeOfTransportAtTheBorder = modeOfTransportAtTheBorder,
-        grossMass = 0, // TODO
+        grossMass = 1d, // TODO
         referenceNumberUCR = referenceNumberUCR,
         Carrier = Carrier,
         Consignor = Consignor,
@@ -316,7 +316,7 @@ object placeOfLoadingType03 {
 
   implicit val reads: Reads[PlaceOfLoadingType03] = (
     (__ \ "unLocode").readNullable[String] and
-      (__ \ "additionalInformation" \ "country").readNullable[String] and
+      (__ \ "additionalInformation" \ "country" \ "code").readNullable[String] and
       (__ \ "additionalInformation" \ "location").readNullable[String]
   )(PlaceOfLoadingType03.apply _)
 }
@@ -325,7 +325,7 @@ object placeOfUnloadingType01 {
 
   implicit val reads: Reads[PlaceOfUnloadingType01] = (
     (__ \ "unLocode").readNullable[String] and
-      (__ \ "additionalInformation" \ "country").readNullable[String] and
+      (__ \ "additionalInformation" \ "country" \ "code").readNullable[String] and
       (__ \ "additionalInformation" \ "location").readNullable[String]
   )(PlaceOfUnloadingType01.apply _)
 }

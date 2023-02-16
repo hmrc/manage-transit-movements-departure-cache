@@ -19,10 +19,9 @@ package controllers
 import config.AppConfig
 import connectors.ApiConnector
 import controllers.actions.AuthenticateActionProvider
-import models.UserAnswers
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
-import play.api.mvc.{Action, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -45,12 +44,11 @@ class SubmissionController @Inject() (
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(lrn, _) =>
-          val maybeUa: Future[Option[UserAnswers]] = cacheRepository.get(lrn, request.eoriNumber)
-          maybeUa.flatMap {
+          cacheRepository.get(lrn, request.eoriNumber).flatMap {
             case Some(uA) =>
               apiConnector.submitDeclaration(uA).map {
-                case Right(uA)       => Ok(Json.toJson(uA))
-                case Left(errorCode) => new Status(errorCode)
+                case Right(response) => Ok(response.body)
+                case Left(error)     => error
               }
             case None => Future.successful(InternalServerError)
           }

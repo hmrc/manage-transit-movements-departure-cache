@@ -24,8 +24,11 @@ import models.UserAnswers
 import play.api.Logging
 import play.api.http.HeaderNames
 import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR}
+import play.api.mvc.Result
+import play.api.mvc.Results.{BadRequest, InternalServerError}
 import scalaxb.`package`.toXML
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions}
+import uk.gov.hmrc.http.HttpReads.is4xx
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErrorFunctions, HttpResponse, UpstreamErrorResponse}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -37,23 +40,26 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
     HeaderNames.CONTENT_TYPE -> "application/xml"
   )
 
-  def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Int, UserAnswers]] = {
+  def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
 
     val declarationUrl  = s"${appConfig.apiUrl}/movements/departures"
     val payload: String = toXML[CC015CType](Declaration.transform(userAnswers), "ncts:CC015C", scope).toString
 
     // TODO - can we log and audit here and send a generic error to the FE?
-    httpClient.POSTString(declarationUrl, payload, requestHeaders).map {
-      case response if is2xx(response.status) =>
-        logger.debug(s"submitDeclaration: ${response.status}-${response.body}")
-        Right(userAnswers)
-      case response if is4xx(response.status) =>
-        logger.warn(s"submitDeclaration: ${response.status}-${response.body}")
-        Left(BAD_REQUEST)
-      case e =>
-        logger.error(s"submitDeclaration: ${e.status}-${e.body}")
-        Left(INTERNAL_SERVER_ERROR)
-    }
+    httpClient
+      .POSTString[HttpResponse](declarationUrl, payload, requestHeaders)
+      .map {
+        response =>
+          logger.debug(s"ApiConnector:submitDeclaration: success: ${response.status}-${response.body}")
+          Right(response)
+      }
+      .recover {
+        case httpEx: BadRequestException =>
+          logger.warn(s"ApiConnector:submitDeclaration: bad request: ${httpEx.responseCode}-${httpEx.getMessage}")
+          Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
+        case e: Exception =>
+          logger.error(s"ApiConnector:submitDeclaration: something went wrong: ${e.getMessage}")
+          Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
+      }
   }
-
 }

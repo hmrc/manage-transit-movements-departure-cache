@@ -134,14 +134,20 @@ class ConsignmentSpec extends SpecBase {
             |      "loading" : {
             |        "unLocode" : "UNLOCODE1",
             |        "additionalInformation" : {
-            |          "country" : "Loading country",
+            |          "country" : {
+            |            "code" : "Loading country",
+            |            "description" : "United Kingdom"
+            |          },
             |          "location" : "Loading location"
             |        }
             |      },
             |      "unloading" : {
             |        "unLocode" : "UNLOCODE2",
             |        "additionalInformation" : {
-            |          "country" : "Unloading country",
+            |          "country" : {
+            |            "code" : "Unloading country",
+            |            "description" : "United Kingdom"
+            |          },
             |          "location" : "Unloading location"
             |        }
             |      }
@@ -256,7 +262,7 @@ class ConsignmentSpec extends SpecBase {
         converted.containerIndicator shouldBe Some(Number1)
         converted.inlandModeOfTransport shouldBe Some("1")
         converted.modeOfTransportAtTheBorder shouldBe Some("1")
-        converted.grossMass shouldBe 0
+        converted.grossMass shouldBe 1d
         converted.referenceNumberUCR shouldBe Some("ucr123")
 
         converted.Carrier shouldBe Some(
