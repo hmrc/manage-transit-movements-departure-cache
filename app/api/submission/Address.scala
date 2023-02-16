@@ -20,32 +20,30 @@ import generated.{AddressType14, AddressType17, PostcodeAddressType02}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{__, Reads}
 
-object addressType14 {
+object addressType {
 
-  implicit val optionalReads: Reads[Option[AddressType14]] = (
+  def optionalReads[T](apply: (String, Option[String], String, String) => T): Reads[Option[T]] = (
     (__ \ "address" \ "numberAndStreet").readNullable[String] and
       (__ \ "address" \ "postalCode").readNullable[String] and
       (__ \ "address" \ "city").readNullable[String] and
       (__ \ "country" \ "code").readNullable[String]
   ).tupled.map {
     case (Some(streetAndNumber), postcode, Some(city), Some(country)) =>
-      Some(AddressType14(streetAndNumber, postcode, city, country))
+      Some(apply(streetAndNumber, postcode, city, country))
     case _ => None
   }
 }
 
+object addressType14 {
+
+  implicit val optionalReads: Reads[Option[AddressType14]] =
+    addressType.optionalReads(AddressType14)
+}
+
 object addressType17 {
 
-  implicit val optionalReads: Reads[Option[AddressType17]] = (
-    (__ \ "address" \ "numberAndStreet").readNullable[String] and
-      (__ \ "address" \ "postalCode").readNullable[String] and
-      (__ \ "address" \ "city").readNullable[String] and
-      (__ \ "country" \ "code").readNullable[String]
-  ).tupled.map {
-    case (Some(streetAndNumber), postcode, Some(city), Some(country)) =>
-      Some(AddressType17(streetAndNumber, postcode, city, country))
-    case _ => None
-  }
+  implicit val optionalReads: Reads[Option[AddressType17]] =
+    addressType.optionalReads(AddressType17)
 }
 
 object postcodeAddressType02 {
