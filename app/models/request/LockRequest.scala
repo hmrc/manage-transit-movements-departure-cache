@@ -14,21 +14,9 @@
  * limitations under the License.
  */
 
-package models
+package models.request
 
-import play.api.libs.json.{Json, OFormat}
+import models.Lock
+import play.api.mvc.WrappedRequest
 
-import java.time.LocalDateTime
-
-final case class Lock(
-  sessionId: String,
-  eoriNumber: String,
-  lrn: String,
-  createdAt: LocalDateTime,
-  lastUpdated: LocalDateTime
-)
-
-object Lock {
-
-  implicit lazy val format: OFormat[Lock] = Json.format[Lock]
-}
+case class LockRequest[A](authenticatedRequest: AuthenticatedRequest[A], lock: Lock) extends WrappedRequest[A](authenticatedRequest)

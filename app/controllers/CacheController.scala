@@ -16,8 +16,7 @@
 
 package controllers
 
-import config.AppConfig
-import controllers.actions.AuthenticateActionProvider
+import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
 import models.UserAnswers
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
@@ -34,8 +33,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class CacheController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
-  cacheRepository: CacheRepository,
-  appConfig: AppConfig
+  authenticateAndLock: AuthenticateAndLockActionProvider,
+  cacheRepository: CacheRepository
 )(implicit ec: ExecutionContext, clock: Clock)
     extends BackendController(cc)
     with Logging {
@@ -58,14 +57,14 @@ class CacheController @Inject() (
         }
   }
 
-  def post(): Action[JsValue] = authenticate().async(parse.json) {
+  def post(lrn: String, sessionId: String): Action[JsValue] = authenticateAndLock(sessionId, lrn).async(parse.json) {
     implicit request =>
       request.body.validate[UserAnswers] match {
         case JsSuccess(userAnswers, _) =>
-          if (request.eoriNumber == userAnswers.eoriNumber) {
+          if (request.authenticatedRequest.eoriNumber == userAnswers.eoriNumber) {
             set(userAnswers)
           } else {
-            logger.error(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${userAnswers.eoriNumber})")
+            logger.error(s"Enrolment EORI (${request.authenticatedRequest.eoriNumber}) does not match EORI in user answers (${userAnswers.eoriNumber})")
             Future.successful(Forbidden)
           }
         case JsError(errors) =>
