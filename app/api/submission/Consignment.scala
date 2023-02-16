@@ -108,7 +108,7 @@ object consignmentType20 {
         Nil
     }
 
-  private val convertModeOfTransport: Option[String] => Option[String] = _ map {
+  private lazy val convertModeOfTransport: Option[String] => Option[String] = _ map {
     case "maritime" => "1"
     case "rail"     => "2"
     case "road"     => "3"
@@ -117,7 +117,7 @@ object consignmentType20 {
     case "fixed"    => "7"
     case "waterway" => "8"
     case "unknown"  => "9"
-    case _          => throw new Exception("Invalid inland mode of transport value")
+    case _          => throw new Exception("Invalid mode of transport value")
   }
 }
 
@@ -160,7 +160,7 @@ object additionalSupplyChainActorType {
       (__ \ "identificationNumber").read[String]
   ).tupled.map((additionalSupplyChainActorType.apply _).tupled).map(_(index))
 
-  private val convertRole: String => String = {
+  private lazy val convertRole: String => String = {
     case "consolidator"     => "CS"
     case "freightForwarder" => "FW"
     case "manufacturer"     => "MF"
@@ -207,35 +207,9 @@ object goodsReferenceType02 {
 
 object locationOfGoodsType05 {
 
-  def apply(
-    typeOfLocation: String,
-    qualifierOfIdentification: String,
-    authorisationNumber: Option[String],
-    additionalIdentifier: Option[String],
-    UNLocode: Option[String],
-    CustomsOffice: Option[generated.CustomsOfficeType02],
-    GNSS: Option[generated.GNSSType],
-    EconomicOperator: Option[generated.EconomicOperatorType03],
-    Address: Option[generated.AddressType14],
-    PostcodeAddress: Option[generated.PostcodeAddressType02],
-    ContactPerson: Option[generated.ContactPersonType06]
-  ): LocationOfGoodsType05 = LocationOfGoodsType05(
-    typeOfLocation = convertTypeOfLocation(typeOfLocation),
-    qualifierOfIdentification = convertQualifierOfIdentification(qualifierOfIdentification),
-    authorisationNumber = authorisationNumber,
-    additionalIdentifier = additionalIdentifier,
-    UNLocode = UNLocode,
-    CustomsOffice = CustomsOffice,
-    GNSS = GNSS,
-    EconomicOperator = EconomicOperator,
-    Address = Address,
-    PostcodeAddress = PostcodeAddress,
-    ContactPerson = ContactPerson
-  )
-
   implicit val reads: Reads[LocationOfGoodsType05] = (
-    (__ \ "typeOfLocation").read[String] and
-      (__ \ "qualifierOfIdentification").read[String] and
+    (__ \ "typeOfLocation").read[String].map(convertTypeOfLocation) and
+      (__ \ "qualifierOfIdentification").read[String].map(convertQualifierOfIdentification) and
       (__ \ "identifier" \ "authorisationNumber").readNullable[String] and
       (__ \ "identifier" \ "additionalIdentifier").readNullable[String] and
       (__ \ "identifier" \ "unLocode").readNullable[String] and
@@ -245,9 +219,9 @@ object locationOfGoodsType05 {
       (__ \ "identifier").read[Option[AddressType14]](addressType14.optionalReads) and
       (__ \ "identifier" \ "postalCode").readNullable[PostcodeAddressType02](postcodeAddressType02.reads) and
       (__ \ "contact").readNullable[ContactPersonType06](contactPersonType06.reads)
-  )(locationOfGoodsType05.apply _)
+  )(LocationOfGoodsType05.apply _)
 
-  private val convertTypeOfLocation: String => String = {
+  private lazy val convertTypeOfLocation: String => String = {
     case "designatedLocation" => "A"
     case "authorisedPlace"    => "B"
     case "approvedPlace"      => "C"
@@ -255,7 +229,7 @@ object locationOfGoodsType05 {
     case _                    => throw new Exception("Invalid type of location value")
   }
 
-  private val convertQualifierOfIdentification: String => String = {
+  private lazy val convertQualifierOfIdentification: String => String = {
     case "postalCode"              => "T"
     case "unlocode"                => "U"
     case "customsOfficeIdentifier" => "V"
@@ -289,7 +263,7 @@ object economicOperatorType03 {
 
 object transportMeans {
 
-  val convertTypeOfIdentification: Option[String] => Option[String] = _ map {
+  lazy val convertTypeOfIdentification: Option[String] => Option[String] = _ map {
     case "imoShipIdNumber"        => "10"
     case "seaGoingVessel"         => "11"
     case "wagonNumber"            => "20"
@@ -396,13 +370,10 @@ object additionalInformationType03 {}
 
 object transportChargesType {
 
-  def apply(methodOfPayment: String): TransportChargesType =
-    TransportChargesType(convertMethodOfPayment(methodOfPayment))
-
   implicit val reads: Reads[TransportChargesType] =
-    __.read[String].map(transportChargesType(_))
+    __.read[String].map(convertMethodOfPayment).map(TransportChargesType)
 
-  private val convertMethodOfPayment: String => String = {
+  private lazy val convertMethodOfPayment: String => String = {
     case "cash"                     => "A"
     case "creditCard"               => "B"
     case "cheque"                   => "C"

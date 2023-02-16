@@ -55,7 +55,7 @@ object transitOperationType06 {
       )
   }
 
-  private val convertSecurity: String => String = {
+  private lazy val convertSecurity: String => String = {
     case "noSecurity"                     => "0"
     case "entrySummaryDeclaration"        => "1"
     case "exitSummaryDeclaration"         => "2"

@@ -52,7 +52,7 @@ object authorisationType03 {
       case _                                         => (__ \ "authorisationType").read[String]
     }
 
-  private val convertTypeValue: String => String = {
+  private lazy val convertTypeValue: String => String = {
     case "ACR" => "C521"
     case "SSE" => "C523"
     case "TRD" => "C524"
