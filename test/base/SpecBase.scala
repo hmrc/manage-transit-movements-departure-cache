@@ -28,7 +28,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import repositories.CacheRepository
+import repositories.{CacheRepository, DefaultLockRepository}
 
 import java.time.{Clock, LocalDateTime}
 import java.util.UUID
@@ -40,18 +40,21 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
 
   val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
 
-  val mockCacheRepository: CacheRepository = mock[CacheRepository]
+  val mockCacheRepository: CacheRepository      = mock[CacheRepository]
+  val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockCacheRepository)
+    reset(mockLockRepository)
   }
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
       .guiceApplicationBuilder()
       .overrides(
-        bind[CacheRepository].toInstance(mockCacheRepository)
+        bind[CacheRepository].toInstance(mockCacheRepository),
+        bind[DefaultLockRepository].toInstance(mockLockRepository)
       )
 
   def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")

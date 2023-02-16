@@ -16,7 +16,12 @@
 
 package itbase
 
-import controllers.actions.{AuthenticateActionProvider, FakeAuthenticateActionProvider}
+import controllers.actions.{
+  AuthenticateActionProvider,
+  AuthenticateAndLockActionProvider,
+  FakeAuthenticateActionProvider,
+  FakeAuthenticateAndLockActionProvider
+}
 import models.UserAnswers
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
@@ -59,5 +64,6 @@ trait ItSpecBase
       .configure("metrics.enabled" -> false)
       .overrides(bind[MongoComponent].toInstance(mongoComponent))
       .overrides(bind[AuthenticateActionProvider].toInstance(new FakeAuthenticateActionProvider))
+      .overrides(bind[AuthenticateAndLockActionProvider].toInstance(new FakeAuthenticateAndLockActionProvider))
       .build()
 }

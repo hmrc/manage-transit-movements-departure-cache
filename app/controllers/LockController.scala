@@ -16,17 +16,13 @@
 
 package controllers
 
-import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
-import models.UserAnswers
+import controllers.actions.AuthenticateActionProvider
 import play.api.Logging
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import repositories.{CacheRepository, DefaultLockRepository}
-import uk.gov.hmrc.mongo.lock.LockRepository
+import repositories.DefaultLockRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import java.time.{Clock, LocalDateTime}
-import java.util.UUID
+import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 

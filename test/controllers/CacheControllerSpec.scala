@@ -78,7 +78,7 @@ class CacheControllerSpec extends SpecBase {
         val userAnswers = emptyUserAnswers
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(true))
 
-        val request = FakeRequest(POST, routes.CacheController.post().url)
+        val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
           .withBody(Json.toJson(userAnswers))
         val result = route(app, request).value
 
@@ -89,7 +89,7 @@ class CacheControllerSpec extends SpecBase {
 
     "return 400" when {
       "request body is invalid" in {
-        val request = FakeRequest(POST, routes.CacheController.post().url)
+        val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
           .withBody(JsString("foo"))
 
         val result = route(app, request).value
@@ -99,7 +99,7 @@ class CacheControllerSpec extends SpecBase {
       }
 
       "request body is empty" in {
-        val request = FakeRequest(POST, routes.CacheController.post().url)
+        val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
           .withBody(Json.obj())
 
         val result = route(app, request).value
@@ -113,7 +113,7 @@ class CacheControllerSpec extends SpecBase {
       "the EORI in the enrolment and the EORI in user answers do not match" in {
         val userAnswers = emptyUserAnswers.copy(eoriNumber = "different eori")
 
-        val request = FakeRequest(POST, routes.CacheController.post().url)
+        val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
           .withBody(Json.toJson(userAnswers))
 
         val result = route(app, request).value
@@ -129,7 +129,7 @@ class CacheControllerSpec extends SpecBase {
 
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(false))
 
-        val request = FakeRequest(POST, routes.CacheController.post().url)
+        val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
           .withBody(Json.toJson(userAnswers))
 
         val result = route(app, request).value
@@ -142,7 +142,7 @@ class CacheControllerSpec extends SpecBase {
         val userAnswers = emptyUserAnswers
         when(mockCacheRepository.set(any())).thenReturn(Future.failed(new Throwable()))
 
-        val request = FakeRequest(POST, routes.CacheController.post().url)
+        val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
           .withBody(Json.toJson(userAnswers))
 
         val result = route(app, request).value
