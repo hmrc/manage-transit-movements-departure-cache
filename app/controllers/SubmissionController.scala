@@ -20,8 +20,8 @@ import config.AppConfig
 import connectors.ApiConnector
 import controllers.actions.AuthenticateActionProvider
 import play.api.Logging
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.libs.json.{JsError, JsSuccess, JsValue}
+import play.api.mvc.{Action, ControllerComponents}
 import repositories.CacheRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 

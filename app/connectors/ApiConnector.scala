@@ -23,12 +23,10 @@ import generated._
 import models.UserAnswers
 import play.api.Logging
 import play.api.http.HeaderNames
-import play.api.http.Status.{BAD_REQUEST, INTERNAL_SERVER_ERROR}
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError}
 import scalaxb.`package`.toXML
-import uk.gov.hmrc.http.HttpReads.is4xx
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErrorFunctions, HttpResponse, UpstreamErrorResponse}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErrorFunctions, HttpResponse}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
