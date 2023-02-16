@@ -38,7 +38,7 @@ class GuaranteeSpec extends SpecBase {
             |  "data" : {
             |    "guaranteeDetails" : [
             |      {
-            |        "guaranteeType" : "FOO",
+            |        "guaranteeType" : "1",
             |        "otherReference" : "otherRefNo1",
             |        "referenceNumber" : "refNo1",
             |        "accessCode" : "1234",
@@ -49,7 +49,7 @@ class GuaranteeSpec extends SpecBase {
             |        }
             |      },
             |      {
-            |        "guaranteeType" : "BAR",
+            |        "guaranteeType" : "A",
             |        "otherReference" : "otherRefNo2",
             |        "referenceNumber" : "refNo2",
             |        "accessCode" : "5678",
@@ -80,7 +80,7 @@ class GuaranteeSpec extends SpecBase {
         val expected = Seq(
           GuaranteeType02(
             sequenceNumber = "0",
-            guaranteeType = "FOO",
+            guaranteeType = "1",
             otherGuaranteeReference = Some("otherRefNo1"),
             GuaranteeReference = Seq(
               GuaranteeReferenceType03(
@@ -94,7 +94,7 @@ class GuaranteeSpec extends SpecBase {
           ),
           GuaranteeType02(
             sequenceNumber = "1",
-            guaranteeType = "BAR",
+            guaranteeType = "A",
             otherGuaranteeReference = Some("otherRefNo2"),
             GuaranteeReference = Seq(
               GuaranteeReferenceType03(
