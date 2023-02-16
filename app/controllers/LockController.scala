@@ -31,7 +31,7 @@ class LockController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
   lockRepository: DefaultLockRepository
-)(implicit ec: ExecutionContext, clock: Clock)
+)(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
 

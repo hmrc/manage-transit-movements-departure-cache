@@ -19,18 +19,19 @@ package repositories
 import config.AppConfig
 import models.Lock
 import org.mongodb.scala.bson.conversions.Bson
+import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
 import org.mongodb.scala.model._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
-import java.time.LocalDateTime
+import java.time.{Clock, LocalDateTime}
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
-class DefaultLockRepository @Inject() (mongoC: MongoComponent, appConfig: AppConfig)(implicit ec: ExecutionContext)
+class DefaultLockRepository @Inject() (mongoComponent: MongoComponent, appConfig: AppConfig, clock: Clock)(implicit ec: ExecutionContext)
     extends PlayMongoRepository[Lock](
-      mongoComponent = mongoC,
+      mongoComponent = mongoComponent,
       collectionName = "draft-locks",
       domainFormat = Lock.format,
       indexes = LockRepository.indexes(appConfig)
@@ -50,7 +51,7 @@ class DefaultLockRepository @Inject() (mongoC: MongoComponent, appConfig: AppCon
       )
 
   private def updateLock(existingLock: Lock): Future[Boolean] = {
-    val updatedLock = existingLock.copy(lastUpdated = LocalDateTime.now())
+    val updatedLock = existingLock.copy(lastUpdated = LocalDateTime.now(clock))
     collection
       .replaceOne(primaryFilter(existingLock.eoriNumber, existingLock.lrn), updatedLock)
       .head()
@@ -98,6 +99,11 @@ object LockRepository {
       indexOptions = IndexOptions().name("draft-lock-last-updated-index").expireAfter(appConfig.lockTTLInMins, TimeUnit.MINUTES)
     )
 
-    Seq(userAnswersCreatedAtIndex, userAnswersLastUpdatedIndex)
+    val eoriNumberAndLrnCompoundIndex: IndexModel = IndexModel(
+      keys = compoundIndex(ascending("eoriNumber"), ascending("lrn")),
+      indexOptions = IndexOptions().name("eoriNumber-lrn-index")
+    )
+
+    Seq(userAnswersCreatedAtIndex, userAnswersLastUpdatedIndex, eoriNumberAndLrnCompoundIndex)
   }
 }

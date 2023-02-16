@@ -26,16 +26,16 @@ import repositories.DefaultLockRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import java.time.LocalDateTime
+import java.time.{Clock, LocalDateTime}
 import scala.concurrent.{ExecutionContext, Future}
 
-class LockActionProvider @Inject() (repository: DefaultLockRepository)(implicit ec: ExecutionContext) {
+class LockActionProvider @Inject() (repository: DefaultLockRepository, clock: Clock)(implicit ec: ExecutionContext) {
 
   def apply(lrn: String): ActionRefiner[AuthenticatedRequest, AuthenticatedRequest] =
-    new LockAction(lrn, repository)
+    new LockAction(lrn, repository, clock)
 }
 
-class LockAction(lrn: String, repository: DefaultLockRepository)(implicit val executionContext: ExecutionContext)
+class LockAction(lrn: String, repository: DefaultLockRepository, clock: Clock)(implicit val executionContext: ExecutionContext)
     extends ActionRefiner[AuthenticatedRequest, AuthenticatedRequest]
     with Logging {
 
@@ -50,8 +50,8 @@ class LockAction(lrn: String, repository: DefaultLockRepository)(implicit val ex
             sessionId = sessionId.value,
             eoriNumber = request.eoriNumber,
             lrn = lrn,
-            createdAt = LocalDateTime.now(),
-            lastUpdated = LocalDateTime.now()
+            createdAt = LocalDateTime.now(clock),
+            lastUpdated = LocalDateTime.now(clock)
           )
 
           repository.lock(lock).map {

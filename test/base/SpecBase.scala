@@ -29,6 +29,7 @@ import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import repositories.{CacheRepository, DefaultLockRepository}
+import uk.gov.hmrc.http.HeaderNames
 
 import java.time.{Clock, LocalDateTime}
 import java.util.UUID
