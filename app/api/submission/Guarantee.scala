@@ -30,29 +30,21 @@ object Guarantee {
 
 object guaranteeType02 {
 
-  def apply(guaranteeType: String, otherGuaranteeReference: Option[String], GuaranteeReference: Seq[GuaranteeReferenceType03])(
-    sequenceNumber: Int
-  ): GuaranteeType02 =
-    GuaranteeType02(sequenceNumber.toString, guaranteeType, otherGuaranteeReference, GuaranteeReference)
-
   def reads(index: Int): Reads[GuaranteeType02] = (
-    (__ \ "guaranteeType").read[String] and
+    (index.toString: Reads[String]) and
+      (__ \ "guaranteeType").read[String] and
       (__ \ "otherReference").readNullable[String] and
       __.read[GuaranteeReferenceType03](guaranteeReferenceType03.reads(index)).map(Seq(_))
-  ).tupled.map((guaranteeType02.apply _).tupled).map(_(index))
+  )(GuaranteeType02.apply _)
 }
 
 object guaranteeReferenceType03 {
 
-  def apply(GRN: Option[String], accessCode: Option[String], amountToBeCovered: Option[BigDecimal], currency: Option[String])(
-    sequenceNumber: Int
-  ): GuaranteeReferenceType03 =
-    GuaranteeReferenceType03(sequenceNumber.toString, GRN, accessCode, amountToBeCovered, currency)
-
   def reads(index: Int): Reads[GuaranteeReferenceType03] = (
-    (__ \ "referenceNumber").readNullable[String] and
+    (index.toString: Reads[String]) and
+      (__ \ "referenceNumber").readNullable[String] and
       (__ \ "accessCode").readNullable[String] and
       (__ \ "liabilityAmount").readNullable[BigDecimal] and
       (__ \ "currency" \ "currency").readNullable[String]
-  ).tupled.map((guaranteeReferenceType03.apply _).tupled).map(_(index))
+  )(GuaranteeReferenceType03.apply _)
 }

@@ -33,8 +33,8 @@ object consignmentType20 {
     (preRequisitesPath \ "countryOfDispatch" \ "code").readNullable[String] and
       (routeDetailsPath \ "routing" \ "countryOfDestination" \ "code").readNullable[String] and
       (preRequisitesPath \ "containerIndicator").readNullable[Boolean] and
-      inlandModeReads.map(Some(_)) and
-      borderModeOfTransportReads and
+      inlandModeReads.map(Some(_)).map(convertModeOfTransport) and
+      borderModeOfTransportReads.map(convertModeOfTransport) and
       (preRequisitesPath \ "uniqueConsignmentReference").readNullable[String] and
       (transportDetailsPath \ "carrierDetails").readNullable[CarrierType04](carrierType04.reads) and
       (consignmentPath \ "consignor").readNullable[ConsignorType07](consignorType07.reads) and
@@ -42,13 +42,13 @@ object consignmentType20 {
       (transportDetailsPath \ "supplyChainActors").readArray[AdditionalSupplyChainActorType](additionalSupplyChainActorType.reads) and
       equipmentsPath.readArray[TransportEquipmentType06](transportEquipmentType06.reads) and
       (routeDetailsPath \ "locationOfGoods").readNullable[LocationOfGoodsType05](locationOfGoodsType05.reads) and
-      (transportDetailsPath \ "transportMeansDeparture").read[DepartureTransportMeansType03](departureTransportMeansType03.reads) and
+      (transportDetailsPath \ "transportMeansDeparture").read[DepartureTransportMeansType03](departureTransportMeansType03.reads).map(Seq(_)) and
       (routeDetailsPath \ "routing" \ "countriesOfRouting").readArray[CountryOfRoutingOfConsignmentType01](countryOfRoutingOfConsignmentType01.reads) and
       __.read[Seq[ActiveBorderTransportMeansType02]](activeBorderTransportMeansReads) and
       (routeDetailsPath \ "loading").readNullable[PlaceOfLoadingType03](placeOfLoadingType03.reads) and
       (routeDetailsPath \ "unloading").readNullable[PlaceOfUnloadingType01](placeOfUnloadingType01.reads) and
       (equipmentsAndChargesPath \ "paymentMethod").readNullable[TransportChargesType](transportChargesType.reads)
-  ).apply {
+  ).apply { // TODO - Should be able to change this to `(ConsignmentType20.apply _)` once this is all done
     (
       countryOfDispatch,
       countryOfDestination,
@@ -73,8 +73,8 @@ object consignmentType20 {
         countryOfDispatch = countryOfDispatch,
         countryOfDestination = countryOfDestination,
         containerIndicator = containerIndicator,
-        inlandModeOfTransport = convertModeOfTransport(inlandModeOfTransport),
-        modeOfTransportAtTheBorder = convertModeOfTransport(modeOfTransportAtTheBorder),
+        inlandModeOfTransport = inlandModeOfTransport,
+        modeOfTransportAtTheBorder = modeOfTransportAtTheBorder,
         grossMass = 0, // TODO
         referenceNumberUCR = referenceNumberUCR,
         Carrier = Carrier,
@@ -83,7 +83,7 @@ object consignmentType20 {
         AdditionalSupplyChainActor = AdditionalSupplyChainActor,
         TransportEquipment = TransportEquipment,
         LocationOfGoods = LocationOfGoods,
-        DepartureTransportMeans = Seq(DepartureTransportMeans),
+        DepartureTransportMeans = DepartureTransportMeans,
         CountryOfRoutingOfConsignment = CountryOfRoutingOfConsignment,
         ActiveBorderTransportMeans = ActiveBorderTransportMeans,
         PlaceOfLoading = PlaceOfLoading,
@@ -150,15 +150,11 @@ object consigneeType05 {
 
 object additionalSupplyChainActorType {
 
-  def apply(role: String, identificationNumber: String)(
-    sequenceNumber: Int
-  ): AdditionalSupplyChainActorType =
-    AdditionalSupplyChainActorType(sequenceNumber.toString, convertRole(role), identificationNumber)
-
   def reads(index: Int): Reads[AdditionalSupplyChainActorType] = (
-    (__ \ "supplyChainActorType").read[String] and
+    (index.toString: Reads[String]) and
+      (__ \ "supplyChainActorType").read[String].map(convertRole) and
       (__ \ "identificationNumber").read[String]
-  ).tupled.map((additionalSupplyChainActorType.apply _).tupled).map(_(index))
+  )(AdditionalSupplyChainActorType.apply _)
 
   private lazy val convertRole: String => String = {
     case "consolidator"     => "CS"
@@ -171,38 +167,36 @@ object additionalSupplyChainActorType {
 
 object transportEquipmentType06 {
 
-  def apply(containerIdentificationNumber: Option[String], Seal: Seq[SealType05], GoodsReference: Seq[GoodsReferenceType02])(
-    sequenceNumber: Int
+  def apply(
+    sequenceNumber: String,
+    containerIdentificationNumber: Option[String],
+    Seal: Seq[SealType05],
+    GoodsReference: Seq[GoodsReferenceType02]
   ): TransportEquipmentType06 =
-    TransportEquipmentType06(sequenceNumber.toString, containerIdentificationNumber, Seal.length, Seal, GoodsReference)
+    TransportEquipmentType06(sequenceNumber, containerIdentificationNumber, Seal.length, Seal, GoodsReference)
 
   def reads(index: Int): Reads[TransportEquipmentType06] = (
-    (__ \ "containerIdentificationNumber").readNullable[String] and
+    (index.toString: Reads[String]) and
+      (__ \ "containerIdentificationNumber").readNullable[String] and
       (__ \ "seals").readArray[SealType05](sealType05.reads) and
       (__ \ "itemNumbers").readArray[GoodsReferenceType02](goodsReferenceType02.reads)
-  ).tupled.map((transportEquipmentType06.apply _).tupled).map(_(index))
+  )(transportEquipmentType06.apply _)
 }
 
 object sealType05 {
 
-  def apply(identifier: String)(
-    sequenceNumber: Int
-  ): SealType05 =
-    SealType05(sequenceNumber.toString, identifier)
-
-  def reads(index: Int): Reads[SealType05] =
-    (__ \ "identificationNumber").read[String].map(sealType05(_)(index))
+  def reads(index: Int): Reads[SealType05] = (
+    (index.toString: Reads[String]) and
+      (__ \ "identificationNumber").read[String]
+  )(SealType05.apply _)
 }
 
 object goodsReferenceType02 {
 
-  def apply(declarationGoodsItemNumber: String)(
-    sequenceNumber: Int
-  ): GoodsReferenceType02 =
-    GoodsReferenceType02(sequenceNumber.toString, BigInt(declarationGoodsItemNumber))
-
-  def reads(index: Int): Reads[GoodsReferenceType02] =
-    (__ \ "itemNumber").read[String].map(goodsReferenceType02(_)(index))
+  def reads(index: Int): Reads[GoodsReferenceType02] = (
+    (index.toString: Reads[String]) and
+      (__ \ "itemNumber").read[String].map(BigInt(_))
+  )(GoodsReferenceType02.apply _)
 }
 
 object locationOfGoodsType05 {
@@ -282,55 +276,33 @@ object transportMeans {
 object departureTransportMeansType03 {
   import transportMeans._
 
-  def apply(typeOfIdentification: Option[String], identificationNumber: Option[String], nationality: Option[String]): DepartureTransportMeansType03 =
-    DepartureTransportMeansType03("0", convertTypeOfIdentification(typeOfIdentification), identificationNumber, nationality)
-
   implicit val reads: Reads[DepartureTransportMeansType03] = (
-    (__ \ "identification").readNullable[String] and
+    ("0": Reads[String]) and
+      (__ \ "identification").readNullable[String].map(convertTypeOfIdentification) and
       (__ \ "meansIdentificationNumber").readNullable[String] and
       (__ \ "vehicleCountry" \ "code").readNullable[String]
-  )(departureTransportMeansType03.apply _)
+  )(DepartureTransportMeansType03.apply _)
 }
 
 object countryOfRoutingOfConsignmentType01 {
 
-  def apply(country: String)(
-    sequenceNumber: Int
-  ): CountryOfRoutingOfConsignmentType01 =
-    CountryOfRoutingOfConsignmentType01(sequenceNumber.toString, country)
-
-  def reads(index: Int): Reads[CountryOfRoutingOfConsignmentType01] =
-    (__ \ "countryOfRouting" \ "code").read[String].map(countryOfRoutingOfConsignmentType01(_)(index))
+  def reads(index: Int): Reads[CountryOfRoutingOfConsignmentType01] = (
+    (index.toString: Reads[String]) and
+      (__ \ "countryOfRouting" \ "code").read[String]
+  )(CountryOfRoutingOfConsignmentType01.apply _)
 }
 
 object activeBorderTransportMeansType02 {
   import transportMeans._
 
-  def apply(
-    customsOfficeAtBorderReferenceNumber: Option[String],
-    typeOfIdentification: Option[String],
-    identificationNumber: Option[String],
-    nationality: Option[String],
-    conveyanceReferenceNumber: Option[String]
-  )(
-    sequenceNumber: Int
-  ): ActiveBorderTransportMeansType02 =
-    ActiveBorderTransportMeansType02(
-      sequenceNumber = sequenceNumber.toString,
-      customsOfficeAtBorderReferenceNumber = customsOfficeAtBorderReferenceNumber,
-      typeOfIdentification = convertTypeOfIdentification(typeOfIdentification),
-      identificationNumber = identificationNumber,
-      nationality = nationality,
-      conveyanceReferenceNumber = conveyanceReferenceNumber
-    )
-
   def reads(index: Int, borderModeOfTransport: String): Reads[ActiveBorderTransportMeansType02] = (
-    (__ \ "customsOfficeActiveBorder" \ "id").readNullable[String] and
-      __.read[Option[String]](typeOfIdentificationReads(index, borderModeOfTransport)) and
+    (index.toString: Reads[String]) and
+      (__ \ "customsOfficeActiveBorder" \ "id").readNullable[String] and
+      __.read[Option[String]](typeOfIdentificationReads(index, borderModeOfTransport)).map(convertTypeOfIdentification) and
       (__ \ "identificationNumber").readNullable[String] and
       (__ \ "nationality" \ "code").readNullable[String] and
       (__ \ "conveyanceReferenceNumber").readNullable[String]
-  ).tupled.map((activeBorderTransportMeansType02.apply _).tupled).map(_(index))
+  )(ActiveBorderTransportMeansType02.apply _)
 
   private def typeOfIdentificationReads(index: Int, borderModeOfTransport: String): Reads[Option[String]] =
     (index, borderModeOfTransport) match {

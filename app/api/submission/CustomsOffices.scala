@@ -56,24 +56,17 @@ object customsOfficeOfDestinationDeclaredType01 {
 
 object customsOfficeOfTransitDeclaredType03 {
 
-  def apply(referenceNumber: String, arrivalDateAndTimeEstimated: Option[String])(
-    sequenceNumber: Int
-  ): CustomsOfficeOfTransitDeclaredType03 =
-    CustomsOfficeOfTransitDeclaredType03(sequenceNumber.toString, referenceNumber, arrivalDateAndTimeEstimated)
-
   def reads(index: Int): Reads[CustomsOfficeOfTransitDeclaredType03] = (
-    (__ \ "officeOfTransit" \ "id").read[String] and
-      (__ \ "arrivalDateTime").readNullable[String]
-  ).tupled.map((customsOfficeOfTransitDeclaredType03.apply _).tupled).map(_(index))
+    (index.toString: Reads[String]) and
+      (__ \ "officeOfTransit" \ "id").read[String] and
+      (__ \ "arrivalDateTime").readNullable[String].map(stringToXMLGregorianCalendar)
+  )(CustomsOfficeOfTransitDeclaredType03.apply _)
 }
 
 object customsOfficeOfExitForTransitDeclaredType02 {
 
-  def apply(referenceNumber: String)(
-    sequenceNumber: Int
-  ): CustomsOfficeOfExitForTransitDeclaredType02 =
-    CustomsOfficeOfExitForTransitDeclaredType02(sequenceNumber.toString, referenceNumber)
-
-  def reads(index: Int): Reads[CustomsOfficeOfExitForTransitDeclaredType02] =
-    (__ \ "officeOfExit" \ "id").read[String].map(customsOfficeOfExitForTransitDeclaredType02(_)(index))
+  def reads(index: Int): Reads[CustomsOfficeOfExitForTransitDeclaredType02] = (
+    (index.toString: Reads[String]) and
+      (__ \ "officeOfExit" \ "id").read[String]
+  )(CustomsOfficeOfExitForTransitDeclaredType02.apply _)
 }

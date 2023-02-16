@@ -36,14 +36,11 @@ object Authorisations {
 
 object authorisationType03 {
 
-  def apply(typeValue: String, referenceNumber: String)(
-    sequenceNumber: Int
-  ): AuthorisationType03 = AuthorisationType03(sequenceNumber.toString, convertTypeValue(typeValue), referenceNumber)
-
   def reads(index: Int, procedureType: String, reducedDatasetIndicator: Boolean, inlandMode: String): Reads[AuthorisationType03] = (
-    __.read[String](authorisationTypeReads(index, procedureType, reducedDatasetIndicator, inlandMode)) and
+    (index.toString: Reads[String]) and
+      __.read[String](authorisationTypeReads(index, procedureType, reducedDatasetIndicator, inlandMode)).map(convertTypeValue) and
       (__ \ "authorisationReferenceNumber").read[String]
-  ).tupled.map((authorisationType03.apply _).tupled).map(_(index))
+  )(AuthorisationType03.apply _)
 
   private def authorisationTypeReads(index: Int, procedureType: String, reducedDatasetIndicator: Boolean, inlandMode: String): Reads[String] =
     (index, procedureType, reducedDatasetIndicator, inlandMode) match {
