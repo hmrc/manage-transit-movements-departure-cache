@@ -45,15 +45,13 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
     // TODO - can we log and audit here and send a generic error to the FE?
     httpClient.POSTString(declarationUrl, payload, requestHeaders).map {
       case response if is2xx(response.status) =>
-        // TODO log and audit response body?
+        logger.debug(s"submitDeclaration: ${response.status}-${response.body}")
         Right(userAnswers)
       case response if is4xx(response.status) =>
-        // TODO log and audit response body?
-        println(s"ACHI: ${response.body}")
+        logger.warn(s"submitDeclaration: ${response.status}-${response.body}")
         Left(BAD_REQUEST)
       case e =>
-        // TODO log and audit response body?
-        println(s"ACHI: ${e.body}")
+        logger.error(s"submitDeclaration: ${e.status}-${e.body}")
         Left(INTERNAL_SERVER_ERROR)
     }
   }
