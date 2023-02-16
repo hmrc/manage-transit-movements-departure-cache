@@ -16,43 +16,51 @@
 
 package controllers.actions
 
+import com.google.inject.Inject
 import models.Lock
-import models.request.{AuthenticatedRequest, LockRequest}
+import models.request.AuthenticatedRequest
 import play.api.Logging
-import play.api.mvc.Results.Locked
+import play.api.mvc.Results.{BadRequest, Locked}
 import play.api.mvc.{ActionRefiner, Result}
 import repositories.DefaultLockRepository
+import uk.gov.hmrc.http.HeaderCarrier
+import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import java.time.LocalDateTime
-import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class LockActionProvider @Inject() (repository: DefaultLockRepository)(implicit ec: ExecutionContext) {
 
-  def apply(sessionId: String, lrn: String): ActionRefiner[AuthenticatedRequest, LockRequest] =
-    new LockAction(sessionId, lrn, repository)
+  def apply(lrn: String): ActionRefiner[AuthenticatedRequest, AuthenticatedRequest] =
+    new LockAction(lrn, repository)
 }
 
-class LockAction(sessionId: String, lrn: String, repository: DefaultLockRepository)(implicit val executionContext: ExecutionContext)
-    extends ActionRefiner[AuthenticatedRequest, LockRequest]
+class LockAction(lrn: String, repository: DefaultLockRepository)(implicit val executionContext: ExecutionContext)
+    extends ActionRefiner[AuthenticatedRequest, AuthenticatedRequest]
     with Logging {
 
-  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, LockRequest[A]]] = {
+  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
 
-    val lock: Lock = Lock(
-      sessionId = sessionId,
-      eoriNumber = request.eoriNumber,
-      lrn = lrn,
-      createdAt = LocalDateTime.now(),
-      lastUpdated = LocalDateTime.now()
-    )
+    implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
-    repository.lock(lock).map {
-      case true =>
-        Right(LockRequest(request, lock))
-      case false =>
-        Left(Locked)
-    }
+    hc.sessionId
+      .map {
+        sessionId =>
+          val lock: Lock = Lock(
+            sessionId = sessionId.value,
+            eoriNumber = request.eoriNumber,
+            lrn = lrn,
+            createdAt = LocalDateTime.now(),
+            lastUpdated = LocalDateTime.now()
+          )
+
+          repository.lock(lock).map {
+            case true =>
+              Right(request)
+            case false =>
+              Left(Locked)
+          }
+      }
+      .getOrElse(Future.successful(Left(BadRequest)))
   }
-
 }

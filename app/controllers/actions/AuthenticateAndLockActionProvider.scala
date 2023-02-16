@@ -16,13 +16,13 @@
 
 package controllers.actions
 
-import models.request.LockRequest
+import models.request.AuthenticatedRequest
 import play.api.mvc.{ActionBuilder, AnyContent, DefaultActionBuilder}
 
 import javax.inject.Inject
 
 trait AuthenticateAndLockActionProvider {
-  def apply(sessionId: String, lrn: String): ActionBuilder[LockRequest, AnyContent]
+  def apply(lrn: String): ActionBuilder[AuthenticatedRequest, AnyContent]
 }
 
 object AuthenticateAndLockActionProvider {
@@ -33,7 +33,7 @@ object AuthenticateAndLockActionProvider {
     buildDefault: DefaultActionBuilder
   ) extends AuthenticateAndLockActionProvider {
 
-    override def apply(sessionId: String, lrn: String): ActionBuilder[LockRequest, AnyContent] =
-      buildDefault andThen authenticate andThen lock(sessionId, lrn)
+    override def apply(lrn: String): ActionBuilder[AuthenticatedRequest, AnyContent] =
+      buildDefault andThen authenticate andThen lock(lrn)
   }
 }

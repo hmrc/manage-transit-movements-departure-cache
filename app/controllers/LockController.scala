@@ -39,11 +39,16 @@ class LockController @Inject() (
     extends BackendController(cc)
     with Logging {
 
-  def checkLock(lrn: String, sessionId: String): Action[AnyContent] = authenticate().async {
+  def checkLock(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
-      lockRepository.findLocks(request.eoriNumber, lrn).map {
-        case Some(value) if sessionId != value.sessionId => Locked
-        case _ => Ok
-      }
+      hc.sessionId
+        .map {
+          sessionId =>
+            lockRepository.findLocks(request.eoriNumber, lrn).map {
+              case Some(value) if sessionId.value != value.sessionId => Locked
+              case _                                                 => Ok
+            }
+        }
+        .getOrElse(Future.successful(BadRequest))
   }
 }

@@ -57,14 +57,14 @@ class CacheController @Inject() (
         }
   }
 
-  def post(lrn: String, sessionId: String): Action[JsValue] = authenticateAndLock(sessionId, lrn).async(parse.json) {
+  def post(lrn: String): Action[JsValue] = authenticateAndLock(lrn).async(parse.json) {
     implicit request =>
       request.body.validate[UserAnswers] match {
         case JsSuccess(userAnswers, _) =>
-          if (request.authenticatedRequest.eoriNumber == userAnswers.eoriNumber) {
+          if (request.eoriNumber == userAnswers.eoriNumber) {
             set(userAnswers)
           } else {
-            logger.error(s"Enrolment EORI (${request.authenticatedRequest.eoriNumber}) does not match EORI in user answers (${userAnswers.eoriNumber})")
+            logger.error(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${userAnswers.eoriNumber})")
             Future.successful(Forbidden)
           }
         case JsError(errors) =>
