@@ -42,15 +42,18 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
     val declarationUrl  = s"${appConfig.apiUrl}/movements/departures"
     val payload: String = toXML[CC015CType](Declaration.transform(userAnswers), "ncts:CC015C", scope).toString
 
+    // TODO - can we log and audit here and send a generic error to the FE?
     httpClient.POSTString(declarationUrl, payload, requestHeaders).map {
       case response if is2xx(response.status) =>
-        // TODO log and audit
+        // TODO log and audit response body?
         Right(userAnswers)
       case response if is4xx(response.status) =>
-        // TODO log and audit
+        // TODO log and audit response body?
+        println(s"ACHI: ${response.body}")
         Left(BAD_REQUEST)
       case e =>
-        // TODO log and audit
+        // TODO log and audit response body?
+        println(s"ACHI: ${e.body}")
         Left(INTERNAL_SERVER_ERROR)
     }
   }

@@ -49,7 +49,7 @@ class SubmissionController @Inject() (
           maybeUa.flatMap {
             case Some(uA) =>
               apiConnector.submitDeclaration(uA).map {
-                case Right(uA)       => Ok (Json.toJson(uA))
+                case Right(uA)       => Ok(Json.toJson(uA))
                 case Left(errorCode) => new Status(errorCode)
               }
             case None => Future.successful(InternalServerError)
