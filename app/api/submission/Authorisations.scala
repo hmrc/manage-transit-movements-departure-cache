@@ -19,24 +19,40 @@ package api.submission
 import generated.AuthorisationType03
 import models.UserAnswers
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{__, JsArray, Reads}
+import play.api.libs.json.{__, Reads}
 
 object Authorisations {
 
-  def transform(uA: UserAnswers): Seq[AuthorisationType03] = uA
-    .get[JsArray](authorisationsPath)
-    .readValuesAs[AuthorisationType03](authorisationType03.reads)
+  def transform(uA: UserAnswers): Seq[AuthorisationType03] =
+    uA.data.as[Seq[AuthorisationType03]](authorisationsReads)
+
+  implicit val authorisationsReads: Reads[Seq[AuthorisationType03]] = for {
+    procedureType           <- (preTaskListPath \ "procedureType").read[String]
+    reducedDatasetIndicator <- reducedDatasetIndicatorReads
+    inlandMode              <- inlandModeReads
+    reads                   <- authorisationsPath.readArray[AuthorisationType03](authorisationType03.reads(_, procedureType, reducedDatasetIndicator, inlandMode))
+  } yield reads
 }
 
 object authorisationType03 {
 
-  def apply(typeValue: String, referenceNumber: String)(
-    sequenceNumber: Int
-  ): AuthorisationType03 = AuthorisationType03(sequenceNumber.toString, typeValue, referenceNumber)
-
-  // TODO - authorisation type has an inferred reader in the frontend (i.e. won't always be populated in user answers)
-  def reads(index: Int): Reads[AuthorisationType03] = (
-    (__ \ "authorisationType").read[String] and
+  def reads(index: Int, procedureType: String, reducedDatasetIndicator: Boolean, inlandMode: String): Reads[AuthorisationType03] = (
+    (index.toString: Reads[String]) and
+      __.read[String](authorisationTypeReads(index, procedureType, reducedDatasetIndicator, inlandMode)).map(convertTypeValue) and
       (__ \ "authorisationReferenceNumber").read[String]
-  ).tupled.map((authorisationType03.apply _).tupled).map(_(index))
+  )(AuthorisationType03.apply _)
+
+  private def authorisationTypeReads(index: Int, procedureType: String, reducedDatasetIndicator: Boolean, inlandMode: String): Reads[String] =
+    (index, procedureType, reducedDatasetIndicator, inlandMode) match {
+      case (0, _, true, "maritime" | "rail" | "air") => "TRD"
+      case (0, "simplified", true, _)                => "ACR"
+      case _                                         => (__ \ "authorisationType").read[String]
+    }
+
+  private lazy val convertTypeValue: String => String = {
+    case "ACR" => "C521"
+    case "SSE" => "C523"
+    case "TRD" => "C524"
+    case _     => throw new Exception("Invalid authorisation type value")
+  }
 }

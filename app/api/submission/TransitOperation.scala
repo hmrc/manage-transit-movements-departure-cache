@@ -35,12 +35,12 @@ object transitOperationType06 {
     (preTaskListPath \ "declarationType").read[String] and
       (preTaskListPath \ "tirCarnetReference").readNullable[String] and
       (preTaskListPath \ "securityDetailsType").read[String] and
-      (traderDetailsPath \ "consignment" \ "approvedOperator").readWithDefault[Boolean](false) and
+      reducedDatasetIndicatorReads and
       (routeDetailsPath \ "routing" \ "bindingItinerary").readWithDefault[Boolean](false) and
       (transportDetailsPath \ "authorisationsAndLimit" \ "limit" \ "limitDate").readNullable[LocalDate]
   ).apply {
     (declarationType, TIRCarnetNumber, security, reducedDatasetIndicator, bindingItinerary, limitDate) =>
-      new TransitOperationType06(
+      TransitOperationType06(
         LRN = lrn,
         declarationType = declarationType,
         additionalDeclarationType = "A",
@@ -55,10 +55,11 @@ object transitOperationType06 {
       )
   }
 
-  private val convertSecurity: String => String = {
+  private lazy val convertSecurity: String => String = {
     case "noSecurity"                     => "0"
     case "entrySummaryDeclaration"        => "1"
     case "exitSummaryDeclaration"         => "2"
     case "entryAndExitSummaryDeclaration" => "3"
+    case _                                => throw new Exception("Invalid security value")
   }
 }
