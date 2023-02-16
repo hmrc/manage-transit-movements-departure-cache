@@ -37,12 +37,13 @@ class UserAnswersSummarySpec extends SpecBase {
       val userAnswers1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), dateNow, dateNow, id1)
       val userAnswers2 = UserAnswers("CD123", eoriNumber, Json.obj(), Map(), dateNow.minusDays(1), dateNow.minusDays(1), id2)
 
-      val userAnswersSummary = UserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2), ttlInDay, 2)
+      val userAnswersSummary = UserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2), ttlInDay, 2, 2)
 
       val expectedResult =
         Json.obj(
-          "eoriNumber"     -> eoriNumber,
-          "totalMovements" -> 2,
+          "eoriNumber"             -> eoriNumber,
+          "totalMovements"         -> 2,
+          "totalMatchingMovements" -> 2,
           "userAnswers" -> Json.arr(
             Json.obj(
               "lrn" -> "AB123",

@@ -34,6 +34,8 @@
 ```
 {
   "eoriNumber": "1234567",
+  "totalMovements": 2,
+  "totalMatchingMovements": 2, 
   "userAnswers": [
       {
         "lrn": "AB123",
