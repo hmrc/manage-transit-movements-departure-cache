@@ -21,7 +21,7 @@ import models.Lock
 import models.request.AuthenticatedRequest
 import play.api.Logging
 import play.api.mvc.Results.{BadRequest, Locked}
-import play.api.mvc.{ActionRefiner, Result}
+import play.api.mvc.{ActionFilter, Result}
 import repositories.DefaultLockRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
@@ -31,16 +31,15 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class LockActionProvider @Inject() (repository: DefaultLockRepository, clock: Clock)(implicit ec: ExecutionContext) {
 
-  def apply(lrn: String): ActionRefiner[AuthenticatedRequest, AuthenticatedRequest] =
+  def apply(lrn: String): ActionFilter[AuthenticatedRequest] =
     new LockAction(lrn, repository, clock)
 }
 
 class LockAction(lrn: String, repository: DefaultLockRepository, clock: Clock)(implicit val executionContext: ExecutionContext)
-    extends ActionRefiner[AuthenticatedRequest, AuthenticatedRequest]
+    extends ActionFilter[AuthenticatedRequest]
     with Logging {
 
-  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, AuthenticatedRequest[A]]] = {
-
+  override protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = {
     implicit val hc: HeaderCarrier = HeaderCarrierConverter.fromRequestAndSession(request, request.session)
 
     hc.sessionId
@@ -55,12 +54,10 @@ class LockAction(lrn: String, repository: DefaultLockRepository, clock: Clock)(i
           )
 
           repository.lock(lock).map {
-            case true =>
-              Right(request)
-            case false =>
-              Left(Locked)
+            case true  => None
+            case false => Some(Locked)
           }
       }
-      .getOrElse(Future.successful(Left(BadRequest)))
+      .getOrElse(Future.successful(Some(BadRequest)))
   }
 }

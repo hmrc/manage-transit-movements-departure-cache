@@ -27,7 +27,7 @@ class FakeAuthenticateAndLockActionProvider extends AuthenticateAndLockActionPro
   override def apply(lrn: String): ActionBuilder[AuthenticatedRequest, AnyContent] = {
     val defaultActionBuilder = DefaultActionBuilder(Helpers.stubBodyParser())
     val authenticate         = new FakeAuthenticateAction("eori")
-    val lock                 = new FakeLockAction("eori")
+    val lock                 = new FakeLockAction()
 
     defaultActionBuilder andThen authenticate andThen lock
   }

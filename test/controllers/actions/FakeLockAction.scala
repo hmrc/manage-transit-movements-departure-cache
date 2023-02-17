@@ -22,10 +22,9 @@ import play.api.mvc._
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.{ExecutionContext, Future}
 
-class FakeLockAction(lrn: String) extends ActionRefiner[AuthenticatedRequest, AuthenticatedRequest] {
+class FakeLockAction extends ActionFilter[AuthenticatedRequest] {
 
-  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, AuthenticatedRequest[A]]] =
-    Future.successful(Right(AuthenticatedRequest(request, request.eoriNumber)))
+  protected def filter[A](request: AuthenticatedRequest[A]): Future[Option[Result]] = Future.successful(None)
 
   override protected def executionContext: ExecutionContext = implicitly[ExecutionContext]
 }
