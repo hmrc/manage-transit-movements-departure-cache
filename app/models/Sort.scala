@@ -17,59 +17,70 @@
 package models
 
 import models.Sort.Field.{CreatedAt, LRN}
-import models.Sort.{Field, Order}
 import models.Sort.Order.{Ascending, Descending}
+import models.Sort.{Field, Order}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, descending}
 
 sealed trait Sort {
-  self: Field with Order =>
-  val convertParams: String     = this.toString
-  val toBson: Bson              = f(field)
-  override def toString: String = s"$field.$orderBy"
+  val field: Field
+  val order: Order
+  lazy val convertParams: String = this.toString
+  def toBson: Bson               = order.f(field.toString)
+  override def toString: String  = s"$field.$order"
 }
 
 object Sort {
 
   sealed trait Order {
     val f: String => Bson
-    val orderBy: String
   }
 
   object Order {
 
-    sealed trait Ascending extends Order {
+    case object Ascending extends Order {
       override val f: String => Bson = ascending(_)
-      override val orderBy: String   = "asc"
+      override def toString: String  = "asc"
     }
 
-    sealed trait Descending extends Order {
+    case object Descending extends Order {
       override val f: String => Bson = descending(_)
-      override val orderBy: String   = "dsc"
+      override def toString: String  = "dsc"
     }
   }
 
-  sealed trait Field {
-    val field: String
-  }
+  sealed trait Field
 
   object Field {
 
-    sealed trait LRN extends Field {
-      override val field: String = "lrn"
+    case object LRN extends Field {
+      override def toString: String = "lrn"
     }
 
-    sealed trait CreatedAt extends Field {
-      override val field: String = "createdAt"
+    case object CreatedAt extends Field {
+      override def toString: String = "createdAt"
     }
   }
-  case object SortByLRNAsc extends Sort with LRN with Ascending
 
-  case object SortByLRNDesc extends Sort with LRN with Descending
+  case object SortByLRNAsc extends Sort {
+    override val field: Field = LRN
+    override val order: Order = Ascending
+  }
 
-  case object SortByCreatedAtAsc extends Sort with CreatedAt with Ascending
+  case object SortByLRNDesc extends Sort {
+    override val field: Field = LRN
+    override val order: Order = Descending
+  }
 
-  case object SortByCreatedAtDesc extends Sort with CreatedAt with Descending
+  case object SortByCreatedAtAsc extends Sort {
+    override val field: Field = CreatedAt
+    override val order: Order = Ascending
+  }
+
+  case object SortByCreatedAtDesc extends Sort {
+    override val field: Field = CreatedAt
+    override val order: Order = Descending
+  }
 
   def apply(sortParams: Option[String]): Sort = sortParams match {
     case Some(SortByLRNAsc.convertParams)       => SortByLRNAsc
@@ -78,18 +89,18 @@ object Sort {
     case _                                      => SortByCreatedAtDesc
   }
 
-//  implicit def queryStringBindable(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[Sort] = new QueryStringBindable[Sort] {
-//
-//    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Sort]] =
-//      Option(stringBinder.bind("sortBy", params) match {
-//        case Some(Right(SortByLRNAsc.convertParams))        => Right(SortByLRNAsc)
-//        case Some(Right(SortByLRNDesc.convertParams))       => Right(SortByLRNDesc)
-//        case Some(Right(SortByCreatedAtAsc.convertParams))  => Right(SortByCreatedAtAsc)
-//        case Some(Right(SortByCreatedAtDesc.convertParams)) => Right(SortByCreatedAtDesc)
-//        case _                                              => Left("Invalid sort parameters")
-//      })
-//
-//    override def unbind(key: String, value: Sort): String = stringBinder.unbind("sortBy", value.convertParams)
-//
-//  }
+  //  implicit def queryStringBindable(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[Sort] = new QueryStringBindable[Sort] {
+  //
+  //    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Sort]] =
+  //      Option(stringBinder.bind("sortBy", params) match {
+  //        case Some(Right(SortByLRNAsc.convertParams))        => Right(SortByLRNAsc)
+  //        case Some(Right(SortByLRNDesc.convertParams))       => Right(SortByLRNDesc)
+  //        case Some(Right(SortByCreatedAtAsc.convertParams))  => Right(SortByCreatedAtAsc)
+  //        case Some(Right(SortByCreatedAtDesc.convertParams)) => Right(SortByCreatedAtDesc)
+  //        case _                                              => Left("Invalid sort parameters")
+  //      })
+  //
+  //    override def unbind(key: String, value: Sort): String = stringBinder.unbind("sortBy", value.convertParams)
+  //
+  //  }
 }
