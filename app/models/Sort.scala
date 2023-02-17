@@ -16,36 +16,36 @@
 
 package models
 
-import models.Sort.Field.{CreatedAt, LRN}
-import models.Sort.Order.{Ascending, Descending}
+import models.Sort.Field._
+import models.Sort.Order._
 import models.Sort.{Field, Order}
 import org.mongodb.scala.bson.conversions.Bson
-import org.mongodb.scala.model.Indexes.{ascending, descending}
+import org.mongodb.scala.model.Indexes._
 
 sealed trait Sort {
   val field: Field
   val order: Order
   lazy val convertParams: String = this.toString
-  def toBson: Bson               = order.f(field.toString)
+  def toBson: Bson               = order.sortBy(field.toString)
   override def toString: String  = s"$field.$order"
 }
 
 object Sort {
 
   sealed trait Order {
-    val f: String => Bson
+    def sortBy(fields: String*): Bson
   }
 
   object Order {
 
     case object Ascending extends Order {
-      override val f: String => Bson = ascending(_)
-      override def toString: String  = "asc"
+      override def sortBy(fields: String*): Bson = ascending(fields: _*)
+      override def toString: String              = "asc"
     }
 
     case object Descending extends Order {
-      override val f: String => Bson = descending(_)
-      override def toString: String  = "dsc"
+      override def sortBy(fields: String*): Bson = descending(fields: _*)
+      override def toString: String              = "dsc"
     }
   }
 
