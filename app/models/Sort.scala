@@ -16,61 +16,60 @@
 
 package models
 
-import models.Sort.Order
+import models.Sort.Field.{CreatedAt, LRN}
+import models.Sort.{Field, Order}
 import models.Sort.Order.{Ascending, Descending}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, descending}
 
 sealed trait Sort {
-  self: Order =>
-  val field: String
-  val orderBy: String
-  val convertParams: String
-  val toBson: Bson
-
+  self: Field with Order =>
+  val convertParams: String     = this.toString
+  val toBson: Bson              = f(field)
   override def toString: String = s"$field.$orderBy"
 }
 
 object Sort {
 
   sealed trait Order {
+    val f: String => Bson
     val orderBy: String
   }
 
   object Order {
 
     sealed trait Ascending extends Order {
-      override val orderBy: String = "asc"
+      override val f: String => Bson = ascending(_)
+      override val orderBy: String   = "asc"
     }
 
     sealed trait Descending extends Order {
-      override val orderBy: String = "dsc"
+      override val f: String => Bson = descending(_)
+      override val orderBy: String   = "dsc"
     }
   }
 
-  case object SortByLRNAsc extends Sort with Ascending {
-    val field: String = "lrn"
-    val convertParams = s"$field.$orderBy"
-    val toBson: Bson  = ascending(field)
+  sealed trait Field {
+    val field: String
   }
 
-  case object SortByLRNDesc extends Sort with Descending {
-    val field: String = "lrn"
-    val convertParams = s"$field.$orderBy"
-    val toBson: Bson  = descending(field)
-  }
+  object Field {
 
-  case object SortByCreatedAtAsc extends Sort with Ascending {
-    val field: String = "createdAt"
-    val convertParams = s"$field.$orderBy"
-    val toBson: Bson  = ascending(field)
-  }
+    sealed trait LRN extends Field {
+      override val field: String = "lrn"
+    }
 
-  case object SortByCreatedAtDesc extends Sort with Descending {
-    val field: String = "createdAt"
-    val convertParams = s"$field.$orderBy"
-    val toBson: Bson  = descending(field)
+    sealed trait CreatedAt extends Field {
+      override val field: String = "createdAt"
+    }
   }
+  case object SortByLRNAsc extends Sort with LRN with Ascending
+
+  case object SortByLRNDesc extends Sort with LRN with Descending
+
+  case object SortByCreatedAtAsc extends Sort with CreatedAt with Ascending
+
+  case object SortByCreatedAtDesc extends Sort with CreatedAt with Descending
 
   def apply(sortParams: Option[String]): Sort = sortParams match {
     case Some(SortByLRNAsc.convertParams)       => SortByLRNAsc
