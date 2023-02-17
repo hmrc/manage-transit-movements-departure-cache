@@ -30,4 +30,7 @@ class AppConfig @Inject() (config: Configuration) {
 
   val enrolmentKey: String        = config.get[String]("enrolment.key")
   val enrolmentIdentifier: String = config.get[String]("enrolment.identifier")
+
+  val apiUrl: String = config.get[Service]("microservice.services.common-transit-convention-traders").baseUrl
+
 }

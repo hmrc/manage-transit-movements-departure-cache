@@ -24,8 +24,6 @@ import java.util.UUID
 
 class UserAnswersSpec extends SpecBase {
 
-  private val uuid = "2e8ede47-dbfb-44ea-a1e3-6c57b1fe6fe2"
-
   private val userAnswers = UserAnswers(
     lrn = lrn,
     eoriNumber = eoriNumber,

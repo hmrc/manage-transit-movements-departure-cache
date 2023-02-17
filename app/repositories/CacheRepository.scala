@@ -18,9 +18,9 @@ package repositories
 
 import com.mongodb.client.model.Filters.{regex, and => mAnd, eq => mEq}
 import config.AppConfig
-import models.{UserAnswers, UserAnswersSummary}
+import models.{Sort, UserAnswers, UserAnswersSummary}
 import org.bson.conversions.Bson
-import org.mongodb.scala.model.Indexes.{ascending, compoundIndex, descending}
+import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
 import org.mongodb.scala.model._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
@@ -85,7 +85,8 @@ class CacheRepository @Inject() (
     eoriNumber: String,
     lrn: Option[String] = None,
     limit: Option[Int] = None,
-    skip: Option[Int] = None
+    skip: Option[Int] = None,
+    sortBy: Option[String] = None
   ): Future[UserAnswersSummary] = {
 
     val skipIndex: Int   = skip.getOrElse(0)
@@ -100,7 +101,7 @@ class CacheRepository @Inject() (
 
     val aggregates: Seq[Bson] = Seq(
       primaryFilter,
-      Aggregates.sort(descending("createdAt")),
+      Aggregates.sort(Sort(sortBy).toBson),
       Aggregates.skip(skipLimit),
       Aggregates.limit(returnLimit)
     )

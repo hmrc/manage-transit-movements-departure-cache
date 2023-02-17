@@ -123,17 +123,18 @@ class CacheController @Inject() (
         }
   }
 
-  def getAll(lrn: Option[String] = None, limit: Option[Int] = None, skip: Option[Int] = None): Action[AnyContent] = authenticate().async {
-    implicit request =>
-      cacheRepository
-        .getAll(request.eoriNumber, lrn, limit, skip)
-        .map(
-          result => Ok(result.toHateoas())
-        )
-        .recover {
-          case e =>
-            logger.error("Failed to read user answers summary from mongo", e)
-            InternalServerError
-        }
-  }
+  def getAll(lrn: Option[String] = None, limit: Option[Int] = None, skip: Option[Int] = None, sortBy: Option[String] = None): Action[AnyContent] =
+    authenticate().async {
+      implicit request =>
+        cacheRepository
+          .getAll(request.eoriNumber, lrn, limit, skip, sortBy)
+          .map(
+            result => Ok(result.toHateoas())
+          )
+          .recover {
+            case e =>
+              logger.error("Failed to read user answers summary from mongo", e)
+              InternalServerError
+          }
+    }
 }
