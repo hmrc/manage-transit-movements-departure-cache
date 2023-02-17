@@ -16,10 +16,13 @@
 
 package models
 
+import models.Sort.Order
+import models.Sort.Order.{Ascending, Descending}
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, descending}
 
 sealed trait Sort {
+  self: Order =>
   val field: String
   val orderBy: String
   val convertParams: String
@@ -30,32 +33,43 @@ sealed trait Sort {
 
 object Sort {
 
-  case object SortByLRNAsc extends Sort {
-    val field: String   = "lrn"
-    val orderBy: String = "asc"
-    val convertParams   = s"$field.$orderBy"
-    val toBson: Bson    = ascending(field)
+  sealed trait Order {
+    val orderBy: String
   }
 
-  case object SortByLRNDesc extends Sort {
-    val field: String   = "lrn"
-    val orderBy: String = "dsc"
-    val convertParams   = s"$field.$orderBy"
-    val toBson: Bson    = descending(field)
+  object Order {
+
+    sealed trait Ascending extends Order {
+      override val orderBy: String = "asc"
+    }
+
+    sealed trait Descending extends Order {
+      override val orderBy: String = "dsc"
+    }
   }
 
-  case object SortByCreatedAtAsc extends Sort {
-    val field: String   = "createdAt"
-    val orderBy: String = "asc"
-    val convertParams   = s"$field.$orderBy"
-    val toBson: Bson    = ascending(field)
+  case object SortByLRNAsc extends Sort with Ascending {
+    val field: String = "lrn"
+    val convertParams = s"$field.$orderBy"
+    val toBson: Bson  = ascending(field)
   }
 
-  case object SortByCreatedAtDesc extends Sort {
-    val field: String   = "createdAt"
-    val orderBy: String = "dsc"
-    val convertParams   = s"$field.$orderBy"
-    val toBson: Bson    = descending(field)
+  case object SortByLRNDesc extends Sort with Descending {
+    val field: String = "lrn"
+    val convertParams = s"$field.$orderBy"
+    val toBson: Bson  = descending(field)
+  }
+
+  case object SortByCreatedAtAsc extends Sort with Ascending {
+    val field: String = "createdAt"
+    val convertParams = s"$field.$orderBy"
+    val toBson: Bson  = ascending(field)
+  }
+
+  case object SortByCreatedAtDesc extends Sort with Descending {
+    val field: String = "createdAt"
+    val convertParams = s"$field.$orderBy"
+    val toBson: Bson  = descending(field)
   }
 
   def apply(sortParams: Option[String]): Sort = sortParams match {
