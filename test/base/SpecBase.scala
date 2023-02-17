@@ -29,6 +29,7 @@ import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import repositories.CacheRepository
+import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.{Clock, LocalDateTime}
 import java.util.UUID
@@ -37,6 +38,9 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
 
   val lrn        = "lrn"
   val eoriNumber = "eori"
+  val uuid       = "2e8ede47-dbfb-44ea-a1e3-6c57b1fe6fe2"
+
+  implicit val hc: HeaderCarrier = HeaderCarrier()
 
   val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
 

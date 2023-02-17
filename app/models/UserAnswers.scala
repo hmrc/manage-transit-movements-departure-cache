@@ -22,7 +22,7 @@ import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 import java.time.LocalDateTime
 import java.util.UUID
 
-case class UserAnswers(
+final case class UserAnswers(
   lrn: String,
   eoriNumber: String,
   data: JsObject,
@@ -30,7 +30,12 @@ case class UserAnswers(
   createdAt: LocalDateTime,
   lastUpdated: LocalDateTime,
   id: UUID
-)
+) {
+
+  def get[A](path: JsPath)(implicit rds: Reads[A]): Option[A] =
+    Reads.optionNoError(Reads.at(path)).reads(data).getOrElse(None)
+
+}
 
 object UserAnswers {
 
