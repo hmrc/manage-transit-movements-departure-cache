@@ -16,7 +16,6 @@
 
 package controllers
 
-import config.AppConfig
 import connectors.ApiConnector
 import controllers.actions.AuthenticateActionProvider
 import play.api.Logging
@@ -25,7 +24,6 @@ import play.api.mvc.{Action, ControllerComponents}
 import repositories.CacheRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -34,9 +32,8 @@ class SubmissionController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
   apiConnector: ApiConnector,
-  cacheRepository: CacheRepository,
-  appConfig: AppConfig
-)(implicit ec: ExecutionContext, clock: Clock)
+  cacheRepository: CacheRepository
+)(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
 
