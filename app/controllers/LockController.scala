@@ -41,8 +41,8 @@ class LockController @Inject() (
         .map {
           sessionId =>
             lockRepository.findLocks(request.eoriNumber, lrn).map {
-              case Some(value) if sessionId.value != value.sessionId => Locked
-              case _                                                 => Ok
+              case Some(lock) if sessionId.value != lock.sessionId => Locked
+              case _                                               => Ok
             }
         }
         .getOrElse(Future.successful(BadRequest))
