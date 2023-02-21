@@ -16,8 +16,7 @@
 
 package controllers
 
-import config.AppConfig
-import controllers.actions.AuthenticateActionProvider
+import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
 import models.UserAnswers
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
@@ -34,8 +33,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class CacheController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
-  cacheRepository: CacheRepository,
-  appConfig: AppConfig
+  authenticateAndLock: AuthenticateAndLockActionProvider,
+  cacheRepository: CacheRepository
 )(implicit ec: ExecutionContext, clock: Clock)
     extends BackendController(cc)
     with Logging {
@@ -58,7 +57,7 @@ class CacheController @Inject() (
         }
   }
 
-  def post(): Action[JsValue] = authenticate().async(parse.json) {
+  def post(lrn: String): Action[JsValue] = authenticateAndLock(lrn).async(parse.json) {
     implicit request =>
       request.body.validate[UserAnswers] match {
         case JsSuccess(userAnswers, _) =>

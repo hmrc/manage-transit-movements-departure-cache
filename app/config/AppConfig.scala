@@ -25,6 +25,7 @@ class AppConfig @Inject() (config: Configuration) {
 
   val appName: String      = config.get[String]("appName")
   val mongoTtlInDays: Int  = config.get[Int]("mongodb.ttlInDays")
+  val lockTTLInMins: Int   = config.get[Int]("mongodb.lockTTLInMins")
   val maxRowsReturned: Int = config.get[Int]("mongodb.maxRowsReturned")
 
   val enrolmentKey: String        = config.get[String]("enrolment.key")

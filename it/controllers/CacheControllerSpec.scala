@@ -68,7 +68,7 @@ class CacheControllerSpec extends ItSpecBase {
 
   "POST /user-answers" when {
 
-    val url = s"$baseUrl/manage-transit-movements-departure-cache/user-answers"
+    val url = s"$baseUrl/manage-transit-movements-departure-cache/user-answers/$lrn"
 
     "document successfully written to mongo" should {
       "respond with 200 status" in {
