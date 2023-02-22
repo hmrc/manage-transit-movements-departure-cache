@@ -361,28 +361,32 @@ object transportChargesType {
 
 object houseConsignmentType10 {
 
-  // TODO - Should be able to change this to `(HouseConsignmentType10.apply _)` once this is all done
-  implicit val reads: Reads[HouseConsignmentType10] =
-    itemsPath.readArray[ConsignmentItemType09](consignmentItemType09.reads).map {
-      ConsignmentItem =>
-        HouseConsignmentType10(
-          sequenceNumber = "0",
-          countryOfDispatch = None, // TODO
-          grossMass = 1, // TODO
-          referenceNumberUCR = None, // TODO
-          Consignor = None, // TODO
-          Consignee = None, // TODO
-          AdditionalSupplyChainActor = Nil, // TODO
-          DepartureTransportMeans = Nil, // TODO
-          PreviousDocument = Nil, // TODO
-          SupportingDocument = Nil, // TODO
-          TransportDocument = Nil, // TODO
-          AdditionalReference = Nil, // TODO
-          AdditionalInformation = Nil, // TODO
-          TransportCharges = None, // TODO
-          ConsignmentItem = ConsignmentItem
-        )
-    }
+  implicit val reads: Reads[HouseConsignmentType10] = (
+    ("0": Reads[String]) and
+      itemsPath.readArray[ConsignmentItemType09](consignmentItemType09.reads)
+  ).apply { // TODO - Should be able to change this to `(HouseConsignmentType10.apply _)` once this is all done
+    (
+      sequenceNumber,
+      ConsignmentItem
+    ) =>
+      HouseConsignmentType10(
+        sequenceNumber = sequenceNumber,
+        countryOfDispatch = None, // TODO
+        grossMass = 1, // TODO
+        referenceNumberUCR = None, // TODO
+        Consignor = None, // TODO
+        Consignee = None, // TODO
+        AdditionalSupplyChainActor = Nil, // TODO
+        DepartureTransportMeans = Nil, // TODO
+        PreviousDocument = Nil, // TODO
+        SupportingDocument = Nil, // TODO
+        TransportDocument = Nil, // TODO
+        AdditionalReference = Nil, // TODO
+        AdditionalInformation = Nil, // TODO
+        TransportCharges = None, // TODO
+        ConsignmentItem = ConsignmentItem
+      )
+  }
 }
 
 object consignmentItemType09 {
