@@ -47,7 +47,8 @@ object consignmentType20 {
       __.read[Seq[ActiveBorderTransportMeansType02]](activeBorderTransportMeansReads) and
       (routeDetailsPath \ "loading").readNullable[PlaceOfLoadingType03](placeOfLoadingType03.reads) and
       (routeDetailsPath \ "unloading").readNullable[PlaceOfUnloadingType01](placeOfUnloadingType01.reads) and
-      (equipmentsAndChargesPath \ "paymentMethod").readNullable[TransportChargesType](transportChargesType.reads)
+      (equipmentsAndChargesPath \ "paymentMethod").readNullable[TransportChargesType](transportChargesType.reads) and
+      __.read[HouseConsignmentType10](houseConsignmentType10.reads).map(Seq(_))
   ).apply { // TODO - Should be able to change this to `(ConsignmentType20.apply _)` once this is all done
     (
       countryOfDispatch,
@@ -67,7 +68,8 @@ object consignmentType20 {
       ActiveBorderTransportMeans,
       PlaceOfLoading,
       PlaceOfUnloading,
-      TransportCharges
+      TransportCharges,
+      HouseConsignment
     ) =>
       ConsignmentType20(
         countryOfDispatch = countryOfDispatch,
@@ -94,7 +96,7 @@ object consignmentType20 {
         AdditionalReference = Nil, // TODO
         AdditionalInformation = Nil, // TODO
         TransportCharges = TransportCharges,
-        HouseConsignment = Nil // TODO
+        HouseConsignment = HouseConsignment
       )
   }
 
@@ -357,4 +359,81 @@ object transportChargesType {
   }
 }
 
-object houseConsignmentType10 {}
+object houseConsignmentType10 {
+
+  // TODO - Should be able to change this to `(HouseConsignmentType10.apply _)` once this is all done
+  implicit val reads: Reads[HouseConsignmentType10] =
+    itemsPath.readArray[ConsignmentItemType09](consignmentItemType09.reads).map {
+      ConsignmentItem =>
+        HouseConsignmentType10(
+          sequenceNumber = "0",
+          countryOfDispatch = None, // TODO
+          grossMass = 1, // TODO
+          referenceNumberUCR = None, // TODO
+          Consignor = None, // TODO
+          Consignee = None, // TODO
+          AdditionalSupplyChainActor = Nil, // TODO
+          DepartureTransportMeans = Nil, // TODO
+          PreviousDocument = Nil, // TODO
+          SupportingDocument = Nil, // TODO
+          TransportDocument = Nil, // TODO
+          AdditionalReference = Nil, // TODO
+          AdditionalInformation = Nil, // TODO
+          TransportCharges = None, // TODO
+          ConsignmentItem = ConsignmentItem
+        )
+    }
+}
+
+object consignmentItemType09 {
+
+  def reads(index: Int): Reads[ConsignmentItemType09] = (
+    (index.toString: Reads[String]) and
+      (index: Reads[Int]) and
+      (__ \ "declarationType").readNullable[String] and
+      (__ \ "countryOfDispatch" \ "code").readNullable[String] and
+      (__ \ "countryOfDestination" \ "code").readNullable[String] and
+      __.read[CommodityType06](commodityType06.reads)
+  ).apply { // TODO - Should be able to change this to `(ConsignmentItemType09.apply _)` once this is all done
+    (
+      goodsItemNumber,
+      declarationGoodsItemNumber,
+      declarationType,
+      countryOfDispatch,
+      countryOfDestination,
+      Commodity
+    ) =>
+      ConsignmentItemType09(
+        goodsItemNumber = goodsItemNumber,
+        declarationGoodsItemNumber = declarationGoodsItemNumber,
+        declarationType = declarationType,
+        countryOfDispatch = countryOfDispatch,
+        countryOfDestination = countryOfDestination,
+        referenceNumberUCR = None, // TODO
+        Consignee = None, // TODO
+        AdditionalSupplyChainActor = Nil, // TODO
+        Commodity = Commodity,
+        Packaging = Nil, // TODO
+        PreviousDocument = Nil, // TODO
+        SupportingDocument = Nil, // TODO
+        TransportDocument = Nil, // TODO
+        AdditionalReference = Nil, // TODO
+        AdditionalInformation = Nil, // TODO
+        TransportCharges = None // TODO
+      )
+  }
+}
+
+object commodityType06 {
+
+  implicit val reads: Reads[CommodityType06] = (__ \ "description").read[String].map {
+    descriptionOfGoods =>
+      CommodityType06(
+        descriptionOfGoods = descriptionOfGoods,
+        cusCode = None, // TODO
+        CommodityCode = None, // TODO
+        DangerousGoods = Nil, // TODO
+        GoodsMeasure = None // TODO
+      )
+  }
+}
