@@ -26,9 +26,10 @@ import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
 import java.time.{Clock, LocalDateTime}
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
+import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
+@Singleton
 class DefaultLockRepository @Inject() (mongoComponent: MongoComponent, appConfig: AppConfig, clock: Clock)(implicit ec: ExecutionContext)
     extends PlayMongoRepository[Lock](
       mongoComponent = mongoComponent,
