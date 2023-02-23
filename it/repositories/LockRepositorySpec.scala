@@ -22,6 +22,10 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import play.api.Application
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import java.time.LocalDateTime
@@ -34,15 +38,16 @@ class LockRepositorySpec
     with GuiceOneServerPerSuite
     with DefaultPlayMongoRepositorySupport[Lock] {
 
+  override def fakeApplication(): Application =
+    GuiceApplicationBuilder()
+      .configure("metrics.enabled" -> false)
+      .overrides(bind[MongoComponent].toInstance(mongoComponent))
+      .build()
+
   override protected def repository: DefaultLockRepository =
     app.injector.instanceOf[DefaultLockRepository]
 
   val dateNow: LocalDateTime = LocalDateTime.now()
-
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    dropCollection()
-  }
 
   "lock" when {
 
