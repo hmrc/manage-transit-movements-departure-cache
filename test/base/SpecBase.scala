@@ -28,10 +28,8 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
-import repositories.CacheRepository
-import uk.gov.hmrc.http.HeaderCarrier
 import repositories.{CacheRepository, DefaultLockRepository}
-import uk.gov.hmrc.http.HeaderNames
+import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.{Clock, LocalDateTime}
 import java.util.UUID
