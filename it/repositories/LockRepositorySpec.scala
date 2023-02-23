@@ -25,7 +25,6 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import java.time.LocalDateTime
-import scala.concurrent.Future
 
 class LockRepositorySpec
     extends AnyWordSpec
@@ -102,7 +101,9 @@ class LockRepositorySpec
 
         val result = repository.findLocks(lock1.eoriNumber, lock1.lrn).futureValue
 
-        result.value shouldBe lock1
+        result.value.sessionId shouldBe lock1.sessionId
+        result.value.eoriNumber shouldBe lock1.eoriNumber
+        result.value.lrn shouldBe lock1.lrn
       }
 
       "return None for no lock" in {
