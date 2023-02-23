@@ -22,7 +22,6 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.DefaultLockRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 

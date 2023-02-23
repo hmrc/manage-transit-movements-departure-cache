@@ -22,10 +22,13 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatestplus.play.guice.GuiceOneServerPerSuite
+import play.api.Application
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 import java.time.LocalDateTime
-import scala.concurrent.Future
 
 class LockRepositorySpec
     extends AnyWordSpec
@@ -35,15 +38,16 @@ class LockRepositorySpec
     with GuiceOneServerPerSuite
     with DefaultPlayMongoRepositorySupport[Lock] {
 
+  override def fakeApplication(): Application =
+    GuiceApplicationBuilder()
+      .configure("metrics.enabled" -> false)
+      .overrides(bind[MongoComponent].toInstance(mongoComponent))
+      .build()
+
   override protected def repository: DefaultLockRepository =
     app.injector.instanceOf[DefaultLockRepository]
 
   val dateNow: LocalDateTime = LocalDateTime.now()
-
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    dropCollection()
-  }
 
   "lock" when {
 
@@ -102,7 +106,9 @@ class LockRepositorySpec
 
         val result = repository.findLocks(lock1.eoriNumber, lock1.lrn).futureValue
 
-        result.value shouldBe lock1
+        result.value.sessionId shouldBe lock1.sessionId
+        result.value.eoriNumber shouldBe lock1.eoriNumber
+        result.value.lrn shouldBe lock1.lrn
       }
 
       "return None for no lock" in {

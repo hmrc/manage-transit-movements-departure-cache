@@ -16,7 +16,8 @@
 
 package models
 
-import play.api.libs.json.{Json, OFormat}
+import play.api.libs.json._
+import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.LocalDateTime
 
@@ -30,5 +31,25 @@ final case class Lock(
 
 object Lock {
 
-  implicit lazy val format: OFormat[Lock] = Json.format[Lock]
+  import play.api.libs.functional.syntax._
+
+  implicit val reads: Reads[Lock] =
+    (
+      (__ \ "sessionId").read[String] and
+        (__ \ "eoriNumber").read[String] and
+        (__ \ "lrn").read[String] and
+        (__ \ "createdAt").read(MongoJavatimeFormats.localDateTimeReads) and
+        (__ \ "lastUpdated").read(MongoJavatimeFormats.localDateTimeReads)
+    )(Lock.apply _)
+
+  implicit val writes: Writes[Lock] =
+    (
+      (__ \ "sessionId").write[String] and
+        (__ \ "eoriNumber").write[String] and
+        (__ \ "lrn").write[String] and
+        (__ \ "createdAt").write(MongoJavatimeFormats.localDateTimeWrites) and
+        (__ \ "lastUpdated").write(MongoJavatimeFormats.localDateTimeWrites)
+    )(unlift(Lock.unapply))
+
+  implicit lazy val format: Format[Lock] = Format(reads, writes)
 }
