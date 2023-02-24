@@ -19,7 +19,7 @@ package api.submission
 import generated._
 import models.UserAnswers
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{__, Reads}
+import play.api.libs.json.{Reads, __}
 
 object Consignment {
 
@@ -397,6 +397,7 @@ object consignmentItemType09 {
       (__ \ "declarationType").readNullable[String] and
       (__ \ "countryOfDispatch" \ "code").readNullable[String] and
       (__ \ "countryOfDestination" \ "code").readNullable[String] and
+      (__ \ "uniqueConsignmentReference").readNullable[String] and
       __.read[CommodityType06](commodityType06.reads)
   ).apply { // TODO - Should be able to change this to `(ConsignmentItemType09.apply _)` once this is all done
     (
@@ -405,6 +406,7 @@ object consignmentItemType09 {
       declarationType,
       countryOfDispatch,
       countryOfDestination,
+      referenceNumberUCR,
       Commodity
     ) =>
       ConsignmentItemType09(
@@ -413,7 +415,7 @@ object consignmentItemType09 {
         declarationType = declarationType,
         countryOfDispatch = countryOfDispatch,
         countryOfDestination = countryOfDestination,
-        referenceNumberUCR = None, // TODO
+        referenceNumberUCR = referenceNumberUCR,
         Consignee = None, // TODO
         AdditionalSupplyChainActor = Nil, // TODO
         Commodity = Commodity,
@@ -430,14 +432,27 @@ object consignmentItemType09 {
 
 object commodityType06 {
 
-  implicit val reads: Reads[CommodityType06] = (__ \ "description").read[String].map {
-    descriptionOfGoods =>
-      CommodityType06(
-        descriptionOfGoods = descriptionOfGoods,
-        cusCode = None, // TODO
-        CommodityCode = None, // TODO
-        DangerousGoods = Nil, // TODO
-        GoodsMeasure = None // TODO
-      )
-  }
+  implicit val reads: Reads[CommodityType06] = (
+    (__ \ "description").read[String] and
+      (__ \ "customsUnionAndStatisticsCode").readNullable[String] and
+      __.readNullable[CommodityCodeType02](commodityCodeType02.reads) and
+      (__ \ "dangerousGoodsList").readArray[DangerousGoodsType01](dangerousGoodsType01.reads) and
+      (None: Reads[Option[GoodsMeasureType02]]) // TODO
+  )(CommodityType06.apply _)
+}
+
+object commodityCodeType02 {
+
+  implicit val reads: Reads[CommodityCodeType02] = (
+    (__ \ "commodityCode").read[String] and
+      (__ \ "combinedNomenclatureCode").readNullable[String]
+  )(CommodityCodeType02.apply _)
+}
+
+object dangerousGoodsType01 {
+
+  def reads(index: Int): Reads[DangerousGoodsType01] = (
+    (index.toString: Reads[String]) and
+      (__ \ "unNumber").read[String]
+  )(DangerousGoodsType01.apply _)
 }

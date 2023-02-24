@@ -249,7 +249,19 @@ class ConsignmentSpec extends SpecBase {
             |        "countryOfDestination" : {
             |          "code" : "FR",
             |          "description" : "France"
-            |        }
+            |        },
+            |        "uniqueConsignmentReference" : "UCR 1",
+            |        "customsUnionAndStatisticsCode" : "CUS code 1",
+            |        "commodityCode" : "commodity code 1",
+            |        "combinedNomenclatureCode" : "CN code 1",
+            |        "dangerousGoodsList" : [
+            |          {
+            |            "unNumber" : "UN number 1_1"
+            |          },
+            |          {
+            |            "unNumber" : "UN number 1_2"
+            |          }
+            |        ]
             |      },
             |      {
             |        "description" : "Description 2",
@@ -261,7 +273,19 @@ class ConsignmentSpec extends SpecBase {
             |        "countryOfDestination" : {
             |          "code" : "ES",
             |          "description" : "Spain"
-            |        }
+            |        },
+            |        "uniqueConsignmentReference" : "UCR 2",
+            |        "customsUnionAndStatisticsCode" : "CUS code 2",
+            |        "commodityCode" : "commodity code 2",
+            |        "combinedNomenclatureCode" : "CN code 2",
+            |        "dangerousGoodsList" : [
+            |          {
+            |            "unNumber" : "UN number 2_1"
+            |          },
+            |          {
+            |            "unNumber" : "UN number 2_2"
+            |          }
+            |        ]
             |      }
             |    ]
             |  },
@@ -506,14 +530,28 @@ class ConsignmentSpec extends SpecBase {
               declarationType = Some("T1"),
               countryOfDispatch = Some("GB"),
               countryOfDestination = Some("FR"),
-              referenceNumberUCR = None,
+              referenceNumberUCR = Some("UCR 1"),
               Consignee = None,
               AdditionalSupplyChainActor = Nil,
               Commodity = CommodityType06(
                 descriptionOfGoods = "Description 1",
-                cusCode = None,
-                CommodityCode = None,
-                DangerousGoods = Nil,
+                cusCode = Some("CUS code 1"),
+                CommodityCode = Some(
+                  CommodityCodeType02(
+                    harmonizedSystemSubHeadingCode = "commodity code 1",
+                    combinedNomenclatureCode = Some("CN code 1")
+                  )
+                ),
+                DangerousGoods = Seq(
+                  DangerousGoodsType01(
+                    sequenceNumber = "0",
+                    UNNumber = "UN number 1_1"
+                  ),
+                  DangerousGoodsType01(
+                    sequenceNumber = "1",
+                    UNNumber = "UN number 1_2"
+                  )
+                ),
                 GoodsMeasure = None
               ),
               Packaging = Nil,
@@ -530,14 +568,28 @@ class ConsignmentSpec extends SpecBase {
               declarationType = Some("T2"),
               countryOfDispatch = Some("DE"),
               countryOfDestination = Some("ES"),
-              referenceNumberUCR = None,
+              referenceNumberUCR = Some("UCR 2"),
               Consignee = None,
               AdditionalSupplyChainActor = Nil,
               Commodity = CommodityType06(
                 descriptionOfGoods = "Description 2",
-                cusCode = None,
-                CommodityCode = None,
-                DangerousGoods = Nil,
+                cusCode = Some("CUS code 2"),
+                CommodityCode = Some(
+                  CommodityCodeType02(
+                    harmonizedSystemSubHeadingCode = "commodity code 2",
+                    combinedNomenclatureCode = Some("CN code 2")
+                  )
+                ),
+                DangerousGoods = Seq(
+                  DangerousGoodsType01(
+                    sequenceNumber = "0",
+                    UNNumber = "UN number 2_1"
+                  ),
+                  DangerousGoodsType01(
+                    sequenceNumber = "1",
+                    UNNumber = "UN number 2_2"
+                  )
+                ),
                 GoodsMeasure = None
               ),
               Packaging = Nil,
