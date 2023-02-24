@@ -19,7 +19,7 @@ package api.submission
 import generated._
 import models.UserAnswers
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{Reads, __}
+import play.api.libs.json.{__, Reads}
 
 object Consignment {
 
