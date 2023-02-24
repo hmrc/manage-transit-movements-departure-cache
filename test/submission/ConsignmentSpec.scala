@@ -237,7 +237,57 @@ class ConsignmentSpec extends SpecBase {
             |        ],
             |        "paymentMethod" : "cash"
             |      }
-            |    }
+            |    },
+            |    "items" : [
+            |      {
+            |        "description" : "Description 1",
+            |        "declarationType" : "T1",
+            |        "countryOfDispatch" : {
+            |          "code" : "GB",
+            |          "description" : "United Kingdom"
+            |        },
+            |        "countryOfDestination" : {
+            |          "code" : "FR",
+            |          "description" : "France"
+            |        },
+            |        "uniqueConsignmentReference" : "UCR 1",
+            |        "customsUnionAndStatisticsCode" : "CUS code 1",
+            |        "commodityCode" : "commodity code 1",
+            |        "combinedNomenclatureCode" : "CN code 1",
+            |        "dangerousGoodsList" : [
+            |          {
+            |            "unNumber" : "UN number 1_1"
+            |          },
+            |          {
+            |            "unNumber" : "UN number 1_2"
+            |          }
+            |        ]
+            |      },
+            |      {
+            |        "description" : "Description 2",
+            |        "declarationType" : "T2",
+            |        "countryOfDispatch" : {
+            |          "code" : "DE",
+            |          "description" : "Germany"
+            |        },
+            |        "countryOfDestination" : {
+            |          "code" : "ES",
+            |          "description" : "Spain"
+            |        },
+            |        "uniqueConsignmentReference" : "UCR 2",
+            |        "customsUnionAndStatisticsCode" : "CUS code 2",
+            |        "commodityCode" : "commodity code 2",
+            |        "combinedNomenclatureCode" : "CN code 2",
+            |        "dangerousGoodsList" : [
+            |          {
+            |            "unNumber" : "UN number 2_1"
+            |          },
+            |          {
+            |            "unNumber" : "UN number 2_2"
+            |          }
+            |        ]
+            |      }
+            |    ]
             |  },
             |  "tasks" : {},
             |  "createdAt" : {
@@ -455,6 +505,102 @@ class ConsignmentSpec extends SpecBase {
 
         converted.TransportCharges shouldBe Some(
           TransportChargesType("A")
+        )
+
+        converted.HouseConsignment.size shouldBe 1
+        converted.HouseConsignment.head shouldBe HouseConsignmentType10(
+          sequenceNumber = "0",
+          countryOfDispatch = None,
+          grossMass = 1,
+          referenceNumberUCR = None,
+          Consignor = None,
+          Consignee = None,
+          AdditionalSupplyChainActor = Nil,
+          DepartureTransportMeans = Nil,
+          PreviousDocument = Nil,
+          SupportingDocument = Nil,
+          TransportDocument = Nil,
+          AdditionalReference = Nil,
+          AdditionalInformation = Nil,
+          TransportCharges = None,
+          ConsignmentItem = Seq(
+            ConsignmentItemType09(
+              goodsItemNumber = "0",
+              declarationGoodsItemNumber = 0,
+              declarationType = Some("T1"),
+              countryOfDispatch = Some("GB"),
+              countryOfDestination = Some("FR"),
+              referenceNumberUCR = Some("UCR 1"),
+              Consignee = None,
+              AdditionalSupplyChainActor = Nil,
+              Commodity = CommodityType06(
+                descriptionOfGoods = "Description 1",
+                cusCode = Some("CUS code 1"),
+                CommodityCode = Some(
+                  CommodityCodeType02(
+                    harmonizedSystemSubHeadingCode = "commodity code 1",
+                    combinedNomenclatureCode = Some("CN code 1")
+                  )
+                ),
+                DangerousGoods = Seq(
+                  DangerousGoodsType01(
+                    sequenceNumber = "0",
+                    UNNumber = "UN number 1_1"
+                  ),
+                  DangerousGoodsType01(
+                    sequenceNumber = "1",
+                    UNNumber = "UN number 1_2"
+                  )
+                ),
+                GoodsMeasure = None
+              ),
+              Packaging = Nil,
+              PreviousDocument = Nil,
+              SupportingDocument = Nil,
+              TransportDocument = Nil,
+              AdditionalReference = Nil,
+              AdditionalInformation = Nil,
+              TransportCharges = None
+            ),
+            ConsignmentItemType09(
+              goodsItemNumber = "1",
+              declarationGoodsItemNumber = 1,
+              declarationType = Some("T2"),
+              countryOfDispatch = Some("DE"),
+              countryOfDestination = Some("ES"),
+              referenceNumberUCR = Some("UCR 2"),
+              Consignee = None,
+              AdditionalSupplyChainActor = Nil,
+              Commodity = CommodityType06(
+                descriptionOfGoods = "Description 2",
+                cusCode = Some("CUS code 2"),
+                CommodityCode = Some(
+                  CommodityCodeType02(
+                    harmonizedSystemSubHeadingCode = "commodity code 2",
+                    combinedNomenclatureCode = Some("CN code 2")
+                  )
+                ),
+                DangerousGoods = Seq(
+                  DangerousGoodsType01(
+                    sequenceNumber = "0",
+                    UNNumber = "UN number 2_1"
+                  ),
+                  DangerousGoodsType01(
+                    sequenceNumber = "1",
+                    UNNumber = "UN number 2_2"
+                  )
+                ),
+                GoodsMeasure = None
+              ),
+              Packaging = Nil,
+              PreviousDocument = Nil,
+              SupportingDocument = Nil,
+              TransportDocument = Nil,
+              AdditionalReference = Nil,
+              AdditionalInformation = Nil,
+              TransportCharges = None
+            )
+          )
         )
       }
     }
