@@ -44,8 +44,8 @@ object authorisationType03 {
 
   private def authorisationTypeReads(index: Int, procedureType: String, reducedDatasetIndicator: Boolean, inlandMode: String): Reads[String] =
     (index, procedureType, reducedDatasetIndicator, inlandMode) match {
-      case (0, _, true, "maritime" | "rail" | "air") => "TRD"
-      case (0, "simplified", true, _)                => "ACR"
+      case (1, _, true, "maritime" | "rail" | "air") => "TRD"
+      case (1, "simplified", true, _)                => "ACR"
       case _                                         => (__ \ "authorisationType").read[String]
     }
 

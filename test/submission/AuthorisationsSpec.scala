@@ -94,17 +94,17 @@ class AuthorisationsSpec extends SpecBase with ScalaCheckPropertyChecks {
 
                 val expected = Seq(
                   AuthorisationType03(
-                    sequenceNumber = "0",
+                    sequenceNumber = "1",
                     typeValue = "C524",
                     referenceNumber = "TRD1"
                   ),
                   AuthorisationType03(
-                    sequenceNumber = "1",
+                    sequenceNumber = "2",
                     typeValue = "C523",
                     referenceNumber = "SSE1"
                   ),
                   AuthorisationType03(
-                    sequenceNumber = "2",
+                    sequenceNumber = "3",
                     typeValue = "C521",
                     referenceNumber = "ACR1"
                   )
@@ -175,17 +175,17 @@ class AuthorisationsSpec extends SpecBase with ScalaCheckPropertyChecks {
 
                   val expected = Seq(
                     AuthorisationType03(
-                      sequenceNumber = "0",
+                      sequenceNumber = "1",
                       typeValue = "C521",
                       referenceNumber = "ACR1"
                     ),
                     AuthorisationType03(
-                      sequenceNumber = "1",
+                      sequenceNumber = "2",
                       typeValue = "C523",
                       referenceNumber = "SSE1"
                     ),
                     AuthorisationType03(
-                      sequenceNumber = "2",
+                      sequenceNumber = "3",
                       typeValue = "C524",
                       referenceNumber = "TRD1"
                     )
@@ -253,17 +253,17 @@ class AuthorisationsSpec extends SpecBase with ScalaCheckPropertyChecks {
 
                   val expected = Seq(
                     AuthorisationType03(
-                      sequenceNumber = "0",
+                      sequenceNumber = "1",
                       typeValue = "C521",
                       referenceNumber = "ACR1"
                     ),
                     AuthorisationType03(
-                      sequenceNumber = "1",
+                      sequenceNumber = "2",
                       typeValue = "C523",
                       referenceNumber = "SSE1"
                     ),
                     AuthorisationType03(
-                      sequenceNumber = "2",
+                      sequenceNumber = "3",
                       typeValue = "C524",
                       referenceNumber = "TRD1"
                     )
@@ -335,17 +335,17 @@ class AuthorisationsSpec extends SpecBase with ScalaCheckPropertyChecks {
 
               val expected = Seq(
                 AuthorisationType03(
-                  sequenceNumber = "0",
+                  sequenceNumber = "1",
                   typeValue = "C521",
                   referenceNumber = "ACR1"
                 ),
                 AuthorisationType03(
-                  sequenceNumber = "1",
+                  sequenceNumber = "2",
                   typeValue = "C523",
                   referenceNumber = "SSE1"
                 ),
                 AuthorisationType03(
-                  sequenceNumber = "2",
+                  sequenceNumber = "3",
                   typeValue = "C524",
                   referenceNumber = "TRD1"
                 )
@@ -411,17 +411,17 @@ class AuthorisationsSpec extends SpecBase with ScalaCheckPropertyChecks {
 
               val expected = Seq(
                 AuthorisationType03(
-                  sequenceNumber = "0",
+                  sequenceNumber = "1",
                   typeValue = "C521",
                   referenceNumber = "ACR1"
                 ),
                 AuthorisationType03(
-                  sequenceNumber = "1",
+                  sequenceNumber = "2",
                   typeValue = "C523",
                   referenceNumber = "SSE1"
                 ),
                 AuthorisationType03(
-                  sequenceNumber = "2",
+                  sequenceNumber = "3",
                   typeValue = "C524",
                   referenceNumber = "TRD1"
                 )

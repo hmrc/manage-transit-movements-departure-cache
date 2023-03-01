@@ -180,12 +180,12 @@ class CustomsOfficesSpec extends SpecBase {
 
         val expected = Seq(
           CustomsOfficeOfTransitDeclaredType03(
-            sequenceNumber = "0",
+            sequenceNumber = "1",
             referenceNumber = "IT057101",
             arrivalDateAndTimeEstimated = Some(XMLCalendar("2023-02-23T08:45:00"))
           ),
           CustomsOfficeOfTransitDeclaredType03(
-            sequenceNumber = "1",
+            sequenceNumber = "2",
             referenceNumber = "AT330400",
             arrivalDateAndTimeEstimated = None
           )
@@ -251,11 +251,11 @@ class CustomsOfficesSpec extends SpecBase {
 
         val expected = Seq(
           CustomsOfficeOfExitForTransitDeclaredType02(
-            sequenceNumber = "0",
+            sequenceNumber = "1",
             referenceNumber = "IT057101"
           ),
           CustomsOfficeOfExitForTransitDeclaredType02(
-            sequenceNumber = "1",
+            sequenceNumber = "2",
             referenceNumber = "AT330400"
           )
         )

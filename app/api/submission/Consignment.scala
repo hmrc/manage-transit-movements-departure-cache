@@ -279,7 +279,7 @@ object departureTransportMeansType03 {
   import transportMeans._
 
   implicit val reads: Reads[DepartureTransportMeansType03] = (
-    ("0": Reads[String]) and
+    ("1": Reads[String]) and
       (__ \ "identification").readNullable[String].map(convertTypeOfIdentification) and
       (__ \ "meansIdentificationNumber").readNullable[String] and
       (__ \ "vehicleCountry" \ "code").readNullable[String]
@@ -308,8 +308,8 @@ object activeBorderTransportMeansType02 {
 
   private def typeOfIdentificationReads(index: Int, borderModeOfTransport: String): Reads[Option[String]] =
     (index, borderModeOfTransport) match {
-      case (0, "rail") => Some("trainNumber")
-      case (0, "road") => Some("regNumberRoadVehicle")
+      case (1, "rail") => Some("trainNumber")
+      case (1, "road") => Some("regNumberRoadVehicle")
       case _           => (__ \ "identification").readNullable[String]
     }
 }
@@ -362,7 +362,7 @@ object transportChargesType {
 object houseConsignmentType10 {
 
   implicit val reads: Reads[HouseConsignmentType10] = (
-    ("0": Reads[String]) and
+    ("1": Reads[String]) and
       itemsPath.readArray[ConsignmentItemType09](consignmentItemType09.reads)
   ).apply { // TODO - Should be able to change this to `(HouseConsignmentType10.apply _)` once this is all done
     (
