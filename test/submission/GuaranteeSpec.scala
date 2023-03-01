@@ -79,12 +79,12 @@ class GuaranteeSpec extends SpecBase {
 
         val expected = Seq(
           GuaranteeType02(
-            sequenceNumber = "0",
+            sequenceNumber = "1",
             guaranteeType = "1",
             otherGuaranteeReference = Some("otherRefNo1"),
             GuaranteeReference = Seq(
               GuaranteeReferenceType03(
-                sequenceNumber = "0",
+                sequenceNumber = "1",
                 GRN = Some("refNo1"),
                 accessCode = Some("1234"),
                 amountToBeCovered = Some(1000),
@@ -93,12 +93,12 @@ class GuaranteeSpec extends SpecBase {
             )
           ),
           GuaranteeType02(
-            sequenceNumber = "1",
+            sequenceNumber = "2",
             guaranteeType = "A",
             otherGuaranteeReference = Some("otherRefNo2"),
             GuaranteeReference = Seq(
               GuaranteeReferenceType03(
-                sequenceNumber = "1",
+                sequenceNumber = "2",
                 GRN = Some("refNo2"),
                 accessCode = Some("5678"),
                 amountToBeCovered = Some(2000),

@@ -367,22 +367,22 @@ class ConsignmentSpec extends SpecBase {
 
         converted.AdditionalSupplyChainActor shouldBe Seq(
           AdditionalSupplyChainActorType(
-            sequenceNumber = "0",
+            sequenceNumber = "1",
             role = "CS",
             identificationNumber = "sca1"
           ),
           AdditionalSupplyChainActorType(
-            sequenceNumber = "1",
+            sequenceNumber = "2",
             role = "FW",
             identificationNumber = "sca2"
           ),
           AdditionalSupplyChainActorType(
-            sequenceNumber = "2",
+            sequenceNumber = "3",
             role = "MF",
             identificationNumber = "sca3"
           ),
           AdditionalSupplyChainActorType(
-            sequenceNumber = "3",
+            sequenceNumber = "4",
             role = "WH",
             identificationNumber = "sca4"
           )
@@ -390,26 +390,26 @@ class ConsignmentSpec extends SpecBase {
 
         converted.TransportEquipment shouldBe Seq(
           TransportEquipmentType06(
-            sequenceNumber = "0",
+            sequenceNumber = "1",
             containerIdentificationNumber = Some("container id 1"),
             numberOfSeals = 2,
             Seal = Seq(
               SealType05(
-                sequenceNumber = "0",
+                sequenceNumber = "1",
                 identifier = "seal 1"
               ),
               SealType05(
-                sequenceNumber = "1",
+                sequenceNumber = "2",
                 identifier = "seal 2"
               )
             ),
             GoodsReference = Seq(
               GoodsReferenceType02(
-                sequenceNumber = "0",
+                sequenceNumber = "1",
                 declarationGoodsItemNumber = 1
               ),
               GoodsReferenceType02(
-                sequenceNumber = "1",
+                sequenceNumber = "2",
                 declarationGoodsItemNumber = 2
               )
             )
@@ -458,7 +458,7 @@ class ConsignmentSpec extends SpecBase {
 
         converted.DepartureTransportMeans shouldBe Seq(
           DepartureTransportMeansType03(
-            sequenceNumber = "0",
+            sequenceNumber = "1",
             typeOfIdentification = Some("10"),
             identificationNumber = Some("means id number"),
             nationality = Some("FR")
@@ -467,7 +467,7 @@ class ConsignmentSpec extends SpecBase {
 
         converted.ActiveBorderTransportMeans shouldBe Seq(
           ActiveBorderTransportMeansType02(
-            sequenceNumber = "0",
+            sequenceNumber = "1",
             customsOfficeAtBorderReferenceNumber = Some("IT018101"),
             typeOfIdentification = Some("11"),
             identificationNumber = Some("active id number"),
@@ -478,11 +478,11 @@ class ConsignmentSpec extends SpecBase {
 
         converted.CountryOfRoutingOfConsignment shouldBe Seq(
           CountryOfRoutingOfConsignmentType01(
-            sequenceNumber = "0",
+            sequenceNumber = "1",
             country = "AD"
           ),
           CountryOfRoutingOfConsignmentType01(
-            sequenceNumber = "1",
+            sequenceNumber = "2",
             country = "AR"
           )
         )
@@ -509,7 +509,7 @@ class ConsignmentSpec extends SpecBase {
 
         converted.HouseConsignment.size shouldBe 1
         converted.HouseConsignment.head shouldBe HouseConsignmentType10(
-          sequenceNumber = "0",
+          sequenceNumber = "1",
           countryOfDispatch = None,
           grossMass = 1,
           referenceNumberUCR = None,
@@ -525,8 +525,8 @@ class ConsignmentSpec extends SpecBase {
           TransportCharges = None,
           ConsignmentItem = Seq(
             ConsignmentItemType09(
-              goodsItemNumber = "0",
-              declarationGoodsItemNumber = 0,
+              goodsItemNumber = "1",
+              declarationGoodsItemNumber = 1,
               declarationType = Some("T1"),
               countryOfDispatch = Some("GB"),
               countryOfDestination = Some("FR"),
@@ -544,11 +544,11 @@ class ConsignmentSpec extends SpecBase {
                 ),
                 DangerousGoods = Seq(
                   DangerousGoodsType01(
-                    sequenceNumber = "0",
+                    sequenceNumber = "1",
                     UNNumber = "UN number 1_1"
                   ),
                   DangerousGoodsType01(
-                    sequenceNumber = "1",
+                    sequenceNumber = "2",
                     UNNumber = "UN number 1_2"
                   )
                 ),
@@ -563,8 +563,8 @@ class ConsignmentSpec extends SpecBase {
               TransportCharges = None
             ),
             ConsignmentItemType09(
-              goodsItemNumber = "1",
-              declarationGoodsItemNumber = 1,
+              goodsItemNumber = "2",
+              declarationGoodsItemNumber = 2,
               declarationType = Some("T2"),
               countryOfDispatch = Some("DE"),
               countryOfDestination = Some("ES"),
@@ -582,11 +582,11 @@ class ConsignmentSpec extends SpecBase {
                 ),
                 DangerousGoods = Seq(
                   DangerousGoodsType01(
-                    sequenceNumber = "0",
+                    sequenceNumber = "1",
                     UNNumber = "UN number 2_1"
                   ),
                   DangerousGoodsType01(
-                    sequenceNumber = "1",
+                    sequenceNumber = "2",
                     UNNumber = "UN number 2_2"
                   )
                 ),
@@ -666,7 +666,7 @@ class ConsignmentSpec extends SpecBase {
 
           result shouldBe Seq(
             ActiveBorderTransportMeansType02(
-              sequenceNumber = "0",
+              sequenceNumber = "1",
               customsOfficeAtBorderReferenceNumber = Some("IT018101"),
               typeOfIdentification = Some("21"),
               identificationNumber = Some("active id number"),
@@ -674,7 +674,7 @@ class ConsignmentSpec extends SpecBase {
               conveyanceReferenceNumber = Some("conveyance ref number")
             ),
             ActiveBorderTransportMeansType02(
-              sequenceNumber = "1",
+              sequenceNumber = "2",
               customsOfficeAtBorderReferenceNumber = None,
               typeOfIdentification = Some("80"),
               identificationNumber = None,
@@ -744,7 +744,7 @@ class ConsignmentSpec extends SpecBase {
 
           result shouldBe Seq(
             ActiveBorderTransportMeansType02(
-              sequenceNumber = "0",
+              sequenceNumber = "1",
               customsOfficeAtBorderReferenceNumber = Some("IT018101"),
               typeOfIdentification = Some("30"),
               identificationNumber = Some("active id number"),
@@ -752,7 +752,7 @@ class ConsignmentSpec extends SpecBase {
               conveyanceReferenceNumber = Some("conveyance ref number")
             ),
             ActiveBorderTransportMeansType02(
-              sequenceNumber = "1",
+              sequenceNumber = "2",
               customsOfficeAtBorderReferenceNumber = None,
               typeOfIdentification = Some("40"),
               identificationNumber = None,

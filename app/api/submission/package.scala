@@ -66,25 +66,25 @@ package object submission {
     def zipWithIndex: List[(JsValue, Int)] = arr.value.toList.zipWithIndex
 
     def readValuesAs[T](implicit reads: Int => Reads[T]): Seq[T] =
-      arr.mapWithIndex {
+      arr.mapWithSequenceNumber {
         case (value, index) => value.as[T](reads(index))
       }
 
-    def mapWithIndex[T](f: (JsValue, Int) => T): Seq[T] =
+    def mapWithSequenceNumber[T](f: (JsValue, Int) => T): Seq[T] =
       arr.zipWithIndex.map {
-        case (value, i) => f(value, i)
+        case (value, i) => f(value, i + 1)
       }
   }
 
   implicit class RichOptionalJsArray(arr: Option[JsArray]) {
 
     def readValuesAs[T](implicit reads: Int => Reads[T]): Seq[T] =
-      arr.mapWithIndex {
+      arr.mapWithSequenceNumber {
         case (value, index) => value.as[T](reads(index))
       }
 
-    def mapWithIndex[T](f: (JsValue, Int) => T): Seq[T] =
-      arr.map(_.mapWithIndex(f)).getOrElse(Nil)
+    def mapWithSequenceNumber[T](f: (JsValue, Int) => T): Seq[T] =
+      arr.map(_.mapWithSequenceNumber(f)).getOrElse(Nil)
   }
 
   implicit class RichOptionalJsObject(obj: Option[JsObject]) {
