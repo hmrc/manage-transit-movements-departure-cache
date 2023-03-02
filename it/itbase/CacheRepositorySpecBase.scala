@@ -22,6 +22,6 @@ import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 trait CacheRepositorySpecBase extends ItSpecBase with DefaultPlayMongoRepositorySupport[UserAnswers] {
 
-  override protected def repository: CacheRepository =
+  override protected val repository: CacheRepository =
     app.injector.instanceOf[CacheRepository]
 }

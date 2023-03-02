@@ -22,6 +22,6 @@ import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 trait LockRepositorySpecBase extends ItSpecBase with DefaultPlayMongoRepositorySupport[Lock] {
 
-  override protected def repository: DefaultLockRepository =
+  override protected val repository: DefaultLockRepository =
     app.injector.instanceOf[DefaultLockRepository]
 }
