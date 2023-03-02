@@ -25,7 +25,7 @@ import org.mongodb.scala.model._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
-import java.time.{Clock, LocalDateTime}
+import java.time.{Clock, Instant}
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -48,7 +48,7 @@ class CacheRepository @Inject() (
       Filters.eq("lrn", lrn),
       Filters.eq("eoriNumber", eoriNumber)
     )
-    val update  = Updates.set("lastUpdated", LocalDateTime.now(clock))
+    val update  = Updates.set("lastUpdated", Instant.now(clock))
     val options = FindOneAndUpdateOptions().upsert(false).sort(Sorts.descending("createdAt"))
 
     collection
@@ -61,7 +61,7 @@ class CacheRepository @Inject() (
       Filters.eq("lrn", userAnswers.lrn),
       Filters.eq("eoriNumber", userAnswers.eoriNumber)
     )
-    val updatedUserAnswers = userAnswers.copy(lastUpdated = LocalDateTime.now(clock))
+    val updatedUserAnswers = userAnswers.copy(lastUpdated = Instant.now(clock))
 
     collection
       .replaceOne(filter, updatedUserAnswers, ReplaceOptions().upsert(true))

@@ -16,15 +16,16 @@
 
 package controllers
 
-import itbase.ItSpecBase
+import itbase.CacheRepositorySpecBase
 import models.UserAnswers
 import org.mongodb.scala.model.Filters
 import play.api.libs.json.{JsObject, JsString, Json}
 
-import java.time.LocalDateTime
+import java.time.Instant
+import java.time.temporal.ChronoUnit.DAYS
 import java.util.UUID
 
-class CacheControllerSpec extends ItSpecBase {
+class CacheControllerSpec extends CacheRepositorySpecBase {
 
   "GET /user-answers/:lrn" when {
 
@@ -215,9 +216,9 @@ class CacheControllerSpec extends ItSpecBase {
 
     "documents do exist" should {
       "respond with 200 status" in {
-        val userAnswers1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
+        val userAnswers1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), Instant.now(), Instant.now(), UUID.randomUUID())
         val userAnswers2 =
-          UserAnswers("CD123", eoriNumber, Json.obj(), Map(), LocalDateTime.now().minusDays(1), LocalDateTime.now().minusDays(1), UUID.randomUUID())
+          UserAnswers("CD123", eoriNumber, Json.obj(), Map(), Instant.now().minus(1, DAYS), Instant.now().minus(1, DAYS), UUID.randomUUID())
 
         insert(userAnswers1).futureValue
         insert(userAnswers2).futureValue

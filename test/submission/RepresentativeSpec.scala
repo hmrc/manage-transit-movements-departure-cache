@@ -32,7 +32,7 @@ class RepresentativeSpec extends SpecBase {
 
         "there is a representative" when {
 
-          "there is a contact person" ignore {
+          "there is a contact person" in {
 
             val json: JsValue = Json.parse(s"""
                 |{
@@ -127,7 +127,7 @@ class RepresentativeSpec extends SpecBase {
           }
         }
 
-        "there is not a representative" ignore {
+        "there is not a representative" in {
 
           val json: JsValue = Json.parse(s"""
               |{

@@ -31,7 +31,7 @@ import play.api.test.FakeRequest
 import repositories.{CacheRepository, DefaultLockRepository}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.{Clock, LocalDateTime}
+import java.time.{Clock, Instant}
 import java.util.UUID
 
 trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach with OptionValues with EitherValues with AppWithDefaultMockFixtures {
@@ -42,7 +42,7 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
+  val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Json.obj(), Map(), Instant.now(), Instant.now(), UUID.randomUUID())
 
   val mockCacheRepository: CacheRepository      = mock[CacheRepository]
   val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]

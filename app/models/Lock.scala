@@ -19,14 +19,14 @@ package models
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 final case class Lock(
   sessionId: String,
   eoriNumber: String,
   lrn: String,
-  createdAt: LocalDateTime,
-  lastUpdated: LocalDateTime
+  createdAt: Instant,
+  lastUpdated: Instant
 )
 
 object Lock {
@@ -38,8 +38,8 @@ object Lock {
       (__ \ "sessionId").read[String] and
         (__ \ "eoriNumber").read[String] and
         (__ \ "lrn").read[String] and
-        (__ \ "createdAt").read(MongoJavatimeFormats.localDateTimeReads) and
-        (__ \ "lastUpdated").read(MongoJavatimeFormats.localDateTimeReads)
+        (__ \ "createdAt").read(MongoJavatimeFormats.instantReads) and
+        (__ \ "lastUpdated").read(MongoJavatimeFormats.instantReads)
     )(Lock.apply _)
 
   implicit val writes: Writes[Lock] =
@@ -47,8 +47,8 @@ object Lock {
       (__ \ "sessionId").write[String] and
         (__ \ "eoriNumber").write[String] and
         (__ \ "lrn").write[String] and
-        (__ \ "createdAt").write(MongoJavatimeFormats.localDateTimeWrites) and
-        (__ \ "lastUpdated").write(MongoJavatimeFormats.localDateTimeWrites)
+        (__ \ "createdAt").write(MongoJavatimeFormats.instantWrites) and
+        (__ \ "lastUpdated").write(MongoJavatimeFormats.instantWrites)
     )(unlift(Lock.unapply))
 
   implicit lazy val format: Format[Lock] = Format(reads, writes)

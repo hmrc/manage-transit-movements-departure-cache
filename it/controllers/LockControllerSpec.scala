@@ -16,10 +16,10 @@
 
 package controllers
 
-import itbase.ItSpecBase
+import itbase.LockRepositorySpecBase
 import uk.gov.hmrc.http.HeaderNames
 
-class LockControllerSpec extends ItSpecBase {
+class LockControllerSpec extends LockRepositorySpecBase {
 
   "GET /user-answers/:lrn/lock" when {
 

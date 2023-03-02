@@ -19,7 +19,7 @@ package models
 import base.SpecBase
 import play.api.libs.json.{JsValue, Json}
 
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.UUID
 
 class UserAnswersSpec extends SpecBase {
@@ -34,40 +34,68 @@ class UserAnswersSpec extends SpecBase {
       "task3" -> Status.NotStarted,
       "task4" -> Status.CannotStartYet
     ),
-    createdAt = LocalDateTime.of(2022: Int, 9: Int, 5: Int, 15: Int, 58: Int, 44: Int, 188000000: Int),
-    lastUpdated = LocalDateTime.of(2022: Int, 9: Int, 7: Int, 10: Int, 33: Int, 23: Int, 472000000: Int),
+    createdAt = Instant.ofEpochMilli(1662393524188L),
+    lastUpdated = Instant.ofEpochMilli(1662546803472L),
     id = UUID.fromString(uuid)
   )
 
   "User answers" when {
 
-    "being passed between backend and frontend" should {
+    "being passed between backend and frontend" when {
 
-      val json: JsValue = Json.parse(s"""
-          |{
-          |    "_id" : "$uuid",
-          |    "lrn" : "$lrn",
-          |    "eoriNumber" : "$eoriNumber",
-          |    "data" : {},
-          |    "tasks" : {
-          |        "task1" : "completed",
-          |        "task2" : "in-progress",
-          |        "task3" : "not-started",
-          |        "task4" : "cannot-start-yet"
-          |    },
-          |    "createdAt" : "2022-09-05T15:58:44.188",
-          |    "lastUpdated" : "2022-09-07T10:33:23.472"
-          |}
-          |""".stripMargin)
+      "old LocalDateTime format" should {
 
-      "read correctly" in {
-        val result = json.as[UserAnswers]
-        result shouldBe userAnswers
+        val json: JsValue = Json.parse(s"""
+             |{
+             |    "_id" : "$uuid",
+             |    "lrn" : "$lrn",
+             |    "eoriNumber" : "$eoriNumber",
+             |    "data" : {},
+             |    "tasks" : {
+             |        "task1" : "completed",
+             |        "task2" : "in-progress",
+             |        "task3" : "not-started",
+             |        "task4" : "cannot-start-yet"
+             |    },
+             |    "createdAt" : "2022-09-05T15:58:44.188",
+             |    "lastUpdated" : "2022-09-07T10:33:23.472"
+             |}
+             |""".stripMargin)
+
+        "read correctly" in {
+          val result = json.as[UserAnswers]
+          result shouldBe userAnswers
+        }
       }
 
-      "write correctly" in {
-        val result = Json.toJson(userAnswers)
-        result shouldBe json
+      "new Instant format" should {
+
+        val json: JsValue = Json.parse(s"""
+             |{
+             |    "_id" : "$uuid",
+             |    "lrn" : "$lrn",
+             |    "eoriNumber" : "$eoriNumber",
+             |    "data" : {},
+             |    "tasks" : {
+             |        "task1" : "completed",
+             |        "task2" : "in-progress",
+             |        "task3" : "not-started",
+             |        "task4" : "cannot-start-yet"
+             |    },
+             |    "createdAt" : "2022-09-05T15:58:44.188Z",
+             |    "lastUpdated" : "2022-09-07T10:33:23.472Z"
+             |}
+             |""".stripMargin)
+
+        "read correctly" in {
+          val result = json.as[UserAnswers]
+          result shouldBe userAnswers
+        }
+
+        "write correctly" in {
+          val result = Json.toJson(userAnswers)
+          result shouldBe json
+        }
       }
     }
 

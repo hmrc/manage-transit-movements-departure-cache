@@ -24,7 +24,7 @@ import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import java.time.{Clock, LocalDateTime}
+import java.time.{Clock, Instant}
 import java.util.UUID
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -77,7 +77,7 @@ class CacheController @Inject() (
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(lrn, _) =>
-          val now = LocalDateTime.now(clock)
+          val now = Instant.now(clock)
           val userAnswers = UserAnswers(
             lrn = lrn,
             eoriNumber = request.eoriNumber,

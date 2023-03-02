@@ -25,7 +25,7 @@ import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.UUID
 import scala.concurrent.Future
 
@@ -253,8 +253,8 @@ class CacheControllerSpec extends SpecBase {
     "return 200" when {
 
       "read from mongo is successful" in {
-        val userAnswer1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
-        val userAnswer2 = UserAnswers("CD123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
+        val userAnswer1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), Instant.now(), Instant.now(), UUID.randomUUID())
+        val userAnswer2 = UserAnswers("CD123", eoriNumber, Json.obj(), Map(), Instant.now(), Instant.now(), UUID.randomUUID())
 
         when(mockCacheRepository.getAll(any(), any(), any(), any(), any()))
           .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 30, 2, 2)))

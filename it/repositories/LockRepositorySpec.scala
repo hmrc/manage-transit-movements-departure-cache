@@ -16,38 +16,15 @@
 
 package repositories
 
+import itbase.LockRepositorySpecBase
 import models.Lock
-import org.scalatest.OptionValues
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.wordspec.AnyWordSpec
-import org.scalatestplus.play.guice.GuiceOneServerPerSuite
-import play.api.Application
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
-import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
-import java.time.LocalDateTime
+import java.time.Instant
+import java.time.temporal.ChronoUnit.DAYS
 
-class LockRepositorySpec
-    extends AnyWordSpec
-    with Matchers
-    with ScalaFutures
-    with OptionValues
-    with GuiceOneServerPerSuite
-    with DefaultPlayMongoRepositorySupport[Lock] {
+class LockRepositorySpec extends LockRepositorySpecBase {
 
-  override def fakeApplication(): Application =
-    GuiceApplicationBuilder()
-      .configure("metrics.enabled" -> false)
-      .overrides(bind[MongoComponent].toInstance(mongoComponent))
-      .build()
-
-  override protected def repository: DefaultLockRepository =
-    app.injector.instanceOf[DefaultLockRepository]
-
-  val dateNow: LocalDateTime = LocalDateTime.now()
+  val now: Instant = Instant.now()
 
   "lock" when {
 
@@ -55,7 +32,7 @@ class LockRepositorySpec
 
       "add new lock" in {
 
-        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", dateNow, dateNow)
+        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", now, now)
 
         val result = repository.lock(lock1).futureValue
 
@@ -64,8 +41,8 @@ class LockRepositorySpec
 
       "update lock when sessionId is the same as lock" in {
 
-        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", dateNow, dateNow.minusDays(1))
-        val lock2: Lock = Lock("session1", "eoriNumber", "lrn", dateNow, dateNow)
+        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", now, now.minus(1, DAYS))
+        val lock2: Lock = Lock("session1", "eoriNumber", "lrn", now, now)
 
         insert(lock1).futureValue
 
@@ -79,8 +56,8 @@ class LockRepositorySpec
 
       "not add new lock if lock already exists and sessionId is different" in {
 
-        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", dateNow, dateNow)
-        val lock2: Lock = Lock("session2", "eoriNumber", "lrn", dateNow, dateNow)
+        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", now, now)
+        val lock2: Lock = Lock("session2", "eoriNumber", "lrn", now, now)
 
         insert(lock1).futureValue
 
@@ -100,7 +77,7 @@ class LockRepositorySpec
 
       "find and return existing lock" in {
 
-        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", dateNow, dateNow)
+        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", now, now)
 
         insert(lock1).futureValue
 
@@ -126,7 +103,7 @@ class LockRepositorySpec
 
       "return true for successful unlock" in {
 
-        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", dateNow, dateNow)
+        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", now, now)
 
         insert(lock1).futureValue
 
