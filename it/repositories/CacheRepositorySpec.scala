@@ -19,7 +19,7 @@ package repositories
 import itbase.CacheRepositorySpecBase
 import models.Sort.{SortByCreatedAtAsc, SortByCreatedAtDesc, SortByLRNAsc, SortByLRNDesc}
 import models.{UserAnswers, UserAnswersSummary}
-import org.mongodb.scala.bson.{BsonDocument, BsonInt64, BsonString}
+import org.mongodb.scala.bson.{BsonDocument, BsonString}
 import org.mongodb.scala.model.Filters
 import org.mongodb.scala.{Document, MongoWriteException}
 import play.api.libs.json.Json
@@ -499,7 +499,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       val createdAtIndex = findIndex("user-answers-created-at-index")
       createdAtIndex.get("key").get shouldBe BsonDocument("createdAt" -> 1)
-      createdAtIndex.get("expireAfterSeconds").get shouldBe BsonInt64(2592000)
+      createdAtIndex.get("expireAfterSeconds").get.asNumber().intValue() shouldBe 2592000
 
       val eoriLrnIndex = findIndex("eoriNumber-lrn-index")
       eoriLrnIndex.get("key").get shouldBe BsonDocument("eoriNumber" -> 1, "lrn" -> 1)
