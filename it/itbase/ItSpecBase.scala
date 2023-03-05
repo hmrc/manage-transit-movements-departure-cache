@@ -22,7 +22,7 @@ import controllers.actions.{
   FakeAuthenticateActionProvider,
   FakeAuthenticateAndLockActionProvider
 }
-import models.UserAnswers
+import models.{Data, UserAnswers}
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -31,7 +31,6 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.test.MongoSupport
@@ -45,7 +44,7 @@ trait ItSpecBase extends AnyWordSpec with Matchers with ScalaFutures with Option
   val lrn        = "lrn"
   val eoriNumber = "eori"
 
-  def emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Json.obj(), Map(), Instant.now(), Instant.now(), UUID.randomUUID())
+  def emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Data(), Instant.now(), Instant.now(), UUID.randomUUID())
 
   val wsClient: WSClient = app.injector.instanceOf[WSClient]
   val baseUrl            = s"http://localhost:$port"

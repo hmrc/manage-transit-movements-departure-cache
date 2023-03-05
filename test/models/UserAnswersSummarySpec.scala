@@ -35,8 +35,8 @@ class UserAnswersSummarySpec extends SpecBase {
 
       val ttlInDay = 30
 
-      val userAnswers1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), now, now, id1)
-      val userAnswers2 = UserAnswers("CD123", eoriNumber, Json.obj(), Map(), now.minus(1, DAYS), now.minus(1, DAYS), id2)
+      val userAnswers1 = UserAnswers("AB123", eoriNumber, Data(), now, now, id1)
+      val userAnswers2 = UserAnswers("CD123", eoriNumber, Data(), now.minus(1, DAYS), now.minus(1, DAYS), id2)
 
       val userAnswersSummary = UserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2), ttlInDay, 2, 2)
 

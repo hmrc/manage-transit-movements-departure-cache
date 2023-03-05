@@ -27,12 +27,14 @@ class UserAnswersSpec extends SpecBase {
   private val userAnswers = UserAnswers(
     lrn = lrn,
     eoriNumber = eoriNumber,
-    data = Json.obj(),
-    tasks = Map(
-      "task1" -> Status.Completed,
-      "task2" -> Status.InProgress,
-      "task3" -> Status.NotStarted,
-      "task4" -> Status.CannotStartYet
+    data = Data(
+      data = Json.obj(),
+      tasks = Map(
+        "task1" -> Status.Completed,
+        "task2" -> Status.InProgress,
+        "task3" -> Status.NotStarted,
+        "task4" -> Status.CannotStartYet
+      )
     ),
     createdAt = Instant.ofEpochMilli(1662393524188L),
     lastUpdated = Instant.ofEpochMilli(1662546803472L),

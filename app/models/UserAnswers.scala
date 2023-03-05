@@ -25,15 +25,14 @@ import java.util.UUID
 final case class UserAnswers(
   lrn: String,
   eoriNumber: String,
-  data: JsObject,
-  tasks: Map[String, Status.Value],
+  data: Data,
   createdAt: Instant,
   lastUpdated: Instant,
   id: UUID
 ) {
 
   def get[A](path: JsPath)(implicit rds: Reads[A]): Option[A] =
-    Reads.optionNoError(Reads.at(path)).reads(data).getOrElse(None)
+    Reads.optionNoError(Reads.at(path)).reads(data.data).getOrElse(None)
 
 }
 
@@ -51,8 +50,7 @@ object UserAnswers {
   private def customReads(implicit instantReads: Reads[Instant]): Reads[UserAnswers] = (
     (__ \ "lrn").read[String] and
       (__ \ "eoriNumber").read[String] and
-      (__ \ "data").read[JsObject] and
-      (__ \ "tasks").read[Map[String, Status.Value]] and
+      __.read[Data] and
       (__ \ "createdAt").read[Instant] and
       (__ \ "lastUpdated").read[Instant] and
       (__ \ "_id").read[UUID]
@@ -61,8 +59,7 @@ object UserAnswers {
   private def customWrites(implicit instantWrites: Writes[Instant]): Writes[UserAnswers] = (
     (__ \ "lrn").write[String] and
       (__ \ "eoriNumber").write[String] and
-      (__ \ "data").write[JsObject] and
-      (__ \ "tasks").write[Map[String, Status.Value]] and
+      __.write[Data] and
       (__ \ "createdAt").write[Instant] and
       (__ \ "lastUpdated").write[Instant] and
       (__ \ "_id").write[UUID]

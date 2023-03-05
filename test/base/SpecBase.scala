@@ -17,7 +17,7 @@
 package base
 
 import config.AppConfig
-import models.UserAnswers
+import models.{Data, UserAnswers}
 import org.mockito.Mockito.reset
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -25,7 +25,6 @@ import org.scalatest.{BeforeAndAfterEach, EitherValues, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
 import play.api.mvc.AnyContentAsEmpty
 import play.api.test.FakeRequest
 import repositories.{CacheRepository, DefaultLockRepository}
@@ -42,7 +41,7 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Json.obj(), Map(), Instant.now(), Instant.now(), UUID.randomUUID())
+  val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Data(), Instant.now(), Instant.now(), UUID.randomUUID())
 
   val mockCacheRepository: CacheRepository      = mock[CacheRepository]
   val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]

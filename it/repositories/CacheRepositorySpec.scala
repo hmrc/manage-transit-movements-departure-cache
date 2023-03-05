@@ -100,7 +100,8 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       val firstGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
 
-      val setResult = repository.set(userAnswers1.copy(data = Json.obj("foo" -> "bar"))).futureValue
+      val data      = userAnswers1.data.copy(data = Json.obj("foo" -> "bar"))
+      val setResult = repository.set(userAnswers1.copy(data = data)).futureValue
 
       setResult shouldBe true
 

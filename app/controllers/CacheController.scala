@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
-import models.UserAnswers
+import models.{Data, UserAnswers}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -81,8 +81,7 @@ class CacheController @Inject() (
           val userAnswers = UserAnswers(
             lrn = lrn,
             eoriNumber = request.eoriNumber,
-            data = Json.obj(),
-            tasks = Map.empty,
+            data = Data(),
             createdAt = now,
             lastUpdated = now,
             id = UUID.randomUUID()
