@@ -22,7 +22,6 @@ import models._
 import org.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
 import org.mongodb.scala.model._
-import play.api.Logging
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
@@ -43,8 +42,7 @@ class CacheRepository @Inject() (
       collectionName = CacheRepository.collectionName,
       domainFormat = UserAnswers.mongoFormat,
       indexes = CacheRepository.indexes(appConfig)
-    )
-    with Logging {
+    ) {
 
   def get(lrn: String, eoriNumber: String): Future[Option[UserAnswers]] = {
     val filter = Filters.and(
