@@ -23,13 +23,14 @@ import java.time.{Instant, LocalDateTime, ZoneOffset}
 import java.util.UUID
 
 final case class UserAnswers(
-  lrn: String,
-  eoriNumber: String,
   data: Data,
   createdAt: Instant,
   lastUpdated: Instant,
   id: UUID
 ) {
+
+  val lrn: String        = data.lrn
+  val eoriNumber: String = data.eoriNumber
 
   def get[A](path: JsPath)(implicit rds: Reads[A]): Option[A] =
     Reads.optionNoError(Reads.at(path)).reads(data.data).getOrElse(None)
@@ -40,7 +41,7 @@ object UserAnswers {
 
   import play.api.libs.functional.syntax._
 
-  // TODO - this is for backwards compatibility. Can be removed when all frontends using Instant
+  // TODO - this is for backwards compatibility. Can be removed when all frontends no longer using LocalDateTime
   lazy val oldReads: Reads[Instant] =
     implicitly[Reads[LocalDateTime]].map(_.toInstant(ZoneOffset.UTC))
 
@@ -48,18 +49,14 @@ object UserAnswers {
   implicit lazy val writes: Writes[UserAnswers] = customWrites(implicitly)
 
   private def customReads(implicit instantReads: Reads[Instant]): Reads[UserAnswers] = (
-    (__ \ "lrn").read[String] and
-      (__ \ "eoriNumber").read[String] and
-      __.read[Data] and
+    __.read[Data] and
       (__ \ "createdAt").read[Instant] and
       (__ \ "lastUpdated").read[Instant] and
       (__ \ "_id").read[UUID]
   )(UserAnswers.apply _)
 
   private def customWrites(implicit instantWrites: Writes[Instant]): Writes[UserAnswers] = (
-    (__ \ "lrn").write[String] and
-      (__ \ "eoriNumber").write[String] and
-      __.write[Data] and
+    __.write[Data] and
       (__ \ "createdAt").write[Instant] and
       (__ \ "lastUpdated").write[Instant] and
       (__ \ "_id").write[UUID]

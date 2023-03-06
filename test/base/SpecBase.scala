@@ -41,7 +41,8 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Data(), Instant.now(), Instant.now(), UUID.randomUUID())
+  val emptyData: Data               = Data(lrn, eoriNumber)
+  val emptyUserAnswers: UserAnswers = UserAnswers(emptyData, Instant.now(), Instant.now(), UUID.randomUUID())
 
   val mockCacheRepository: CacheRepository      = mock[CacheRepository]
   val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]

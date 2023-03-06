@@ -19,13 +19,15 @@ package models
 import play.api.libs.json.{Format, JsObject, Json}
 
 case class Data(
+  lrn: String,
+  eoriNumber: String,
   data: JsObject,
   tasks: Map[String, Status.Value]
 )
 
 object Data {
 
-  def apply(): Data = Data(Json.obj(), Map())
+  def apply(lrn: String, eoriNumber: String): Data = Data(lrn, eoriNumber, Json.obj(), Map())
 
   implicit val format: Format[Data] = Json.format[Data]
 }

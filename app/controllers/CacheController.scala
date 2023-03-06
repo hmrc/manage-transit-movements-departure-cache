@@ -17,15 +17,14 @@
 package controllers
 
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
-import models.{Data, UserAnswers}
+import models.Data
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import java.time.{Clock, Instant}
-import java.util.UUID
+import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -59,12 +58,12 @@ class CacheController @Inject() (
 
   def post(lrn: String): Action[JsValue] = authenticateAndLock(lrn).async(parse.json) {
     implicit request =>
-      request.body.validate[UserAnswers] match {
-        case JsSuccess(userAnswers, _) =>
-          if (request.eoriNumber == userAnswers.eoriNumber) {
-            set(userAnswers)
+      request.body.validate[Data] match {
+        case JsSuccess(data, _) =>
+          if (request.eoriNumber == data.eoriNumber) {
+            set(data)
           } else {
-            logger.error(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${userAnswers.eoriNumber})")
+            logger.error(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
             Future.successful(Forbidden)
           }
         case JsError(errors) =>
@@ -77,25 +76,16 @@ class CacheController @Inject() (
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(lrn, _) =>
-          val now = Instant.now(clock)
-          val userAnswers = UserAnswers(
-            lrn = lrn,
-            eoriNumber = request.eoriNumber,
-            data = Data(),
-            createdAt = now,
-            lastUpdated = now,
-            id = UUID.randomUUID()
-          )
-          set(userAnswers)
+          set(Data(lrn, request.eoriNumber))
         case JsError(errors) =>
           logger.error(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)
       }
   }
 
-  private def set(userAnswers: UserAnswers): Future[Status] =
+  private def set(data: Data): Future[Status] =
     cacheRepository
-      .set(userAnswers)
+      .set(data)
       .map {
         case true => Ok
         case false =>

@@ -75,15 +75,15 @@ class CacheControllerSpec extends SpecBase {
 
     "return 200" when {
       "write to mongo was acknowledged" in {
-        val userAnswers = emptyUserAnswers
+        val data = emptyData
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.toJson(userAnswers))
+          .withBody(Json.toJson(data))
         val result = route(app, request).value
 
         status(result) shouldBe OK
-        verify(mockCacheRepository).set(eqTo(userAnswers))
+        verify(mockCacheRepository).set(eqTo(data))
       }
     }
 
@@ -111,7 +111,8 @@ class CacheControllerSpec extends SpecBase {
 
     "return 403" when {
       "the EORI in the enrolment and the EORI in user answers do not match" in {
-        val userAnswers = emptyUserAnswers.copy(eoriNumber = "different eori")
+        val data        = emptyData.copy(eoriNumber = "different eori")
+        val userAnswers = emptyUserAnswers.copy(data = data)
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
           .withBody(Json.toJson(userAnswers))
@@ -125,29 +126,29 @@ class CacheControllerSpec extends SpecBase {
 
     "return 500" when {
       "write to mongo was not acknowledged" in {
-        val userAnswers = emptyUserAnswers
+        val data = emptyData
 
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(false))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.toJson(userAnswers))
+          .withBody(Json.toJson(data))
 
         val result = route(app, request).value
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockCacheRepository).set(eqTo(userAnswers))
+        verify(mockCacheRepository).set(eqTo(data))
       }
 
       "write to mongo fails" in {
-        val userAnswers = emptyUserAnswers
+        val data = emptyData
         when(mockCacheRepository.set(any())).thenReturn(Future.failed(new Throwable()))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.toJson(userAnswers))
+          .withBody(Json.toJson(data))
 
         val result = route(app, request).value
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockCacheRepository).set(eqTo(userAnswers))
+        verify(mockCacheRepository).set(eqTo(data))
       }
     }
   }
@@ -161,12 +162,12 @@ class CacheControllerSpec extends SpecBase {
         val request = FakeRequest(PUT, routes.CacheController.put().url)
           .withBody(JsString(lrn))
 
-        val result                                         = route(app, request).value
-        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        val result                           = route(app, request).value
+        val dataCaptor: ArgumentCaptor[Data] = ArgumentCaptor.forClass(classOf[Data])
 
         status(result) shouldBe OK
-        verify(mockCacheRepository).set(userAnswersCaptor.capture())
-        userAnswersCaptor.getValue.lrn shouldBe lrn
+        verify(mockCacheRepository).set(dataCaptor.capture())
+        dataCaptor.getValue.lrn shouldBe lrn
       }
     }
 
@@ -199,12 +200,12 @@ class CacheControllerSpec extends SpecBase {
         val request = FakeRequest(PUT, routes.CacheController.put().url)
           .withBody(JsString(lrn))
 
-        val result                                         = route(app, request).value
-        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        val result                           = route(app, request).value
+        val dataCaptor: ArgumentCaptor[Data] = ArgumentCaptor.forClass(classOf[Data])
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockCacheRepository).set(userAnswersCaptor.capture())
-        userAnswersCaptor.getValue.lrn shouldBe lrn
+        verify(mockCacheRepository).set(dataCaptor.capture())
+        dataCaptor.getValue.lrn shouldBe lrn
       }
 
       "write to mongo fails" in {
@@ -213,12 +214,12 @@ class CacheControllerSpec extends SpecBase {
         val request = FakeRequest(PUT, routes.CacheController.put().url)
           .withBody(JsString(lrn))
 
-        val result                                         = route(app, request).value
-        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        val result                           = route(app, request).value
+        val dataCaptor: ArgumentCaptor[Data] = ArgumentCaptor.forClass(classOf[Data])
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockCacheRepository).set(userAnswersCaptor.capture())
-        userAnswersCaptor.getValue.lrn shouldBe lrn
+        verify(mockCacheRepository).set(dataCaptor.capture())
+        dataCaptor.getValue.lrn shouldBe lrn
       }
     }
   }
@@ -253,8 +254,8 @@ class CacheControllerSpec extends SpecBase {
     "return 200" when {
 
       "read from mongo is successful" in {
-        val userAnswer1 = UserAnswers("AB123", eoriNumber, Data(), Instant.now(), Instant.now(), UUID.randomUUID())
-        val userAnswer2 = UserAnswers("CD123", eoriNumber, Data(), Instant.now(), Instant.now(), UUID.randomUUID())
+        val userAnswer1 = UserAnswers(Data("AB123", eoriNumber), Instant.now(), Instant.now(), UUID.randomUUID())
+        val userAnswer2 = UserAnswers(Data("CD123", eoriNumber), Instant.now(), Instant.now(), UUID.randomUUID())
 
         when(mockCacheRepository.getAll(any(), any(), any(), any(), any()))
           .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 30, 2, 2)))

@@ -73,27 +73,21 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
 
     "document successfully written to mongo" should {
       "respond with 200 status" in {
-        val userAnswers = emptyUserAnswers
+        val data = emptyData
 
         val response = wsClient
           .url(url)
-          .post(Json.toJson(userAnswers))
+          .post(Json.toJson(data))
           .futureValue
 
         response.status shouldBe 200
 
-        val results = find(Filters.eq("_id", userAnswers.id.toString)).futureValue
+        val results = findAll().futureValue
         results.size shouldBe 1
         val result = results.head
-        result.id shouldBe userAnswers.id
-        result.lrn shouldBe userAnswers.lrn
-        result.eoriNumber shouldBe userAnswers.eoriNumber
-        result.data shouldBe userAnswers.data
-        result.createdAt shouldBe userAnswers.createdAt.truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
-
-        result.lastUpdated isAfter userAnswers.lastUpdated.truncatedTo(
-          java.time.temporal.ChronoUnit.MILLIS
-        ) shouldBe true
+        result.lrn shouldBe data.lrn
+        result.eoriNumber shouldBe data.eoriNumber
+        result.data shouldBe data
       }
     }
 
@@ -121,7 +115,8 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
 
     "the EORI in the enrolment and the EORI in user answers do not match" should {
       "respond with 403 status" in {
-        val userAnswers = emptyUserAnswers.copy(eoriNumber = "different eori")
+        val data        = emptyData.copy(eoriNumber = "different eori")
+        val userAnswers = emptyUserAnswers.copy(data = data)
 
         val response = wsClient
           .url(url)
@@ -215,9 +210,19 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
 
     "documents do exist" should {
       "respond with 200 status" in {
-        val userAnswers1 = UserAnswers("AB123", eoriNumber, Data(), Instant.now(), Instant.now(), UUID.randomUUID())
-        val userAnswers2 =
-          UserAnswers("CD123", eoriNumber, Data(), Instant.now().minus(1, DAYS), Instant.now().minus(1, DAYS), UUID.randomUUID())
+        val userAnswers1 = UserAnswers(
+          data = Data("AB123", eoriNumber),
+          createdAt = Instant.now(),
+          lastUpdated = Instant.now(),
+          id = UUID.randomUUID()
+        )
+
+        val userAnswers2 = UserAnswers(
+          data = Data("CD123", eoriNumber),
+          createdAt = Instant.now().minus(1, DAYS),
+          lastUpdated = Instant.now().minus(1, DAYS),
+          id = UUID.randomUUID()
+        )
 
         insert(userAnswers1).futureValue
         insert(userAnswers2).futureValue

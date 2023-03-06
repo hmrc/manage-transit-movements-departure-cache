@@ -17,17 +17,17 @@
 package models
 
 import base.SpecBase
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsSuccess, JsValue, Json}
 
-import java.time.Instant
+import java.time.{Instant, LocalDateTime}
 import java.util.UUID
 
 class UserAnswersSpec extends SpecBase {
 
   private val userAnswers = UserAnswers(
-    lrn = lrn,
-    eoriNumber = eoriNumber,
     data = Data(
+      lrn = lrn,
+      eoriNumber = eoriNumber,
       data = Json.obj(),
       tasks = Map(
         "task1" -> Status.Completed,
@@ -97,6 +97,11 @@ class UserAnswersSpec extends SpecBase {
         "write correctly" in {
           val result = Json.toJson(userAnswers)
           result shouldBe json
+        }
+
+        "be readable as a LocalDateTime for backwards compatibility" in {
+          val json = Json.toJson(Instant.now())
+          json.validate[LocalDateTime] shouldBe a[JsSuccess[_]]
         }
       }
     }
