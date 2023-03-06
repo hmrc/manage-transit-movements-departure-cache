@@ -16,15 +16,16 @@
 
 package controllers
 
-import itbase.ItSpecBase
-import models.UserAnswers
+import itbase.CacheRepositorySpecBase
+import models.{Metadata, UserAnswers}
 import org.mongodb.scala.model.Filters
 import play.api.libs.json.{JsObject, JsString, Json}
 
-import java.time.LocalDateTime
+import java.time.Instant
+import java.time.temporal.ChronoUnit.DAYS
 import java.util.UUID
 
-class CacheControllerSpec extends ItSpecBase {
+class CacheControllerSpec extends CacheRepositorySpecBase {
 
   "GET /user-answers/:lrn" when {
 
@@ -53,7 +54,7 @@ class CacheControllerSpec extends ItSpecBase {
 
         response.status shouldBe 200
 
-        response.json.as[UserAnswers].data shouldBe userAnswers.data
+        response.json.as[UserAnswers].metadata shouldBe userAnswers.metadata
 
         response.json.as[UserAnswers].createdAt shouldBe userAnswers.createdAt.truncatedTo(
           java.time.temporal.ChronoUnit.MILLIS
@@ -72,28 +73,21 @@ class CacheControllerSpec extends ItSpecBase {
 
     "document successfully written to mongo" should {
       "respond with 200 status" in {
-        val userAnswers = emptyUserAnswers
+        val metadata = emptyMetadata
 
         val response = wsClient
           .url(url)
-          .post(Json.toJson(userAnswers))
+          .post(Json.toJson(metadata))
           .futureValue
 
         response.status shouldBe 200
 
-        val results = find(Filters.eq("_id", userAnswers.id.toString)).futureValue
+        val results = findAll().futureValue
         results.size shouldBe 1
         val result = results.head
-        result.id shouldBe userAnswers.id
-        result.lrn shouldBe userAnswers.lrn
-        result.eoriNumber shouldBe userAnswers.eoriNumber
-        result.data shouldBe userAnswers.data
-        result.tasks shouldBe userAnswers.tasks
-        result.createdAt shouldBe userAnswers.createdAt.truncatedTo(java.time.temporal.ChronoUnit.MILLIS)
-
-        result.lastUpdated isAfter userAnswers.lastUpdated.truncatedTo(
-          java.time.temporal.ChronoUnit.MILLIS
-        ) shouldBe true
+        result.lrn shouldBe metadata.lrn
+        result.eoriNumber shouldBe metadata.eoriNumber
+        result.metadata shouldBe metadata
       }
     }
 
@@ -121,7 +115,8 @@ class CacheControllerSpec extends ItSpecBase {
 
     "the EORI in the enrolment and the EORI in user answers do not match" should {
       "respond with 403 status" in {
-        val userAnswers = emptyUserAnswers.copy(eoriNumber = "different eori")
+        val metadata    = emptyMetadata.copy(eoriNumber = "different eori")
+        val userAnswers = emptyUserAnswers.copy(metadata = metadata)
 
         val response = wsClient
           .url(url)
@@ -215,9 +210,19 @@ class CacheControllerSpec extends ItSpecBase {
 
     "documents do exist" should {
       "respond with 200 status" in {
-        val userAnswers1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
-        val userAnswers2 =
-          UserAnswers("CD123", eoriNumber, Json.obj(), Map(), LocalDateTime.now().minusDays(1), LocalDateTime.now().minusDays(1), UUID.randomUUID())
+        val userAnswers1 = UserAnswers(
+          metadata = Metadata("AB123", eoriNumber),
+          createdAt = Instant.now(),
+          lastUpdated = Instant.now(),
+          id = UUID.randomUUID()
+        )
+
+        val userAnswers2 = UserAnswers(
+          metadata = Metadata("CD123", eoriNumber),
+          createdAt = Instant.now().minus(1, DAYS),
+          lastUpdated = Instant.now().minus(1, DAYS),
+          id = UUID.randomUUID()
+        )
 
         insert(userAnswers1).futureValue
         insert(userAnswers2).futureValue

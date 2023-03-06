@@ -17,18 +17,18 @@
 package models
 
 import base.SpecBase
-import play.api.libs.json.{JsValue, Json}
 import models.Lock._
+import play.api.libs.json.{JsValue, Json}
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 class LockSpec extends SpecBase {
 
   private val lock = Lock(
     lrn = lrn,
     eoriNumber = eoriNumber,
-    createdAt = LocalDateTime.of(2022: Int, 9: Int, 5: Int, 15: Int, 58: Int, 44: Int, 188000000: Int),
-    lastUpdated = LocalDateTime.of(2022: Int, 9: Int, 7: Int, 10: Int, 33: Int, 23: Int, 472000000: Int),
+    createdAt = Instant.ofEpochMilli(1662393524188L),
+    lastUpdated = Instant.ofEpochMilli(1662546803472L),
     sessionId = "AB123"
   )
 

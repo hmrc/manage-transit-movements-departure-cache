@@ -24,7 +24,7 @@ import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HeaderNames
 
-import java.time.LocalDateTime
+import java.time.Instant
 import scala.concurrent.Future
 
 class LockControllerSpec extends SpecBase {
@@ -35,8 +35,8 @@ class LockControllerSpec extends SpecBase {
       sessionId = "abc123",
       eoriNumber = "AB123",
       lrn = "CD123",
-      createdAt = LocalDateTime.now(),
-      lastUpdated = LocalDateTime.now()
+      createdAt = Instant.now(),
+      lastUpdated = Instant.now()
     )
 
     "return 200" when {

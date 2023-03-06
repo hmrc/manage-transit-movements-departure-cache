@@ -22,7 +22,7 @@ import controllers.actions.{
   FakeAuthenticateActionProvider,
   FakeAuthenticateAndLockActionProvider
 }
-import models.UserAnswers
+import models.{Metadata, UserAnswers}
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -31,30 +31,21 @@ import org.scalatestplus.play.guice.GuiceOneServerPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
-import repositories.CacheRepository
 import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
+import uk.gov.hmrc.mongo.test.MongoSupport
 
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.UUID
 
-trait ItSpecBase
-    extends AnyWordSpec
-    with Matchers
-    with ScalaFutures
-    with OptionValues
-    with GuiceOneServerPerSuite
-    with DefaultPlayMongoRepositorySupport[UserAnswers] {
-
-  override protected def repository: CacheRepository =
-    app.injector.instanceOf[CacheRepository]
+trait ItSpecBase extends AnyWordSpec with Matchers with ScalaFutures with OptionValues with GuiceOneServerPerSuite {
+  self: MongoSupport =>
 
   val lrn        = "lrn"
   val eoriNumber = "eori"
 
-  def emptyUserAnswers: UserAnswers = UserAnswers(lrn, eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
+  def emptyMetadata: Metadata       = Metadata(lrn, eoriNumber)
+  def emptyUserAnswers: UserAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
 
   val wsClient: WSClient = app.injector.instanceOf[WSClient]
   val baseUrl            = s"http://localhost:$port"

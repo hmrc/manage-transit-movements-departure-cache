@@ -24,7 +24,7 @@ import play.api.libs.json.{__, Reads}
 object Authorisations {
 
   def transform(uA: UserAnswers): Seq[AuthorisationType03] =
-    uA.data.as[Seq[AuthorisationType03]](authorisationsReads)
+    uA.metadata.data.as[Seq[AuthorisationType03]](authorisationsReads)
 
   implicit val authorisationsReads: Reads[Seq[AuthorisationType03]] = for {
     procedureType           <- (preTaskListPath \ "procedureType").read[String]

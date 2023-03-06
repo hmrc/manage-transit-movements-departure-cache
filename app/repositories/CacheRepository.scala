@@ -18,14 +18,15 @@ package repositories
 
 import com.mongodb.client.model.Filters.{regex, and => mAnd, eq => mEq}
 import config.AppConfig
-import models.{Sort, UserAnswers, UserAnswersSummary}
+import models._
 import org.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
 import org.mongodb.scala.model._
 import uk.gov.hmrc.mongo.MongoComponent
-import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
+import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
-import java.time.{Clock, LocalDateTime}
+import java.time.{Clock, Instant}
+import java.util.UUID
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -48,7 +49,7 @@ class CacheRepository @Inject() (
       Filters.eq("lrn", lrn),
       Filters.eq("eoriNumber", eoriNumber)
     )
-    val update  = Updates.set("lastUpdated", LocalDateTime.now(clock))
+    val update  = Updates.set("lastUpdated", Instant.now(clock))
     val options = FindOneAndUpdateOptions().upsert(false).sort(Sorts.descending("createdAt"))
 
     collection
@@ -56,15 +57,25 @@ class CacheRepository @Inject() (
       .toFutureOption()
   }
 
-  def set(userAnswers: UserAnswers): Future[Boolean] = {
+  def set(data: Metadata): Future[Boolean] = {
+    val now = Instant.now(clock)
     val filter = Filters.and(
-      Filters.eq("lrn", userAnswers.lrn),
-      Filters.eq("eoriNumber", userAnswers.eoriNumber)
+      Filters.eq("lrn", data.lrn),
+      Filters.eq("eoriNumber", data.eoriNumber)
     )
-    val updatedUserAnswers = userAnswers.copy(lastUpdated = LocalDateTime.now(clock))
+    val updates = Updates.combine(
+      Updates.setOnInsert("lrn", data.lrn),
+      Updates.setOnInsert("eoriNumber", data.eoriNumber),
+      Updates.set("data", Codecs.toBson(data.data)),
+      Updates.set("tasks", Codecs.toBson(data.tasks)),
+      Updates.setOnInsert("createdAt", now),
+      Updates.set("lastUpdated", now),
+      Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID()))
+    )
+    val options = UpdateOptions().upsert(true)
 
     collection
-      .replaceOne(filter, updatedUserAnswers, ReplaceOptions().upsert(true))
+      .updateOne(filter, updates, options)
       .toFuture()
       .map(_.wasAcknowledged())
   }

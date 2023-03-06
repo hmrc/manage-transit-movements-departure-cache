@@ -26,7 +26,7 @@ import java.time.LocalDate
 object TransitOperation {
 
   def transform(uA: UserAnswers): TransitOperationType06 =
-    uA.data.as[TransitOperationType06](transitOperationType06.reads(uA.lrn))
+    uA.metadata.data.as[TransitOperationType06](transitOperationType06.reads(uA.lrn))
 }
 
 object transitOperationType06 {

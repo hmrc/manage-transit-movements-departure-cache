@@ -16,25 +16,25 @@
 
 package repositories
 
-import itbase.ItSpecBase
+import itbase.CacheRepositorySpecBase
 import models.Sort.{SortByCreatedAtAsc, SortByCreatedAtDesc, SortByLRNAsc, SortByLRNDesc}
-import models.{UserAnswers, UserAnswersSummary}
-import org.mongodb.scala.bson.{BsonDocument, BsonInt64, BsonString}
+import models.{Metadata, Status, UserAnswers, UserAnswersSummary}
+import org.mongodb.scala.Document
+import org.mongodb.scala.bson.{BsonDocument, BsonString}
 import org.mongodb.scala.model.Filters
-import org.mongodb.scala.{Document, MongoWriteException}
 import play.api.libs.json.Json
 
-import java.time.LocalDateTime
-import java.util.UUID
+import java.time.Instant
+import java.time.temporal.ChronoUnit._
 
-class CacheRepositorySpec extends ItSpecBase {
+class CacheRepositorySpec extends CacheRepositorySpecBase {
 
-  private lazy val userAnswers1 = emptyUserAnswers.copy(lrn = "ABCD1111111111111", eoriNumber = "EoriNumber1")
-  private lazy val userAnswers2 = emptyUserAnswers.copy(lrn = "ABCD2222222222222", eoriNumber = "EoriNumber2")
-  private lazy val userAnswers3 = emptyUserAnswers.copy(lrn = "ABCD3333333333333", eoriNumber = "EoriNumber3")
-  private lazy val userAnswers4 = emptyUserAnswers.copy(lrn = "ABCD1111111111111", eoriNumber = "EoriNumber4", createdAt = LocalDateTime.now())
-  private lazy val userAnswers5 = emptyUserAnswers.copy(lrn = "ABCD2222222222222", eoriNumber = "EoriNumber4", createdAt = LocalDateTime.now().minusHours(1))
-  private lazy val userAnswers6 = emptyUserAnswers.copy(lrn = "EFGH3333333333333", eoriNumber = "EoriNumber4")
+  private lazy val userAnswers1 = emptyUserAnswers.copy(metadata = Metadata("ABCD1111111111111", "EoriNumber1"))
+  private lazy val userAnswers2 = emptyUserAnswers.copy(metadata = Metadata("ABCD2222222222222", "EoriNumber2"))
+  private lazy val userAnswers3 = emptyUserAnswers.copy(metadata = Metadata("ABCD3333333333333", "EoriNumber3"))
+  private lazy val userAnswers4 = emptyUserAnswers.copy(metadata = Metadata("ABCD1111111111111", "EoriNumber4"), createdAt = Instant.now())
+  private lazy val userAnswers5 = emptyUserAnswers.copy(metadata = Metadata("ABCD2222222222222", "EoriNumber4"), createdAt = Instant.now().minus(1, HOURS))
+  private lazy val userAnswers6 = emptyUserAnswers.copy(metadata = Metadata("EFGH3333333333333", "EoriNumber4"))
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -60,7 +60,7 @@ class CacheRepositorySpec extends ItSpecBase {
 
       result.value.lrn shouldBe userAnswers1.lrn
       result.value.eoriNumber shouldBe userAnswers1.eoriNumber
-      result.value.data shouldBe userAnswers1.data
+      result.value.metadata shouldBe userAnswers1.metadata
     }
 
     "return None when no UserAnswers match LocalReferenceNumber" in {
@@ -84,7 +84,7 @@ class CacheRepositorySpec extends ItSpecBase {
 
       findOne(userAnswers3.lrn, userAnswers3.eoriNumber) should not be defined
 
-      val setResult = repository.set(userAnswers3).futureValue
+      val setResult = repository.set(userAnswers3.metadata).futureValue
 
       setResult shouldBe true
 
@@ -92,14 +92,18 @@ class CacheRepositorySpec extends ItSpecBase {
 
       getResult.lrn shouldBe userAnswers3.lrn
       getResult.eoriNumber shouldBe userAnswers3.eoriNumber
-      getResult.data shouldBe userAnswers3.data
+      getResult.metadata shouldBe userAnswers3.metadata
     }
 
     "update document when it already exists" in {
 
       val firstGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
 
-      val setResult = repository.set(userAnswers1.copy(data = Json.obj("foo" -> "bar"))).futureValue
+      val metadata = userAnswers1.metadata.copy(
+        data = Json.obj("foo" -> "bar"),
+        tasks = Map(".task" -> Status.InProgress)
+      )
+      val setResult = repository.set(metadata).futureValue
 
       setResult shouldBe true
 
@@ -108,19 +112,9 @@ class CacheRepositorySpec extends ItSpecBase {
       firstGet.id shouldBe secondGet.id
       firstGet.lrn shouldBe secondGet.lrn
       firstGet.eoriNumber shouldBe secondGet.eoriNumber
-      firstGet.data shouldNot equal(secondGet.data)
+      firstGet.metadata shouldNot equal(secondGet.metadata)
       firstGet.createdAt shouldBe secondGet.createdAt
       firstGet.lastUpdated isBefore secondGet.lastUpdated shouldBe true
-    }
-
-    "fail when attempting to set using an existing LocalReferenceNumber and EoriNumber with a different Id" in {
-
-      val setResult = repository.set(userAnswers1.copy(id = UUID.randomUUID()))
-
-      whenReady(setResult.failed) {
-        e =>
-          e shouldBe a[MongoWriteException]
-      }
     }
   }
 
@@ -227,10 +221,10 @@ class CacheRepositorySpec extends ItSpecBase {
 
       "return UserAnswersSummary to limit sorted by createdDate" in {
 
-        val userAnswers1 = emptyUserAnswers.copy(lrn = "XI1111111111111", eoriNumber = "AB123", createdAt = LocalDateTime.now())
-        val userAnswers2 = emptyUserAnswers.copy(lrn = "X22222222222222", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusHours(1))
-        val userAnswers3 = emptyUserAnswers.copy(lrn = "GB13333333333333", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(2))
-        val userAnswers4 = emptyUserAnswers.copy(lrn = "GB24444444444444", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(1))
+        val userAnswers1 = emptyUserAnswers.copy(metadata = Metadata("XI1111111111111", "AB123")).copy(createdAt = Instant.now())
+        val userAnswers2 = emptyUserAnswers.copy(metadata = Metadata("X22222222222222", "AB123"), createdAt = Instant.now().minus(1, HOURS))
+        val userAnswers3 = emptyUserAnswers.copy(metadata = Metadata("GB13333333333333", "AB123"), createdAt = Instant.now().minus(2, DAYS))
+        val userAnswers4 = emptyUserAnswers.copy(metadata = Metadata("GB24444444444444", "AB123"), createdAt = Instant.now().minus(1, DAYS))
 
         insert(userAnswers1).futureValue
         insert(userAnswers2).futureValue
@@ -253,12 +247,12 @@ class CacheRepositorySpec extends ItSpecBase {
 
       "return UserAnswersSummary to limit and to lrn param sorted by createdDate" in {
 
-        val userAnswers1 = emptyUserAnswers.copy(lrn = "XI1111111111111", eoriNumber = "AB123", createdAt = LocalDateTime.now())
-        val userAnswers2 = emptyUserAnswers.copy(lrn = "XI2222222222222", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusHours(1))
-        val userAnswers3 = emptyUserAnswers.copy(lrn = "XI3333333333333", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusHours(2))
-        val userAnswers4 = emptyUserAnswers.copy(lrn = "GB1111111111111", eoriNumber = "AB123", createdAt = LocalDateTime.now())
-        val userAnswers5 = emptyUserAnswers.copy(lrn = "GB2222222222222", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(1))
-        val userAnswers6 = emptyUserAnswers.copy(lrn = "GB3333333333333", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(2))
+        val userAnswers1 = emptyUserAnswers.copy(metadata = Metadata("XI1111111111111", "AB123"), createdAt = Instant.now())
+        val userAnswers2 = emptyUserAnswers.copy(metadata = Metadata("XI2222222222222", "AB123"), createdAt = Instant.now().minus(1, HOURS))
+        val userAnswers3 = emptyUserAnswers.copy(metadata = Metadata("XI3333333333333", "AB123"), createdAt = Instant.now().minus(2, HOURS))
+        val userAnswers4 = emptyUserAnswers.copy(metadata = Metadata("GB1111111111111", "AB123"), createdAt = Instant.now())
+        val userAnswers5 = emptyUserAnswers.copy(metadata = Metadata("GB2222222222222", "AB123"), createdAt = Instant.now().minus(1, DAYS))
+        val userAnswers6 = emptyUserAnswers.copy(metadata = Metadata("GB3333333333333", "AB123"), createdAt = Instant.now().minus(2, DAYS))
 
         insert(userAnswers1).futureValue
         insert(userAnswers2).futureValue
@@ -267,7 +261,7 @@ class CacheRepositorySpec extends ItSpecBase {
         insert(userAnswers5).futureValue
         insert(userAnswers6).futureValue
 
-        val result = repository.getAll(userAnswers1.eoriNumber, lrn = Some("GB"), limit = Some(2)).futureValue
+        val result = repository.getAll(userAnswers1.eoriNumber, Some("GB"), limit = Some(2)).futureValue
 
         result match {
           case UserAnswersSummary(eoriNumber, userAnswers, _, totalMovements, totalMatchingMovements) =>
@@ -285,12 +279,12 @@ class CacheRepositorySpec extends ItSpecBase {
 
       "return UserAnswersSummary, skipping based on skip param and limit param" in {
 
-        val userAnswers1 = emptyUserAnswers.copy(lrn = "GB111", eoriNumber = "AB123", createdAt = LocalDateTime.now())
-        val userAnswers2 = emptyUserAnswers.copy(lrn = "GB222", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusHours(1))
-        val userAnswers3 = emptyUserAnswers.copy(lrn = "GB333", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(1))
-        val userAnswers4 = emptyUserAnswers.copy(lrn = "GB444", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(2))
-        val userAnswers5 = emptyUserAnswers.copy(lrn = "GB555", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(3))
-        val userAnswers6 = emptyUserAnswers.copy(lrn = "GB666", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(4))
+        val userAnswers1 = emptyUserAnswers.copy(metadata = Metadata("GB111", "AB123"), createdAt = Instant.now())
+        val userAnswers2 = emptyUserAnswers.copy(metadata = Metadata("GB222", "AB123"), createdAt = Instant.now().minus(1, HOURS))
+        val userAnswers3 = emptyUserAnswers.copy(metadata = Metadata("GB333", "AB123"), createdAt = Instant.now().minus(1, DAYS))
+        val userAnswers4 = emptyUserAnswers.copy(metadata = Metadata("GB444", "AB123"), createdAt = Instant.now().minus(2, DAYS))
+        val userAnswers5 = emptyUserAnswers.copy(metadata = Metadata("GB555", "AB123"), createdAt = Instant.now().minus(3, DAYS))
+        val userAnswers6 = emptyUserAnswers.copy(metadata = Metadata("GB666", "AB123"), createdAt = Instant.now().minus(4, DAYS))
 
         insert(userAnswers1).futureValue
         insert(userAnswers2).futureValue
@@ -337,12 +331,12 @@ class CacheRepositorySpec extends ItSpecBase {
 
       "return UserAnswersSummary to limit, lrn and skip param sorted by createdDate" in {
 
-        val userAnswers1 = emptyUserAnswers.copy(lrn = "XI1111111111111", eoriNumber = "AB123", createdAt = LocalDateTime.now())
-        val userAnswers2 = emptyUserAnswers.copy(lrn = "XI2222222222222", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusHours(1))
-        val userAnswers3 = emptyUserAnswers.copy(lrn = "XI3333333333333", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusHours(2))
-        val userAnswers4 = emptyUserAnswers.copy(lrn = "GB1111111111111", eoriNumber = "AB123", createdAt = LocalDateTime.now())
-        val userAnswers5 = emptyUserAnswers.copy(lrn = "GB2222222222222", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(1))
-        val userAnswers6 = emptyUserAnswers.copy(lrn = "GB3333333333333", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(2))
+        val userAnswers1 = emptyUserAnswers.copy(metadata = Metadata("XI1111111111111", "AB123"), createdAt = Instant.now())
+        val userAnswers2 = emptyUserAnswers.copy(metadata = Metadata("XI2222222222222", "AB123"), createdAt = Instant.now().minus(1, HOURS))
+        val userAnswers3 = emptyUserAnswers.copy(metadata = Metadata("XI3333333333333", "AB123"), createdAt = Instant.now().minus(2, HOURS))
+        val userAnswers4 = emptyUserAnswers.copy(metadata = Metadata("GB1111111111111", "AB123"), createdAt = Instant.now())
+        val userAnswers5 = emptyUserAnswers.copy(metadata = Metadata("GB2222222222222", "AB123"), createdAt = Instant.now().minus(1, DAYS))
+        val userAnswers6 = emptyUserAnswers.copy(metadata = Metadata("GB3333333333333", "AB123"), createdAt = Instant.now().minus(2, DAYS))
 
         insert(userAnswers1).futureValue
         insert(userAnswers2).futureValue
@@ -351,7 +345,7 @@ class CacheRepositorySpec extends ItSpecBase {
         insert(userAnswers5).futureValue
         insert(userAnswers6).futureValue
 
-        val result = repository.getAll(userAnswers1.eoriNumber, lrn = Some("GB"), limit = Some(2), skip = Some(1)).futureValue
+        val result = repository.getAll(userAnswers1.eoriNumber, Some("GB"), limit = Some(2), skip = Some(1)).futureValue
 
         result match {
           case UserAnswersSummary(eoriNumber, userAnswers, _, totalMovements, totalMatchingMovements) =>
@@ -366,12 +360,12 @@ class CacheRepositorySpec extends ItSpecBase {
 
     "when given sortBy param" should {
 
-      val userAnswers1 = emptyUserAnswers.copy(lrn = "AA1111111111111", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(3))
-      val userAnswers2 = emptyUserAnswers.copy(lrn = "BB2222222222222", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(6))
-      val userAnswers3 = emptyUserAnswers.copy(lrn = "CC3333333333333", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(5))
-      val userAnswers4 = emptyUserAnswers.copy(lrn = "DD1111111111111", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(4))
-      val userAnswers5 = emptyUserAnswers.copy(lrn = "EE2222222222222", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(1))
-      val userAnswers6 = emptyUserAnswers.copy(lrn = "FF3333333333333", eoriNumber = "AB123", createdAt = LocalDateTime.now().minusDays(2))
+      val userAnswers1 = emptyUserAnswers.copy(metadata = Metadata("AA1111111111111", "AB123"), createdAt = Instant.now().minus(3, DAYS))
+      val userAnswers2 = emptyUserAnswers.copy(metadata = Metadata("BB2222222222222", "AB123"), createdAt = Instant.now().minus(6, DAYS))
+      val userAnswers3 = emptyUserAnswers.copy(metadata = Metadata("CC3333333333333", "AB123"), createdAt = Instant.now().minus(5, DAYS))
+      val userAnswers4 = emptyUserAnswers.copy(metadata = Metadata("DD1111111111111", "AB123"), createdAt = Instant.now().minus(4, DAYS))
+      val userAnswers5 = emptyUserAnswers.copy(metadata = Metadata("EE2222222222222", "AB123"), createdAt = Instant.now().minus(1, DAYS))
+      val userAnswers6 = emptyUserAnswers.copy(metadata = Metadata("FF3333333333333", "AB123"), createdAt = Instant.now().minus(2, DAYS))
 
       "return UserAnswersSummary, which is sorted by lrn in ascending order when sortBy is lrn.asc" in {
 
@@ -498,7 +492,7 @@ class CacheRepositorySpec extends ItSpecBase {
 
       val createdAtIndex = findIndex("user-answers-created-at-index")
       createdAtIndex.get("key").get shouldBe BsonDocument("createdAt" -> 1)
-      createdAtIndex.get("expireAfterSeconds").get shouldBe BsonInt64(2592000)
+      createdAtIndex.get("expireAfterSeconds").get.asNumber().intValue() shouldBe 2592000
 
       val eoriLrnIndex = findIndex("eoriNumber-lrn-index")
       eoriLrnIndex.get("key").get shouldBe BsonDocument("eoriNumber" -> 1, "lrn" -> 1)

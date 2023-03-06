@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.{UserAnswers, UserAnswersSummary}
+import models.{Metadata, UserAnswers, UserAnswersSummary}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, verify, when}
@@ -25,7 +25,7 @@ import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 
-import java.time.LocalDateTime
+import java.time.Instant
 import java.util.UUID
 import scala.concurrent.Future
 
@@ -75,15 +75,15 @@ class CacheControllerSpec extends SpecBase {
 
     "return 200" when {
       "write to mongo was acknowledged" in {
-        val userAnswers = emptyUserAnswers
+        val metadata = emptyMetadata
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.toJson(userAnswers))
+          .withBody(Json.toJson(metadata))
         val result = route(app, request).value
 
         status(result) shouldBe OK
-        verify(mockCacheRepository).set(eqTo(userAnswers))
+        verify(mockCacheRepository).set(eqTo(metadata))
       }
     }
 
@@ -111,7 +111,8 @@ class CacheControllerSpec extends SpecBase {
 
     "return 403" when {
       "the EORI in the enrolment and the EORI in user answers do not match" in {
-        val userAnswers = emptyUserAnswers.copy(eoriNumber = "different eori")
+        val metadata    = emptyMetadata.copy(eoriNumber = "different eori")
+        val userAnswers = emptyUserAnswers.copy(metadata = metadata)
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
           .withBody(Json.toJson(userAnswers))
@@ -125,29 +126,29 @@ class CacheControllerSpec extends SpecBase {
 
     "return 500" when {
       "write to mongo was not acknowledged" in {
-        val userAnswers = emptyUserAnswers
+        val metadata = emptyMetadata
 
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(false))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.toJson(userAnswers))
+          .withBody(Json.toJson(metadata))
 
         val result = route(app, request).value
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockCacheRepository).set(eqTo(userAnswers))
+        verify(mockCacheRepository).set(eqTo(metadata))
       }
 
       "write to mongo fails" in {
-        val userAnswers = emptyUserAnswers
+        val metadata = emptyMetadata
         when(mockCacheRepository.set(any())).thenReturn(Future.failed(new Throwable()))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.toJson(userAnswers))
+          .withBody(Json.toJson(metadata))
 
         val result = route(app, request).value
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockCacheRepository).set(eqTo(userAnswers))
+        verify(mockCacheRepository).set(eqTo(metadata))
       }
     }
   }
@@ -161,12 +162,12 @@ class CacheControllerSpec extends SpecBase {
         val request = FakeRequest(PUT, routes.CacheController.put().url)
           .withBody(JsString(lrn))
 
-        val result                                         = route(app, request).value
-        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        val result                                   = route(app, request).value
+        val metadataCaptor: ArgumentCaptor[Metadata] = ArgumentCaptor.forClass(classOf[Metadata])
 
         status(result) shouldBe OK
-        verify(mockCacheRepository).set(userAnswersCaptor.capture())
-        userAnswersCaptor.getValue.lrn shouldBe lrn
+        verify(mockCacheRepository).set(metadataCaptor.capture())
+        metadataCaptor.getValue.lrn shouldBe lrn
       }
     }
 
@@ -199,12 +200,12 @@ class CacheControllerSpec extends SpecBase {
         val request = FakeRequest(PUT, routes.CacheController.put().url)
           .withBody(JsString(lrn))
 
-        val result                                         = route(app, request).value
-        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        val result                                   = route(app, request).value
+        val metadataCaptor: ArgumentCaptor[Metadata] = ArgumentCaptor.forClass(classOf[Metadata])
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockCacheRepository).set(userAnswersCaptor.capture())
-        userAnswersCaptor.getValue.lrn shouldBe lrn
+        verify(mockCacheRepository).set(metadataCaptor.capture())
+        metadataCaptor.getValue.lrn shouldBe lrn
       }
 
       "write to mongo fails" in {
@@ -213,12 +214,12 @@ class CacheControllerSpec extends SpecBase {
         val request = FakeRequest(PUT, routes.CacheController.put().url)
           .withBody(JsString(lrn))
 
-        val result                                         = route(app, request).value
-        val userAnswersCaptor: ArgumentCaptor[UserAnswers] = ArgumentCaptor.forClass(classOf[UserAnswers])
+        val result                                   = route(app, request).value
+        val metadataCaptor: ArgumentCaptor[Metadata] = ArgumentCaptor.forClass(classOf[Metadata])
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockCacheRepository).set(userAnswersCaptor.capture())
-        userAnswersCaptor.getValue.lrn shouldBe lrn
+        verify(mockCacheRepository).set(metadataCaptor.capture())
+        metadataCaptor.getValue.lrn shouldBe lrn
       }
     }
   }
@@ -253,8 +254,8 @@ class CacheControllerSpec extends SpecBase {
     "return 200" when {
 
       "read from mongo is successful" in {
-        val userAnswer1 = UserAnswers("AB123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
-        val userAnswer2 = UserAnswers("CD123", eoriNumber, Json.obj(), Map(), LocalDateTime.now(), LocalDateTime.now(), UUID.randomUUID())
+        val userAnswer1 = UserAnswers(Metadata("AB123", eoriNumber), Instant.now(), Instant.now(), UUID.randomUUID())
+        val userAnswer2 = UserAnswers(Metadata("CD123", eoriNumber), Instant.now(), Instant.now(), UUID.randomUUID())
 
         when(mockCacheRepository.getAll(any(), any(), any(), any(), any()))
           .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 30, 2, 2)))

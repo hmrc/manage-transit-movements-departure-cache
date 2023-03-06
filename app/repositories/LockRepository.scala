@@ -24,7 +24,7 @@ import org.mongodb.scala.model._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
-import java.time.{Clock, LocalDateTime}
+import java.time.{Clock, Instant}
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
@@ -47,18 +47,14 @@ class DefaultLockRepository @Inject() (mongoComponent: MongoComponent, appConfig
     collection
       .insertOne(lock)
       .head()
-      .map(
-        insertOneResult => insertOneResult.wasAcknowledged()
-      )
+      .map(_.wasAcknowledged())
 
   private def updateLock(existingLock: Lock): Future[Boolean] = {
-    val updatedLock = existingLock.copy(lastUpdated = LocalDateTime.now(clock))
+    val updatedLock = existingLock.copy(lastUpdated = Instant.now(clock))
     collection
       .replaceOne(primaryFilter(existingLock.eoriNumber, existingLock.lrn), updatedLock)
       .head()
-      .map(
-        updatedOneResult => updatedOneResult.wasAcknowledged()
-      )
+      .map(_.wasAcknowledged())
   }
 
   def lock(newLock: Lock): Future[Boolean] =
@@ -81,9 +77,7 @@ class DefaultLockRepository @Inject() (mongoComponent: MongoComponent, appConfig
     collection
       .deleteOne(filters)
       .head()
-      .map(
-        deleteResult => deleteResult.wasAcknowledged()
-      )
+      .map(_.wasAcknowledged())
   }
 }
 

@@ -26,7 +26,7 @@ import repositories.DefaultLockRepository
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
-import java.time.{Clock, LocalDateTime}
+import java.time.{Clock, Instant}
 import scala.concurrent.{ExecutionContext, Future}
 
 class LockActionProvider @Inject() (repository: DefaultLockRepository, clock: Clock)(implicit ec: ExecutionContext) {
@@ -45,12 +45,14 @@ class LockAction(lrn: String, repository: DefaultLockRepository, clock: Clock)(i
     hc.sessionId
       .map {
         sessionId =>
+          val now = Instant.now(clock)
+
           val lock: Lock = Lock(
             sessionId = sessionId.value,
             eoriNumber = request.eoriNumber,
             lrn = lrn,
-            createdAt = LocalDateTime.now(clock),
-            lastUpdated = LocalDateTime.now(clock)
+            createdAt = now,
+            lastUpdated = now
           )
 
           repository.lock(lock).map {

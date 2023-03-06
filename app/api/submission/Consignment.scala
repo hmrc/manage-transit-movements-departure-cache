@@ -24,7 +24,7 @@ import play.api.libs.json.{__, Reads}
 object Consignment {
 
   def transform(uA: UserAnswers): ConsignmentType20 =
-    uA.data.as[ConsignmentType20](consignmentType20.reads)
+    uA.metadata.data.as[ConsignmentType20](consignmentType20.reads)
 }
 
 object consignmentType20 {
