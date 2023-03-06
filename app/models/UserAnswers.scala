@@ -19,7 +19,7 @@ package models
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
-import java.time.{Instant, LocalDateTime, ZoneOffset}
+import java.time.Instant
 import java.util.UUID
 
 final case class UserAnswers(
@@ -40,11 +40,7 @@ object UserAnswers {
 
   import play.api.libs.functional.syntax._
 
-  // TODO - this is for backwards compatibility. Can be removed when all frontends no longer using LocalDateTime
-  lazy val oldReads: Reads[Instant] =
-    implicitly[Reads[LocalDateTime]].map(_.toInstant(ZoneOffset.UTC))
-
-  implicit lazy val reads: Reads[UserAnswers]   = customReads(implicitly[Reads[Instant]] orElse oldReads)
+  implicit lazy val reads: Reads[UserAnswers]   = customReads(implicitly)
   implicit lazy val writes: Writes[UserAnswers] = customWrites(implicitly)
 
   private def customReads(implicit instantReads: Reads[Instant]): Reads[UserAnswers] = (

@@ -43,66 +43,38 @@ class UserAnswersSpec extends SpecBase {
 
   "User answers" when {
 
-    "being passed between backend and frontend" when {
+    "being passed between backend and frontend" should {
 
-      "old LocalDateTime format" should {
+      val json: JsValue = Json.parse(s"""
+          |{
+          |    "_id" : "$uuid",
+          |    "lrn" : "$lrn",
+          |    "eoriNumber" : "$eoriNumber",
+          |    "data" : {},
+          |    "tasks" : {
+          |        "task1" : "completed",
+          |        "task2" : "in-progress",
+          |        "task3" : "not-started",
+          |        "task4" : "cannot-start-yet"
+          |    },
+          |    "createdAt" : "2022-09-05T15:58:44.188Z",
+          |    "lastUpdated" : "2022-09-07T10:33:23.472Z"
+          |}
+          |""".stripMargin)
 
-        val json: JsValue = Json.parse(s"""
-             |{
-             |    "_id" : "$uuid",
-             |    "lrn" : "$lrn",
-             |    "eoriNumber" : "$eoriNumber",
-             |    "data" : {},
-             |    "tasks" : {
-             |        "task1" : "completed",
-             |        "task2" : "in-progress",
-             |        "task3" : "not-started",
-             |        "task4" : "cannot-start-yet"
-             |    },
-             |    "createdAt" : "2022-09-05T15:58:44.188",
-             |    "lastUpdated" : "2022-09-07T10:33:23.472"
-             |}
-             |""".stripMargin)
-
-        "read correctly" in {
-          val result = json.as[UserAnswers]
-          result shouldBe userAnswers
-        }
+      "read correctly" in {
+        val result = json.as[UserAnswers]
+        result shouldBe userAnswers
       }
 
-      "new Instant format" should {
+      "write correctly" in {
+        val result = Json.toJson(userAnswers)
+        result shouldBe json
+      }
 
-        val json: JsValue = Json.parse(s"""
-             |{
-             |    "_id" : "$uuid",
-             |    "lrn" : "$lrn",
-             |    "eoriNumber" : "$eoriNumber",
-             |    "data" : {},
-             |    "tasks" : {
-             |        "task1" : "completed",
-             |        "task2" : "in-progress",
-             |        "task3" : "not-started",
-             |        "task4" : "cannot-start-yet"
-             |    },
-             |    "createdAt" : "2022-09-05T15:58:44.188Z",
-             |    "lastUpdated" : "2022-09-07T10:33:23.472Z"
-             |}
-             |""".stripMargin)
-
-        "read correctly" in {
-          val result = json.as[UserAnswers]
-          result shouldBe userAnswers
-        }
-
-        "write correctly" in {
-          val result = Json.toJson(userAnswers)
-          result shouldBe json
-        }
-
-        "be readable as a LocalDateTime for backwards compatibility" in {
-          val json = Json.toJson(Instant.now())
-          json.validate[LocalDateTime] shouldBe a[JsSuccess[_]]
-        }
+      "be readable as a LocalDateTime for backwards compatibility" in {
+        val json = Json.toJson(Instant.now())
+        json.validate[LocalDateTime] shouldBe a[JsSuccess[_]]
       }
     }
 
