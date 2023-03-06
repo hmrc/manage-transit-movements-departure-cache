@@ -17,7 +17,7 @@
 package base
 
 import config.AppConfig
-import models.{Data, UserAnswers}
+import models.{Metadata, UserAnswers}
 import org.mockito.Mockito.reset
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -41,8 +41,8 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val emptyData: Data               = Data(lrn, eoriNumber)
-  val emptyUserAnswers: UserAnswers = UserAnswers(emptyData, Instant.now(), Instant.now(), UUID.randomUUID())
+  val emptyMetadata: Metadata       = Metadata(lrn, eoriNumber)
+  val emptyUserAnswers: UserAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
 
   val mockCacheRepository: CacheRepository      = mock[CacheRepository]
   val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]

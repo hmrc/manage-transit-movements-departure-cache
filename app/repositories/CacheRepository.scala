@@ -57,7 +57,7 @@ class CacheRepository @Inject() (
       .toFutureOption()
   }
 
-  def set(data: Data): Future[Boolean] = {
+  def set(data: Metadata): Future[Boolean] = {
     val now = Instant.now(clock)
     val filter = Filters.and(
       Filters.eq("lrn", data.lrn),

@@ -17,7 +17,7 @@
 package controllers
 
 import itbase.CacheRepositorySpecBase
-import models.{Data, UserAnswers}
+import models.{Metadata, UserAnswers}
 import org.mongodb.scala.model.Filters
 import play.api.libs.json.{JsObject, JsString, Json}
 
@@ -54,7 +54,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
 
         response.status shouldBe 200
 
-        response.json.as[UserAnswers].data shouldBe userAnswers.data
+        response.json.as[UserAnswers].metadata shouldBe userAnswers.metadata
 
         response.json.as[UserAnswers].createdAt shouldBe userAnswers.createdAt.truncatedTo(
           java.time.temporal.ChronoUnit.MILLIS
@@ -73,11 +73,11 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
 
     "document successfully written to mongo" should {
       "respond with 200 status" in {
-        val data = emptyData
+        val metadata = emptyMetadata
 
         val response = wsClient
           .url(url)
-          .post(Json.toJson(data))
+          .post(Json.toJson(metadata))
           .futureValue
 
         response.status shouldBe 200
@@ -85,9 +85,9 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
         val results = findAll().futureValue
         results.size shouldBe 1
         val result = results.head
-        result.lrn shouldBe data.lrn
-        result.eoriNumber shouldBe data.eoriNumber
-        result.data shouldBe data
+        result.lrn shouldBe metadata.lrn
+        result.eoriNumber shouldBe metadata.eoriNumber
+        result.metadata shouldBe metadata
       }
     }
 
@@ -115,8 +115,8 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
 
     "the EORI in the enrolment and the EORI in user answers do not match" should {
       "respond with 403 status" in {
-        val data        = emptyData.copy(eoriNumber = "different eori")
-        val userAnswers = emptyUserAnswers.copy(data = data)
+        val metadata    = emptyMetadata.copy(eoriNumber = "different eori")
+        val userAnswers = emptyUserAnswers.copy(metadata = metadata)
 
         val response = wsClient
           .url(url)
@@ -211,14 +211,14 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
     "documents do exist" should {
       "respond with 200 status" in {
         val userAnswers1 = UserAnswers(
-          data = Data("AB123", eoriNumber),
+          metadata = Metadata("AB123", eoriNumber),
           createdAt = Instant.now(),
           lastUpdated = Instant.now(),
           id = UUID.randomUUID()
         )
 
         val userAnswers2 = UserAnswers(
-          data = Data("CD123", eoriNumber),
+          metadata = Metadata("CD123", eoriNumber),
           createdAt = Instant.now().minus(1, DAYS),
           lastUpdated = Instant.now().minus(1, DAYS),
           id = UUID.randomUUID()

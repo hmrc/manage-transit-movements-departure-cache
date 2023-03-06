@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
-import models.Data
+import models.Metadata
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -58,7 +58,7 @@ class CacheController @Inject() (
 
   def post(lrn: String): Action[JsValue] = authenticateAndLock(lrn).async(parse.json) {
     implicit request =>
-      request.body.validate[Data] match {
+      request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
           if (request.eoriNumber == data.eoriNumber) {
             set(data)
@@ -76,14 +76,14 @@ class CacheController @Inject() (
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(lrn, _) =>
-          set(Data(lrn, request.eoriNumber))
+          set(Metadata(lrn, request.eoriNumber))
         case JsError(errors) =>
           logger.error(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)
       }
   }
 
-  private def set(data: Data): Future[Status] =
+  private def set(data: Metadata): Future[Status] =
     cacheRepository
       .set(data)
       .map {

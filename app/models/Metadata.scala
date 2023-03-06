@@ -18,16 +18,16 @@ package models
 
 import play.api.libs.json.{Format, JsObject, Json}
 
-case class Data(
+case class Metadata(
   lrn: String,
   eoriNumber: String,
   data: JsObject,
   tasks: Map[String, Status.Value]
 )
 
-object Data {
+object Metadata {
 
-  def apply(lrn: String, eoriNumber: String): Data = Data(lrn, eoriNumber, Json.obj(), Map())
+  def apply(lrn: String, eoriNumber: String): Metadata = Metadata(lrn, eoriNumber, Json.obj(), Map())
 
-  implicit val format: Format[Data] = Json.format[Data]
+  implicit val format: Format[Metadata] = Json.format[Metadata]
 }

@@ -25,7 +25,7 @@ import java.util.UUID
 class UserAnswersSpec extends SpecBase {
 
   private val userAnswers = UserAnswers(
-    data = Data(
+    metadata = Metadata(
       lrn = lrn,
       eoriNumber = eoriNumber,
       data = Json.obj(),

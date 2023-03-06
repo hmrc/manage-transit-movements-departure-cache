@@ -23,18 +23,17 @@ import java.time.{Instant, LocalDateTime, ZoneOffset}
 import java.util.UUID
 
 final case class UserAnswers(
-  data: Data,
+  metadata: Metadata,
   createdAt: Instant,
   lastUpdated: Instant,
   id: UUID
 ) {
 
-  val lrn: String        = data.lrn
-  val eoriNumber: String = data.eoriNumber
+  val lrn: String        = metadata.lrn
+  val eoriNumber: String = metadata.eoriNumber
 
   def get[A](path: JsPath)(implicit rds: Reads[A]): Option[A] =
-    Reads.optionNoError(Reads.at(path)).reads(data.data).getOrElse(None)
-
+    Reads.optionNoError(Reads.at(path)).reads(metadata.data).getOrElse(None)
 }
 
 object UserAnswers {
@@ -49,14 +48,14 @@ object UserAnswers {
   implicit lazy val writes: Writes[UserAnswers] = customWrites(implicitly)
 
   private def customReads(implicit instantReads: Reads[Instant]): Reads[UserAnswers] = (
-    __.read[Data] and
+    __.read[Metadata] and
       (__ \ "createdAt").read[Instant] and
       (__ \ "lastUpdated").read[Instant] and
       (__ \ "_id").read[UUID]
   )(UserAnswers.apply _)
 
   private def customWrites(implicit instantWrites: Writes[Instant]): Writes[UserAnswers] = (
-    __.write[Data] and
+    __.write[Metadata] and
       (__ \ "createdAt").write[Instant] and
       (__ \ "lastUpdated").write[Instant] and
       (__ \ "_id").write[UUID]
