@@ -203,9 +203,12 @@ object goodsReferenceType02 {
 
 object locationOfGoodsType05 {
 
+  lazy val qualifierOfIdentificationReads: Reads[String] =
+    (__ \ "qualifierOfIdentification").read[String] orElse (__ \ "inferredQualifierOfIdentification").read[String]
+
   implicit val reads: Reads[LocationOfGoodsType05] = (
     (__ \ "typeOfLocation").read[String].map(convertTypeOfLocation) and
-      (__ \ "qualifierOfIdentification").read[String].map(convertQualifierOfIdentification) and
+      qualifierOfIdentificationReads.map(convertQualifierOfIdentification) and
       (__ \ "identifier" \ "authorisationNumber").readNullable[String] and
       (__ \ "identifier" \ "additionalIdentifier").readNullable[String] and
       (__ \ "identifier" \ "unLocode").readNullable[String] and

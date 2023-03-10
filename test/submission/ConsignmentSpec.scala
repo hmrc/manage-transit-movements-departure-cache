@@ -16,7 +16,7 @@
 
 package submission
 
-import api.submission.Consignment
+import api.submission._
 import base.SpecBase
 import generated._
 import models.UserAnswers
@@ -802,6 +802,67 @@ class ConsignmentSpec extends SpecBase {
         val result: Seq[ActiveBorderTransportMeansType02] = Consignment.transform(uA).ActiveBorderTransportMeans
 
         result shouldBe Nil
+      }
+    }
+
+    "locationOfGoodsType05 reads is called" when {
+      "qualifier of identification is not inferred" in {
+        val json = Json.parse(s"""
+             |{
+             |  "typeOfLocation" : "approvedPlace",
+             |  "qualifierOfIdentification" : "unlocode",
+             |  "identifier" : {
+             |    "unLocode" : "UNLOCODE",
+             |    "addContact" : false
+             |  }
+             |}
+             |""".stripMargin)
+
+        val result = json.as[LocationOfGoodsType05](locationOfGoodsType05.reads)
+
+        result shouldBe LocationOfGoodsType05(
+          typeOfLocation = "C",
+          qualifierOfIdentification = "U",
+          authorisationNumber = None,
+          additionalIdentifier = None,
+          UNLocode = Some("UNLOCODE"),
+          CustomsOffice = None,
+          GNSS = None,
+          EconomicOperator = None,
+          Address = None,
+          PostcodeAddress = None,
+          ContactPerson = None
+        )
+      }
+
+      "qualifier of identification is inferred" in {
+        val json = Json.parse(s"""
+             |{
+             |  "typeOfLocation" : "authorisedPlace",
+             |  "inferredQualifierOfIdentification" : "authorisationNumber",
+             |  "identifier" : {
+             |    "authorisationNumber" : "authorisation number",
+             |    "addAdditionalIdentifier" : false,
+             |    "addContact" : false
+             |  }
+             |}
+             |""".stripMargin)
+
+        val result = json.as[LocationOfGoodsType05](locationOfGoodsType05.reads)
+
+        result shouldBe LocationOfGoodsType05(
+          typeOfLocation = "B",
+          qualifierOfIdentification = "Y",
+          authorisationNumber = Some("authorisation number"),
+          additionalIdentifier = None,
+          UNLocode = None,
+          CustomsOffice = None,
+          GNSS = None,
+          EconomicOperator = None,
+          Address = None,
+          PostcodeAddress = None,
+          ContactPerson = None
+        )
       }
     }
   }
