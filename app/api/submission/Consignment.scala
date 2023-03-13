@@ -101,14 +101,9 @@ object consignmentType20 {
   }
 
   def activeBorderTransportMeansReads: Reads[Seq[ActiveBorderTransportMeansType02]] =
-    borderModeOfTransportReads flatMap {
-      case Some(modeOfTransportAtTheBorder) =>
-        (transportDetailsPath \ "transportMeansActiveList").readArray[ActiveBorderTransportMeansType02](
-          activeBorderTransportMeansType02.reads(_, modeOfTransportAtTheBorder)
-        )
-      case _ =>
-        Nil
-    }
+    (transportDetailsPath \ "transportMeansActiveList").readArray[ActiveBorderTransportMeansType02](
+      activeBorderTransportMeansType02.reads
+    )
 
   private lazy val convertModeOfTransport: Option[String] => Option[String] = _ map {
     case "maritime" => "1"
@@ -203,9 +198,12 @@ object goodsReferenceType02 {
 
 object locationOfGoodsType05 {
 
+  lazy val qualifierOfIdentificationReads: Reads[String] =
+    (__ \ "qualifierOfIdentification").read[String] orElse (__ \ "inferredQualifierOfIdentification").read[String]
+
   implicit val reads: Reads[LocationOfGoodsType05] = (
     (__ \ "typeOfLocation").read[String].map(convertTypeOfLocation) and
-      (__ \ "qualifierOfIdentification").read[String].map(convertQualifierOfIdentification) and
+      qualifierOfIdentificationReads.map(convertQualifierOfIdentification) and
       (__ \ "identifier" \ "authorisationNumber").readNullable[String] and
       (__ \ "identifier" \ "additionalIdentifier").readNullable[String] and
       (__ \ "identifier" \ "unLocode").readNullable[String] and
@@ -297,21 +295,19 @@ object countryOfRoutingOfConsignmentType01 {
 object activeBorderTransportMeansType02 {
   import transportMeans._
 
-  def reads(index: Int, borderModeOfTransport: String): Reads[ActiveBorderTransportMeansType02] = (
+  lazy val identificationReads: Reads[Option[String]] =
+    ((__ \ "identification").read[String] orElse (__ \ "inferredIdentification").read[String])
+      .map(Option(_))
+      .orElse(None)
+
+  def reads(index: Int): Reads[ActiveBorderTransportMeansType02] = (
     (index.toString: Reads[String]) and
       (__ \ "customsOfficeActiveBorder" \ "id").readNullable[String] and
-      __.read[Option[String]](typeOfIdentificationReads(index, borderModeOfTransport)).map(convertTypeOfIdentification) and
+      identificationReads.map(convertTypeOfIdentification) and
       (__ \ "identificationNumber").readNullable[String] and
       (__ \ "nationality" \ "code").readNullable[String] and
       (__ \ "conveyanceReferenceNumber").readNullable[String]
   )(ActiveBorderTransportMeansType02.apply _)
-
-  private def typeOfIdentificationReads(index: Int, borderModeOfTransport: String): Reads[Option[String]] =
-    (index, borderModeOfTransport) match {
-      case (1, "rail") => Some("trainNumber")
-      case (1, "road") => Some("regNumberRoadVehicle")
-      case _           => (__ \ "identification").readNullable[String]
-    }
 }
 
 object placeOfLoadingType03 {
