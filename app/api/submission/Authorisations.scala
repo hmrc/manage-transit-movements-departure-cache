@@ -26,28 +26,22 @@ object Authorisations {
   def transform(uA: UserAnswers): Seq[AuthorisationType03] =
     uA.metadata.data.as[Seq[AuthorisationType03]](authorisationsReads)
 
-  implicit val authorisationsReads: Reads[Seq[AuthorisationType03]] = for {
-    procedureType           <- (preTaskListPath \ "procedureType").read[String]
-    reducedDatasetIndicator <- reducedDatasetIndicatorReads
-    inlandMode              <- inlandModeReads
-    reads                   <- authorisationsPath.readArray[AuthorisationType03](authorisationType03.reads(_, procedureType, reducedDatasetIndicator, inlandMode))
-  } yield reads
+  implicit val authorisationsReads: Reads[Seq[AuthorisationType03]] =
+    authorisationsPath.readArray[AuthorisationType03](authorisationType03.reads)
 }
 
 object authorisationType03 {
 
-  def reads(index: Int, procedureType: String, reducedDatasetIndicator: Boolean, inlandMode: String): Reads[AuthorisationType03] = (
-    (index.toString: Reads[String]) and
-      __.read[String](authorisationTypeReads(index, procedureType, reducedDatasetIndicator, inlandMode)).map(convertTypeValue) and
-      (__ \ "authorisationReferenceNumber").read[String]
-  )(AuthorisationType03.apply _)
+  def reads(index: Int): Reads[AuthorisationType03] = {
+    lazy val authorisationTypeReads: Reads[String] =
+      (__ \ "authorisationType").read[String] orElse (__ \ "inferredAuthorisationType").read[String]
 
-  private def authorisationTypeReads(index: Int, procedureType: String, reducedDatasetIndicator: Boolean, inlandMode: String): Reads[String] =
-    (index, procedureType, reducedDatasetIndicator, inlandMode) match {
-      case (1, _, true, "maritime" | "rail" | "air") => "TRD"
-      case (1, "simplified", true, _)                => "ACR"
-      case _                                         => (__ \ "authorisationType").read[String]
-    }
+    (
+      (index.toString: Reads[String]) and
+        authorisationTypeReads.map(convertTypeValue) and
+        (__ \ "authorisationReferenceNumber").read[String]
+    )(AuthorisationType03.apply _)
+  }
 
   private lazy val convertTypeValue: String => String = {
     case "ACR" => "C521"
