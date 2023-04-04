@@ -433,7 +433,7 @@ object commodityType06 {
       (__ \ "customsUnionAndStatisticsCode").readNullable[String] and
       __.readNullable[CommodityCodeType02](commodityCodeType02.reads) and
       (__ \ "dangerousGoodsList").readArray[DangerousGoodsType01](dangerousGoodsType01.reads) and
-      (None: Reads[Option[GoodsMeasureType02]]) // TODO
+      __.readNullable[GoodsMeasureType02](goodsMeasureType02.reads)
   )(CommodityType06.apply _)
 }
 
@@ -451,4 +451,13 @@ object dangerousGoodsType01 {
     (index.toString: Reads[String]) and
       (__ \ "unNumber").read[String]
   )(DangerousGoodsType01.apply _)
+}
+
+object goodsMeasureType02 {
+
+  implicit val reads: Reads[GoodsMeasureType02] = (
+    (__ \ "grossWeight").readNullable[BigDecimal] and
+      (__ \ "netWeight").readNullable[BigDecimal] and
+      (__ \ "supplementaryUnits").readNullable[BigDecimal]
+  )(GoodsMeasureType02.apply _)
 }

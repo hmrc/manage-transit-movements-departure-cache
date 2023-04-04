@@ -262,7 +262,10 @@ class ConsignmentSpec extends SpecBase {
             |          {
             |            "unNumber" : "UN number 1_2"
             |          }
-            |        ]
+            |        ],
+            |        "grossWeight" : 123,
+            |        "netWeight" : 1234,
+            |        "supplementaryUnits" : 12345
             |      },
             |      {
             |        "description" : "Description 2",
@@ -553,7 +556,13 @@ class ConsignmentSpec extends SpecBase {
                     UNNumber = "UN number 1_2"
                   )
                 ),
-                GoodsMeasure = None
+                GoodsMeasure = Some(
+                  GoodsMeasureType02(
+                    grossMass = Some(BigDecimal(123)),
+                    netMass = Some(BigDecimal(1234)),
+                    supplementaryUnits = Some(BigDecimal(12345))
+                  )
+                )
               ),
               Packaging = Nil,
               PreviousDocument = Nil,
@@ -591,7 +600,13 @@ class ConsignmentSpec extends SpecBase {
                     UNNumber = "UN number 2_2"
                   )
                 ),
-                GoodsMeasure = None
+                GoodsMeasure = Some(
+                  GoodsMeasureType02(
+                    grossMass = None,
+                    netMass = None,
+                    supplementaryUnits = None
+                  )
+                )
               ),
               Packaging = Nil,
               PreviousDocument = Nil,
