@@ -20,7 +20,8 @@ import generated.{Flag, Number0, Number1}
 import play.api.libs.json._
 import scalaxb.XMLCalendar
 
-import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime}
 import javax.xml.datatype.XMLGregorianCalendar
 import scala.language.implicitConversions
 
@@ -110,6 +111,11 @@ package object submission {
 
   implicit def stringToXMLGregorianCalendar(date: String): XMLGregorianCalendar =
     XMLCalendar(date.replace("Z", ""))
+
+  implicit def localDateTimeToXMLGregorianCalendar(localDateTime: LocalDateTime): XMLGregorianCalendar = {
+    val formatterNoMillis: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+    localDateTime.format(formatterNoMillis)
+  }
 
   implicit def successfulReads[T](value: T): Reads[T] = Reads {
     _ => JsSuccess(value)
