@@ -265,7 +265,33 @@ class ConsignmentSpec extends SpecBase {
             |        ],
             |        "grossWeight" : 123,
             |        "netWeight" : 1234,
-            |        "supplementaryUnits" : 12345
+            |        "supplementaryUnits" : 12345,
+            |        "packages" : [
+            |          {
+            |            "packageType" : {
+            |              "code" : "VL",
+            |              "description" : "Bulk, liquid",
+            |              "type" : "Bulk"
+            |            },
+            |            "addShippingMarkYesNo" : false
+            |          },
+            |          {
+            |            "packageType" : {
+            |              "code" : "NE",
+            |              "description" : "Unpacked or unpackaged",
+            |              "type" : "Unpacked"
+            |            },
+            |            "numberOfPackages" : 5
+            |          },
+            |          {
+            |            "packageType" : {
+            |              "code" : "TR",
+            |              "description" : "Trunk",
+            |              "type" : "Other"
+            |            },
+            |            "shippingMark" : "mark3"
+            |          }
+            |        ]
             |      },
             |      {
             |        "description" : "Description 2",
@@ -564,7 +590,26 @@ class ConsignmentSpec extends SpecBase {
                   )
                 )
               ),
-              Packaging = Nil,
+              Packaging = Seq(
+                PackagingType03(
+                  sequenceNumber = "1",
+                  typeOfPackages = "VL",
+                  numberOfPackages = None,
+                  shippingMarks = None
+                ),
+                PackagingType03(
+                  sequenceNumber = "2",
+                  typeOfPackages = "NE",
+                  numberOfPackages = Some(5),
+                  shippingMarks = None
+                ),
+                PackagingType03(
+                  sequenceNumber = "3",
+                  typeOfPackages = "TR",
+                  numberOfPackages = None,
+                  shippingMarks = Some("mark3")
+                )
+              ),
               PreviousDocument = Nil,
               SupportingDocument = Nil,
               TransportDocument = Nil,
@@ -651,7 +696,7 @@ class ConsignmentSpec extends SpecBase {
             |""".stripMargin)
 
         val result: Seq[ActiveBorderTransportMeansType02] =
-          json.as[Seq[ActiveBorderTransportMeansType02]](activeBorderTransportMeansReads.reads)
+          json.as[Seq[ActiveBorderTransportMeansType02]](activeBorderTransportMeansReads)
 
         result shouldBe Seq(
           ActiveBorderTransportMeansType02(
@@ -701,7 +746,7 @@ class ConsignmentSpec extends SpecBase {
             |""".stripMargin)
 
         val result: Seq[ActiveBorderTransportMeansType02] =
-          json.as[Seq[ActiveBorderTransportMeansType02]](activeBorderTransportMeansReads.reads)
+          json.as[Seq[ActiveBorderTransportMeansType02]](activeBorderTransportMeansReads)
 
         result shouldBe Seq(
           ActiveBorderTransportMeansType02(
@@ -750,7 +795,7 @@ class ConsignmentSpec extends SpecBase {
             |""".stripMargin)
 
         val result: Seq[ActiveBorderTransportMeansType02] =
-          json.as[Seq[ActiveBorderTransportMeansType02]](activeBorderTransportMeansReads.reads)
+          json.as[Seq[ActiveBorderTransportMeansType02]](activeBorderTransportMeansReads)
 
         result shouldBe Seq(
           ActiveBorderTransportMeansType02(

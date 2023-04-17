@@ -394,7 +394,8 @@ object consignmentItemType09 {
       (__ \ "countryOfDispatch" \ "code").readNullable[String] and
       (__ \ "countryOfDestination" \ "code").readNullable[String] and
       (__ \ "uniqueConsignmentReference").readNullable[String] and
-      __.read[CommodityType06](commodityType06.reads)
+      __.read[CommodityType06](commodityType06.reads) and
+      (__ \ "packages").readArray[PackagingType03](packagingType03.reads)
   ).apply { // TODO - Should be able to change this to `(ConsignmentItemType09.apply _)` once this is all done
     (
       goodsItemNumber,
@@ -403,7 +404,8 @@ object consignmentItemType09 {
       countryOfDispatch,
       countryOfDestination,
       referenceNumberUCR,
-      Commodity
+      Commodity,
+      Packaging
     ) =>
       ConsignmentItemType09(
         goodsItemNumber = goodsItemNumber,
@@ -415,7 +417,7 @@ object consignmentItemType09 {
         Consignee = None, // TODO
         AdditionalSupplyChainActor = Nil, // TODO
         Commodity = Commodity,
-        Packaging = Nil, // TODO
+        Packaging = Packaging,
         PreviousDocument = Nil, // TODO
         SupportingDocument = Nil, // TODO
         TransportDocument = Nil, // TODO
@@ -460,4 +462,14 @@ object goodsMeasureType02 {
       (__ \ "netWeight").readNullable[BigDecimal] and
       (__ \ "supplementaryUnits").readNullable[BigDecimal]
   )(GoodsMeasureType02.apply _)
+}
+
+object packagingType03 {
+
+  def reads(index: Int): Reads[PackagingType03] = (
+    (index.toString: Reads[String]) and
+      (__ \ "packageType" \ "code").read[String] and
+      (__ \ "numberOfPackages").readNullable[BigInt] and
+      (__ \ "shippingMark").readNullable[String]
+  )(PackagingType03.apply _)
 }
