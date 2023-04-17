@@ -281,7 +281,8 @@ class ConsignmentSpec extends SpecBase {
             |              "description" : "Unpacked or unpackaged",
             |              "type" : "Unpacked"
             |            },
-            |            "numberOfPackages" : 5
+            |            "numberOfPackages" : 5,
+            |            "addShippingMarkYesNo" : false
             |          },
             |          {
             |            "packageType" : {
