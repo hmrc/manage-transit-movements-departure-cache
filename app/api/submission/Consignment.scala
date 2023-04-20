@@ -19,7 +19,7 @@ package api.submission
 import generated._
 import models.UserAnswers
 import play.api.libs.functional.syntax._
-import play.api.libs.json.{__, Reads}
+import play.api.libs.json._
 
 object Consignment {
 
@@ -328,16 +328,6 @@ object placeOfUnloadingType01 {
   )(PlaceOfUnloadingType01.apply _)
 }
 
-object previousDocumentType09 {}
-
-object supportingDocumentType05 {}
-
-object transportDocumentType04 {}
-
-object additionalReferenceType06 {}
-
-object additionalInformationType03 {}
-
 object transportChargesType {
 
   implicit val reads: Reads[TransportChargesType] =
@@ -357,37 +347,58 @@ object transportChargesType {
 
 object houseConsignmentType10 {
 
-  implicit val reads: Reads[HouseConsignmentType10] = (
-    ("1": Reads[String]) and
-      itemsPath.readArray[ConsignmentItemType09](consignmentItemType09.reads)
-  ).apply { // TODO - Should be able to change this to `(HouseConsignmentType10.apply _)` once this is all done
-    (
-      sequenceNumber,
-      ConsignmentItem
-    ) =>
-      HouseConsignmentType10(
-        sequenceNumber = sequenceNumber,
-        countryOfDispatch = None, // TODO
-        grossMass = 1, // TODO
-        referenceNumberUCR = None, // TODO
-        Consignor = None, // TODO
-        Consignee = None, // TODO
-        AdditionalSupplyChainActor = Nil, // TODO
-        DepartureTransportMeans = Nil, // TODO
-        PreviousDocument = Nil, // TODO
-        SupportingDocument = Nil, // TODO
-        TransportDocument = Nil, // TODO
-        AdditionalReference = Nil, // TODO
-        AdditionalInformation = Nil, // TODO
-        TransportCharges = None, // TODO
-        ConsignmentItem = ConsignmentItem
-      )
-  }
+  implicit val reads: Reads[HouseConsignmentType10] =
+    documentsPath.read[JsArray].flatMap {
+      documents =>
+        (
+          ("1": Reads[String]) and
+            itemsPath.readArray[ConsignmentItemType09](consignmentItemType09.reads(_, documents))
+        ).apply { // TODO - Should be able to change this to `(HouseConsignmentType10.apply _)` once this is all done
+          (
+            sequenceNumber,
+            ConsignmentItem
+          ) =>
+            HouseConsignmentType10(
+              sequenceNumber = sequenceNumber,
+              countryOfDispatch = None, // TODO
+              grossMass = 1, // TODO
+              referenceNumberUCR = None, // TODO
+              Consignor = None, // TODO
+              Consignee = None, // TODO
+              AdditionalSupplyChainActor = Nil, // TODO
+              DepartureTransportMeans = Nil, // TODO
+              PreviousDocument = Nil, // TODO
+              SupportingDocument = Nil, // TODO
+              TransportDocument = Nil, // TODO
+              AdditionalReference = Nil, // TODO
+              AdditionalInformation = Nil, // TODO
+              TransportCharges = None, // TODO
+              ConsignmentItem = ConsignmentItem
+            )
+        }
+    }
 }
 
 object consignmentItemType09 {
 
-  def reads(index: Int): Reads[ConsignmentItemType09] = (
+  private def readDocuments[T](`type`: String, documents: JsArray)(implicit rds: Int => Reads[T]): Reads[Seq[T]] =
+    (__ \ "documents").readWithDefault[JsArray](JsArray()).map {
+      itemDocuments =>
+        val itemDocumentsOfCorrectType = JsArray(itemDocuments.value.filter(isDocumentOfType(_, `type`)))
+        val indexes                    = (itemDocumentsOfCorrectType \\ "index").map(_.as[Int])
+        val documentsOfCorrectType = documents.value.zipWithIndex.collect {
+          case (value, i) if indexes.contains(i) => value
+        }
+        JsArray(documentsOfCorrectType).readValuesAs[T]
+    }
+
+  private def isDocumentOfType(document: JsValue, `type`: String): Boolean =
+    document.transform((__ \ "document" \ "type").json.pick[JsString]) match {
+      case JsSuccess(JsString(`type`), _) => true
+      case _                              => false
+    }
+
+  def reads(index: Int, documents: JsArray): Reads[ConsignmentItemType09] = (
     (index.toString: Reads[String]) and
       (index: Reads[Int]) and
       (__ \ "declarationType").readNullable[String] and
@@ -395,7 +406,10 @@ object consignmentItemType09 {
       (__ \ "countryOfDestination" \ "code").readNullable[String] and
       (__ \ "uniqueConsignmentReference").readNullable[String] and
       __.read[CommodityType06](commodityType06.reads) and
-      (__ \ "packages").readArray[PackagingType03](packagingType03.reads)
+      (__ \ "packages").readArray[PackagingType03](packagingType03.reads) and
+      readDocuments[PreviousDocumentType08]("Previous", documents)(previousDocumentType08.reads) and
+      readDocuments[SupportingDocumentType05]("Support", documents)(supportingDocumentType05.reads) and
+      readDocuments[TransportDocumentType04]("Transport", documents)(transportDocumentType04.reads)
   ).apply { // TODO - Should be able to change this to `(ConsignmentItemType09.apply _)` once this is all done
     (
       goodsItemNumber,
@@ -405,7 +419,10 @@ object consignmentItemType09 {
       countryOfDestination,
       referenceNumberUCR,
       Commodity,
-      Packaging
+      Packaging,
+      PreviousDocument,
+      SupportingDocument,
+      TransportDocument
     ) =>
       ConsignmentItemType09(
         goodsItemNumber = goodsItemNumber,
@@ -418,9 +435,9 @@ object consignmentItemType09 {
         AdditionalSupplyChainActor = Nil, // TODO
         Commodity = Commodity,
         Packaging = Packaging,
-        PreviousDocument = Nil, // TODO
-        SupportingDocument = Nil, // TODO
-        TransportDocument = Nil, // TODO
+        PreviousDocument = PreviousDocument,
+        SupportingDocument = SupportingDocument,
+        TransportDocument = TransportDocument,
         AdditionalReference = Nil, // TODO
         AdditionalInformation = Nil, // TODO
         TransportCharges = None // TODO
@@ -472,4 +489,39 @@ object packagingType03 {
       (__ \ "numberOfPackages").readNullable[BigInt] and
       (__ \ "shippingMark").readNullable[String]
   )(PackagingType03.apply _)
+}
+
+object previousDocumentType08 {
+
+  def reads(index: Int): Reads[PreviousDocumentType08] = (
+    (index.toString: Reads[String]) and
+      ((__ \ "type" \ "code").read[String] orElse (__ \ "previousDocumentType" \ "code").read[String]) and
+      (__ \ "details" \ "documentReferenceNumber").read[String] and
+      (__ \ "details" \ "goodsItemNumber").readNullable[BigInt] and
+      (__ \ "details" \ "packageType" \ "code").readNullable[String] and
+      (__ \ "details" \ "numberOfPackages").readNullable[BigInt] and
+      (__ \ "details" \ "metric" \ "code").readNullable[String] and
+      (__ \ "details" \ "quantity").readNullable[BigDecimal] and
+      (None: Reads[Option[String]])
+  )(PreviousDocumentType08.apply _)
+}
+
+object supportingDocumentType05 {
+
+  def reads(index: Int): Reads[SupportingDocumentType05] = (
+    (index.toString: Reads[String]) and
+      (__ \ "type" \ "code").read[String] and
+      (__ \ "details" \ "documentReferenceNumber").read[String] and
+      (__ \ "details" \ "lineItemNumber").readNullable[BigInt] and
+      (None: Reads[Option[String]])
+  )(SupportingDocumentType05.apply _)
+}
+
+object transportDocumentType04 {
+
+  def reads(index: Int): Reads[TransportDocumentType04] = (
+    (index.toString: Reads[String]) and
+      (__ \ "type" \ "code").read[String] and
+      (__ \ "details" \ "documentReferenceNumber").read[String]
+  )(TransportDocumentType04.apply _)
 }

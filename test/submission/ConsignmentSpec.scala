@@ -239,6 +239,69 @@ class ConsignmentSpec extends SpecBase {
             |        "paymentMethod" : "cash"
             |      }
             |    },
+            |    "documents" : [
+            |      {
+            |        "previousDocumentType" : {
+            |          "type" : "Previous",
+            |          "code" : "CO",
+            |          "description" : "SAD - Community goods subject"
+            |        },
+            |        "details" : {
+            |          "documentReferenceNumber" : "previous1",
+            |          "addGoodsItemNumberYesNo" : false,
+            |          "addTypeOfPackageYesNo" : false,
+            |          "addNumberOfPackagesYesNo" : false,
+            |          "declareQuantityOfGoodsYesNo" : false
+            |        }
+            |      },
+            |      {
+            |        "type" : {
+            |          "type" : "Transport",
+            |          "code" : "235",
+            |          "description" : "Container list"
+            |        },
+            |        "details" : {
+            |          "documentReferenceNumber" : "transport1"
+            |        }
+            |      },
+            |      {
+            |        "type" : {
+            |          "type" : "Support",
+            |          "code" : "C673",
+            |          "description" : "Catch certificate"
+            |        },
+            |        "details" : {
+            |          "documentReferenceNumber" : "support1",
+            |          "addLineItemNumberYesNo" : true,
+            |          "lineItemNumber" : 678
+            |        }
+            |      },
+            |      {
+            |        "type" : {
+            |          "type" : "Previous",
+            |          "code" : "T2F",
+            |          "description" : "Internal Community transit Declaration"
+            |        },
+            |        "details" : {
+            |          "documentReferenceNumber" : "previous2",
+            |          "addGoodsItemNumberYesNo" : true,
+            |          "goodsItemNumber" : 78689,
+            |          "addTypeOfPackageYesNo" : true,
+            |          "packageType" : {
+            |            "code" : "AT",
+            |            "description" : "Atomizer"
+            |          },
+            |          "addNumberOfPackagesYesNo" : true,
+            |          "numberOfPackages" : 12,
+            |          "declareQuantityOfGoodsYesNo" : true,
+            |          "metric" : {
+            |            "code" : "MIL",
+            |            "description" : "1000 items"
+            |          },
+            |          "quantity" : 13
+            |        }
+            |      }
+            |    ],
             |    "items" : [
             |      {
             |        "description" : "Description 1",
@@ -292,6 +355,45 @@ class ConsignmentSpec extends SpecBase {
             |            },
             |            "shippingMark" : "mark3"
             |          }
+            |        ],
+            |        "addDocumentsYesNo" : true,
+            |        "documents" : [
+            |          {
+            |            "document" : {
+            |              "index" : 1,
+            |              "type" : "Transport",
+            |              "code" : "235",
+            |              "description" : "Container list",
+            |              "referenceNumber" : "transport1"
+            |            }
+            |          },
+            |          {
+            |            "document" : {
+            |              "index" : 2,
+            |              "type" : "Support",
+            |              "code" : "C673",
+            |              "description" : "Catch certificate",
+            |              "referenceNumber" : "support1"
+            |            }
+            |          },
+            |          {
+            |            "document" : {
+            |              "index" : 3,
+            |              "type" : "Previous",
+            |              "code" : "T2F",
+            |              "description" : "Internal Community transit Declaration",
+            |              "referenceNumber" : "previous2"
+            |            }
+            |          },
+            |          {
+            |            "document" : {
+            |              "index" : 0,
+            |              "type" : "Previous",
+            |              "code" : "CO",
+            |              "description" : "Internal Community transit Declaration",
+            |              "referenceNumber" : "previous1"
+            |            }
+            |          }
             |        ]
             |      },
             |      {
@@ -316,7 +418,8 @@ class ConsignmentSpec extends SpecBase {
             |          {
             |            "unNumber" : "UN number 2_2"
             |          }
-            |        ]
+            |        ],
+            |        "addDocumentsYesNo" : false
             |      }
             |    ]
             |  },
@@ -611,9 +714,46 @@ class ConsignmentSpec extends SpecBase {
                   shippingMarks = Some("mark3")
                 )
               ),
-              PreviousDocument = Nil,
-              SupportingDocument = Nil,
-              TransportDocument = Nil,
+              PreviousDocument = Seq(
+                PreviousDocumentType08(
+                  sequenceNumber = "1",
+                  typeValue = "CO",
+                  referenceNumber = "previous1",
+                  goodsItemNumber = None,
+                  typeOfPackages = None,
+                  numberOfPackages = None,
+                  measurementUnitAndQualifier = None,
+                  quantity = None,
+                  complementOfInformation = None
+                ),
+                PreviousDocumentType08(
+                  sequenceNumber = "2",
+                  typeValue = "T2F",
+                  referenceNumber = "previous2",
+                  goodsItemNumber = Some(78689),
+                  typeOfPackages = Some("AT"),
+                  numberOfPackages = Some(12),
+                  measurementUnitAndQualifier = Some("MIL"),
+                  quantity = Some(13),
+                  complementOfInformation = None
+                )
+              ),
+              SupportingDocument = Seq(
+                SupportingDocumentType05(
+                  sequenceNumber = "1",
+                  typeValue = "C673",
+                  referenceNumber = "support1",
+                  documentLineItemNumber = Some(678),
+                  complementOfInformation = None
+                )
+              ),
+              TransportDocument = Seq(
+                TransportDocumentType04(
+                  sequenceNumber = "1",
+                  typeValue = "235",
+                  referenceNumber = "transport1"
+                )
+              ),
               AdditionalReference = Nil,
               AdditionalInformation = Nil,
               TransportCharges = None
