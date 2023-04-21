@@ -348,57 +348,76 @@ object transportChargesType {
 object houseConsignmentType10 {
 
   implicit val reads: Reads[HouseConsignmentType10] =
-    documentsPath.read[JsArray].flatMap {
-      documents =>
-        (
-          ("1": Reads[String]) and
-            itemsPath.readArray[ConsignmentItemType09](consignmentItemType09.reads(_, documents))
-        ).apply { // TODO - Should be able to change this to `(HouseConsignmentType10.apply _)` once this is all done
+    documentsPath
+      .read[JsArray]
+      .map(_.value.toSeq)
+      .flatMap {
+        documents =>
           (
-            sequenceNumber,
-            ConsignmentItem
-          ) =>
-            HouseConsignmentType10(
-              sequenceNumber = sequenceNumber,
-              countryOfDispatch = None, // TODO
-              grossMass = 1, // TODO
-              referenceNumberUCR = None, // TODO
-              Consignor = None, // TODO
-              Consignee = None, // TODO
-              AdditionalSupplyChainActor = Nil, // TODO
-              DepartureTransportMeans = Nil, // TODO
-              PreviousDocument = Nil, // TODO
-              SupportingDocument = Nil, // TODO
-              TransportDocument = Nil, // TODO
-              AdditionalReference = Nil, // TODO
-              AdditionalInformation = Nil, // TODO
-              TransportCharges = None, // TODO
-              ConsignmentItem = ConsignmentItem
-            )
-        }
-    }
+            ("1": Reads[String]) and
+              itemsPath.readArray[ConsignmentItemType09](consignmentItemType09.reads(_, documents))
+          ).apply { // TODO - Should be able to change this to `(HouseConsignmentType10.apply _)` once this is all done
+            (
+              sequenceNumber,
+              ConsignmentItem
+            ) =>
+              HouseConsignmentType10(
+                sequenceNumber = sequenceNumber,
+                countryOfDispatch = None, // TODO
+                grossMass = 1, // TODO
+                referenceNumberUCR = None, // TODO
+                Consignor = None, // TODO
+                Consignee = None, // TODO
+                AdditionalSupplyChainActor = Nil, // TODO
+                DepartureTransportMeans = Nil, // TODO
+                PreviousDocument = Nil, // TODO
+                SupportingDocument = Nil, // TODO
+                TransportDocument = Nil, // TODO
+                AdditionalReference = Nil, // TODO
+                AdditionalInformation = Nil, // TODO
+                TransportCharges = None, // TODO
+                ConsignmentItem = ConsignmentItem
+              )
+          }
+      }
 }
 
 object consignmentItemType09 {
 
-  private def readDocuments[T](`type`: String, documents: JsArray)(implicit rds: Int => Reads[T]): Reads[Seq[T]] =
-    (__ \ "documents").readWithDefault[JsArray](JsArray()).map {
-      itemDocuments =>
-        val itemDocumentsOfCorrectType = JsArray(itemDocuments.value.filter(isDocumentOfType(_, `type`)))
-        val indexes                    = (itemDocumentsOfCorrectType \\ "index").map(_.as[Int])
-        val documentsOfCorrectType = documents.value.zipWithIndex.collect {
-          case (value, i) if indexes.contains(i) => value
-        }
-        JsArray(documentsOfCorrectType).readValuesAs[T]
+  private def areDocumentsEqual(documentsFrontendDocument: JsValue, itemsFrontendDocument: JsValue): Boolean = {
+    def readStringStrictly(document: JsValue, path: JsPath): Option[String] =
+      document.transform(path.json.pick[JsString]).asOpt.map(_.value)
+
+    def readStringLoosely(document: JsValue, key: String): Option[String] =
+      readStringStrictly(document, __ \ "type" \ key) orElse readStringStrictly(document, __ \ "previousDocumentType" \ key)
+
+    val result = for {
+      type1            <- readStringLoosely(documentsFrontendDocument, "type")
+      code1            <- readStringLoosely(documentsFrontendDocument, "code")
+      referenceNumber1 <- readStringStrictly(documentsFrontendDocument, __ \ "details" \ "documentReferenceNumber")
+      type2            <- readStringStrictly(itemsFrontendDocument, __ \ "document" \ "type")
+      code2            <- readStringStrictly(itemsFrontendDocument, __ \ "document" \ "code")
+      referenceNumber2 <- readStringStrictly(itemsFrontendDocument, __ \ "document" \ "referenceNumber")
+    } yield type1 == type2 && code1 == code2 && referenceNumber1 == referenceNumber2
+
+    result.getOrElse(false)
+  }
+
+  private def doesDocumentExist(itemsFrontendDocuments: Seq[JsValue], documentsFrontendDocument: JsValue): Boolean =
+    itemsFrontendDocuments.exists(areDocumentsEqual(documentsFrontendDocument, _))
+
+  private def readDocuments[T](`type`: String, documentsFrontendDocuments: Seq[JsValue])(implicit rds: Int => Reads[T]): Reads[Seq[T]] =
+    for {
+      itemsFrontendDocuments <- (__ \ "documents").readWithDefault[JsArray](JsArray()).map(_.value.toSeq)
+    } yield {
+      val typeReads: Reads[String] = (__ \ "type" \ "type").read[String] orElse (__ \ "previousDocumentType" \ "type").read[String]
+      val documents = documentsFrontendDocuments
+        .filter(_.validate(typeReads).exists(_ == `type`))
+        .filter(doesDocumentExist(itemsFrontendDocuments, _))
+      JsArray(documents).readValuesAs[T]
     }
 
-  private def isDocumentOfType(document: JsValue, `type`: String): Boolean =
-    document.transform((__ \ "document" \ "type").json.pick[JsString]) match {
-      case JsSuccess(JsString(`type`), _) => true
-      case _                              => false
-    }
-
-  def reads(index: Int, documents: JsArray): Reads[ConsignmentItemType09] = (
+  def reads(index: Int, documents: Seq[JsValue]): Reads[ConsignmentItemType09] = (
     (index.toString: Reads[String]) and
       (index: Reads[Int]) and
       (__ \ "declarationType").readNullable[String] and

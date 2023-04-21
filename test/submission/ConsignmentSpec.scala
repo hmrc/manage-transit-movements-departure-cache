@@ -300,6 +300,28 @@ class ConsignmentSpec extends SpecBase {
             |          },
             |          "quantity" : 13
             |        }
+            |      },
+            |      {
+            |        "type" : {
+            |          "type" : "Transport",
+            |          "code" : "235",
+            |          "description" : "Container list"
+            |        },
+            |        "details" : {
+            |          "documentReferenceNumber" : "transport2"
+            |        }
+            |      },
+            |      {
+            |        "type" : {
+            |          "type" : "Support",
+            |          "code" : "C673",
+            |          "description" : "Catch certificate"
+            |        },
+            |        "details" : {
+            |          "documentReferenceNumber" : "support2",
+            |          "addLineItemNumberYesNo" : true,
+            |          "lineItemNumber" : 679
+            |        }
             |      }
             |    ],
             |    "items" : [
@@ -360,7 +382,6 @@ class ConsignmentSpec extends SpecBase {
             |        "documents" : [
             |          {
             |            "document" : {
-            |              "index" : 1,
             |              "type" : "Transport",
             |              "code" : "235",
             |              "description" : "Container list",
@@ -369,7 +390,6 @@ class ConsignmentSpec extends SpecBase {
             |          },
             |          {
             |            "document" : {
-            |              "index" : 2,
             |              "type" : "Support",
             |              "code" : "C673",
             |              "description" : "Catch certificate",
@@ -378,7 +398,6 @@ class ConsignmentSpec extends SpecBase {
             |          },
             |          {
             |            "document" : {
-            |              "index" : 3,
             |              "type" : "Previous",
             |              "code" : "T2F",
             |              "description" : "Internal Community transit Declaration",
@@ -387,7 +406,6 @@ class ConsignmentSpec extends SpecBase {
             |          },
             |          {
             |            "document" : {
-            |              "index" : 0,
             |              "type" : "Previous",
             |              "code" : "CO",
             |              "description" : "Internal Community transit Declaration",
