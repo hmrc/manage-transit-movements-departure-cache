@@ -247,7 +247,19 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |          "telephoneNumber" : "+88 888 888"
                                     |        }
                                     |      }
-                                    |    }
+                                    |    },
+                                    |    "documents" : [
+                                    |      {
+                                    |        "type" : {
+                                    |          "type" : "Transport",
+                                    |          "code" : "235",
+                                    |          "description" : "Container list"
+                                    |        },
+                                    |        "details" : {
+                                    |          "documentReferenceNumber" : "transport1"
+                                    |        }
+                                    |      }
+                                    |    ]
                                     |  },
                                     |  "tasks" : {},
                                     |  "createdAt" : {
