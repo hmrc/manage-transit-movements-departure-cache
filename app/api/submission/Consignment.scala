@@ -431,7 +431,8 @@ object consignmentItemType09 {
             (__ \ "packages").readArray[PackagingType03](packagingType03.reads) and
             readDocuments[PreviousDocumentType08]("Previous", documents, itemDocuments)(previousDocumentType08.reads) and
             readDocuments[SupportingDocumentType05]("Support", documents, itemDocuments)(supportingDocumentType05.reads) and
-            readDocuments[TransportDocumentType04]("Transport", documents, itemDocuments)(transportDocumentType04.reads)
+            readDocuments[TransportDocumentType04]("Transport", documents, itemDocuments)(transportDocumentType04.reads) and
+            (__ \ "additionalReferences").readArray[AdditionalReferenceType05](additionalReferenceType05.reads)
         ).apply { // TODO - Should be able to change this to `(ConsignmentItemType09.apply _)` once this is all done
           (
             goodsItemNumber,
@@ -444,7 +445,8 @@ object consignmentItemType09 {
             Packaging,
             PreviousDocument,
             SupportingDocument,
-            TransportDocument
+            TransportDocument,
+            AdditionalReference
           ) =>
             ConsignmentItemType09(
               goodsItemNumber = goodsItemNumber,
@@ -460,7 +462,7 @@ object consignmentItemType09 {
               PreviousDocument = PreviousDocument,
               SupportingDocument = SupportingDocument,
               TransportDocument = TransportDocument,
-              AdditionalReference = Nil, // TODO
+              AdditionalReference = AdditionalReference,
               AdditionalInformation = Nil, // TODO
               TransportCharges = None // TODO
             )
@@ -559,4 +561,13 @@ object transportDocumentType04 {
       (__ \ "type" \ "code").read[String] and
       (__ \ "details" \ "documentReferenceNumber").read[String]
   )(TransportDocumentType04.apply _)
+}
+
+object additionalReferenceType05 {
+
+  def reads(index: Int): Reads[AdditionalReferenceType05] = (
+    (index.toString: Reads[String]) and
+      (__ \ "additionalReference" \ "documentType").read[String] and
+      (__ \ "additionalReferenceNumber").readNullable[String]
+  )(AdditionalReferenceType05.apply _)
 }

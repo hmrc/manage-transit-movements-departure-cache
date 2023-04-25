@@ -412,6 +412,24 @@ class ConsignmentSpec extends SpecBase {
             |              "referenceNumber" : "previous1"
             |            }
             |          }
+            |        ],
+            |        "addAdditionalReferenceYesNo" : true,
+            |        "additionalReferences" : [
+            |          {
+            |            "additionalReference" : {
+            |              "documentType" : "ar1",
+            |              "description" : "Additional reference 1"
+            |            },
+            |            "addAdditionalReferenceNumberYesNo" : true,
+            |            "additionalReferenceNumber" : "arno1"
+            |          },
+            |          {
+            |            "additionalReference" : {
+            |              "documentType" : "ar2",
+            |              "description" : "Additional reference 2"
+            |            },
+            |            "addAdditionalReferenceNumberYesNo" : false
+            |          }
             |        ]
             |      },
             |      {
@@ -437,7 +455,8 @@ class ConsignmentSpec extends SpecBase {
             |            "unNumber" : "UN number 2_2"
             |          }
             |        ],
-            |        "addDocumentsYesNo" : false
+            |        "addDocumentsYesNo" : false,
+            |        "addAdditionalReferenceYesNo" : false
             |      }
             |    ]
             |  },
@@ -772,7 +791,18 @@ class ConsignmentSpec extends SpecBase {
                   referenceNumber = "transport1"
                 )
               ),
-              AdditionalReference = Nil,
+              AdditionalReference = Seq(
+                AdditionalReferenceType05(
+                  sequenceNumber = "1",
+                  typeValue = "ar1",
+                  referenceNumber = Some("arno1")
+                ),
+                AdditionalReferenceType05(
+                  sequenceNumber = "2",
+                  typeValue = "ar2",
+                  referenceNumber = None
+                )
+              ),
               AdditionalInformation = Nil,
               TransportCharges = None
             ),
