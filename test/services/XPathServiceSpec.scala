@@ -28,9 +28,9 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
 
   private val service = app.injector.instanceOf[XPathService]
 
-  private val unamendableXPath = XPath("CC014C")
+  private val unamendableXPath = XPath("/CC014C")
 
-  private val amendableXPath = XPath("/CC015C/foo/bar")
+  private val amendableXPath = XPath("/CC015C/Authorisation[1]/referenceNumber")
 
   "isDeclarationAmendable" must {
 
