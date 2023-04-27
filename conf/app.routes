@@ -12,3 +12,5 @@ POST       /declaration/submit                                  controllers.Subm
 
 GET        /user-answers/:lrn/lock                              controllers.LockController.checkLock(lrn: String)
 DELETE     /user-answers/:lrn/lock                              controllers.LockController.deleteLock(lrn: String)
+
+POST       /x-paths/:lrn/is-declaration-amendable               controllers.XPathController.isDeclarationAmendable(lrn: String)
