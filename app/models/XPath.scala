@@ -20,7 +20,26 @@ import play.api.libs.json.{__, Reads}
 
 case class XPath(value: String) {
 
-  def isAmendable: Boolean = value.startsWith("/CC015C/")
+  private val sections = Seq(
+    "TransitOperation",
+    "Authorisation",
+    "CustomsOfficeOfDeparture",
+    "CustomsOfficeOfDestinationDeclared",
+    "CustomsOfficeOfTransitDeclared",
+    "CustomsOfficeOfExitForTransitDeclared",
+    "HolderOfTheTransitProcedure",
+    "Representative",
+    "Guarantee",
+    "Consignment"
+  )
+
+  def isAmendable: Boolean = {
+    val regex = "^/CC015C/(.+)$".r
+    value match {
+      case regex(section) if sections.exists(section.startsWith) => true
+      case _                                                     => false
+    }
+  }
 }
 
 object XPath {
