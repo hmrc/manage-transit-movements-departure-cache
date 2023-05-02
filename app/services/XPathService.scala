@@ -32,4 +32,19 @@ class XPathService @Inject() (
     cacheRepository.get(lrn, eoriNumber).map {
       _.isDefined && xPaths.size <= config.maxErrorsForAmendableDeclaration && xPaths.exists(_.isAmendable)
     }
+
+  def areErrorsAmendable(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Option[Seq[XPath]]] =
+    cacheRepository.get(lrn, eoriNumber).map {
+      userAnswers =>
+        if (userAnswers.isDefined) {
+          val filteredXPaths = xPaths.filter(_.isAmendable)
+          if (filteredXPaths.isEmpty || filteredXPaths.length > config.maxErrorsForAmendableDeclaration) {
+            None
+          } else {
+            Some(filteredXPaths)
+          }
+        } else {
+          None
+        }
+    }
 }

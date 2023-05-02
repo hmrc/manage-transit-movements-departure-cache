@@ -99,4 +99,86 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
     }
   }
 
+  "areErrorsAmendable" must {
+
+    "return a sequence of xPaths" when {
+
+      "a document exists in the cache for the given LRN and EORI" +
+        "and at least one of the errors is amendable" in {
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+
+          val xPaths = Seq.fill(9)(unamendableXPath) :+ amendableXPath
+
+          val result = service.areErrorsAmendable(lrn, eoriNumber, xPaths).futureValue
+
+          val expectedResult = Some(Seq(amendableXPath))
+
+          result shouldBe expectedResult
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        }
+
+      "a document exists in the cache for the given LRN and EORI" +
+        "and there are less than 10 amendable errors" in {
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+
+          val xPaths = Seq.fill(10)(amendableXPath) ++ Seq.fill(20)(unamendableXPath)
+
+          val result = service.areErrorsAmendable(lrn, eoriNumber, xPaths).futureValue
+
+          val expectedResult = Some(Seq.fill(10)(amendableXPath))
+
+          result shouldBe expectedResult
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        }
+
+    }
+
+    "return None" when {
+      "a document doesn't exist in the cache for the given LRN and EORI" +
+        "and at least one of the errors is amendable" in {
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
+
+          val xPaths = Seq.fill(9)(unamendableXPath) :+ amendableXPath
+
+          val result = service.areErrorsAmendable(lrn, eoriNumber, xPaths).futureValue
+
+          result shouldBe None
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        }
+
+      "a document exists in the cache for the given LRN and EORI" +
+        "and none of the errors are amendable" in {
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+
+          val xPaths = Seq.fill(10)(unamendableXPath)
+
+          val result = service.areErrorsAmendable(lrn, eoriNumber, xPaths).futureValue
+
+          result shouldBe None
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        }
+
+      "a document exists in the cache for the given LRN and EORI" +
+        "there are more than 10 amendable errors" in {
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+
+          val xPaths = Seq.fill(11)(amendableXPath) :+ unamendableXPath
+
+          val result = service.areErrorsAmendable(lrn, eoriNumber, xPaths).futureValue
+
+          result shouldBe None
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        }
+    }
+  }
 }

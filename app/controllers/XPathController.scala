@@ -19,7 +19,7 @@ package controllers
 import controllers.actions.AuthenticateActionProvider
 import models.XPath
 import play.api.Logging
-import play.api.libs.json.{JsBoolean, JsError, JsSuccess, JsValue}
+import play.api.libs.json.{JsBoolean, JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, ControllerComponents}
 import services.XPathService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -41,6 +41,21 @@ class XPathController @Inject() (
       request.body.validate[Seq[XPath]] match {
         case JsSuccess(xPaths, _) =>
           xPathService.isDeclarationAmendable(lrn, request.eoriNumber, xPaths).map(JsBoolean).map(Ok(_))
+        case JsError(errors) =>
+          logger.error(s"Failed to validate request body as sequence of xPaths: $errors")
+          Future.successful(BadRequest)
+      }
+  }
+
+  def areErrorsAmendable(lrn: String): Action[JsValue] = authenticate().async(parse.json) {
+    implicit request =>
+      request.body.validate[Seq[XPath]] match {
+        case JsSuccess(xPaths, _) =>
+          xPathService
+            .areErrorsAmendable(lrn, request.eoriNumber, xPaths)
+            .map(
+              xPaths => Ok(Json.toJson(xPaths))
+            )
         case JsError(errors) =>
           logger.error(s"Failed to validate request body as sequence of xPaths: $errors")
           Future.successful(BadRequest)

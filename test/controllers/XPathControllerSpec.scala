@@ -92,4 +92,34 @@ class XPathControllerSpec extends SpecBase with Generators {
     }
   }
 
+  "areErrorsAmendable" should {
+    "return 200 with true" when {
+      "errors are amendable" in {
+        val errors = Some(Seq(XPath("errorPointer1"), XPath("errorPointer2")))
+        when(mockXPathService.areErrorsAmendable(any(), any(), any())).thenReturn(Future.successful(errors))
+
+        val request = FakeRequest(POST, routes.XPathController.areErrorsAmendable(lrn).url)
+          .withBody(JsArray(xPaths.map(_.value).map(JsString)))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(errors)
+        verify(mockXPathService).areErrorsAmendable(eqTo(lrn), eqTo(eoriNumber), eqTo(xPaths))
+      }
+    }
+
+    "return 400" when {
+      "request body is not an array of xpaths" in {
+        val request = FakeRequest(POST, routes.XPathController.areErrorsAmendable(lrn).url)
+          .withBody(Json.obj("foo" -> "bar"))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe BAD_REQUEST
+        verify(mockXPathService, never()).areErrorsAmendable(any(), any(), any())
+      }
+    }
+  }
+
 }

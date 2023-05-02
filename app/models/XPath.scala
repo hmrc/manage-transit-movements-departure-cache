@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json.{__, Reads}
+import play.api.libs.json.{__, Json, OWrites, Reads, Writes}
 
 case class XPath(value: String) {
 
@@ -45,4 +45,7 @@ case class XPath(value: String) {
 object XPath {
 
   implicit val reads: Reads[XPath] = __.read[String].map(XPath(_))
+
+  implicit val writes: OWrites[XPath] = Json.writes[XPath]
+
 }
