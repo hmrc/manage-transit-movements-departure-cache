@@ -31,7 +31,6 @@ import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton
 class CacheRepository @Inject() (
   mongoComponent: MongoComponent,
   appConfig: AppConfig,
