@@ -28,7 +28,6 @@ import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
-@Singleton()
 class CacheController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
