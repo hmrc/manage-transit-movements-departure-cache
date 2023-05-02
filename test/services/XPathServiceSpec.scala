@@ -49,6 +49,21 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
 
           verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         }
+
+      "a document exists in the cache for the given LRN and EORI" +
+        "and there are 10 or more errors" +
+        "and 10 or less are amendable" in {
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+
+          val xPaths = Seq.fill(20)(unamendableXPath) :+ amendableXPath
+
+          val result = service.isDeclarationAmendable(lrn, eoriNumber, xPaths).futureValue
+
+          result shouldBe true
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        }
     }
 
     "return false" when {
@@ -68,12 +83,11 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
         }
 
       "a document exists in the cache for the given LRN and EORI" +
-        "and there are more than 10 errors" +
-        "and at least one of the errors is amendable" in {
+        "and there are more than 10 amendable errors" in {
 
           when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
 
-          val xPaths = Seq.fill(10)(unamendableXPath) :+ amendableXPath
+          val xPaths = Seq.fill(11)(amendableXPath) :+ unamendableXPath
 
           val result = service.isDeclarationAmendable(lrn, eoriNumber, xPaths).futureValue
 

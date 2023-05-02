@@ -30,7 +30,7 @@ class XPathService @Inject() (
 
   def isDeclarationAmendable(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
     cacheRepository.get(lrn, eoriNumber).map {
-      _.isDefined && xPaths.size <= config.maxErrorsForAmendableDeclaration && xPaths.exists(_.isAmendable)
+      _.isDefined && xPaths.count(_.isAmendable) <= config.maxErrorsForAmendableDeclaration && xPaths.exists(_.isAmendable)
     }
 
   def areErrorsAmendable(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Option[Seq[XPath]]] =
