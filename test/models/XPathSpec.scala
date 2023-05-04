@@ -21,6 +21,7 @@ import generators.Generators
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.JsString
+import org.scalacheck.Arbitrary.arbitrary
 
 class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
 
@@ -136,6 +137,16 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
   }
 
   "sectionError" must {
+
+    "return a section paired with an error value" when {
+      "xPath is appended with an index" in {
+        forAll(Gen.alphaNumStr, arbitrary[Int]) {
+          (subPath, index) =>
+            val xPath = s"/CC015C/HolderOfTheTransitProcedure[$index]/" + subPath
+            XPath(xPath).sectionError shouldBe Some((".traderDetails", Status(Status.Error.id)))
+        }
+      }
+    }
 
     "return Some((.traderDetails, Status.Value))" when {
 

@@ -50,10 +50,11 @@ case class XPath(value: String) {
     value match {
       case regex(section) =>
         sections.find(
-          x => x.errorPath == section
+          x => section.startsWith(x.errorPath)
         ) match {
-          case Some(section) => Some(section.relatedJourney, Status(Status.Error.id))
-          case None          => None
+          case Some(section) =>
+            Some((section.relatedJourney, Status(Status.Error.id)))
+          case None => None
         }
       case _ => None
     }

@@ -17,9 +17,9 @@
 package services
 
 import base.SpecBase
-import models.XPath
+import models.{Metadata, Status, XPath}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{verify, when}
+import org.mockito.Mockito.{verify, verifyNoInteractions, verifyNoMoreInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
 
 import scala.concurrent.Future
@@ -96,6 +96,69 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
 
           verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         }
+    }
+  }
+
+  "handleErrors" must {
+    val xPaths = Seq(
+      XPath("/CC015C/Authorisation/referenceNumber"),
+      XPath("/CC015C/CustomsOfficeOfDeparture/customsOffice"),
+      XPath("/CC015C/Representative/firstName")
+    )
+
+    "return true" when {
+      "a document exists in the cache for the given LRN and EORI " +
+        "and setting the document tasks to error succeeds" in {
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+          when(mockCacheRepository.set(any())).thenReturn(Future.successful(true))
+
+          val result = service.handleErrors(lrn, eoriNumber, xPaths).futureValue
+
+          result shouldBe true
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+          verify(mockCacheRepository).set(any())
+        }
+    }
+
+    "return false" when {
+      "a document doesn't exist in the cache for the given LRN and EORI" in {
+
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
+
+        val result = service.handleErrors(lrn, eoriNumber, xPaths).futureValue
+
+        result shouldBe false
+
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        verifyNoMoreInteractions(mockCacheRepository)
+      }
+
+      "a document exists in the cache for the given LRN and EORI " +
+        "and setting the document tasks to error fails" in {
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+          when(mockCacheRepository.set(any())).thenReturn(Future.successful(false))
+
+          val result = service.handleErrors(lrn, eoriNumber, xPaths).futureValue
+
+          result shouldBe false
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+          verify(mockCacheRepository).set(any())
+        }
+
+      "there are no tasks to update" in {
+
+        val xPaths = Seq.empty
+
+        val result = service.handleErrors(lrn, eoriNumber, xPaths).futureValue
+
+        result shouldBe false
+
+        verifyNoInteractions(mockCacheRepository)
+      }
     }
   }
 
