@@ -92,4 +92,49 @@ class XPathControllerSpec extends SpecBase with Generators {
     }
   }
 
+  "handleErrors" should {
+
+    "return 200 with true" when {
+      "errors set successfully" in {
+        when(mockXPathService.handleErrors(any(), any(), any())).thenReturn(Future.successful(true))
+
+        val request = FakeRequest(POST, routes.XPathController.handleErrors(lrn).url)
+          .withBody(JsArray(xPaths.map(_.value).map(JsString)))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe JsBoolean(true)
+        verify(mockXPathService).handleErrors(eqTo(lrn), eqTo(eoriNumber), eqTo(xPaths))
+      }
+    }
+
+    "return 200 with false" when {
+      "errors not set" in {
+        when(mockXPathService.handleErrors(any(), any(), any())).thenReturn(Future.successful(false))
+
+        val request = FakeRequest(POST, routes.XPathController.handleErrors(lrn).url)
+          .withBody(JsArray(xPaths.map(_.value).map(JsString)))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe JsBoolean(false)
+        verify(mockXPathService).handleErrors(eqTo(lrn), eqTo(eoriNumber), eqTo(xPaths))
+      }
+    }
+
+    "return 400" when {
+      "request body is not an array of xpaths" in {
+        val request = FakeRequest(POST, routes.XPathController.handleErrors(lrn).url)
+          .withBody(Json.obj("foo" -> "bar"))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe BAD_REQUEST
+        verify(mockXPathService, never()).handleErrors(any(), any(), any())
+      }
+    }
+  }
+
 }
