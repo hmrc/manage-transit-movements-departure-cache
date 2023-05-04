@@ -47,4 +47,15 @@ class XPathController @Inject() (
       }
   }
 
+  def handleErrors(lrn: String): Action[JsValue] = authenticate().async(parse.json) {
+    implicit request =>
+      request.body.validate[Seq[XPath]] match {
+        case JsSuccess(xPaths, _) =>
+          xPathService.handleErrors(lrn, request.eoriNumber, xPaths).map(JsBoolean).map(Ok(_))
+        case JsError(errors) =>
+          logger.error(s"Failed to validate request body as sequence of xPaths: $errors")
+          Future.successful(BadRequest)
+      }
+  }
+
 }

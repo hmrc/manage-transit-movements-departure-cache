@@ -18,28 +18,47 @@ package models
 
 import play.api.libs.json.{__, Reads}
 
+case class Section(errorPath: String, relatedJourney: String) {
+  override def toString: String = this.errorPath
+}
+
 case class XPath(value: String) {
 
   private val sections = Seq(
-    "TransitOperation",
-    "Authorisation",
-    "CustomsOfficeOfDeparture",
-    "CustomsOfficeOfDestinationDeclared",
-    "CustomsOfficeOfTransitDeclared",
-    "CustomsOfficeOfExitForTransitDeclared",
-    "HolderOfTheTransitProcedure",
-    "Representative",
-    "Guarantee",
-    "Consignment"
+    Section("TransitOperation", ".preTaskList"),
+    Section("Authorisation", ".transportDetails"),
+    Section("CustomsOfficeOfDeparture", ".preTaskList"),
+    Section("CustomsOfficeOfDestinationDeclared", ".routeDetails"),
+    Section("CustomsOfficeOfTransitDeclared", ".routeDetails"),
+    Section("CustomsOfficeOfExitForTransitDeclared", ".routeDetails"),
+    Section("HolderOfTheTransitProcedure", ".traderDetails"),
+    Section("Representative", ".traderDetails"),
+    Section("Guarantee", ".guaranteeDetails"),
+    Section("Consignment", ".traderDetails")
   )
 
   def isAmendable: Boolean = {
     val regex = "^/CC015C/(.+)$".r
     value match {
-      case regex(section) if sections.exists(section.startsWith) => true
-      case _                                                     => false
+      case regex(section) if sections.map(_.errorPath).exists(section.startsWith) => true
+      case _                                                                      => false
     }
   }
+
+  def sectionError: Option[(String, Status.Value)] = {
+    val regex = """/CC015C/(?<middle>[^/]+)/.*""".r
+    value match {
+      case regex(section) =>
+        sections.find(
+          x => x.errorPath == section
+        ) match {
+          case Some(section) => Some(section.relatedJourney, Status(Status.Error.id))
+          case None          => None
+        }
+      case _ => None
+    }
+  }
+
 }
 
 object XPath {
