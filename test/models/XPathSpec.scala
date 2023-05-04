@@ -143,26 +143,26 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
       val error                                          = Status(Status.Error.id)
       val expectedResult: Option[(String, Status.Value)] = Some((section, error))
 
-      "xPath is prepended with /CC015C/HolderOfTheTransitProcedure" in {
+      "xPath is prepended with /CC015C/HolderOfTheTransitProcedure/" in {
         forAll(Gen.alphaNumStr) {
           subPath =>
-            val xPath = "/CC015C/HolderOfTheTransitProcedure" + subPath
+            val xPath = "/CC015C/HolderOfTheTransitProcedure/" + subPath
             XPath(xPath).sectionError shouldBe expectedResult
         }
       }
 
-      "xPath is prepended with /CC015C/Representative" in {
+      "xPath is prepended with /CC015C/Representative/" in {
         forAll(Gen.alphaNumStr) {
           subPath =>
-            val xPath = "/CC015C/Representative" + subPath
+            val xPath = "/CC015C/Representative/" + subPath
             XPath(xPath).sectionError shouldBe expectedResult
         }
       }
 
-      "xPath is prepended with /CC015C/Consignment" in {
+      "xPath is prepended with /CC015C/Consignment/" in {
         forAll(Gen.alphaNumStr) {
           subPath =>
-            val xPath = "/CC015C/Consignment" + subPath
+            val xPath = "/CC015C/Consignment/" + subPath
             XPath(xPath).sectionError shouldBe expectedResult
         }
       }
@@ -174,26 +174,26 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
       val error                                          = Status(Status.Error.id)
       val expectedResult: Option[(String, Status.Value)] = Some((section, error))
 
-      "xPath is prepended with /CC015C/CustomsOfficeOfDestinationDeclared" in {
+      "xPath is prepended with /CC015C/CustomsOfficeOfDestinationDeclared/" in {
         forAll(Gen.alphaNumStr) {
           subPath =>
-            val xPath = "/CC015C/CustomsOfficeOfDestinationDeclared" + subPath
+            val xPath = "/CC015C/CustomsOfficeOfDestinationDeclared/" + subPath
             XPath(xPath).sectionError shouldBe expectedResult
         }
       }
 
-      "xPath is prepended with /CC015C/CustomsOfficeOfTransitDeclared" in {
+      "xPath is prepended with /CC015C/CustomsOfficeOfTransitDeclared/" in {
         forAll(Gen.alphaNumStr) {
           subPath =>
-            val xPath = "/CC015C/CustomsOfficeOfTransitDeclared" + subPath
+            val xPath = "/CC015C/CustomsOfficeOfTransitDeclared/" + subPath
             XPath(xPath).sectionError shouldBe expectedResult
         }
       }
 
-      "xPath is prepended with /CC015C/CustomsOfficeOfExitForTransitDeclared" in {
+      "xPath is prepended with /CC015C/CustomsOfficeOfExitForTransitDeclared/" in {
         forAll(Gen.alphaNumStr) {
           subPath =>
-            val xPath = "/CC015C/CustomsOfficeOfExitForTransitDeclared" + subPath
+            val xPath = "/CC015C/CustomsOfficeOfExitForTransitDeclared/" + subPath
             XPath(xPath).sectionError shouldBe expectedResult
         }
       }
@@ -205,10 +205,10 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
       val error                                          = Status(Status.Error.id)
       val expectedResult: Option[(String, Status.Value)] = Some((section, error))
 
-      "xPath is prepended with /CC015C/Authorisation" in {
+      "xPath is prepended with /CC015C/Authorisation/" in {
         forAll(Gen.alphaNumStr) {
           subPath =>
-            val xPath = "/CC015C/Authorisation" + subPath
+            val xPath = "/CC015C/Authorisation/" + subPath
             XPath(xPath).sectionError shouldBe expectedResult
         }
       }
@@ -220,10 +220,10 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
       val error                                          = Status(Status.Error.id)
       val expectedResult: Option[(String, Status.Value)] = Some((section, error))
 
-      "xPath is prepended with /CC015C/Guarantee" in {
+      "xPath is prepended with /CC015C/Guarantee/" in {
         forAll(Gen.alphaNumStr) {
           subPath =>
-            val xPath = "/CC015C/Guarantee" + subPath
+            val xPath = "/CC015C/Guarantee/" + subPath
             XPath(xPath).sectionError shouldBe expectedResult
         }
       }
@@ -238,14 +238,14 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
       "xPath is prepended with /CC015C/TransitOperation" in {
         forAll(Gen.alphaNumStr) {
           subPath =>
-            val xPath = "/CC015C/TransitOperation" + subPath
+            val xPath = "/CC015C/TransitOperation/" + subPath
             XPath(xPath).sectionError shouldBe expectedResult
         }
       }
       "xPath is prepended with /CC015C/CustomsOfficeOfDeparture" in {
         forAll(Gen.alphaNumStr) {
           subPath =>
-            val xPath = "/CC015C/CustomsOfficeOfDeparture" + subPath
+            val xPath = "/CC015C/CustomsOfficeOfDeparture/" + subPath
             XPath(xPath).sectionError shouldBe expectedResult
         }
       }
