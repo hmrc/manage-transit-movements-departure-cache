@@ -16,25 +16,26 @@
 
 package models
 
+import models.JourneyTask._
 import play.api.libs.json.{__, Reads}
 
-case class Section(errorPath: String, relatedJourney: String) {
+case class Section(errorPath: String, relatedJourney: JourneyTask) {
   override def toString: String = this.errorPath
 }
 
 case class XPath(value: String) {
 
   private val sections = Seq(
-    Section("TransitOperation", ".preTaskList"),
-    Section("Authorisation", ".transportDetails"),
-    Section("CustomsOfficeOfDeparture", ".preTaskList"),
-    Section("CustomsOfficeOfDestinationDeclared", ".routeDetails"),
-    Section("CustomsOfficeOfTransitDeclared", ".routeDetails"),
-    Section("CustomsOfficeOfExitForTransitDeclared", ".routeDetails"),
-    Section("HolderOfTheTransitProcedure", ".traderDetails"),
-    Section("Representative", ".traderDetails"),
-    Section("Guarantee", ".guaranteeDetails"),
-    Section("Consignment", ".traderDetails")
+    Section("TransitOperation", PreTaskList),
+    Section("Authorisation", TransportDetails),
+    Section("CustomsOfficeOfDeparture", PreTaskList),
+    Section("CustomsOfficeOfDestinationDeclared", RouteDetails),
+    Section("CustomsOfficeOfTransitDeclared", RouteDetails),
+    Section("CustomsOfficeOfExitForTransitDeclared", RouteDetails),
+    Section("HolderOfTheTransitProcedure", TraderDetails),
+    Section("Representative", TraderDetails),
+    Section("Guarantee", GuaranteeDetails),
+    Section("Consignment", TraderDetails)
   )
 
   def isAmendable: Boolean = {
@@ -53,7 +54,7 @@ case class XPath(value: String) {
           x => section.startsWith(x.errorPath)
         ) match {
           case Some(section) =>
-            Some((section.relatedJourney, Status(Status.Error.id)))
+            Some((section.relatedJourney.taskName, Status(Status.Error.id)))
           case None => None
         }
       case _ => None
