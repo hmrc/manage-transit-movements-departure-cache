@@ -432,7 +432,8 @@ object consignmentItemType09 {
             readDocuments[PreviousDocumentType08]("Previous", documents, itemDocuments)(previousDocumentType08.reads) and
             readDocuments[SupportingDocumentType05]("Support", documents, itemDocuments)(supportingDocumentType05.reads) and
             readDocuments[TransportDocumentType04]("Transport", documents, itemDocuments)(transportDocumentType04.reads) and
-            (__ \ "additionalReferences").readArray[AdditionalReferenceType05](additionalReferenceType05.reads)
+            (__ \ "additionalReferences").readArray[AdditionalReferenceType05](additionalReferenceType05.reads) and
+            (__ \ "additionalInformationList").readArray[AdditionalInformationType03](additionalInformationType03.reads)
         ).apply { // TODO - Should be able to change this to `(ConsignmentItemType09.apply _)` once this is all done
           (
             goodsItemNumber,
@@ -446,7 +447,8 @@ object consignmentItemType09 {
             PreviousDocument,
             SupportingDocument,
             TransportDocument,
-            AdditionalReference
+            AdditionalReference,
+            AdditionalInformation
           ) =>
             ConsignmentItemType09(
               goodsItemNumber = goodsItemNumber,
@@ -463,7 +465,7 @@ object consignmentItemType09 {
               SupportingDocument = SupportingDocument,
               TransportDocument = TransportDocument,
               AdditionalReference = AdditionalReference,
-              AdditionalInformation = Nil, // TODO
+              AdditionalInformation = AdditionalInformation,
               TransportCharges = None // TODO
             )
         }
@@ -570,4 +572,13 @@ object additionalReferenceType05 {
       (__ \ "additionalReference" \ "documentType").read[String] and
       (__ \ "additionalReferenceNumber").readNullable[String]
   )(AdditionalReferenceType05.apply _)
+}
+
+object additionalInformationType03 {
+
+  def reads(index: Int): Reads[AdditionalInformationType03] = (
+    (index.toString: Reads[String]) and
+      (__ \ "additionalInformationType" \ "code").read[String] and
+      (__ \ "additionalInformation").readNullable[String]
+  )(AdditionalInformationType03.apply _)
 }

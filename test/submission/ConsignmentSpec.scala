@@ -430,6 +430,22 @@ class ConsignmentSpec extends SpecBase {
             |            },
             |            "addAdditionalReferenceNumberYesNo" : false
             |          }
+            |        ],
+            |        "additionalInformationList" : [
+            |          {
+            |            "additionalInformationType" : {
+            |              "code" : "aiCode1",
+            |              "description" : "aiDescription1"
+            |            },
+            |            "additionalInformation" : "ai1"
+            |          },
+            |          {
+            |            "additionalInformationType" : {
+            |              "code" : "aiCode2",
+            |              "description" : "aiDescription2"
+            |            },
+            |            "additionalInformation" : "ai2"
+            |          }
             |        ]
             |      },
             |      {
@@ -803,7 +819,18 @@ class ConsignmentSpec extends SpecBase {
                   referenceNumber = None
                 )
               ),
-              AdditionalInformation = Nil,
+              AdditionalInformation = Seq(
+                AdditionalInformationType03(
+                  sequenceNumber = "1",
+                  code = "aiCode1",
+                  text = Some("ai1")
+                ),
+                AdditionalInformationType03(
+                  sequenceNumber = "2",
+                  code = "aiCode2",
+                  text = Some("ai2")
+                )
+              ),
               TransportCharges = None
             ),
             ConsignmentItemType09(
