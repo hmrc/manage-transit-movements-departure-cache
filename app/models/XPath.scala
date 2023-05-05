@@ -38,11 +38,13 @@ case class XPath(value: String) {
     Section("Consignment", TraderDetails)
   )
 
+  private val sectionPaths = sections.map(_.errorPath)
+
   def isAmendable: Boolean = {
     val regex = "^/CC015C/(.+)$".r
     value match {
-      case regex(section) if sections.map(_.errorPath).exists(section.startsWith) => true
-      case _                                                                      => false
+      case regex(section) if sectionPaths.exists(section.startsWith) => true
+      case _                                                         => false
     }
   }
 
