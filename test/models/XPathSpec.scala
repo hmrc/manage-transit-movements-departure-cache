@@ -333,10 +333,59 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
       }
     }
 
-    "when /CC015C/Consignment/HouseConsignment[5]/ConsingmentItem[10]/additionalInformation" must {
-      "return Items" in {
-        val xPath = XPath("/CC015C/Consignment/HouseConsignment[50]/ConsingmentItem[10]/additionalInformation")
-        xPath.task.value shouldBe Items
+    "when /CC015C/Consignment/countryOfDispatch" must {
+      "return TransportDetails" in {
+        val xPath = XPath("/CC015C/Consignment/countryOfDispatch")
+        xPath.task.value shouldBe TransportDetails
+      }
+    }
+
+    "when /CC015C/Consignment/containerIndicator" must {
+      "return TransportDetails" in {
+        val xPath = XPath("/CC015C/Consignment/containerIndicator")
+        xPath.task.value shouldBe TransportDetails
+      }
+    }
+
+    "when /CC015C/Consignment/countryOfDestination" must {
+      "return RouteDetails" in {
+        val xPath = XPath("/CC015C/Consignment/countryOfDestination")
+        xPath.task.value shouldBe RouteDetails
+      }
+    }
+
+    "when /CC015C/Consignment/referenceNumberUCR" must {
+      "return TransportDetails" in {
+        val xPath = XPath("/CC015C/Consignment/referenceNumberUCR")
+        xPath.task.value shouldBe TransportDetails
+      }
+    }
+
+    "when /CC015C/Consignment/inlandModeOfTransport" must {
+      "return TransportDetails" in {
+        val xPath = XPath("/CC015C/Consignment/inlandModeOfTransport")
+        xPath.task.value shouldBe TransportDetails
+      }
+    }
+
+    "when /CC015C/Consignment/modeOfTransportAtTheBorder" must {
+      "return TransportDetails" in {
+        val xPath = XPath("/CC015C/Consignment/modeOfTransportAtTheBorder")
+        xPath.task.value shouldBe TransportDetails
+      }
+    }
+
+    "when /CC015C/Consignment/TransportCharges[1]/paymentMethod" must {
+      "return TransportDetails" in {
+        val xPath = XPath("/CC015C/Consignment/TransportCharges[1]/paymentMethod")
+        xPath.task.value shouldBe TransportDetails
+      }
+    }
+
+    "when /CC015C/Consignment/CountryOfRoutingOfConsignment[1]/type" must {
+      "return RouteDetails" in {
+        val xPath = XPath("/CC015C/Consignment/CountryOfRoutingOfConsignment[1]/type")
+        xPath.task.value shouldBe RouteDetails
       }
     }
 
