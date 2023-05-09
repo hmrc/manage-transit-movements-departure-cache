@@ -38,6 +38,14 @@ object JourneyTask {
     override def taskName: String = ".transportDetails"
   }
 
+  case object Documents extends JourneyTask {
+    override def taskName: String = ".documents"
+  }
+
+  case object Items extends JourneyTask {
+    override def taskName: String = ".items"
+  }
+
   case object GuaranteeDetails extends JourneyTask {
     override def taskName: String = ".guaranteeDetails"
   }

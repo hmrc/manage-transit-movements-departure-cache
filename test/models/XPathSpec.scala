@@ -144,23 +144,23 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
       }
     }
 
-    "when /CC015C/TransitOperation/declarationType" must {
+    "when /CC015C/TransitOperation/tirCarnetReference" must {
       "return PreTaskList" in {
         val xPath = XPath("/CC015C/TransitOperation/tirCarnetReference")
         xPath.task.value shouldBe PreTaskList
       }
     }
 
-    "when /CC015C/TransitOperation/declarationType" must {
+    "when /CC015C/TransitOperation/securityDetailsType" must {
       "return PreTaskList" in {
         val xPath = XPath("/CC015C/TransitOperation/securityDetailsType")
         xPath.task.value shouldBe PreTaskList
       }
     }
 
-    "when /CC015C/TransitOperation/declarationType" must {
+    "when /CC015C/TransitOperation/routing/bindingItinerary" must {
       "return routeDetails" in {
-        val xPath = XPath("/CC015C/TransitOperation/routing")
+        val xPath = XPath("/CC015C/TransitOperation/routing/bindingItinerary")
         xPath.task.value shouldBe RouteDetails
       }
     }
@@ -214,10 +214,108 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
       }
     }
 
+    "when /CC015C/Consignment/Carrier/identificationNumber" must {
+      "return TransportDetails" in {
+        val xPath = XPath("/CC015C/Consignment/Carrier/identificationNumber")
+        xPath.task.value shouldBe TransportDetails
+      }
+    }
+
+    "when /CC015C/Consignment/AdditionalSupplyChainActor[1]" must {
+      "return TransportDetails" in {
+        val xPath = XPath("/CC015C/Consignment/AdditionalSupplyChainActor[1]")
+        xPath.task.value shouldBe TransportDetails
+      }
+    }
+
+    "when /CC015C/Consignment/DepartureTransportMeans[1]" must {
+      "return TransportDetails" in {
+        val xPath = XPath("/CC015C/Consignment/DepartureTransportMeans[1]")
+        xPath.task.value shouldBe TransportDetails
+      }
+    }
+
     "when /CC015C/Guarantee[1]/guaranteeType" must {
       "return GuaranteeDetails" in {
         val xPath = XPath("/CC015C/Guarantee[1]/guaranteeType")
         xPath.task.value shouldBe GuaranteeDetails
+      }
+    }
+
+    "when /CC015C/Consignment/Consignor/name" must {
+      "return TraderDetails" in {
+        val xPath = XPath("/CC015C/Consignment/Consignor/name")
+        xPath.task.value shouldBe TraderDetails
+      }
+    }
+
+    "when /CC015C/Consignment/Consignee" must {
+      "return TraderDetails" in {
+        val xPath = XPath("/CC015C/Consignment/Consignee/name")
+        xPath.task.value shouldBe TraderDetails
+      }
+    }
+
+    "when /CC015C/Consignment/TransportEquipment/paymentMethod" must {
+      "return TransportDetails" in {
+        val xPath = XPath("/CC015C/Consignment/TransportEquipment/paymentMethod")
+        xPath.task.value shouldBe TransportDetails
+      }
+    }
+
+    "when /CC015C/Consignment/ActiveBorderTransportMeans/identificationNumber" must {
+      "return TransportDetails" in {
+        val xPath = XPath("/CC015C/Consignment/ActiveBorderTransportMeans/identificationNumber")
+        xPath.task.value shouldBe TransportDetails
+      }
+    }
+
+    "when /CC015C/Consignment/LocationOfGoods/typeOfLocation" must {
+      "return RouteDetails" in {
+        val xPath = XPath("/CC015C/Consignment/LocationOfGoods/typeOfLocation")
+        xPath.task.value shouldBe RouteDetails
+      }
+    }
+
+    "when /CC015C/Consignment/PlaceOfLoading/country" must {
+      "return RouteDetails" in {
+        val xPath = XPath("/CC015C/Consignment/PlaceOfLoading/country")
+        xPath.task.value shouldBe RouteDetails
+      }
+    }
+
+    "when /CC015C/Consignment/PlaceOfUnloading/country" must {
+      "return RouteDetails" in {
+        val xPath = XPath("/CC015C/Consignment/PlaceOfUnloading/country")
+        xPath.task.value shouldBe RouteDetails
+      }
+    }
+
+    "when /CC015C/Consignment/PreviousDocument[5]/type" must {
+      "return Documents" in {
+        val xPath = XPath("/CC015C/Consignment/PreviousDocument[5]/type")
+        xPath.task.value shouldBe Documents
+      }
+    }
+
+    "when /CC015C/Consignment/SupportingDocument[5]/type" must {
+      "return Documents" in {
+        val xPath = XPath("/CC015C/Consignment/SupportingDocument[5]/type")
+        xPath.task.value shouldBe Documents
+      }
+    }
+
+    "when /CC015C/Consignment/TransportDocument[5]/type" must {
+      "return Documents" in {
+        val xPath = XPath("/CC015C/Consignment/TransportDocument[5]/type")
+        xPath.task.value shouldBe Documents
+      }
+    }
+
+    "when /CC015C/Consignment/HouseConsignment[5]/ConsingmentItem[10]/consignor" must {
+      "return Items" in {
+        val xPath = XPath("/CC015C/Consignment/HouseConsignment[50]/ConsingmentItem[10]/consignor")
+        xPath.task.value shouldBe Items
       }
     }
 
