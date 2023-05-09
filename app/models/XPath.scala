@@ -23,19 +23,6 @@ import scala.util.Try
 
 case class XPath(value: String) {
 
-  private val sections = Seq(
-    "TransitOperation",
-    "Authorisation",
-    "CustomsOfficeOfDeparture",
-    "CustomsOfficeOfDestinationDeclared",
-    "CustomsOfficeOfTransitDeclared",
-    "CustomsOfficeOfExitForTransitDeclared",
-    "HolderOfTheTransitProcedure",
-    "Representative",
-    "Guarantee",
-    "Consignment"
-  )
-
   def isAmendable: Boolean = this.task.isDefined
 
   def taskError: Option[(String, Status.Value)] =
@@ -47,8 +34,8 @@ case class XPath(value: String) {
   def task: Option[Task] = {
     val pf: PartialFunction[String, Task] = _.replace("/CC015C/", "") match {
       case x if x.matches("^TransitOperation/declarationType$")                                                            => PreTaskList
-      case x if x.matches("^TransitOperation/TIRCarnetNumber")                                                             => PreTaskList
-      case x if x.matches("^TransitOperation/security")                                                                    => PreTaskList
+      case x if x.matches("^TransitOperation/TIRCarnetNumber$")                                                            => PreTaskList
+      case x if x.matches("^TransitOperation/security$")                                                                   => PreTaskList
       case x if x.matches("^TransitOperation/bindingItinerary$")                                                           => RouteDetails
       case x if x.matches("^TransitOperation/reducedDatasetIndicator$")                                                    => TraderDetails
       case x if x.matches("^TransitOperation/limitDate$")                                                                  => TransportDetails
@@ -64,7 +51,6 @@ case class XPath(value: String) {
       case x if x.matches("^Consignment/AdditionalSupplyChainActor(.+)$")                                                  => TransportDetails
       case x if x.matches("^Consignment/DepartureTransportMeans(.+)$")                                                     => TransportDetails
       case x if x.matches("^Consignment/Consignor(.+)$")                                                                   => TraderDetails
-      case x if x.matches("^Consignment/Consignee(.+)$")                                                                   => TraderDetails
       case x if x.matches("^Consignment/Consignee(.+)$")                                                                   => TraderDetails
       case x if x.matches("^Consignment/LocationOfGoods(.+)$")                                                             => RouteDetails
       case x if x.matches("^Consignment/TransportEquipment(.+)$")                                                          => TransportDetails
