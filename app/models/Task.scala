@@ -16,37 +16,37 @@
 
 package models
 
-sealed trait JourneyTask {
+sealed trait Task {
   def taskName: String
 }
 
-object JourneyTask {
+object Task {
 
-  case object PreTaskList extends JourneyTask {
+  case object PreTaskList extends Task {
     override def taskName: String = ".preTaskList"
   }
 
-  case object TraderDetails extends JourneyTask {
+  case object TraderDetails extends Task {
     override def taskName: String = ".traderDetails"
   }
 
-  case object RouteDetails extends JourneyTask {
+  case object RouteDetails extends Task {
     override def taskName: String = ".routeDetails"
   }
 
-  case object TransportDetails extends JourneyTask {
+  case object TransportDetails extends Task {
     override def taskName: String = ".transportDetails"
   }
 
-  case object Documents extends JourneyTask {
+  case object Documents extends Task {
     override def taskName: String = ".documents"
   }
 
-  case object Items extends JourneyTask {
+  case object Items extends Task {
     override def taskName: String = ".items"
   }
 
-  case object GuaranteeDetails extends JourneyTask {
+  case object GuaranteeDetails extends Task {
     override def taskName: String = ".guaranteeDetails"
   }
 }

@@ -38,7 +38,7 @@ class XPathService @Inject() (
   def handleErrors(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
     xPaths.flatMap {
       xPath =>
-        xPath.sectionError
+        xPath.taskError
     }.toMap match {
       case tasks if tasks.nonEmpty =>
         cacheRepository.get(lrn, eoriNumber).flatMap {

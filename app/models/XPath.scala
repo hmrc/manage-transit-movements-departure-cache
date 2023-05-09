@@ -16,7 +16,7 @@
 
 package models
 
-import models.JourneyTask._
+import models.Task._
 import play.api.libs.json.{__, Reads}
 
 import scala.util.Try
@@ -44,14 +44,14 @@ case class XPath(value: String) {
     }
   }
 
-  def sectionError: Option[(String, Status.Value)] =
+  def taskError: Option[(String, Status.Value)] =
     this.task match {
       case Some(task) => Some((task.taskName, Status(Status.Error.id)))
       case _          => None
     }
 
-  def task: Option[JourneyTask] = {
-    val pf: PartialFunction[String, JourneyTask] = _.replace("/CC015C/", "") match {
+  def task: Option[Task] = {
+    val pf: PartialFunction[String, Task] = _.replace("/CC015C/", "") match {
       case x if x.matches("^TransitOperation/declarationType$")                                                            => PreTaskList
       case x if x.matches("^TransitOperation/tirCarnetReference$")                                                         => PreTaskList
       case x if x.matches("^TransitOperation/securityDetailsType$")                                                        => PreTaskList

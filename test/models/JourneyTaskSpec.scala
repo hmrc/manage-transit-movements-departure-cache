@@ -17,7 +17,7 @@
 package models
 
 import base.SpecBase
-import models.JourneyTask._
+import models.Task._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
 class JourneyTaskSpec extends SpecBase with ScalaCheckPropertyChecks {

@@ -18,7 +18,7 @@ package models
 
 import base.SpecBase
 import generators.Generators
-import models.JourneyTask._
+import models.Task._
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.JsString
@@ -362,193 +362,49 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
     }
   }
 
-  "sectionError" must {
+  "taskError" must {
 
     "return Some((.preTaskList, Status.Value.Error))" when {
       "xPath.task returns PreTaskList" in {
         val xPath = s"/CC015C/TransitOperation/declarationType"
-        XPath(xPath).sectionError shouldBe Some((".preTaskList", Status(Status.Error.id)))
+        XPath(xPath).taskError shouldBe Some((".preTaskList", Status(Status.Error.id)))
       }
     }
 
     "return Some((.traderDetails, Status.Value.Error))" when {
       "xPath.task returns TraderDetails" in {
         val xPath = s"/CC015C/Consignment/Consignor/name"
-        XPath(xPath).sectionError shouldBe Some((".traderDetails", Status(Status.Error.id)))
+        XPath(xPath).taskError shouldBe Some((".traderDetails", Status(Status.Error.id)))
       }
     }
 
     "return Some((.routeDetails, Status.Value.Error))" when {
       "xPath.task returns RouteDetails" in {
         val xPath = s"/CC015C/Consignment/PlaceOfLoading/country"
-        XPath(xPath).sectionError shouldBe Some((".routeDetails", Status(Status.Error.id)))
+        XPath(xPath).taskError shouldBe Some((".routeDetails", Status(Status.Error.id)))
       }
     }
 
     "return Some((.transportDetails, Status.Value.Error))" when {
       "xPath.task returns TransportDetails" in {
         val xPath = s"/CC015C/Authorisation[1]/referenceNumber"
-        XPath(xPath).sectionError shouldBe Some((".transportDetails", Status(Status.Error.id)))
+        XPath(xPath).taskError shouldBe Some((".transportDetails", Status(Status.Error.id)))
       }
     }
 
     "return Some((.documents, Status.Value.Error))" when {
       "xPath.task returns Documents" in {
         val xPath = s"/CC015C/Consignment/PreviousDocument[1]/type"
-        XPath(xPath).sectionError shouldBe Some((".documents", Status(Status.Error.id)))
+        XPath(xPath).taskError shouldBe Some((".documents", Status(Status.Error.id)))
       }
     }
 
     "return Some((.items, Status.Value.Error))" when {
       "xPath.task returns Items" in {
         val xPath = s"/CC015C/Consignment/HouseConsignment[2]/ConsingmentItem[99]/additionalInformation"
-        XPath(xPath).sectionError shouldBe Some((".items", Status(Status.Error.id)))
+        XPath(xPath).taskError shouldBe Some((".items", Status(Status.Error.id)))
       }
     }
   }
-
-  //  "sectionError" ignore {
-  //
-  //          "return a section paired with an error value" when {
-  //            "xPath is appended with an index" in {
-  //              forAll(Gen.alphaNumStr, arbitrary[Int]) {
-  //                (subPath, index) =>
-  //                  val xPath = s"/CC015C/HolderOfTheTransitProcedure[$index]/" + subPath
-  //                  XPath(xPath).sectionError shouldBe Some((".traderDetails", Status(Status.Error.id)))
-  //              }
-  //            }
-  //          }
-  //
-  //          "return Some((.traderDetails, Status.Value))" when {
-  //
-  //            val section = ".traderDetails"
-  //            val error = Status(Status.Error.id)
-  //            val expectedResult: Option[(String, Status.Value)] = Some((section, error))
-  //
-  //            "xPath is prepended with /CC015C/HolderOfTheTransitProcedure/" in {
-  //              forAll(Gen.alphaNumStr) {
-  //                subPath =>
-  //                  val xPath = "/CC015C/HolderOfTheTransitProcedure/" + subPath
-  //                  XPath(xPath).sectionError shouldBe expectedResult
-  //              }
-  //            }
-  //
-  //            "xPath is prepended with /CC015C/Representative/" in {
-  //              forAll(Gen.alphaNumStr) {
-  //                subPath =>
-  //                  val xPath = "/CC015C/Representative/" + subPath
-  //                  XPath(xPath).sectionError shouldBe expectedResult
-  //              }
-  //            }
-  //
-  //            "xPath is prepended with /CC015C/Consignment/" in {
-  //              forAll(Gen.alphaNumStr) {
-  //                subPath =>
-  //                  val xPath = "/CC015C/Consignment/" + subPath
-  //                  XPath(xPath).sectionError shouldBe expectedResult
-  //              }
-  //            }
-  //          }
-  //
-  //          "return Some((.routeDetails, Status.Value))" when {
-  //
-  //            val section = ".routeDetails"
-  //            val error = Status(Status.Error.id)
-  //            val expectedResult: Option[(String, Status.Value)] = Some((section, error))
-  //
-  //            "xPath is prepended with /CC015C/CustomsOfficeOfDestinationDeclared/" in {
-  //              forAll(Gen.alphaNumStr) {
-  //                subPath =>
-  //                  val xPath = "/CC015C/CustomsOfficeOfDestinationDeclared/" + subPath
-  //                  XPath(xPath).sectionError shouldBe expectedResult
-  //              }
-  //            }
-  //
-  //            "xPath is prepended with /CC015C/CustomsOfficeOfTransitDeclared/" in {
-  //              forAll(Gen.alphaNumStr) {
-  //                subPath =>
-  //                  val xPath = "/CC015C/CustomsOfficeOfTransitDeclared/" + subPath
-  //                  XPath(xPath).sectionError shouldBe expectedResult
-  //              }
-  //            }
-  //
-  //            "xPath is prepended with /CC015C/CustomsOfficeOfExitForTransitDeclared/" in {
-  //              forAll(Gen.alphaNumStr) {
-  //                subPath =>
-  //                  val xPath = "/CC015C/CustomsOfficeOfExitForTransitDeclared/" + subPath
-  //                  XPath(xPath).sectionError shouldBe expectedResult
-  //              }
-  //            }
-  //          }
-  //
-  //          "return Some((.transportDetails, Status.Value))" when {
-  //
-  //            val section = ".transportDetails"
-  //            val error = Status(Status.Error.id)
-  //            val expectedResult: Option[(String, Status.Value)] = Some((section, error))
-  //
-  //            "xPath is prepended with /CC015C/Authorisation/" in {
-  //              forAll(Gen.alphaNumStr) {
-  //                subPath =>
-  //                  val xPath = "/CC015C/Authorisation/" + subPath
-  //                  XPath(xPath).sectionError shouldBe expectedResult
-  //              }
-  //            }
-  //          }
-  //
-  //          "return Some((.guaranteeDetails, Status.Value))" when {
-  //
-  //            val section = ".guaranteeDetails"
-  //            val error = Status(Status.Error.id)
-  //            val expectedResult: Option[(String, Status.Value)] = Some((section, error))
-  //
-  //            "xPath is prepended with /CC015C/Guarantee/" in {
-  //              forAll(Gen.alphaNumStr) {
-  //                subPath =>
-  //                  val xPath = "/CC015C/Guarantee/" + subPath
-  //                  XPath(xPath).sectionError shouldBe expectedResult
-  //              }
-  //            }
-  //          }
-  //
-  //          "return Some((.preTaskList, Status.Value))" when {
-  //
-  //            val section = ".preTaskList"
-  //            val error = Status(Status.Error.id)
-  //            val expectedResult: Option[(String, Status.Value)] = Some((section, error))
-  //
-  //            "xPath is prepended with /CC015C/TransitOperation" in {
-  //              forAll(Gen.alphaNumStr) {
-  //                subPath =>
-  //                  val xPath = "/CC015C/TransitOperation/" + subPath
-  //                  XPath(xPath).sectionError shouldBe expectedResult
-  //              }
-  //            }
-  //            "xPath is prepended with /CC015C/CustomsOfficeOfDeparture" in {
-  //              forAll(Gen.alphaNumStr) {
-  //                subPath =>
-  //                  val xPath = "/CC015C/CustomsOfficeOfDeparture/" + subPath
-  //                  XPath(xPath).sectionError shouldBe expectedResult
-  //              }
-  //            }
-  //          }
-  //
-  //          "return None" when {
-  //            "xPath is prepended with CC015C but doesn't have a recognised section" in {
-  //              forAll(Gen.alphaNumStr) {
-  //                subPath =>
-  //                  val xPath = "/CC015C/" + subPath
-  //                  XPath(xPath).sectionError shouldBe None
-  //              }
-  //            }
-  //
-  //            "xPath is anything else" in {
-  //              forAll(Gen.alphaNumStr) {
-  //                xPath =>
-  //                  XPath(xPath).sectionError shouldBe None
-  //              }
-  //            }
-  //          }
-  //        }
 
 }
