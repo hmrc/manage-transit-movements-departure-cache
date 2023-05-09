@@ -53,9 +53,11 @@ case class XPath(value: String) {
   def task: Option[Task] = {
     val pf: PartialFunction[String, Task] = _.replace("/CC015C/", "") match {
       case x if x.matches("^TransitOperation/declarationType$")                                                            => PreTaskList
-      case x if x.matches("^TransitOperation/tirCarnetReference$")                                                         => PreTaskList
-      case x if x.matches("^TransitOperation/securityDetailsType$")                                                        => PreTaskList
-      case x if x.matches("^TransitOperation/routing(.+)$")                                                                => RouteDetails
+      case x if x.matches("^TransitOperation/TIRCarnetNumber")                                                             => PreTaskList
+      case x if x.matches("^TransitOperation/security")                                                                    => PreTaskList
+      case x if x.matches("^TransitOperation/bindingItinerary$")                                                           => RouteDetails
+      case x if x.matches("^TransitOperation/reducedDatasetIndicator$")                                                    => TraderDetails
+      case x if x.matches("^TransitOperation/limitDate$")                                                                  => TransportDetails
       case x if x.matches("^Authorisation(.+)$")                                                                           => TransportDetails
       case x if x.matches("^CustomsOfficeOfDeparture(.+)$")                                                                => PreTaskList
       case x if x.matches("^CustomsOfficeOfDestinationDeclared(.+)$")                                                      => RouteDetails

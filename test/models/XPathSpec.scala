@@ -144,23 +144,37 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
       }
     }
 
-    "when /CC015C/TransitOperation/tirCarnetReference" must {
+    "when /CC015C/TransitOperation/TIRCarnetNumber" must {
       "return PreTaskList" in {
-        val xPath = XPath("/CC015C/TransitOperation/tirCarnetReference")
+        val xPath = XPath("/CC015C/TransitOperation/TIRCarnetNumber")
         xPath.task.value shouldBe PreTaskList
       }
     }
 
-    "when /CC015C/TransitOperation/securityDetailsType" must {
+    "when /CC015C/TransitOperation/security" must {
       "return PreTaskList" in {
-        val xPath = XPath("/CC015C/TransitOperation/securityDetailsType")
+        val xPath = XPath("/CC015C/TransitOperation/security")
         xPath.task.value shouldBe PreTaskList
       }
     }
 
-    "when /CC015C/TransitOperation/routing/bindingItinerary" must {
+    "when /CC015C/TransitOperation/reducedDatasetIndicator" must {
+      "return TraderDetails" in {
+        val xPath = XPath("/CC015C/TransitOperation/reducedDatasetIndicator")
+        xPath.task.value shouldBe TraderDetails
+      }
+    }
+
+    "when /CC015C/TransitOperation/limitDate" must {
+      "return TransportDetails" in {
+        val xPath = XPath("/CC015C/TransitOperation/limitDate")
+        xPath.task.value shouldBe TransportDetails
+      }
+    }
+
+    "when /CC015C/TransitOperation/bindingItinerary" must {
       "return routeDetails" in {
-        val xPath = XPath("/CC015C/TransitOperation/routing/bindingItinerary")
+        val xPath = XPath("/CC015C/TransitOperation/bindingItinerary")
         xPath.task.value shouldBe RouteDetails
       }
     }
