@@ -36,13 +36,7 @@ case class XPath(value: String) {
     "Consignment"
   )
 
-  def isAmendable: Boolean = {
-    val regex = "^/CC015C/(.+)$".r
-    value match {
-      case regex(section) if sections.exists(section.startsWith) => true
-      case _                                                     => false
-    }
-  }
+  def isAmendable: Boolean = this.task.isDefined
 
   def taskError: Option[(String, Status.Value)] =
     this.task match {
