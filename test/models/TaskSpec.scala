@@ -20,7 +20,7 @@ import base.SpecBase
 import models.Task._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class JourneyTaskSpec extends SpecBase with ScalaCheckPropertyChecks {
+class TaskSpec extends SpecBase with ScalaCheckPropertyChecks {
 
   "PreTaskList must have correct taskName" in {
     PreTaskList.taskName shouldBe ".preTaskList"
@@ -36,6 +36,12 @@ class JourneyTaskSpec extends SpecBase with ScalaCheckPropertyChecks {
   }
   "GuaranteeDetails must have correct taskName" in {
     GuaranteeDetails.taskName shouldBe ".guaranteeDetails"
+  }
+  "Documents must have correct taskName" in {
+    Documents.taskName shouldBe ".documents"
+  }
+  "Items must have correct taskName" in {
+    Items.taskName shouldBe ".items"
   }
 
 }
