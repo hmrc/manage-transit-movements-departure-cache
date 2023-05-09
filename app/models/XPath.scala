@@ -19,48 +19,57 @@ package models
 import models.JourneyTask._
 import play.api.libs.json.{__, Reads}
 
-case class Section(errorPath: String, relatedJourney: JourneyTask) {
-  override def toString: String = this.errorPath
-}
+import scala.util.Try
+import scala.util.matching.Regex
 
 case class XPath(value: String) {
 
   private val sections = Seq(
-    Section("TransitOperation", PreTaskList),
-    Section("Authorisation", TransportDetails),
-    Section("CustomsOfficeOfDeparture", PreTaskList),
-    Section("CustomsOfficeOfDestinationDeclared", RouteDetails),
-    Section("CustomsOfficeOfTransitDeclared", RouteDetails),
-    Section("CustomsOfficeOfExitForTransitDeclared", RouteDetails),
-    Section("HolderOfTheTransitProcedure", TraderDetails),
-    Section("Representative", TraderDetails),
-    Section("Guarantee", GuaranteeDetails),
-    Section("Consignment", TraderDetails)
+    "TransitOperation",
+    "Authorisation",
+    "CustomsOfficeOfDeparture",
+    "CustomsOfficeOfDestinationDeclared",
+    "CustomsOfficeOfTransitDeclared",
+    "CustomsOfficeOfExitForTransitDeclared",
+    "HolderOfTheTransitProcedure",
+    "Representative",
+    "Guarantee",
+    "Consignment"
   )
 
-  private val sectionPaths = sections.map(_.errorPath)
+  val preTaskList: JourneyTask = TraderDetails
 
   def isAmendable: Boolean = {
     val regex = "^/CC015C/(.+)$".r
     value match {
-      case regex(section) if sectionPaths.exists(section.startsWith) => true
-      case _                                                         => false
+      case regex(section) if sections.exists(section.startsWith) => true
+      case _                                                     => false
     }
   }
 
-  def sectionError: Option[(String, Status.Value)] = {
-    val regex = """/CC015C/(?<middle>[^/]+)/.*""".r
-    value match {
-      case regex(section) =>
-        sections.find(
-          x => section.startsWith(x.errorPath)
-        ) match {
-          case Some(section) =>
-            Some((section.relatedJourney.taskName, Status(Status.Error.id)))
-          case None => None
-        }
-      case _ => None
+  def sectionError: Option[(String, Status.Value)] =
+    this.task match {
+      case Some(task) => Some((task.taskName, Status(Status.Error.id)))
+      case _          => None
     }
+
+  def task: Option[JourneyTask] = {
+    val pf: PartialFunction[String, JourneyTask] = _.replace("/CC015C/", "") match {
+      case x if x.matches("^TransitOperation/declarationType$")          => PreTaskList
+      case x if x.matches("^TransitOperation/tirCarnetReference$")       => PreTaskList
+      case x if x.matches("^TransitOperation/securityDetailsType$")      => PreTaskList
+      case x if x.matches("^TransitOperation/routing$")                  => RouteDetails
+      case x if x.matches("^Authorisation(.+)$")                         => TransportDetails
+      case x if x.matches("^CustomsOfficeOfDeparture(.+)$")              => PreTaskList
+      case x if x.matches("^CustomsOfficeOfDestinationDeclared(.+)$")    => RouteDetails
+      case x if x.matches("^CustomsOfficeOfTransitDeclared(.+)$")        => RouteDetails
+      case x if x.matches("^CustomsOfficeOfExitForTransitDeclared(.+)$") => RouteDetails
+      case x if x.matches("^HolderOfTheTransitProcedure(.+)$")           => TraderDetails
+      case x if x.matches("^Representative(.+)$")                        => TraderDetails
+      case x if x.matches("^Guarantee(.+)$")                             => GuaranteeDetails
+    }
+
+    Try(pf.apply(value)).toOption
   }
 
 }
