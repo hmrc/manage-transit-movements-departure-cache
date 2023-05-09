@@ -362,6 +362,51 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
     }
   }
 
+  "sectionError" must {
+
+    "return Some((.preTaskList, Status.Value.Error))" when {
+      "xPath.task returns PreTaskList" in {
+        val xPath = s"/CC015C/TransitOperation/declarationType"
+        XPath(xPath).sectionError shouldBe Some((".preTaskList", Status(Status.Error.id)))
+      }
+    }
+
+    "return Some((.traderDetails, Status.Value.Error))" when {
+      "xPath.task returns TraderDetails" in {
+        val xPath = s"/CC015C/Consignment/Consignor/name"
+        XPath(xPath).sectionError shouldBe Some((".traderDetails", Status(Status.Error.id)))
+      }
+    }
+
+    "return Some((.routeDetails, Status.Value.Error))" when {
+      "xPath.task returns RouteDetails" in {
+        val xPath = s"/CC015C/Consignment/PlaceOfLoading/country"
+        XPath(xPath).sectionError shouldBe Some((".routeDetails", Status(Status.Error.id)))
+      }
+    }
+
+    "return Some((.transportDetails, Status.Value.Error))" when {
+      "xPath.task returns TransportDetails" in {
+        val xPath = s"/CC015C/Authorisation[1]/referenceNumber"
+        XPath(xPath).sectionError shouldBe Some((".transportDetails", Status(Status.Error.id)))
+      }
+    }
+
+    "return Some((.documents, Status.Value.Error))" when {
+      "xPath.task returns Documents" in {
+        val xPath = s"/CC015C/Consignment/PreviousDocument[1]/type"
+        XPath(xPath).sectionError shouldBe Some((".documents", Status(Status.Error.id)))
+      }
+    }
+
+    "return Some((.items, Status.Value.Error))" when {
+      "xPath.task returns Items" in {
+        val xPath = s"/CC015C/Consignment/HouseConsignment[2]/ConsingmentItem[99]/additionalInformation"
+        XPath(xPath).sectionError shouldBe Some((".items", Status(Status.Error.id)))
+      }
+    }
+  }
+
   //  "sectionError" ignore {
   //
   //          "return a section paired with an error value" when {
