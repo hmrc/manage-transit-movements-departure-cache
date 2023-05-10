@@ -158,6 +158,7 @@ class CacheControllerSpec extends SpecBase {
     "return 200" when {
       "write to mongo was acknowledged" in {
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(true))
+        when(mockCacheRepository.setFlag(any(), any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest(PUT, routes.CacheController.put().url)
           .withBody(JsString(lrn))
@@ -196,6 +197,7 @@ class CacheControllerSpec extends SpecBase {
     "return 500" when {
       "write to mongo was not acknowledged" in {
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(false))
+        when(mockCacheRepository.setFlag(any(), any())).thenReturn(Future.successful(false))
 
         val request = FakeRequest(PUT, routes.CacheController.put().url)
           .withBody(JsString(lrn))
@@ -210,6 +212,7 @@ class CacheControllerSpec extends SpecBase {
 
       "write to mongo fails" in {
         when(mockCacheRepository.set(any())).thenReturn(Future.failed(new Throwable()))
+        when(mockCacheRepository.setFlag(any(), any())).thenReturn(Future.successful(false))
 
         val request = FakeRequest(PUT, routes.CacheController.put().url)
           .withBody(JsString(lrn))
