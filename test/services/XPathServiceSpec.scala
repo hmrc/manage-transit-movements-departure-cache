@@ -17,7 +17,7 @@
 package services
 
 import base.SpecBase
-import models.{Metadata, Status, XPath}
+import models.XPath
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verify, verifyNoInteractions, verifyNoMoreInteractions, when}
 import org.scalatest.concurrent.ScalaFutures

@@ -254,9 +254,9 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
       }
     }
 
-    "when /CC015C/Consignment/HouseConsignment[5]/ConsingmentItem[10]/consignor" must {
+    "when /CC015C/Consignment/HouseConsignment[5]/ConsignmentItem[10]/consignor" must {
       "return Items" in {
-        val xPath = XPath("/CC015C/Consignment/HouseConsignment[50]/ConsingmentItem[10]/consignor")
+        val xPath = XPath("/CC015C/Consignment/HouseConsignment[50]/ConsignmentItem[10]/consignor")
         xPath.task.value shouldBe Items
       }
     }
@@ -317,30 +317,30 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
       }
     }
 
-    "when /CC015C/Consignment/HouseConsignment[5]/ConsingmentItem[10]/additionalReference" must {
+    "when /CC015C/Consignment/HouseConsignment[5]/ConsignmentItem[10]/additionalReference" must {
       "return Items" in {
-        val xPath = XPath("/CC015C/Consignment/HouseConsignment[50]/ConsingmentItem[10]/additionalReference")
+        val xPath = XPath("/CC015C/Consignment/HouseConsignment[50]/ConsignmentItem[10]/additionalReference")
         xPath.task.value shouldBe Items
       }
     }
 
-    "when /CC015C/Consignment/HouseConsignment[5]/ConsingmentItem[10]/SupportingDocument[22]/type" must {
+    "when /CC015C/Consignment/HouseConsignment[5]/ConsignmentItem[10]/SupportingDocument[22]/type" must {
       "return Documents" in {
-        val xPath = XPath("/CC015C/Consignment/HouseConsignment[50]/ConsingmentItem[10]/SupportingDocument[22]/type")
+        val xPath = XPath("/CC015C/Consignment/HouseConsignment[50]/ConsignmentItem[10]/SupportingDocument[22]/type")
         xPath.task.value shouldBe Documents
       }
     }
 
-    "when /CC015C/Consignment/HouseConsignment[5]/ConsingmentItem[10]/TransportDocument[22]/type" must {
+    "when /CC015C/Consignment/HouseConsignment[5]/ConsignmentItem[10]/TransportDocument[22]/type" must {
       "return Documents" in {
-        val xPath = XPath("/CC015C/Consignment/HouseConsignment[50]/ConsingmentItem[10]/TransportDocument[22]/type")
+        val xPath = XPath("/CC015C/Consignment/HouseConsignment[50]/ConsignmentItem[10]/TransportDocument[22]/type")
         xPath.task.value shouldBe Documents
       }
     }
 
-    "when /CC015C/Consignment/HouseConsignment[5]/ConsingmentItem[10]/PreviousDocument[22]/type" must {
+    "when /CC015C/Consignment/HouseConsignment[5]/ConsignmentItem[10]/PreviousDocument[22]/type" must {
       "return Documents" in {
-        val xPath = XPath("/CC015C/Consignment/HouseConsignment[50]/ConsingmentItem[10]/PreviousDocument[22]/type")
+        val xPath = XPath("/CC015C/Consignment/HouseConsignment[50]/ConsignmentItem[10]/PreviousDocument[22]/type")
         xPath.task.value shouldBe Documents
       }
     }
@@ -392,7 +392,7 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
 
     "return Some((.items, Status.Value.Error))" when {
       "xPath.task returns Items" in {
-        val xPath = s"/CC015C/Consignment/HouseConsignment[2]/ConsingmentItem[99]/additionalInformation"
+        val xPath = s"/CC015C/Consignment/HouseConsignment[2]/ConsignmentItem[99]/additionalInformation"
         XPath(xPath).taskError shouldBe Some((".items", Status(Status.Error.id)))
       }
     }
