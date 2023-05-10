@@ -63,7 +63,6 @@ case class XPath(value: String) {
       case x if x.matches("^Consignment/HouseConsignment(\\[[\\d]*])/ConsingmentItem(\\[[\\d]*])/PreviousDocument(.+)$")   => Documents
       case x if x.matches("^Consignment/HouseConsignment(\\[[\\d]*])/ConsingmentItem(\\[[\\d]*])/SupportingDocument(.+)$") => Documents
       case x if x.matches("^Consignment/HouseConsignment(\\[[\\d]*])/ConsingmentItem(\\[[\\d]*])/TransportDocument(.+)$")  => Documents
-      case x if x.matches("^Consignment/HouseConsignment(\\[[\\d]*])/ConsingmentItem(.+)$")                                => Items
       case x if x.matches("^Consignment/countryOfDispatch$")                                                               => TransportDetails
       case x if x.matches("^Consignment/countryOfDestination$")                                                            => RouteDetails
       case x if x.matches("^Consignment/containerIndicator$")                                                              => TransportDetails
@@ -72,6 +71,7 @@ case class XPath(value: String) {
       case x if x.matches("^Consignment/referenceNumberUCR$")                                                              => TransportDetails
       case x if x.matches("^Consignment/CountryOfRoutingOfConsignment(.+)$")                                               => RouteDetails
       case x if x.matches("^Consignment/TransportCharges(.+)$")                                                            => TransportDetails
+      case x if x.matches("^Consignment/HouseConsignment(\\[[\\d]*])/ConsingmentItem(.+)$")                                => Items
 
     }
 
