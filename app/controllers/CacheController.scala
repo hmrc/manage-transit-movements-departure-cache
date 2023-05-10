@@ -76,7 +76,11 @@ class CacheController @Inject() (
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(lrn, _) =>
-          set(Metadata(lrn, request.eoriNumber))
+          val metaData = Metadata(lrn, request.eoriNumber)
+          for {
+            setDocument <- set(metaData)
+            _           <- cacheRepository.setFlag(metaData, flag = false)
+          } yield setDocument
         case JsError(errors) =>
           logger.error(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)
