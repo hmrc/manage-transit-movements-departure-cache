@@ -87,6 +87,7 @@ class CacheRepository @Inject() (
     val updates = Updates.combine(
       Updates.setOnInsert("lrn", data.lrn),
       Updates.setOnInsert("eoriNumber", data.eoriNumber),
+      Updates.setOnInsert("isSubmitted", false),
       Updates.set("data", Codecs.toBson(data.data)),
       Updates.set("tasks", Codecs.toBson(data.tasks)),
       Updates.setOnInsert("createdAt", now),
