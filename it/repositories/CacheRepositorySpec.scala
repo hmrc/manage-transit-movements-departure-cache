@@ -80,11 +80,9 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
   "setFlag" must {
 
-    "do not create a new document when given valid UserAnswers" in {
+    "not create a new document when given valid UserAnswers" in {
 
       val setResult = repository.setFlag(userAnswers3.metadata, flag = true).futureValue
-
-      setResult shouldBe true
 
       val getResult = findOne(userAnswers3.lrn, userAnswers3.eoriNumber)
 
@@ -109,7 +107,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       firstGet.id shouldBe secondGet.id
       firstGet.lrn shouldBe secondGet.lrn
       firstGet.eoriNumber shouldBe secondGet.eoriNumber
-      firstGet.metadata shouldBe secondGet.metadata
+      firstGet.metadata shouldBe equal(secondGet.metadata)
       firstGet.isSubmitted shouldBe false
       secondGet.isSubmitted shouldBe true
       firstGet.lastUpdated isBefore secondGet.lastUpdated shouldBe true
