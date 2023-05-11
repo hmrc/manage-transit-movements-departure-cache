@@ -397,6 +397,9 @@ class ConsignmentSpec extends SpecBase {
             |          },
             |          {
             |            "document" : "ac50154c-cad1-4320-8def-d282eea63b2e"
+            |          },
+            |          {
+            |            "document" : "7d342b27-5171-428c-9354-fb2928b72c3a"
             |          }
             |        ],
             |        "addAdditionalReferenceYesNo" : true,
