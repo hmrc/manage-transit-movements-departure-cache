@@ -248,6 +248,7 @@ class ConsignmentSpec extends SpecBase {
             |        },
             |        "details" : {
             |          "documentReferenceNumber" : "previous1",
+            |          "uuid" : "ac50154c-cad1-4320-8def-d282eea63b2e",
             |          "addGoodsItemNumberYesNo" : false,
             |          "addTypeOfPackageYesNo" : false,
             |          "addNumberOfPackagesYesNo" : false,
@@ -261,7 +262,8 @@ class ConsignmentSpec extends SpecBase {
             |          "description" : "Container list"
             |        },
             |        "details" : {
-            |          "documentReferenceNumber" : "transport1"
+            |          "documentReferenceNumber" : "transport1",
+            |          "uuid" : "1794d93b-17d5-44fe-a18d-aaa2059d06fe"
             |        }
             |      },
             |      {
@@ -272,6 +274,7 @@ class ConsignmentSpec extends SpecBase {
             |        },
             |        "details" : {
             |          "documentReferenceNumber" : "support1",
+            |          "uuid" : "a573bfd3-6470-40c4-a290-ea2d8d43c02a",
             |          "addLineItemNumberYesNo" : true,
             |          "lineItemNumber" : 678
             |        }
@@ -284,6 +287,7 @@ class ConsignmentSpec extends SpecBase {
             |        },
             |        "details" : {
             |          "documentReferenceNumber" : "previous2",
+            |          "uuid" : "3882459f-b7bc-478d-9d24-359533aa8fe3",
             |          "addGoodsItemNumberYesNo" : true,
             |          "goodsItemNumber" : 78689,
             |          "addTypeOfPackageYesNo" : true,
@@ -308,7 +312,8 @@ class ConsignmentSpec extends SpecBase {
             |          "description" : "Container list"
             |        },
             |        "details" : {
-            |          "documentReferenceNumber" : "transport2"
+            |          "documentReferenceNumber" : "transport2",
+            |          "uuid" : "4ab6bc5a-608d-41f6-acf7-241eb387cad9"
             |        }
             |      },
             |      {
@@ -319,6 +324,7 @@ class ConsignmentSpec extends SpecBase {
             |        },
             |        "details" : {
             |          "documentReferenceNumber" : "support2",
+            |          "uuid" : "92626b24-d08e-4d96-ac2c-33b5549361c8",
             |          "addLineItemNumberYesNo" : true,
             |          "lineItemNumber" : 679
             |        }
@@ -381,36 +387,16 @@ class ConsignmentSpec extends SpecBase {
             |        "addDocumentsYesNo" : true,
             |        "documents" : [
             |          {
-            |            "document" : {
-            |              "type" : "Transport",
-            |              "code" : "235",
-            |              "description" : "Container list",
-            |              "referenceNumber" : "transport1"
-            |            }
+            |            "document" : "1794d93b-17d5-44fe-a18d-aaa2059d06fe"
             |          },
             |          {
-            |            "document" : {
-            |              "type" : "Support",
-            |              "code" : "C673",
-            |              "description" : "Catch certificate",
-            |              "referenceNumber" : "support1"
-            |            }
+            |            "document" : "a573bfd3-6470-40c4-a290-ea2d8d43c02a"
             |          },
             |          {
-            |            "document" : {
-            |              "type" : "Previous",
-            |              "code" : "T2F",
-            |              "description" : "Internal Community transit Declaration",
-            |              "referenceNumber" : "previous2"
-            |            }
+            |            "document" : "3882459f-b7bc-478d-9d24-359533aa8fe3"
             |          },
             |          {
-            |            "document" : {
-            |              "type" : "Previous",
-            |              "code" : "CO",
-            |              "description" : "Internal Community transit Declaration",
-            |              "referenceNumber" : "previous1"
-            |            }
+            |            "document" : "ac50154c-cad1-4320-8def-d282eea63b2e"
             |          }
             |        ],
             |        "addAdditionalReferenceYesNo" : true,
