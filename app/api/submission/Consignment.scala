@@ -385,20 +385,13 @@ object houseConsignmentType10 {
 object consignmentItemType09 {
 
   private def readString(document: JsValue, path: JsPath): Option[String] =
-    readString(document, path.json.pick[JsString].map(_.value))
-
-  private def readString(document: JsValue, reads: Reads[String]): Option[String] =
-    document.validate(reads).asOpt
+    document.validate(path.json.pick[JsString].map(_.value)).asOpt
 
   private def areDocumentsEqual(document: JsValue, itemDocument: JsValue): Boolean = {
     val result = for {
-      type1 <- readString(document, documentType.typeReads)
-      code1 <- readString(document, documentType.codeReads)
-      ref1  <- readString(document, __ \ "details" \ "documentReferenceNumber")
-      type2 <- readString(itemDocument, __ \ "document" \ "type")
-      code2 <- readString(itemDocument, __ \ "document" \ "code")
-      ref2  <- readString(itemDocument, __ \ "document" \ "referenceNumber")
-    } yield type1 == type2 && code1 == code2 && ref1 == ref2
+      uuid1 <- readString(document, __ \ "details" \ "uuid")
+      uuid2 <- readString(itemDocument, __ \ "document")
+    } yield uuid1 == uuid2
 
     result.getOrElse(false)
   }
