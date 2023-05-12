@@ -37,9 +37,12 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
     "return true" when {
       "a document exists in the cache for the given LRN and EORI" +
         "and there are 10 or fewer errors" +
-        "and at least one of the errors is amendable" in {
+        "and at least one of the errors is amendable" +
+        "and isSubmitted is true" in {
 
-          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+          val userAnswers = emptyUserAnswers.copy(isSubmitted = Some(true))
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
           val xPaths = Seq.fill(9)(unamendableXPath) :+ amendableXPath
 
@@ -89,6 +92,22 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
           when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
 
           val xPaths = Seq.fill(10)(unamendableXPath)
+
+          val result = service.isDeclarationAmendable(lrn, eoriNumber, xPaths).futureValue
+
+          result shouldBe false
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        }
+
+      "a document exists in the cache for the given LRN and EORI" +
+        "and there are less than 10 errors" +
+        "and all of the errors are amendable" +
+        "and isSubmitted is false" in {
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+
+          val xPaths = Seq.fill(3)(unamendableXPath) :+ amendableXPath
 
           val result = service.isDeclarationAmendable(lrn, eoriNumber, xPaths).futureValue
 
