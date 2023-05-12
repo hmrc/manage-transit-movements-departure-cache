@@ -108,7 +108,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       firstGet.lrn shouldBe secondGet.lrn
       firstGet.eoriNumber shouldBe secondGet.eoriNumber
       firstGet.metadata shouldBe secondGet.metadata
-      firstGet.isSubmitted shouldBe false
+      firstGet.isSubmitted shouldBe Some(false)
       secondGet.isSubmitted shouldBe true
       firstGet.lastUpdated isBefore secondGet.lastUpdated shouldBe true
     }
