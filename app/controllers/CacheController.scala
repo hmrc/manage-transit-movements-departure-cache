@@ -61,7 +61,10 @@ class CacheController @Inject() (
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
           if (request.eoriNumber == data.eoriNumber) {
-            set(data)
+            set(data).flatMap {
+              case Ok => setFlag(data)
+              case x  => Future.successful(x)
+            }
           } else {
             logger.error(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
             Future.successful(Forbidden)
@@ -81,6 +84,21 @@ class CacheController @Inject() (
           Future.successful(BadRequest)
       }
   }
+
+  def setFlag(data: Metadata): Future[Status] =
+    cacheRepository
+      .setFlag(data, data.isSubmitted.getOrElse(false))
+      .map {
+        case true => Ok
+        case false =>
+          logger.error("Write was not acknowledged")
+          InternalServerError
+      }
+      .recover {
+        case e =>
+          logger.error("Failed to write user answers to mongo", e)
+          InternalServerError
+      }
 
   private def set(data: Metadata): Future[Status] =
     cacheRepository

@@ -40,7 +40,7 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
         "and at least one of the errors is amendable" +
         "and isSubmitted is true" in {
 
-          val userAnswers = emptyUserAnswers.copy(isSubmitted = Some(true))
+          val userAnswers = emptyUserAnswers.copy(emptyMetadata.copy(isSubmitted = Some(true)))
 
           when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 

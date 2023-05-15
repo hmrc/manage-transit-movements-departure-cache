@@ -77,7 +77,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
 
         val response = wsClient
           .url(url)
-          .post(Json.toJson(metadata))
+          .post(Json.toJson(emptyMetadata))
           .futureValue
 
         response.status shouldBe 200

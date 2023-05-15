@@ -96,7 +96,8 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       val metadata = userAnswers1.metadata.copy(
         data = Json.obj("foo" -> "bar"),
-        tasks = Map(".task" -> Status.Completed)
+        tasks = Map(".task" -> Status.Completed),
+        isSubmitted = Some(false)
       )
       val setResult = repository.setFlag(metadata, flag = true).futureValue
 
@@ -107,9 +108,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       firstGet.id shouldBe secondGet.id
       firstGet.lrn shouldBe secondGet.lrn
       firstGet.eoriNumber shouldBe secondGet.eoriNumber
-      firstGet.metadata shouldBe secondGet.metadata
-      firstGet.isSubmitted shouldBe Some(false)
-      secondGet.isSubmitted shouldBe Some(true)
+      firstGet.metadata shouldNot equal(secondGet.metadata)
       firstGet.lastUpdated isBefore secondGet.lastUpdated shouldBe true
     }
   }

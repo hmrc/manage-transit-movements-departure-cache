@@ -22,7 +22,8 @@ case class Metadata(
   lrn: String,
   eoriNumber: String,
   data: JsObject,
-  tasks: Map[String, Status.Value]
+  tasks: Map[String, Status.Value],
+  isSubmitted: Option[Boolean] = Some(false)
 )
 
 object Metadata {
