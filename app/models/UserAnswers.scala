@@ -26,7 +26,8 @@ final case class UserAnswers(
   metadata: Metadata,
   createdAt: Instant,
   lastUpdated: Instant,
-  id: UUID
+  id: UUID,
+  isSubmitted: Option[Boolean] = Some(false)
 ) {
 
   val lrn: String        = metadata.lrn
@@ -47,14 +48,16 @@ object UserAnswers {
     __.read[Metadata] and
       (__ \ "createdAt").read[Instant] and
       (__ \ "lastUpdated").read[Instant] and
-      (__ \ "_id").read[UUID]
+      (__ \ "_id").read[UUID] and
+      (__ \ "isSubmitted").readNullable[Boolean]
   )(UserAnswers.apply _)
 
   private def customWrites(implicit instantWrites: Writes[Instant]): Writes[UserAnswers] = (
     __.write[Metadata] and
       (__ \ "createdAt").write[Instant] and
       (__ \ "lastUpdated").write[Instant] and
-      (__ \ "_id").write[UUID]
+      (__ \ "_id").write[UUID] and
+      (__ \ "isSubmitted").writeNullable[Boolean]
   )(unlift(UserAnswers.unapply))
 
   lazy val mongoFormat: Format[UserAnswers] = Format(

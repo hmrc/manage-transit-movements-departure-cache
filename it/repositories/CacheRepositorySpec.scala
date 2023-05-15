@@ -78,6 +78,42 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
     }
   }
 
+  "setFlag" must {
+
+    "not create a new document when given valid UserAnswers" in {
+
+      repository.setFlag(userAnswers3.metadata, flag = true).futureValue
+
+      val getResult = findOne(userAnswers3.lrn, userAnswers3.eoriNumber)
+
+      getResult shouldBe None
+
+    }
+
+    "update flag when document already exists" in {
+
+      val firstGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
+
+      val metadata = userAnswers1.metadata.copy(
+        data = Json.obj("foo" -> "bar"),
+        tasks = Map(".task" -> Status.Completed)
+      )
+      val setResult = repository.setFlag(metadata, flag = true).futureValue
+
+      setResult shouldBe true
+
+      val secondGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
+
+      firstGet.id shouldBe secondGet.id
+      firstGet.lrn shouldBe secondGet.lrn
+      firstGet.eoriNumber shouldBe secondGet.eoriNumber
+      firstGet.metadata shouldBe secondGet.metadata
+      firstGet.isSubmitted shouldBe Some(false)
+      secondGet.isSubmitted shouldBe Some(true)
+      firstGet.lastUpdated isBefore secondGet.lastUpdated shouldBe true
+    }
+  }
+
   "set" must {
 
     "create new document when given valid UserAnswers" in {

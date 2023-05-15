@@ -36,6 +36,7 @@ class ConsignmentSpec extends SpecBase {
             |  "_id" : "$uuid",
             |  "lrn" : "$lrn",
             |  "eoriNumber" : "$eoriNumber",
+            |  "isSubmitted" : false,
             |  "data" : {
             |    "traderDetails" : {
             |      "consignment" : {

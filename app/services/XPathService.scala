@@ -17,7 +17,8 @@
 package services
 
 import config.AppConfig
-import models.XPath
+import models.{Status, XPath}
+import play.api.Logging
 import repositories.CacheRepository
 
 import javax.inject.Inject
@@ -26,10 +27,41 @@ import scala.concurrent.{ExecutionContext, Future}
 class XPathService @Inject() (
   cacheRepository: CacheRepository,
   config: AppConfig
-)(implicit ec: ExecutionContext) {
+)(implicit ec: ExecutionContext)
+    extends Logging {
 
   def isDeclarationAmendable(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
     cacheRepository.get(lrn, eoriNumber).map {
-      _.isDefined && xPaths.size <= config.maxErrorsForAmendableDeclaration && xPaths.exists(_.isAmendable)
+      case Some(userAnswers) =>
+        userAnswers.isSubmitted.getOrElse(false) && xPaths.size <= config.maxErrorsForAmendableDeclaration && xPaths.exists(_.isAmendable)
+      case _ => false
+    }
+
+  def handleErrors(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
+    xPaths.flatMap {
+      xPath =>
+        xPath.taskError
+    }.toMap match {
+      case tasks if tasks.nonEmpty =>
+        cacheRepository.get(lrn, eoriNumber).flatMap {
+          case Some(userAnswers) =>
+            val updatedTasks: Map[String, Status.Value] = (userAnswers.metadata.tasks.toSeq ++ tasks.toSeq).toMap
+            val metaData                                = userAnswers.metadata.copy(tasks = updatedTasks)
+            cacheRepository
+              .set(metaData)
+              .map {
+                case true => true
+                case false =>
+                  logger.error("Write was not acknowledged")
+                  false
+              }
+              .recover {
+                case e =>
+                  logger.error("Failed to write user answers to mongo", e)
+                  false
+              }
+          case _ => Future.successful(false)
+        }
+      case _ => Future.successful(false)
     }
 }

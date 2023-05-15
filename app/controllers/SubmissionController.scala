@@ -43,6 +43,9 @@ class SubmissionController @Inject() (
         case JsSuccess(lrn, _) =>
           cacheRepository.get(lrn, request.eoriNumber).flatMap {
             case Some(uA) =>
+              cacheRepository.setFlag(uA.metadata,
+                                      flag = true
+              ) //TODO: Here for testing purposes, once submission works put back on the Right(response) case before the Ok on line 46
               apiConnector.submitDeclaration(uA).map {
                 case Right(response) => Ok(response.body)
                 case Left(error)     => error

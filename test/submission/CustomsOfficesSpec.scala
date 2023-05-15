@@ -41,6 +41,7 @@ class CustomsOfficesSpec extends SpecBase {
             |  "_id" : "$uuid",
             |  "lrn" : "$lrn",
             |  "eoriNumber" : "$eoriNumber",
+            |  "isSubmitted" : false,
             |  "data" : {
             |    "preTaskList" : {
             |      "officeOfDeparture" : {
@@ -84,6 +85,7 @@ class CustomsOfficesSpec extends SpecBase {
             |  "_id" : "$uuid",
             |  "lrn" : "$lrn",
             |  "eoriNumber" : "$eoriNumber",
+            |  "isSubmitted" : false,
             |  "data" : {
             |    "routeDetails" : {
             |      "routing" : {
@@ -129,6 +131,7 @@ class CustomsOfficesSpec extends SpecBase {
             |  "_id" : "$uuid",
             |  "lrn" : "$lrn",
             |  "eoriNumber" : "$eoriNumber",
+            |  "isSubmitted" : false,
             |  "data" : {
             |    "routeDetails" : {
             |      "transit" : {
@@ -203,6 +206,7 @@ class CustomsOfficesSpec extends SpecBase {
             |  "_id" : "$uuid",
             |  "lrn" : "$lrn",
             |  "eoriNumber" : "$eoriNumber",
+            |  "isSubmitted" : false,
             |  "data" : {
             |    "routeDetails" : {
             |      "exit" : {

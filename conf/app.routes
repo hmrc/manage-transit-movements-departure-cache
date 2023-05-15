@@ -14,3 +14,4 @@ GET        /user-answers/:lrn/lock                              controllers.Lock
 DELETE     /user-answers/:lrn/lock                              controllers.LockController.deleteLock(lrn: String)
 
 POST       /x-paths/:lrn/is-declaration-amendable               controllers.XPathController.isDeclarationAmendable(lrn: String)
+POST       /x-paths/:lrn/handle-errors                          controllers.XPathController.handleErrors(lrn: String)

@@ -75,8 +75,7 @@ class CacheController @Inject() (
   def put(): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
-        case JsSuccess(lrn, _) =>
-          set(Metadata(lrn, request.eoriNumber))
+        case JsSuccess(lrn, _) => set(Metadata(lrn, request.eoriNumber))
         case JsError(errors) =>
           logger.error(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)
