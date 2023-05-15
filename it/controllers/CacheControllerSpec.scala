@@ -73,11 +73,12 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
 
     "document successfully written to mongo" should {
       "respond with 200 status" in {
-        val metadata = emptyMetadata
+        val userAnswers = emptyUserAnswers.copy(isSubmitted = Some(true))
+        val metadata = userAnswers.metadata
 
         val response = wsClient
           .url(url)
-          .post(Json.toJson(metadata))
+          .post(Json.toJson(userAnswers))
           .futureValue
 
         response.status shouldBe 200
@@ -88,7 +89,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
         result.lrn shouldBe metadata.lrn
         result.eoriNumber shouldBe metadata.eoriNumber
         result.metadata shouldBe metadata
-        result.isSubmitted shouldBe false
+        result.isSubmitted shouldBe true
       }
     }
 
