@@ -61,8 +61,10 @@ class CacheController @Inject() (
       request.body.validate[UserAnswers] match {
         case JsSuccess(data, _) =>
           if (request.eoriNumber == data.metadata.eoriNumber) {
-            set(data.metadata)
-            setFlag(data.metadata, data.isSubmitted.getOrElse(false))
+            set(data.metadata).flatMap {
+              case Ok => setFlag(data.metadata, data.isSubmitted.getOrElse(false))
+              case x  => Future.successful(x)
+            }
           } else {
             logger.error(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.metadata.eoriNumber})")
             Future.successful(Forbidden)
@@ -98,8 +100,7 @@ class CacheController @Inject() (
           InternalServerError
       }
 
-
-  private def set(data: Metadata): Future[Status] = {
+  private def set(data: Metadata): Future[Status] =
     cacheRepository
       .set(data)
       .map {
@@ -113,7 +114,6 @@ class CacheController @Inject() (
           logger.error("Failed to write user answers to mongo", e)
           InternalServerError
       }
-  }
 
   def delete(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
