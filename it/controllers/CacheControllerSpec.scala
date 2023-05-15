@@ -88,6 +88,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
         result.lrn shouldBe metadata.lrn
         result.eoriNumber shouldBe metadata.eoriNumber
         result.metadata shouldBe metadata
+        result.isSubmitted shouldBe false
       }
     }
 

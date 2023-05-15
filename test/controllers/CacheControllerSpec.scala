@@ -76,14 +76,17 @@ class CacheControllerSpec extends SpecBase {
     "return 200" when {
       "write to mongo was acknowledged" in {
         val metadata = emptyMetadata
+        val userAnswers = emptyUserAnswers.copy(isSubmitted = Some(true))
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(true))
+        when(mockCacheRepository.setFlag(any(), any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.toJson(metadata))
+          .withBody(Json.toJson(userAnswers))
         val result = route(app, request).value
 
         status(result) shouldBe OK
-        verify(mockCacheRepository).set(eqTo(metadata))
+        verify(mockCacheRepository).set(eqTo(userAnswers.metadata))
+        verify(mockCacheRepository).setFlag(eqTo(userAnswers.metadata), eqTo(userAnswers.isSubmitted.getOrElse(false)))
       }
     }
 

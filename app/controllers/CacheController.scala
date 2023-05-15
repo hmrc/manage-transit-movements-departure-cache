@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
-import models.Metadata
+import models.{Metadata, UserAnswers}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -58,12 +58,13 @@ class CacheController @Inject() (
 
   def post(lrn: String): Action[JsValue] = authenticateAndLock(lrn).async(parse.json) {
     implicit request =>
-      request.body.validate[Metadata] match {
+      request.body.validate[UserAnswers] match {
         case JsSuccess(data, _) =>
-          if (request.eoriNumber == data.eoriNumber) {
-            set(data)
+          if (request.eoriNumber == data.metadata.eoriNumber) {
+            set(data.metadata)
+            setFlag(data.metadata, data.isSubmitted.getOrElse(false))
           } else {
-            logger.error(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
+            logger.error(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.metadata.eoriNumber})")
             Future.successful(Forbidden)
           }
         case JsError(errors) =>
@@ -82,7 +83,23 @@ class CacheController @Inject() (
       }
   }
 
-  private def set(data: Metadata): Future[Status] =
+  def setFlag(data: Metadata, isSubmitted: Boolean): Future[Status] =
+    cacheRepository
+      .setFlag(data, isSubmitted)
+      .map {
+        case true => Ok
+        case false =>
+          logger.error("Write was not acknowledged")
+          InternalServerError
+      }
+      .recover {
+        case e =>
+          logger.error("Failed to write user answers to mongo", e)
+          InternalServerError
+      }
+
+
+  private def set(data: Metadata): Future[Status] = {
     cacheRepository
       .set(data)
       .map {
@@ -96,6 +113,7 @@ class CacheController @Inject() (
           logger.error("Failed to write user answers to mongo", e)
           InternalServerError
       }
+  }
 
   def delete(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
