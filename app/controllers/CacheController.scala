@@ -17,7 +17,7 @@
 package controllers
 
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
-import models.{Metadata, UserAnswers}
+import models.Metadata
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -58,15 +58,15 @@ class CacheController @Inject() (
 
   def post(lrn: String): Action[JsValue] = authenticateAndLock(lrn).async(parse.json) {
     implicit request =>
-      request.body.validate[UserAnswers] match {
+      request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
-          if (request.eoriNumber == data.metadata.eoriNumber) {
-            set(data.metadata).flatMap {
-              case Ok => setFlag(data.metadata, data.isSubmitted.getOrElse(false))
+          if (request.eoriNumber == data.eoriNumber) {
+            set(data).flatMap {
+              case Ok => setFlag(data)
               case x  => Future.successful(x)
             }
           } else {
-            logger.error(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.metadata.eoriNumber})")
+            logger.error(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
             Future.successful(Forbidden)
           }
         case JsError(errors) =>
@@ -85,9 +85,9 @@ class CacheController @Inject() (
       }
   }
 
-  def setFlag(data: Metadata, isSubmitted: Boolean): Future[Status] =
+  def setFlag(data: Metadata): Future[Status] =
     cacheRepository
-      .setFlag(data, isSubmitted)
+      .setFlag(data, data.isSubmitted.getOrElse(false))
       .map {
         case true => Ok
         case false =>

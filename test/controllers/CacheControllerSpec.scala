@@ -75,17 +75,17 @@ class CacheControllerSpec extends SpecBase {
 
     "return 200" when {
       "write to mongo was acknowledged" in {
-        val userAnswers = emptyUserAnswers.copy(isSubmitted = Some(true))
+        val metaData = emptyMetadata.copy(isSubmitted = Some(true))
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(true))
         when(mockCacheRepository.setFlag(any(), any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.toJson(userAnswers))
+          .withBody(Json.toJson(metaData))
         val result = route(app, request).value
 
         status(result) shouldBe OK
-        verify(mockCacheRepository).set(eqTo(userAnswers.metadata))
-        verify(mockCacheRepository).setFlag(eqTo(userAnswers.metadata), eqTo(userAnswers.isSubmitted.getOrElse(false)))
+        verify(mockCacheRepository).set(eqTo(metaData))
+        verify(mockCacheRepository).setFlag(eqTo(metaData), eqTo(metaData.isSubmitted.getOrElse(false)))
       }
     }
 
@@ -131,63 +131,63 @@ class CacheControllerSpec extends SpecBase {
 
     "return 500" when {
       "write to mongo was not acknowledged on set" in {
-        val userAnswers = emptyUserAnswers
+        val metaData = emptyMetadata
 
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(false))
         when(mockCacheRepository.setFlag(any(), any())).thenReturn(Future.successful(false))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.toJson(userAnswers))
+          .withBody(Json.toJson(metaData))
 
         val result = route(app, request).value
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockCacheRepository).set(eqTo(userAnswers.metadata))
+        verify(mockCacheRepository).set(eqTo(metaData))
         verifyNoMoreInteractions(mockCacheRepository)
       }
 
       "write to mongo was not acknowledged on setFlag" in {
-        val userAnswers = emptyUserAnswers
+        val metaData = emptyMetadata
 
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(true))
         when(mockCacheRepository.setFlag(any(), any())).thenReturn(Future.successful(false))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.toJson(userAnswers))
+          .withBody(Json.toJson(metaData))
 
         val result = route(app, request).value
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockCacheRepository).set(eqTo(userAnswers.metadata))
-        verify(mockCacheRepository).setFlag(eqTo(userAnswers.metadata), eqTo(userAnswers.isSubmitted.getOrElse(false)))
+        verify(mockCacheRepository).set(eqTo(metaData))
+        verify(mockCacheRepository).setFlag(eqTo(metaData), eqTo(metaData.isSubmitted.getOrElse(false)))
       }
 
       "write to mongo fails on set" in {
-        val userAnswers = emptyUserAnswers
+        val metaData = emptyMetadata
         when(mockCacheRepository.set(any())).thenReturn(Future.failed(new Throwable()))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.toJson(userAnswers))
+          .withBody(Json.toJson(metaData))
 
         val result = route(app, request).value
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockCacheRepository).set(eqTo(userAnswers.metadata))
+        verify(mockCacheRepository).set(eqTo(metaData))
         verifyNoMoreInteractions(mockCacheRepository)
       }
 
       "write to mongo fails on setFlag" in {
-        val userAnswers = emptyUserAnswers
+        val metaData = emptyMetadata
 
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(true))
         when(mockCacheRepository.setFlag(any(), any())).thenReturn(Future.failed(new Throwable()))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.toJson(userAnswers))
+          .withBody(Json.toJson(metaData))
 
         val result = route(app, request).value
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockCacheRepository).set(eqTo(userAnswers.metadata))
-        verify(mockCacheRepository).setFlag(eqTo(userAnswers.metadata), eqTo(userAnswers.isSubmitted.getOrElse(false)))
+        verify(mockCacheRepository).set(eqTo(metaData))
+        verify(mockCacheRepository).setFlag(eqTo(metaData), eqTo(metaData.isSubmitted.getOrElse(false)))
       }
     }
   }
