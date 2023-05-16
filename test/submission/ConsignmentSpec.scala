@@ -253,7 +253,8 @@ class ConsignmentSpec extends SpecBase {
             |          "addGoodsItemNumberYesNo" : false,
             |          "addTypeOfPackageYesNo" : false,
             |          "addNumberOfPackagesYesNo" : false,
-            |          "declareQuantityOfGoodsYesNo" : false
+            |          "declareQuantityOfGoodsYesNo" : false,
+            |          "addAdditionalInformationYesNo" : false
             |        }
             |      },
             |      {
@@ -277,7 +278,9 @@ class ConsignmentSpec extends SpecBase {
             |          "documentReferenceNumber" : "support1",
             |          "uuid" : "a573bfd3-6470-40c4-a290-ea2d8d43c02a",
             |          "addLineItemNumberYesNo" : true,
-            |          "lineItemNumber" : 678
+            |          "lineItemNumber" : 678,
+            |          "addAdditionalInformationYesNo" : true,
+            |          "additionalInformation" : "complement of information support1"
             |        }
             |      },
             |      {
@@ -303,7 +306,9 @@ class ConsignmentSpec extends SpecBase {
             |            "code" : "MIL",
             |            "description" : "1000 items"
             |          },
-            |          "quantity" : 13
+            |          "quantity" : 13,
+            |          "addAdditionalInformationYesNo" : true,
+            |          "additionalInformation" : "complement of information previous2"
             |        }
             |      },
             |      {
@@ -326,8 +331,8 @@ class ConsignmentSpec extends SpecBase {
             |        "details" : {
             |          "documentReferenceNumber" : "support2",
             |          "uuid" : "92626b24-d08e-4d96-ac2c-33b5549361c8",
-            |          "addLineItemNumberYesNo" : true,
-            |          "lineItemNumber" : 679
+            |          "addLineItemNumberYesNo" : false,
+            |          "addAdditionalInformationYesNo" : false
             |        }
             |      }
             |    ],
@@ -778,7 +783,7 @@ class ConsignmentSpec extends SpecBase {
                   numberOfPackages = Some(12),
                   measurementUnitAndQualifier = Some("MIL"),
                   quantity = Some(13),
-                  complementOfInformation = None
+                  complementOfInformation = Some("complement of information previous2")
                 )
               ),
               SupportingDocument = Seq(
@@ -787,7 +792,7 @@ class ConsignmentSpec extends SpecBase {
                   typeValue = "C673",
                   referenceNumber = "support1",
                   documentLineItemNumber = Some(678),
-                  complementOfInformation = None
+                  complementOfInformation = Some("complement of information support1")
                 )
               ),
               TransportDocument = Seq(

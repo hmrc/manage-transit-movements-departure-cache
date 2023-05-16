@@ -534,7 +534,7 @@ object previousDocumentType08 {
       (__ \ "details" \ "numberOfPackages").readNullable[BigInt] and
       (__ \ "details" \ "metric" \ "code").readNullable[String] and
       (__ \ "details" \ "quantity").readNullable[BigDecimal] and
-      (None: Reads[Option[String]])
+      (__ \ "details" \ "additionalInformation").readNullable[String]
   )(PreviousDocumentType08.apply _)
 }
 
@@ -545,7 +545,7 @@ object supportingDocumentType05 {
       (__ \ "type" \ "code").read[String] and
       (__ \ "details" \ "documentReferenceNumber").read[String] and
       (__ \ "details" \ "lineItemNumber").readNullable[BigInt] and
-      (None: Reads[Option[String]])
+      (__ \ "details" \ "additionalInformation").readNullable[String]
   )(SupportingDocumentType05.apply _)
 }
 
