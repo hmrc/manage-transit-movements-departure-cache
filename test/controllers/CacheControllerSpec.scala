@@ -20,7 +20,7 @@ import base.SpecBase
 import models.{Metadata, UserAnswers, UserAnswersSummary}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{never, verify, verifyNoInteractions, verifyNoMoreInteractions, when}
+import org.mockito.Mockito.{never, verify, when}
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
@@ -77,7 +77,6 @@ class CacheControllerSpec extends SpecBase {
       "write to mongo was acknowledged" in {
         val metaData = emptyMetadata.copy(isSubmitted = Some(true))
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(true))
-        when(mockCacheRepository.setFlag(any(), any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
           .withBody(Json.toJson(metaData))
@@ -85,7 +84,6 @@ class CacheControllerSpec extends SpecBase {
 
         status(result) shouldBe OK
         verify(mockCacheRepository).set(eqTo(metaData))
-        verify(mockCacheRepository).setFlag(eqTo(metaData), eqTo(metaData.isSubmitted.getOrElse(false)))
       }
     }
 
@@ -98,7 +96,6 @@ class CacheControllerSpec extends SpecBase {
 
         status(result) shouldBe BAD_REQUEST
         verify(mockCacheRepository, never()).set(any())
-        verify(mockCacheRepository, never()).setFlag(any(), any())
       }
 
       "request body is empty" in {
@@ -109,7 +106,6 @@ class CacheControllerSpec extends SpecBase {
 
         status(result) shouldBe BAD_REQUEST
         verify(mockCacheRepository, never()).set(any())
-        verify(mockCacheRepository, never()).setFlag(any(), any())
       }
     }
 
@@ -125,7 +121,6 @@ class CacheControllerSpec extends SpecBase {
 
         status(result) shouldBe FORBIDDEN
         verify(mockCacheRepository, never()).set(any())
-        verify(mockCacheRepository, never()).setFlag(any(), any())
       }
     }
 
@@ -134,7 +129,6 @@ class CacheControllerSpec extends SpecBase {
         val metaData = emptyMetadata
 
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(false))
-        when(mockCacheRepository.setFlag(any(), any())).thenReturn(Future.successful(false))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
           .withBody(Json.toJson(metaData))
@@ -143,23 +137,6 @@ class CacheControllerSpec extends SpecBase {
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
         verify(mockCacheRepository).set(eqTo(metaData))
-        verifyNoMoreInteractions(mockCacheRepository)
-      }
-
-      "write to mongo was not acknowledged on setFlag" in {
-        val metaData = emptyMetadata
-
-        when(mockCacheRepository.set(any())).thenReturn(Future.successful(true))
-        when(mockCacheRepository.setFlag(any(), any())).thenReturn(Future.successful(false))
-
-        val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.toJson(metaData))
-
-        val result = route(app, request).value
-
-        status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockCacheRepository).set(eqTo(metaData))
-        verify(mockCacheRepository).setFlag(eqTo(metaData), eqTo(metaData.isSubmitted.getOrElse(false)))
       }
 
       "write to mongo fails on set" in {
@@ -172,22 +149,6 @@ class CacheControllerSpec extends SpecBase {
         val result = route(app, request).value
         status(result) shouldBe INTERNAL_SERVER_ERROR
         verify(mockCacheRepository).set(eqTo(metaData))
-        verifyNoMoreInteractions(mockCacheRepository)
-      }
-
-      "write to mongo fails on setFlag" in {
-        val metaData = emptyMetadata
-
-        when(mockCacheRepository.set(any())).thenReturn(Future.successful(true))
-        when(mockCacheRepository.setFlag(any(), any())).thenReturn(Future.failed(new Throwable()))
-
-        val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.toJson(metaData))
-
-        val result = route(app, request).value
-        status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockCacheRepository).set(eqTo(metaData))
-        verify(mockCacheRepository).setFlag(eqTo(metaData), eqTo(metaData.isSubmitted.getOrElse(false)))
       }
     }
   }
