@@ -92,7 +92,7 @@ package object submission {
 
     def mapWithSequenceNumber[T](f: (JsValue, Int) => T): Seq[T] =
       values.zipWithIndex.map {
-        case (value, i) => f(value, i + 1)
+        case (value, index) => f(value, index + 1)
       }
 
     def readFilteredValuesAs[T](f: JsValue => Boolean)(implicit reads: Int => Reads[T]): Seq[T] =
@@ -104,12 +104,7 @@ package object submission {
   implicit class RichOptionalJsArray(arr: Option[JsArray]) {
 
     def readValuesAs[T](implicit reads: Int => Reads[T]): Seq[T] =
-      arr.mapWithSequenceNumber {
-        case (value, index) => value.as[T](reads(index))
-      }
-
-    def mapWithSequenceNumber[T](f: (JsValue, Int) => T): Seq[T] =
-      arr.map(_.mapWithSequenceNumber(f)).getOrElse(Nil)
+      arr.map(_.readValuesAs[T]).getOrElse(Nil)
   }
 
   implicit class RichOptionalJsObject(obj: Option[JsObject]) {
