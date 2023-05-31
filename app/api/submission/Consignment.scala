@@ -522,15 +522,15 @@ object documentType {
       document.validate(reads).exists(identity)
     }
 
-    def readString(path: JsPath): Option[String] =
-      document.validate(path.read[String]).asOpt
+    def readUuid(uuidPath: JsPath): Option[String] =
+      document.validate(uuidPath.read[String]).asOpt
 
     def addedForItem(itemDocuments: Seq[JsValue]): Boolean = {
 
       def areDocumentsEqual(itemDocument: JsValue): Boolean = {
         val result = for {
-          documentUuid     <- document.readString(__ \ "details" \ "uuid")
-          itemDocumentUuid <- itemDocument.readString(__ \ "document")
+          documentUuid     <- document.readUuid(__ \ "details" \ "uuid")
+          itemDocumentUuid <- itemDocument.readUuid(__ \ "document")
         } yield documentUuid == itemDocumentUuid
 
         result.getOrElse(false)
