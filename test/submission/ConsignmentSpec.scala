@@ -242,6 +242,7 @@ class ConsignmentSpec extends SpecBase {
             |    },
             |    "documents" : [
             |      {
+            |        "attachToAllItems" : false,
             |        "previousDocumentType" : {
             |          "type" : "Previous",
             |          "code" : "CO",
@@ -258,6 +259,7 @@ class ConsignmentSpec extends SpecBase {
             |        }
             |      },
             |      {
+            |        "attachToAllItems" : false,
             |        "type" : {
             |          "type" : "Transport",
             |          "code" : "235",
@@ -269,6 +271,7 @@ class ConsignmentSpec extends SpecBase {
             |        }
             |      },
             |      {
+            |        "inferredAttachToAllItems" : false,
             |        "type" : {
             |          "type" : "Support",
             |          "code" : "C673",
@@ -284,6 +287,7 @@ class ConsignmentSpec extends SpecBase {
             |        }
             |      },
             |      {
+            |        "attachToAllItems" : false,
             |        "type" : {
             |          "type" : "Previous",
             |          "code" : "T2F",
@@ -312,6 +316,7 @@ class ConsignmentSpec extends SpecBase {
             |        }
             |      },
             |      {
+            |        "attachToAllItems" : true,
             |        "type" : {
             |          "type" : "Transport",
             |          "code" : "235",
@@ -323,6 +328,7 @@ class ConsignmentSpec extends SpecBase {
             |        }
             |      },
             |      {
+            |        "attachToAllItems" : true,
             |        "type" : {
             |          "type" : "Support",
             |          "code" : "C673",
@@ -333,6 +339,20 @@ class ConsignmentSpec extends SpecBase {
             |          "uuid" : "92626b24-d08e-4d96-ac2c-33b5549361c8",
             |          "addLineItemNumberYesNo" : false,
             |          "addAdditionalInformationYesNo" : false
+            |        }
+            |      },
+            |      {
+            |        "attachToAllItems" : true,
+            |        "type" : {
+            |          "type" : "Previous",
+            |          "code" : "IM",
+            |          "description" : "Single Administrative Document"
+            |        },
+            |        "details" : {
+            |          "documentReferenceNumber" : "previous3",
+            |          "uuid" : "a3184d85-9860-4258-b5ce-28201f0407d3",
+            |          "addAdditionalInformationYesNo" : true,
+            |          "additionalInformation" : "complement of information previous3"
             |        }
             |      }
             |    ],
@@ -647,17 +667,6 @@ class ConsignmentSpec extends SpecBase {
           )
         )
 
-        converted.ActiveBorderTransportMeans shouldBe Seq(
-          ActiveBorderTransportMeansType02(
-            sequenceNumber = "1",
-            customsOfficeAtBorderReferenceNumber = Some("IT018101"),
-            typeOfIdentification = Some("11"),
-            identificationNumber = Some("active id number"),
-            nationality = Some("ES"),
-            conveyanceReferenceNumber = Some("conveyance ref number")
-          )
-        )
-
         converted.CountryOfRoutingOfConsignment shouldBe Seq(
           CountryOfRoutingOfConsignmentType01(
             sequenceNumber = "1",
@@ -666,6 +675,17 @@ class ConsignmentSpec extends SpecBase {
           CountryOfRoutingOfConsignmentType01(
             sequenceNumber = "2",
             country = "AR"
+          )
+        )
+
+        converted.ActiveBorderTransportMeans shouldBe Seq(
+          ActiveBorderTransportMeansType02(
+            sequenceNumber = "1",
+            customsOfficeAtBorderReferenceNumber = Some("IT018101"),
+            typeOfIdentification = Some("11"),
+            identificationNumber = Some("active id number"),
+            nationality = Some("ES"),
+            conveyanceReferenceNumber = Some("conveyance ref number")
           )
         )
 
@@ -682,6 +702,33 @@ class ConsignmentSpec extends SpecBase {
             Some("UNLOCODE2"),
             Some("Unloading country"),
             Some("Unloading location")
+          )
+        )
+
+        converted.PreviousDocument shouldBe Seq(
+          PreviousDocumentType09(
+            sequenceNumber = "1",
+            typeValue = "IM",
+            referenceNumber = "previous3",
+            complementOfInformation = Some("complement of information previous3")
+          )
+        )
+
+        converted.SupportingDocument shouldBe Seq(
+          SupportingDocumentType05(
+            sequenceNumber = "1",
+            typeValue = "C673",
+            referenceNumber = "support2",
+            documentLineItemNumber = None,
+            complementOfInformation = None
+          )
+        )
+
+        converted.TransportDocument shouldBe Seq(
+          TransportDocumentType04(
+            sequenceNumber = "1",
+            typeValue = "235",
+            referenceNumber = "transport2"
           )
         )
 

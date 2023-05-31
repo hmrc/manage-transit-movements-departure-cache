@@ -16,6 +16,8 @@
 
 package api.submission
 
+import api.submission.Level._
+import api.submission.documentType.RichDocumentJsValue
 import generated._
 import models.UserAnswers
 import play.api.libs.functional.syntax._
@@ -47,6 +49,9 @@ object consignmentType20 {
       __.read[Seq[ActiveBorderTransportMeansType02]](activeBorderTransportMeansReads) and
       (routeDetailsPath \ "loading").readNullable[PlaceOfLoadingType03](placeOfLoadingType03.reads) and
       (routeDetailsPath \ "unloading").readNullable[PlaceOfUnloadingType01](placeOfUnloadingType01.reads) and
+      documentsPath.readFilteredArray[PreviousDocumentType09](_.hasCorrectTypeAndLevel("Previous", ConsignmentLevel))(previousDocumentType09.reads) and
+      documentsPath.readFilteredArray[SupportingDocumentType05](_.hasCorrectTypeAndLevel("Support", ConsignmentLevel))(supportingDocumentType05.reads) and
+      documentsPath.readFilteredArray[TransportDocumentType04](_.hasCorrectTypeAndLevel("Transport", ConsignmentLevel))(transportDocumentType04.reads) and
       (equipmentsAndChargesPath \ "paymentMethod").readNullable[TransportChargesType](transportChargesType.reads) and
       __.read[HouseConsignmentType10](houseConsignmentType10.reads).map(Seq(_))
   ).apply { // TODO - Should be able to change this to `(ConsignmentType20.apply _)` once this is all done
@@ -68,6 +73,9 @@ object consignmentType20 {
       ActiveBorderTransportMeans,
       PlaceOfLoading,
       PlaceOfUnloading,
+      PreviousDocument,
+      SupportingDocument,
+      TransportDocument,
       TransportCharges,
       HouseConsignment
     ) =>
@@ -90,9 +98,9 @@ object consignmentType20 {
         ActiveBorderTransportMeans = ActiveBorderTransportMeans,
         PlaceOfLoading = PlaceOfLoading,
         PlaceOfUnloading = PlaceOfUnloading,
-        PreviousDocument = Nil, // TODO
-        SupportingDocument = Nil, // TODO
-        TransportDocument = Nil, // TODO
+        PreviousDocument = PreviousDocument,
+        SupportingDocument = SupportingDocument,
+        TransportDocument = TransportDocument,
         AdditionalReference = Nil, // TODO
         AdditionalInformation = Nil, // TODO
         TransportCharges = TransportCharges,
@@ -384,35 +392,15 @@ object houseConsignmentType10 {
 
 object consignmentItemType09 {
 
-  private def readString(document: JsValue, path: JsPath): Option[String] =
-    document.validate(path.json.pick[JsString].map(_.value)).asOpt
-
-  private def areDocumentsEqual(document: JsValue, itemDocument: JsValue): Boolean = {
-    val result = for {
-      uuid1 <- readString(document, __ \ "details" \ "uuid")
-      uuid2 <- readString(itemDocument, __ \ "document")
-    } yield uuid1 == uuid2
-
-    result.getOrElse(false)
-  }
-
-  private def documentHasCorrectType(document: JsValue, `type`: String): Boolean =
-    document.validate(documentType.typeReads).exists(_ == `type`)
-
-  private def documentAddedForItem(itemDocuments: Seq[JsValue], document: JsValue): Boolean =
-    itemDocuments.exists(areDocumentsEqual(document, _))
-
-  private def readDocuments[T](
-    `type`: String,
-    documents: Seq[JsValue],
-    itemDocuments: Seq[JsValue]
-  )(implicit rds: Int => Reads[T]): Reads[Seq[T]] = JsArray {
-    documents.filter(documentHasCorrectType(_, `type`)).filter(documentAddedForItem(itemDocuments, _))
-  }.readValuesAs[T]
-
   def reads(index: Int, documents: Seq[JsValue]): Reads[ConsignmentItemType09] =
     (__ \ "documents").readWithDefault[JsArray](JsArray()).map(_.value.toSeq).flatMap {
       itemDocuments =>
+        def readDocuments[T](`type`: String)(implicit rds: Int => Reads[T]): Reads[Seq[T]] =
+          documents.readFilteredValuesAs {
+            document =>
+              document.hasCorrectTypeAndLevel(`type`, ItemLevel) && document.addedForItem(itemDocuments)
+          }
+
         (
           (index.toString: Reads[String]) and
             (index: Reads[Int]) and
@@ -422,9 +410,9 @@ object consignmentItemType09 {
             (__ \ "uniqueConsignmentReference").readNullable[String] and
             __.read[CommodityType06](commodityType06.reads) and
             (__ \ "packages").readArray[PackagingType03](packagingType03.reads) and
-            readDocuments[PreviousDocumentType08]("Previous", documents, itemDocuments)(previousDocumentType08.reads) and
-            readDocuments[SupportingDocumentType05]("Support", documents, itemDocuments)(supportingDocumentType05.reads) and
-            readDocuments[TransportDocumentType04]("Transport", documents, itemDocuments)(transportDocumentType04.reads) and
+            readDocuments[PreviousDocumentType08]("Previous")(previousDocumentType08.reads) and
+            readDocuments[SupportingDocumentType05]("Support")(supportingDocumentType05.reads) and
+            readDocuments[TransportDocumentType04]("Transport")(transportDocumentType04.reads) and
             (__ \ "additionalReferences").readArray[AdditionalReferenceType05](additionalReferenceType05.reads) and
             (__ \ "additionalInformationList").readArray[AdditionalInformationType03](additionalInformationType03.reads)
         ).apply { // TODO - Should be able to change this to `(ConsignmentItemType09.apply _)` once this is all done
@@ -521,6 +509,36 @@ object documentType {
 
   val codeReads: Reads[String] =
     (__ \ genericType \ "code").read[String] orElse (__ \ previousType \ "code").read[String]
+
+  implicit class RichDocumentJsValue(document: JsValue) {
+
+    def hasCorrectTypeAndLevel(`type`: String, level: Level): Boolean = {
+      val reads: Reads[Boolean] =
+        for {
+          hasCorrectType  <- typeReads.map(_ == `type`)
+          hasCorrectLevel <- __.read[Level].map(_ == level)
+        } yield hasCorrectType && hasCorrectLevel
+
+      document.validate(reads).exists(identity)
+    }
+
+    def readString(path: JsPath): Option[String] =
+      document.validate(path.read[String]).asOpt
+
+    def addedForItem(itemDocuments: Seq[JsValue]): Boolean = {
+
+      def areDocumentsEqual(itemDocument: JsValue): Boolean = {
+        val result = for {
+          uuid1 <- document.readString(__ \ "details" \ "uuid")
+          uuid2 <- itemDocument.readString(__ \ "document")
+        } yield uuid1 == uuid2
+
+        result.getOrElse(false)
+      }
+
+      itemDocuments.exists(areDocumentsEqual)
+    }
+  }
 }
 
 object previousDocumentType08 {
@@ -536,6 +554,16 @@ object previousDocumentType08 {
       (__ \ "details" \ "quantity").readNullable[BigDecimal] and
       (__ \ "details" \ "additionalInformation").readNullable[String]
   )(PreviousDocumentType08.apply _)
+}
+
+object previousDocumentType09 {
+
+  def reads(index: Int): Reads[PreviousDocumentType09] = (
+    (index.toString: Reads[String]) and
+      documentType.codeReads and
+      (__ \ "details" \ "documentReferenceNumber").read[String] and
+      (__ \ "details" \ "additionalInformation").readNullable[String]
+  )(PreviousDocumentType09.apply _)
 }
 
 object supportingDocumentType05 {
