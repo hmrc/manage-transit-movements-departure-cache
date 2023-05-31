@@ -529,9 +529,9 @@ object documentType {
 
       def areDocumentsEqual(itemDocument: JsValue): Boolean = {
         val result = for {
-          uuid1 <- document.readString(__ \ "details" \ "uuid")
-          uuid2 <- itemDocument.readString(__ \ "document")
-        } yield uuid1 == uuid2
+          documentUuid     <- document.readString(__ \ "details" \ "uuid")
+          itemDocumentUuid <- itemDocument.readString(__ \ "document")
+        } yield documentUuid == itemDocumentUuid
 
         result.getOrElse(false)
       }
