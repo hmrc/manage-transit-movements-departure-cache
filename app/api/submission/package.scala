@@ -69,13 +69,13 @@ package object submission {
         case _              => throw new Exception(s"$path did not contain an array")
       }
 
-    def readCommonValuesInNestedArray[T](subPath: String)(implicit reads: Int => Reads[T]): Reads[Seq[T]] =
+    def readCommonValuesInNestedArrays[T](subPath: String)(implicit reads: Int => Reads[T]): Reads[Seq[T]] =
       path.readWithDefault[Seq[T]](Nil) {
         case JsArray(values) =>
           JsSuccess {
-            values.zipWithIndex
+            values
               .foldLeft[Seq[Seq[JsValue]]](Nil) {
-                case (acc, (value, index)) =>
+                (acc, value) =>
                   value.transform((__ \ subPath).json.pick) match {
                     case JsSuccess(JsArray(values), _) => acc :+ values.toSeq
                     case _                             => acc

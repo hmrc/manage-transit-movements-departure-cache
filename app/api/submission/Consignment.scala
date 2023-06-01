@@ -52,19 +52,17 @@ object consignmentType20 {
     previousDocuments           <- previousDocumentsReads
     supportingDocuments         <- supportingDocumentsReads
     transportDocuments          <- transportDocumentsReads
-    additionalReferences        <- itemsPath.readCommonValuesInNestedArray[AdditionalReferenceType06]("additionalReferences")(additionalReferenceType06.reads)
-    additionalInformation <- itemsPath.readCommonValuesInNestedArray[AdditionalInformationType03]("additionalInformationList")(
-      additionalInformationType03.reads
-    )
-    transportCharges  <- (equipmentsAndChargesPath \ "paymentMethod").readNullable[TransportChargesType](transportChargesType.reads)
-    houseConsignments <- __.read[HouseConsignmentType10](houseConsignmentType10.reads).map(Seq(_))
+    additionalReferences        <- itemsPath.readCommonValuesInNestedArrays[AdditionalReferenceType06]("additionalReferences")(additionalReferenceType06.reads)
+    additionalInformation       <- additionalInformationReads
+    transportCharges            <- (equipmentsAndChargesPath \ "paymentMethod").readNullable[TransportChargesType](transportChargesType.reads)
+    houseConsignments           <- __.read[HouseConsignmentType10](houseConsignmentType10.reads).map(Seq(_))
   } yield ConsignmentType20(
     countryOfDispatch = countryOfDispatch,
     countryOfDestination = countryOfDestination,
     containerIndicator = containerIndicator,
     inlandModeOfTransport = inlandModeOfTransport,
     modeOfTransportAtTheBorder = modeOfTransportAtTheBorder,
-    grossMass = 1d, // TODO
+    grossMass = houseConsignments.map(_.grossMass).sum,
     referenceNumberUCR = referenceNumberUCR,
     Carrier = carrier,
     Consignor = consignor,
@@ -115,6 +113,10 @@ object consignmentType20 {
     documentsPath.readFilteredArray[TransportDocumentType04](
       _.hasCorrectTypeAndLevel("Transport", ConsignmentLevel)
     )(transportDocumentType04.reads)
+
+  private def additionalInformationReads: Reads[Seq[AdditionalInformationType03]] =
+    itemsPath
+      .readCommonValuesInNestedArrays[AdditionalInformationType03]("additionalInformationList")(additionalInformationType03.reads)
 
   private lazy val convertModeOfTransport: Option[String] => Option[String] = _ map {
     case "maritime" => "1"
@@ -358,39 +360,28 @@ object transportChargesType {
 
 object houseConsignmentType10 {
 
-  implicit val reads: Reads[HouseConsignmentType10] =
-    documentsPath
-      .read[JsArray]
-      .map(_.value.toSeq)
-      .flatMap {
-        documents =>
-          (
-            ("1": Reads[String]) and
-              itemsPath.readArray[ConsignmentItemType09](consignmentItemType09.reads(_, documents))
-          ).apply { // TODO - Should be able to change this to `(HouseConsignmentType10.apply _)` once this is all done
-            (
-              sequenceNumber,
-              ConsignmentItem
-            ) =>
-              HouseConsignmentType10(
-                sequenceNumber = sequenceNumber,
-                countryOfDispatch = None, // TODO
-                grossMass = 1, // TODO
-                referenceNumberUCR = None, // TODO
-                Consignor = None, // TODO
-                Consignee = None, // TODO
-                AdditionalSupplyChainActor = Nil, // TODO
-                DepartureTransportMeans = Nil, // TODO
-                PreviousDocument = Nil, // TODO
-                SupportingDocument = Nil, // TODO
-                TransportDocument = Nil, // TODO
-                AdditionalReference = Nil, // TODO
-                AdditionalInformation = Nil, // TODO
-                TransportCharges = None, // TODO
-                ConsignmentItem = ConsignmentItem
-              )
-          }
-      }
+  implicit val reads: Reads[HouseConsignmentType10] = {
+    for {
+      documents        <- documentsPath.read[JsArray].map(_.value.toSeq)
+      consignmentItems <- itemsPath.readArray[ConsignmentItemType09](consignmentItemType09.reads(_, documents))
+    } yield HouseConsignmentType10(
+      sequenceNumber = "1",
+      countryOfDispatch = None, // TODO
+      grossMass = consignmentItems.flatMap(_.Commodity.GoodsMeasure.flatMap(_.grossMass)).sum,
+      referenceNumberUCR = None, // TODO
+      Consignor = None, // TODO
+      Consignee = None, // TODO
+      AdditionalSupplyChainActor = Nil, // TODO
+      DepartureTransportMeans = Nil, // TODO
+      PreviousDocument = Nil, // TODO
+      SupportingDocument = Nil, // TODO
+      TransportDocument = Nil, // TODO
+      AdditionalReference = Nil, // TODO
+      AdditionalInformation = Nil, // TODO
+      TransportCharges = None, // TODO
+      ConsignmentItem = consignmentItems
+    )
+  }
 }
 
 object consignmentItemType09 {

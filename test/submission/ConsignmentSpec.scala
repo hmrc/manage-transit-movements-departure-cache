@@ -486,6 +486,7 @@ class ConsignmentSpec extends SpecBase {
             |            "unNumber" : "UN number 2_2"
             |          }
             |        ],
+            |        "grossWeight" : 456,
             |        "addDocumentsYesNo" : false,
             |        "addAdditionalReferenceYesNo" : true,
             |        "additionalReferences" : [
@@ -533,7 +534,7 @@ class ConsignmentSpec extends SpecBase {
         converted.containerIndicator shouldBe Some(Number1)
         converted.inlandModeOfTransport shouldBe Some("1")
         converted.modeOfTransportAtTheBorder shouldBe Some("1")
-        converted.grossMass shouldBe 1d
+        converted.grossMass shouldBe 579
         converted.referenceNumberUCR shouldBe Some("ucr123")
 
         converted.Carrier shouldBe Some(
@@ -775,7 +776,7 @@ class ConsignmentSpec extends SpecBase {
         converted.HouseConsignment.head shouldBe HouseConsignmentType10(
           sequenceNumber = "1",
           countryOfDispatch = None,
-          grossMass = 1,
+          grossMass = 579,
           referenceNumberUCR = None,
           Consignor = None,
           Consignee = None,
@@ -940,7 +941,7 @@ class ConsignmentSpec extends SpecBase {
                 ),
                 GoodsMeasure = Some(
                   GoodsMeasureType02(
-                    grossMass = None,
+                    grossMass = Some(BigDecimal(456)),
                     netMass = None,
                     supplementaryUnits = None
                   )
