@@ -487,7 +487,26 @@ class ConsignmentSpec extends SpecBase {
             |          }
             |        ],
             |        "addDocumentsYesNo" : false,
-            |        "addAdditionalReferenceYesNo" : false
+            |        "addAdditionalReferenceYesNo" : true,
+            |        "additionalReferences" : [
+            |          {
+            |            "additionalReference" : {
+            |              "documentType" : "ar1",
+            |              "description" : "Additional reference 1"
+            |            },
+            |            "addAdditionalReferenceNumberYesNo" : true,
+            |            "additionalReferenceNumber" : "arno1"
+            |          }
+            |        ],
+            |        "additionalInformationList" : [
+            |          {
+            |            "additionalInformationType" : {
+            |              "code" : "aiCode1",
+            |              "description" : "aiDescription1"
+            |            },
+            |            "additionalInformation" : "ai1"
+            |          }
+            |        ]
             |      }
             |    ]
             |  },
@@ -732,6 +751,22 @@ class ConsignmentSpec extends SpecBase {
           )
         )
 
+        converted.AdditionalReference shouldBe Seq(
+          AdditionalReferenceType06(
+            sequenceNumber = "1",
+            typeValue = "ar1",
+            referenceNumber = Some("arno1")
+          )
+        )
+
+        converted.AdditionalInformation shouldBe Seq(
+          AdditionalInformationType03(
+            sequenceNumber = "1",
+            code = "aiCode1",
+            text = Some("ai1")
+          )
+        )
+
         converted.TransportCharges shouldBe Some(
           TransportChargesType("A")
         )
@@ -915,8 +950,20 @@ class ConsignmentSpec extends SpecBase {
               PreviousDocument = Nil,
               SupportingDocument = Nil,
               TransportDocument = Nil,
-              AdditionalReference = Nil,
-              AdditionalInformation = Nil,
+              AdditionalReference = Seq(
+                AdditionalReferenceType05(
+                  sequenceNumber = "1",
+                  typeValue = "ar1",
+                  referenceNumber = Some("arno1")
+                )
+              ),
+              AdditionalInformation = Seq(
+                AdditionalInformationType03(
+                  sequenceNumber = "1",
+                  code = "aiCode1",
+                  text = Some("ai1")
+                )
+              ),
               TransportCharges = None
             )
           )

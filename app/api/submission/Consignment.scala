@@ -31,87 +31,90 @@ object Consignment {
 
 object consignmentType20 {
 
-  implicit val reads: Reads[ConsignmentType20] = (
-    (preRequisitesPath \ "countryOfDispatch" \ "code").readNullable[String] and
-      (routeDetailsPath \ "routing" \ "countryOfDestination" \ "code").readNullable[String] and
-      (preRequisitesPath \ "containerIndicator").readNullable[Boolean] and
-      inlandModeReads.map(Some(_)).map(convertModeOfTransport) and
-      borderModeOfTransportReads.map(convertModeOfTransport) and
-      (preRequisitesPath \ "uniqueConsignmentReference").readNullable[String] and
-      (transportDetailsPath \ "carrierDetails").readNullable[CarrierType04](carrierType04.reads) and
-      (consignmentPath \ "consignor").readNullable[ConsignorType07](consignorType07.reads) and
-      (consignmentPath \ "consignee").readNullable[ConsigneeType05](consigneeType05.reads) and
-      (transportDetailsPath \ "supplyChainActors").readArray[AdditionalSupplyChainActorType](additionalSupplyChainActorType.reads) and
-      equipmentsPath.readArray[TransportEquipmentType06](transportEquipmentType06.reads) and
-      (routeDetailsPath \ "locationOfGoods").readNullable[LocationOfGoodsType05](locationOfGoodsType05.reads) and
-      (transportDetailsPath \ "transportMeansDeparture").read[DepartureTransportMeansType03](departureTransportMeansType03.reads).map(Seq(_)) and
-      (routeDetailsPath \ "routing" \ "countriesOfRouting").readArray[CountryOfRoutingOfConsignmentType01](countryOfRoutingOfConsignmentType01.reads) and
-      __.read[Seq[ActiveBorderTransportMeansType02]](activeBorderTransportMeansReads) and
-      (routeDetailsPath \ "loading").readNullable[PlaceOfLoadingType03](placeOfLoadingType03.reads) and
-      (routeDetailsPath \ "unloading").readNullable[PlaceOfUnloadingType01](placeOfUnloadingType01.reads) and
-      documentsPath.readFilteredArray[PreviousDocumentType09](_.hasCorrectTypeAndLevel("Previous", ConsignmentLevel))(previousDocumentType09.reads) and
-      documentsPath.readFilteredArray[SupportingDocumentType05](_.hasCorrectTypeAndLevel("Support", ConsignmentLevel))(supportingDocumentType05.reads) and
-      documentsPath.readFilteredArray[TransportDocumentType04](_.hasCorrectTypeAndLevel("Transport", ConsignmentLevel))(transportDocumentType04.reads) and
-      (equipmentsAndChargesPath \ "paymentMethod").readNullable[TransportChargesType](transportChargesType.reads) and
-      __.read[HouseConsignmentType10](houseConsignmentType10.reads).map(Seq(_))
-  ).apply { // TODO - Should be able to change this to `(ConsignmentType20.apply _)` once this is all done
-    (
-      countryOfDispatch,
-      countryOfDestination,
-      containerIndicator,
-      inlandModeOfTransport,
-      modeOfTransportAtTheBorder,
-      referenceNumberUCR,
-      Carrier,
-      Consignor,
-      Consignee,
-      AdditionalSupplyChainActor,
-      TransportEquipment,
-      LocationOfGoods,
-      DepartureTransportMeans,
-      CountryOfRoutingOfConsignment,
-      ActiveBorderTransportMeans,
-      PlaceOfLoading,
-      PlaceOfUnloading,
-      PreviousDocument,
-      SupportingDocument,
-      TransportDocument,
-      TransportCharges,
-      HouseConsignment
-    ) =>
-      ConsignmentType20(
-        countryOfDispatch = countryOfDispatch,
-        countryOfDestination = countryOfDestination,
-        containerIndicator = containerIndicator,
-        inlandModeOfTransport = inlandModeOfTransport,
-        modeOfTransportAtTheBorder = modeOfTransportAtTheBorder,
-        grossMass = 1d, // TODO
-        referenceNumberUCR = referenceNumberUCR,
-        Carrier = Carrier,
-        Consignor = Consignor,
-        Consignee = Consignee,
-        AdditionalSupplyChainActor = AdditionalSupplyChainActor,
-        TransportEquipment = TransportEquipment,
-        LocationOfGoods = LocationOfGoods,
-        DepartureTransportMeans = DepartureTransportMeans,
-        CountryOfRoutingOfConsignment = CountryOfRoutingOfConsignment,
-        ActiveBorderTransportMeans = ActiveBorderTransportMeans,
-        PlaceOfLoading = PlaceOfLoading,
-        PlaceOfUnloading = PlaceOfUnloading,
-        PreviousDocument = PreviousDocument,
-        SupportingDocument = SupportingDocument,
-        TransportDocument = TransportDocument,
-        AdditionalReference = Nil, // TODO
-        AdditionalInformation = Nil, // TODO
-        TransportCharges = TransportCharges,
-        HouseConsignment = HouseConsignment
-      )
-  }
+  implicit val reads: Reads[ConsignmentType20] = for {
+    countryOfDispatch           <- (preRequisitesPath \ "countryOfDispatch" \ "code").readNullable[String]
+    countryOfDestination        <- (routeDetailsPath \ "routing" \ "countryOfDestination" \ "code").readNullable[String]
+    containerIndicator          <- (preRequisitesPath \ "containerIndicator").readNullable[Boolean]
+    inlandModeOfTransport       <- inlandModeReads.map(Some(_)).map(convertModeOfTransport)
+    modeOfTransportAtTheBorder  <- borderModeOfTransportReads.map(convertModeOfTransport)
+    referenceNumberUCR          <- (preRequisitesPath \ "uniqueConsignmentReference").readNullable[String]
+    carrier                     <- (transportDetailsPath \ "carrierDetails").readNullable[CarrierType04](carrierType04.reads)
+    consignor                   <- (consignmentPath \ "consignor").readNullable[ConsignorType07](consignorType07.reads)
+    consignee                   <- (consignmentPath \ "consignee").readNullable[ConsigneeType05](consigneeType05.reads)
+    additionalSupplyChainActors <- (transportDetailsPath \ "supplyChainActors").readArray[AdditionalSupplyChainActorType](additionalSupplyChainActorType.reads)
+    transportEquipment          <- equipmentsPath.readArray[TransportEquipmentType06](transportEquipmentType06.reads)
+    locationOfGoods             <- (routeDetailsPath \ "locationOfGoods").readNullable[LocationOfGoodsType05](locationOfGoodsType05.reads)
+    departureTransportMeans     <- departureTransportMeansReads
+    countriesOfRouting          <- countriesOfRoutingReads
+    activeBorderTransportMeans  <- activeBorderTransportMeansReads
+    placeOfLoading              <- (routeDetailsPath \ "loading").readNullable[PlaceOfLoadingType03](placeOfLoadingType03.reads)
+    placeOfUnloading            <- (routeDetailsPath \ "unloading").readNullable[PlaceOfUnloadingType01](placeOfUnloadingType01.reads)
+    previousDocuments           <- previousDocumentsReads
+    supportingDocuments         <- supportingDocumentsReads
+    transportDocuments          <- transportDocumentsReads
+    additionalReferences        <- itemsPath.readCommonValuesInNestedArray[AdditionalReferenceType06]("additionalReferences")(additionalReferenceType06.reads)
+    additionalInformation <- itemsPath.readCommonValuesInNestedArray[AdditionalInformationType03]("additionalInformationList")(
+      additionalInformationType03.reads
+    )
+    transportCharges  <- (equipmentsAndChargesPath \ "paymentMethod").readNullable[TransportChargesType](transportChargesType.reads)
+    houseConsignments <- __.read[HouseConsignmentType10](houseConsignmentType10.reads).map(Seq(_))
+  } yield ConsignmentType20(
+    countryOfDispatch = countryOfDispatch,
+    countryOfDestination = countryOfDestination,
+    containerIndicator = containerIndicator,
+    inlandModeOfTransport = inlandModeOfTransport,
+    modeOfTransportAtTheBorder = modeOfTransportAtTheBorder,
+    grossMass = 1d, // TODO
+    referenceNumberUCR = referenceNumberUCR,
+    Carrier = carrier,
+    Consignor = consignor,
+    Consignee = consignee,
+    AdditionalSupplyChainActor = additionalSupplyChainActors,
+    TransportEquipment = transportEquipment,
+    LocationOfGoods = locationOfGoods,
+    DepartureTransportMeans = departureTransportMeans,
+    CountryOfRoutingOfConsignment = countriesOfRouting,
+    ActiveBorderTransportMeans = activeBorderTransportMeans,
+    PlaceOfLoading = placeOfLoading,
+    PlaceOfUnloading = placeOfUnloading,
+    PreviousDocument = previousDocuments,
+    SupportingDocument = supportingDocuments,
+    TransportDocument = transportDocuments,
+    AdditionalReference = additionalReferences,
+    AdditionalInformation = additionalInformation,
+    TransportCharges = transportCharges,
+    HouseConsignment = houseConsignments
+  )
+
+  private def departureTransportMeansReads: Reads[Seq[DepartureTransportMeansType03]] =
+    (transportDetailsPath \ "transportMeansDeparture")
+      .read[DepartureTransportMeansType03](departureTransportMeansType03.reads)
+      .map(Seq(_))
+
+  private def countriesOfRoutingReads: Reads[Seq[CountryOfRoutingOfConsignmentType01]] =
+    (routeDetailsPath \ "routing" \ "countriesOfRouting")
+      .readArray[CountryOfRoutingOfConsignmentType01](countryOfRoutingOfConsignmentType01.reads)
 
   def activeBorderTransportMeansReads: Reads[Seq[ActiveBorderTransportMeansType02]] =
-    (transportDetailsPath \ "transportMeansActiveList").readArray[ActiveBorderTransportMeansType02](
-      activeBorderTransportMeansType02.reads
-    )
+    (transportDetailsPath \ "transportMeansActiveList")
+      .readArray[ActiveBorderTransportMeansType02](activeBorderTransportMeansType02.reads)
+
+  private def previousDocumentsReads: Reads[Seq[PreviousDocumentType09]] =
+    documentsPath
+      .readFilteredArray[PreviousDocumentType09](
+        _.hasCorrectTypeAndLevel("Previous", ConsignmentLevel)
+      )(previousDocumentType09.reads)
+
+  private def supportingDocumentsReads: Reads[Seq[SupportingDocumentType05]] =
+    documentsPath
+      .readFilteredArray[SupportingDocumentType05](
+        _.hasCorrectTypeAndLevel("Support", ConsignmentLevel)
+      )(supportingDocumentType05.reads)
+
+  private def transportDocumentsReads: Reads[Seq[TransportDocumentType04]] =
+    documentsPath.readFilteredArray[TransportDocumentType04](
+      _.hasCorrectTypeAndLevel("Transport", ConsignmentLevel)
+    )(transportDocumentType04.reads)
 
   private lazy val convertModeOfTransport: Option[String] => Option[String] = _ map {
     case "maritime" => "1"
@@ -586,13 +589,25 @@ object transportDocumentType04 {
   )(TransportDocumentType04.apply _)
 }
 
-object additionalReferenceType05 {
+object additionalReference {
 
-  def reads(index: Int): Reads[AdditionalReferenceType05] = (
+  def reads[T](index: Int)(apply: (String, String, Option[String]) => T): Reads[T] = (
     (index.toString: Reads[String]) and
       (__ \ "additionalReference" \ "documentType").read[String] and
       (__ \ "additionalReferenceNumber").readNullable[String]
-  )(AdditionalReferenceType05.apply _)
+  )(apply)
+}
+
+object additionalReferenceType05 {
+
+  def reads(index: Int): Reads[AdditionalReferenceType05] =
+    additionalReference.reads(index)(AdditionalReferenceType05)
+}
+
+object additionalReferenceType06 {
+
+  def reads(index: Int): Reads[AdditionalReferenceType06] =
+    additionalReference.reads(index)(AdditionalReferenceType06)
 }
 
 object additionalInformationType03 {
