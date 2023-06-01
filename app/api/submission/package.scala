@@ -62,32 +62,49 @@ package object submission {
         case value: JsArray => JsSuccess(value.readValuesAs[T])
         case _              => throw new Exception(s"$path did not contain an array")
       }
+
+    def readFilteredArray[T](f: JsValue => Boolean)(implicit reads: Int => Reads[T]): Reads[Seq[T]] =
+      path.readWithDefault[Seq[T]](Nil) {
+        case value: JsArray => JsSuccess(value.readFilteredValuesAs[T](f))
+        case _              => throw new Exception(s"$path did not contain an array")
+      }
   }
 
   implicit class RichJsArray(arr: JsArray) {
 
-    def zipWithIndex: List[(JsValue, Int)] = arr.value.toList.zipWithIndex
+    def values: Seq[JsValue] = arr.value.toSeq
+
+    def zipWithIndex: Seq[(JsValue, Int)] = values.zipWithIndex
 
     def readValuesAs[T](implicit reads: Int => Reads[T]): Seq[T] =
-      arr.mapWithSequenceNumber {
-        case (value, index) => value.as[T](reads(index))
+      readFilteredValuesAs {
+        _ => true
       }
 
+    def readFilteredValuesAs[T](f: JsValue => Boolean)(implicit reads: Int => Reads[T]): Seq[T] =
+      values.readFilteredValuesAs(f)
+
     def mapWithSequenceNumber[T](f: (JsValue, Int) => T): Seq[T] =
-      arr.zipWithIndex.map {
-        case (value, i) => f(value, i + 1)
+      values.mapWithSequenceNumber(f)
+  }
+
+  implicit class RichJsValues(values: Seq[JsValue]) {
+
+    def mapWithSequenceNumber[T](f: (JsValue, Int) => T): Seq[T] =
+      values.zipWithIndex.map {
+        case (value, index) => f(value, index + 1)
+      }
+
+    def readFilteredValuesAs[T](f: JsValue => Boolean)(implicit reads: Int => Reads[T]): Seq[T] =
+      values.filter(f).mapWithSequenceNumber {
+        case (value, index) => value.as[T](reads(index))
       }
   }
 
   implicit class RichOptionalJsArray(arr: Option[JsArray]) {
 
     def readValuesAs[T](implicit reads: Int => Reads[T]): Seq[T] =
-      arr.mapWithSequenceNumber {
-        case (value, index) => value.as[T](reads(index))
-      }
-
-    def mapWithSequenceNumber[T](f: (JsValue, Int) => T): Seq[T] =
-      arr.map(_.mapWithSequenceNumber(f)).getOrElse(Nil)
+      arr.map(_.readValuesAs[T]).getOrElse(Nil)
   }
 
   implicit class RichOptionalJsObject(obj: Option[JsObject]) {
