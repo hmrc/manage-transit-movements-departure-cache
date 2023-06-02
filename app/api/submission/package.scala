@@ -42,7 +42,7 @@ package object submission {
 
   lazy val guaranteesPath: JsPath = __ \ "guaranteeDetails"
 
-  lazy val documentsPath: JsPath = __ \ "documents"
+  lazy val documentsPath: JsPath = __ \ "documents" \ "documents"
 
   lazy val itemsPath: JsPath = __ \ "items"
 
