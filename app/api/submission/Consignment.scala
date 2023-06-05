@@ -402,6 +402,7 @@ object consignmentItemType09 {
             (__ \ "countryOfDispatch" \ "code").readNullable[String] and
             (__ \ "countryOfDestination" \ "code").readNullable[String] and
             (__ \ "uniqueConsignmentReference").readNullable[String] and
+            (__ \ "supplyChainActors").readArray[AdditionalSupplyChainActorType](additionalSupplyChainActorType.reads) and
             __.read[CommodityType06](commodityType06.reads) and
             (__ \ "packages").readArray[PackagingType03](packagingType03.reads) and
             readDocuments[PreviousDocumentType08]("Previous")(previousDocumentType08.reads) and
@@ -417,6 +418,7 @@ object consignmentItemType09 {
             countryOfDispatch,
             countryOfDestination,
             referenceNumberUCR,
+            AdditionalSupplyChainActor,
             Commodity,
             Packaging,
             PreviousDocument,
@@ -433,7 +435,7 @@ object consignmentItemType09 {
               countryOfDestination = countryOfDestination,
               referenceNumberUCR = referenceNumberUCR,
               Consignee = None, // TODO
-              AdditionalSupplyChainActor = Nil, // TODO
+              AdditionalSupplyChainActor = AdditionalSupplyChainActor,
               Commodity = Commodity,
               Packaging = Packaging,
               PreviousDocument = PreviousDocument,

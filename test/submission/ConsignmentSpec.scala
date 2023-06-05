@@ -419,6 +419,25 @@ class ConsignmentSpec extends SpecBase {
             |            "shippingMark" : "mark3"
             |          }
             |        ],
+            |        "addSupplyChainActorYesNo" : true,
+            |        "supplyChainActors" : [
+            |          {
+            |            "supplyChainActorType" : "consolidator",
+            |            "identificationNumber" : "itemSCA1"
+            |          },
+            |          {
+            |            "supplyChainActorType" : "freightForwarder",
+            |            "identificationNumber" : "itemSCA2"
+            |          },
+            |          {
+            |            "supplyChainActorType" : "manufacturer",
+            |            "identificationNumber" : "itemSCA3"
+            |          },
+            |          {
+            |            "supplyChainActorType" : "warehouseKeeper",
+            |            "identificationNumber" : "itemSCA4"
+            |          }
+            |        ],
             |        "addDocumentsYesNo" : true,
             |        "documents" : [
             |          {
@@ -496,6 +515,7 @@ class ConsignmentSpec extends SpecBase {
             |          }
             |        ],
             |        "grossWeight" : 456,
+            |        "addSupplyChainActorYesNo" : false,
             |        "addDocumentsYesNo" : false,
             |        "addAdditionalReferenceYesNo" : true,
             |        "additionalReferences" : [
@@ -806,7 +826,28 @@ class ConsignmentSpec extends SpecBase {
               countryOfDestination = Some("FR"),
               referenceNumberUCR = Some("UCR 1"),
               Consignee = None,
-              AdditionalSupplyChainActor = Nil,
+              AdditionalSupplyChainActor = Seq(
+                AdditionalSupplyChainActorType(
+                  sequenceNumber = "1",
+                  role = "CS",
+                  identificationNumber = "itemSCA1"
+                ),
+                AdditionalSupplyChainActorType(
+                  sequenceNumber = "2",
+                  role = "FW",
+                  identificationNumber = "itemSCA2"
+                ),
+                AdditionalSupplyChainActorType(
+                  sequenceNumber = "3",
+                  role = "MF",
+                  identificationNumber = "itemSCA3"
+                ),
+                AdditionalSupplyChainActorType(
+                  sequenceNumber = "4",
+                  role = "WH",
+                  identificationNumber = "itemSCA4"
+                )
+              ),
               Commodity = CommodityType06(
                 descriptionOfGoods = "Description 1",
                 cusCode = Some("CUS code 1"),
