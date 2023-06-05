@@ -99,7 +99,10 @@ class ConsignmentSpec extends SpecBase {
             |        "identifier" : {
             |          "authorisationNumber" : "authorisation number",
             |          "additionalIdentifier" : "additional identifier",
-            |          "unLocode" : "UNLOCODE",
+            |          "unLocode" : {
+            |            "unLocodeExtendedCode" : "DEAAL",
+            |            "name" : "Aalen"
+            |          },
             |          "customsOffice" : {
             |            "id" : "XI000142",
             |            "name" : "Belfast EPU",
@@ -134,7 +137,10 @@ class ConsignmentSpec extends SpecBase {
             |        }
             |      },
             |      "loading" : {
-            |        "unLocode" : "UNLOCODE1",
+            |        "unLocode" : {
+            |          "unLocodeExtendedCode" : "AEFAT",
+            |          "name" : "Fateh Terminal"
+            |        },
             |        "additionalInformation" : {
             |          "country" : {
             |            "code" : "Loading country",
@@ -144,7 +150,10 @@ class ConsignmentSpec extends SpecBase {
             |        }
             |      },
             |      "unloading" : {
-            |        "unLocode" : "UNLOCODE2",
+            |        "unLocode" : {
+            |          "unLocodeExtendedCode": "ADALV",
+            |          "name": "Andorra la Vella"
+            |        },
             |        "additionalInformation" : {
             |          "country" : {
             |            "code" : "Unloading country",
@@ -644,7 +653,7 @@ class ConsignmentSpec extends SpecBase {
             qualifierOfIdentification = "T",
             authorisationNumber = Some("authorisation number"),
             additionalIdentifier = Some("additional identifier"),
-            UNLocode = Some("UNLOCODE"),
+            UNLocode = Some("DEAAL"),
             CustomsOffice = Some(CustomsOfficeType02(referenceNumber = "XI000142")),
             GNSS = Some(
               GNSSType(
@@ -711,7 +720,7 @@ class ConsignmentSpec extends SpecBase {
 
         converted.PlaceOfLoading shouldBe Some(
           PlaceOfLoadingType03(
-            Some("UNLOCODE1"),
+            Some("AEFAT"),
             Some("Loading country"),
             Some("Loading location")
           )
@@ -719,7 +728,7 @@ class ConsignmentSpec extends SpecBase {
 
         converted.PlaceOfUnloading shouldBe Some(
           PlaceOfUnloadingType01(
-            Some("UNLOCODE2"),
+            Some("ADALV"),
             Some("Unloading country"),
             Some("Unloading location")
           )
@@ -1131,7 +1140,10 @@ class ConsignmentSpec extends SpecBase {
              |  "typeOfLocation" : "approvedPlace",
              |  "qualifierOfIdentification" : "unlocode",
              |  "identifier" : {
-             |    "unLocode" : "UNLOCODE",
+             |    "unLocode" : {
+             |      "unLocodeExtendedCode" : "UNLOCODE",
+             |      "name" : "Test UN-LOCODE"
+             |    },
              |    "addContact" : false
              |  }
              |}
@@ -1182,6 +1194,24 @@ class ConsignmentSpec extends SpecBase {
           PostcodeAddress = None,
           ContactPerson = None
         )
+      }
+    }
+
+    "additionalInformationReads is called" when {
+      "there is no additional information" in {
+        val json = Json.parse(s"""
+             |{
+             |  "items" : [
+             |    {
+             |      "addAdditionalInformationYesNo" : false
+             |    }
+             |  ]
+             |}
+             |""".stripMargin)
+
+        val result = json.as[Seq[AdditionalInformationType03]](consignmentType20.additionalInformationReads)
+
+        result shouldBe Nil
       }
     }
   }

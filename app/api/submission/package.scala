@@ -73,16 +73,21 @@ package object submission {
       path.readWithDefault[Seq[T]](Nil) {
         case JsArray(values) =>
           JsSuccess {
-            values
-              .foldLeft[Seq[Seq[JsValue]]](Nil) {
-                (acc, value) =>
-                  value.transform((__ \ subPath).json.pick) match {
-                    case JsSuccess(JsArray(values), _) => acc :+ values.toSeq
-                    case _                             => acc
-                  }
-              }
-              .reduceLeft(_ intersect _)
-              .readValuesAs[T]
+            val nestedValues = values.foldLeft[Seq[Seq[JsValue]]](Nil) {
+              (acc, value) =>
+                value.transform((__ \ subPath).json.pick) match {
+                  case JsSuccess(JsArray(values), _) => acc :+ values.toSeq
+                  case _                             => acc
+                }
+            }
+
+            val commonValues = if (nestedValues.nonEmpty) {
+              nestedValues.reduceLeft(_ intersect _)
+            } else {
+              Nil
+            }
+
+            commonValues.readValuesAs[T]
           }
         case _ => throw new Exception(s"$path did not contain an array")
       }
