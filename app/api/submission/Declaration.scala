@@ -20,6 +20,9 @@ import api.submission.Header.scope
 import generated.{CC015CType, PhaseIDtype}
 import models.UserAnswers
 import scalaxb.DataRecord
+import scalaxb.`package`.toXML
+
+import scala.xml.NodeSeq
 
 object Declaration {
 
@@ -40,5 +43,8 @@ object Declaration {
       Consignment = Consignment.transform(uA),
       attributes = Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString("NCTS5.0", scope)))
     )
+
+  def transformToXML(ua: UserAnswers): NodeSeq =
+    toXML[CC015CType](transform(ua), "ncts:CC015C", scope)
 
 }

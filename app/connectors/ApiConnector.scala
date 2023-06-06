@@ -16,17 +16,15 @@
 
 package connectors
 
-import api.submission.Header.scope
 import api.submission._
 import config.AppConfig
-import generated._
 import models.UserAnswers
 import play.api.Logging
 import play.api.http.HeaderNames
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError}
-import scalaxb.`package`.toXML
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErrorFunctions, HttpResponse}
+
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,7 +38,7 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
 
     val declarationUrl  = s"${appConfig.apiUrl}/movements/departures"
-    val payload: String = toXML[CC015CType](Declaration.transform(userAnswers), "ncts:CC015C", scope).toString
+    val payload: String = Declaration.transformToXML(userAnswers).toString
 
     // TODO - can we log and audit here and send a generic error to the FE?
     httpClient

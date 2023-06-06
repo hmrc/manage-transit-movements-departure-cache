@@ -68,6 +68,29 @@ package object submission {
         case value: JsArray => JsSuccess(value.readFilteredValuesAs[T](f))
         case _              => throw new Exception(s"$path did not contain an array")
       }
+
+    def readCommonValuesInNestedArrays[T](subPath: String)(implicit reads: Int => Reads[T]): Reads[Seq[T]] =
+      path.readWithDefault[Seq[T]](Nil) {
+        case JsArray(values) =>
+          JsSuccess {
+            val nestedValues = values.foldLeft[Seq[Seq[JsValue]]](Nil) {
+              (acc, value) =>
+                value.transform((__ \ subPath).json.pick) match {
+                  case JsSuccess(JsArray(values), _) => acc :+ values.toSeq
+                  case _                             => acc
+                }
+            }
+
+            val commonValues = if (nestedValues.nonEmpty) {
+              nestedValues.reduceLeft(_ intersect _)
+            } else {
+              Nil
+            }
+
+            commonValues.readValuesAs[T]
+          }
+        case _ => throw new Exception(s"$path did not contain an array")
+      }
   }
 
   implicit class RichJsArray(arr: JsArray) {
@@ -77,9 +100,7 @@ package object submission {
     def zipWithIndex: Seq[(JsValue, Int)] = values.zipWithIndex
 
     def readValuesAs[T](implicit reads: Int => Reads[T]): Seq[T] =
-      readFilteredValuesAs {
-        _ => true
-      }
+      values.readValuesAs
 
     def readFilteredValuesAs[T](f: JsValue => Boolean)(implicit reads: Int => Reads[T]): Seq[T] =
       values.readFilteredValuesAs(f)
@@ -93,6 +114,11 @@ package object submission {
     def mapWithSequenceNumber[T](f: (JsValue, Int) => T): Seq[T] =
       values.zipWithIndex.map {
         case (value, index) => f(value, index + 1)
+      }
+
+    def readValuesAs[T](implicit reads: Int => Reads[T]): Seq[T] =
+      readFilteredValuesAs {
+        _ => true
       }
 
     def readFilteredValuesAs[T](f: JsValue => Boolean)(implicit reads: Int => Reads[T]): Seq[T] =

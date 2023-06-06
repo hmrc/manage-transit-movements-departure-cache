@@ -99,7 +99,10 @@ class ConsignmentSpec extends SpecBase {
             |        "identifier" : {
             |          "authorisationNumber" : "authorisation number",
             |          "additionalIdentifier" : "additional identifier",
-            |          "unLocode" : "UNLOCODE",
+            |          "unLocode" : {
+            |            "unLocodeExtendedCode" : "DEAAL",
+            |            "name" : "Aalen"
+            |          },
             |          "customsOffice" : {
             |            "id" : "XI000142",
             |            "name" : "Belfast EPU",
@@ -134,7 +137,10 @@ class ConsignmentSpec extends SpecBase {
             |        }
             |      },
             |      "loading" : {
-            |        "unLocode" : "UNLOCODE1",
+            |        "unLocode" : {
+            |          "unLocodeExtendedCode" : "AEFAT",
+            |          "name" : "Fateh Terminal"
+            |        },
             |        "additionalInformation" : {
             |          "country" : {
             |            "code" : "Loading country",
@@ -144,7 +150,10 @@ class ConsignmentSpec extends SpecBase {
             |        }
             |      },
             |      "unloading" : {
-            |        "unLocode" : "UNLOCODE2",
+            |        "unLocode" : {
+            |          "unLocodeExtendedCode": "ADALV",
+            |          "name": "Andorra la Vella"
+            |        },
             |        "additionalInformation" : {
             |          "country" : {
             |            "code" : "Unloading country",
@@ -413,6 +422,25 @@ class ConsignmentSpec extends SpecBase {
             |            "shippingMark" : "mark3"
             |          }
             |        ],
+            |        "addSupplyChainActorYesNo" : true,
+            |        "supplyChainActors" : [
+            |          {
+            |            "supplyChainActorType" : "consolidator",
+            |            "identificationNumber" : "itemSCA1"
+            |          },
+            |          {
+            |            "supplyChainActorType" : "freightForwarder",
+            |            "identificationNumber" : "itemSCA2"
+            |          },
+            |          {
+            |            "supplyChainActorType" : "manufacturer",
+            |            "identificationNumber" : "itemSCA3"
+            |          },
+            |          {
+            |            "supplyChainActorType" : "warehouseKeeper",
+            |            "identificationNumber" : "itemSCA4"
+            |          }
+            |        ],
             |        "addDocumentsYesNo" : true,
             |        "documents" : [
             |          {
@@ -489,8 +517,29 @@ class ConsignmentSpec extends SpecBase {
             |            "unNumber" : "UN number 2_2"
             |          }
             |        ],
+            |        "grossWeight" : 456,
+            |        "addSupplyChainActorYesNo" : false,
             |        "addDocumentsYesNo" : false,
-            |        "addAdditionalReferenceYesNo" : false
+            |        "addAdditionalReferenceYesNo" : true,
+            |        "additionalReferences" : [
+            |          {
+            |            "additionalReference" : {
+            |              "documentType" : "ar1",
+            |              "description" : "Additional reference 1"
+            |            },
+            |            "addAdditionalReferenceNumberYesNo" : true,
+            |            "additionalReferenceNumber" : "arno1"
+            |          }
+            |        ],
+            |        "additionalInformationList" : [
+            |          {
+            |            "additionalInformationType" : {
+            |              "code" : "aiCode1",
+            |              "description" : "aiDescription1"
+            |            },
+            |            "additionalInformation" : "ai1"
+            |          }
+            |        ]
             |      }
             |    ]
             |  },
@@ -517,7 +566,7 @@ class ConsignmentSpec extends SpecBase {
         converted.containerIndicator shouldBe Some(Number1)
         converted.inlandModeOfTransport shouldBe Some("1")
         converted.modeOfTransportAtTheBorder shouldBe Some("1")
-        converted.grossMass shouldBe 1d
+        converted.grossMass shouldBe 579
         converted.referenceNumberUCR shouldBe Some("ucr123")
 
         converted.Carrier shouldBe Some(
@@ -627,7 +676,7 @@ class ConsignmentSpec extends SpecBase {
             qualifierOfIdentification = "T",
             authorisationNumber = Some("authorisation number"),
             additionalIdentifier = Some("additional identifier"),
-            UNLocode = Some("UNLOCODE"),
+            UNLocode = Some("DEAAL"),
             CustomsOffice = Some(CustomsOfficeType02(referenceNumber = "XI000142")),
             GNSS = Some(
               GNSSType(
@@ -694,7 +743,7 @@ class ConsignmentSpec extends SpecBase {
 
         converted.PlaceOfLoading shouldBe Some(
           PlaceOfLoadingType03(
-            Some("UNLOCODE1"),
+            Some("AEFAT"),
             Some("Loading country"),
             Some("Loading location")
           )
@@ -702,7 +751,7 @@ class ConsignmentSpec extends SpecBase {
 
         converted.PlaceOfUnloading shouldBe Some(
           PlaceOfUnloadingType01(
-            Some("UNLOCODE2"),
+            Some("ADALV"),
             Some("Unloading country"),
             Some("Unloading location")
           )
@@ -735,6 +784,22 @@ class ConsignmentSpec extends SpecBase {
           )
         )
 
+        converted.AdditionalReference shouldBe Seq(
+          AdditionalReferenceType06(
+            sequenceNumber = "1",
+            typeValue = "ar1",
+            referenceNumber = Some("arno1")
+          )
+        )
+
+        converted.AdditionalInformation shouldBe Seq(
+          AdditionalInformationType03(
+            sequenceNumber = "1",
+            code = "aiCode1",
+            text = Some("ai1")
+          )
+        )
+
         converted.TransportCharges shouldBe Some(
           TransportChargesType("A")
         )
@@ -743,7 +808,7 @@ class ConsignmentSpec extends SpecBase {
         converted.HouseConsignment.head shouldBe HouseConsignmentType10(
           sequenceNumber = "1",
           countryOfDispatch = None,
-          grossMass = 1,
+          grossMass = 579,
           referenceNumberUCR = None,
           Consignor = None,
           Consignee = None,
@@ -764,7 +829,28 @@ class ConsignmentSpec extends SpecBase {
               countryOfDestination = Some("FR"),
               referenceNumberUCR = Some("UCR 1"),
               Consignee = None,
-              AdditionalSupplyChainActor = Nil,
+              AdditionalSupplyChainActor = Seq(
+                AdditionalSupplyChainActorType(
+                  sequenceNumber = "1",
+                  role = "CS",
+                  identificationNumber = "itemSCA1"
+                ),
+                AdditionalSupplyChainActorType(
+                  sequenceNumber = "2",
+                  role = "FW",
+                  identificationNumber = "itemSCA2"
+                ),
+                AdditionalSupplyChainActorType(
+                  sequenceNumber = "3",
+                  role = "MF",
+                  identificationNumber = "itemSCA3"
+                ),
+                AdditionalSupplyChainActorType(
+                  sequenceNumber = "4",
+                  role = "WH",
+                  identificationNumber = "itemSCA4"
+                )
+              ),
               Commodity = CommodityType06(
                 descriptionOfGoods = "Description 1",
                 cusCode = Some("CUS code 1"),
@@ -908,7 +994,7 @@ class ConsignmentSpec extends SpecBase {
                 ),
                 GoodsMeasure = Some(
                   GoodsMeasureType02(
-                    grossMass = None,
+                    grossMass = Some(BigDecimal(456)),
                     netMass = None,
                     supplementaryUnits = None
                   )
@@ -918,8 +1004,20 @@ class ConsignmentSpec extends SpecBase {
               PreviousDocument = Nil,
               SupportingDocument = Nil,
               TransportDocument = Nil,
-              AdditionalReference = Nil,
-              AdditionalInformation = Nil,
+              AdditionalReference = Seq(
+                AdditionalReferenceType05(
+                  sequenceNumber = "1",
+                  typeValue = "ar1",
+                  referenceNumber = Some("arno1")
+                )
+              ),
+              AdditionalInformation = Seq(
+                AdditionalInformationType03(
+                  sequenceNumber = "1",
+                  code = "aiCode1",
+                  text = Some("ai1")
+                )
+              ),
               TransportCharges = None
             )
           )
@@ -1086,7 +1184,10 @@ class ConsignmentSpec extends SpecBase {
              |  "typeOfLocation" : "approvedPlace",
              |  "qualifierOfIdentification" : "unlocode",
              |  "identifier" : {
-             |    "unLocode" : "UNLOCODE",
+             |    "unLocode" : {
+             |      "unLocodeExtendedCode" : "UNLOCODE",
+             |      "name" : "Test UN-LOCODE"
+             |    },
              |    "addContact" : false
              |  }
              |}
@@ -1137,6 +1238,24 @@ class ConsignmentSpec extends SpecBase {
           PostcodeAddress = None,
           ContactPerson = None
         )
+      }
+    }
+
+    "additionalInformationReads is called" when {
+      "there is no additional information" in {
+        val json = Json.parse(s"""
+             |{
+             |  "items" : [
+             |    {
+             |      "addAdditionalInformationYesNo" : false
+             |    }
+             |  ]
+             |}
+             |""".stripMargin)
+
+        val result = json.as[Seq[AdditionalInformationType03]](consignmentType20.additionalInformationReads)
+
+        result shouldBe Nil
       }
     }
   }

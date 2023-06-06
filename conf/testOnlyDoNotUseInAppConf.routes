@@ -11,3 +11,5 @@
 
 # Add all the application routes to the prod.routes file
 ->         /                          prod.Routes
+
+POST       /manage-transit-movements-departure-cache/test-only/declaration/submit               controllers.testonly.TestOnlySubmissionController.submit()
