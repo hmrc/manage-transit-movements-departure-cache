@@ -260,7 +260,8 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |          "documentReferenceNumber" : "transport1"
                                     |        }
                                     |      }
-                                    |    ]
+                                    |    ],
+                                    |    "items" : []
                                     |  },
                                     |  "tasks" : {},
                                     |  "createdAt" : {
