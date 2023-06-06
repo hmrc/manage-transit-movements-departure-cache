@@ -112,8 +112,8 @@ package object submission {
   implicit class RichJsValues(values: Seq[JsValue]) {
 
     def mapWithSequenceNumber[T](f: (JsValue, Int) => T): Seq[T] =
-      values.zipWithIndex.map {
-        case (value, index) => f(value, index + 1)
+      values.zipWithSequenceNumber.map {
+        case (value, index) => f(value, index)
       }
 
     def readValuesAs[T](implicit reads: Int => Reads[T]): Seq[T] =
@@ -125,6 +125,13 @@ package object submission {
       values.filter(f).mapWithSequenceNumber {
         case (value, index) => value.as[T](reads(index))
       }
+  }
+
+  implicit class RichSeq[T](seq: Seq[T]) {
+
+    def zipWithSequenceNumber: Seq[(T, Int)] = seq.zipWithIndex.map {
+      case (value, i) => (value, i + 1)
+    }
   }
 
   implicit class RichOptionalJsArray(arr: Option[JsArray]) {

@@ -17,7 +17,7 @@
 package submission
 
 import api.submission._
-import api.submission.consignmentType20.activeBorderTransportMeansReads
+import api.submission.consignmentType20.{activeBorderTransportMeansReads, transportEquipmentReads}
 import base.SpecBase
 import generated._
 import models.UserAnswers
@@ -234,14 +234,6 @@ class ConsignmentSpec extends SpecBase {
             |              },
             |              {
             |                "identificationNumber" : "seal 2"
-            |              }
-            |            ],
-            |            "itemNumbers" : [
-            |              {
-            |                "itemNumber" : "1"
-            |              },
-            |              {
-            |                "itemNumber" : "2"
             |              }
             |            ]
             |          }
@@ -489,7 +481,8 @@ class ConsignmentSpec extends SpecBase {
             |            },
             |            "additionalInformation" : "ai2"
             |          }
-            |        ]
+            |        ],
+            |        "transportEquipment" : 1
             |      },
             |      {
             |        "description" : "Description 2",
@@ -536,7 +529,8 @@ class ConsignmentSpec extends SpecBase {
             |            },
             |            "additionalInformation" : "ai1"
             |          }
-            |        ]
+            |        ],
+            |        "transportEquipment" : 1
             |      }
             |    ]
             |  },
@@ -1253,6 +1247,155 @@ class ConsignmentSpec extends SpecBase {
         val result = json.as[Seq[AdditionalInformationType03]](consignmentType20.additionalInformationReads)
 
         result shouldBe Nil
+      }
+    }
+
+    "transportEquipmentReads is called" when {
+      "there are no transport equipments" in {
+        val json = Json.parse("""
+            |{
+            |  "transportDetails" : {
+            |    "addTransportEquipmentYesNo" : false
+            |  },
+            |  "items" : [
+            |    {},
+            |    {},
+            |    {}
+            |  ]
+            |}
+            |""".stripMargin)
+
+        val result = json.as[Seq[TransportEquipmentType06]](transportEquipmentReads)
+
+        result shouldBe Nil
+      }
+
+      "there is one transport equipment" in {
+        val json = Json.parse("""
+            |{
+            |  "transportDetails" : {
+            |    "addTransportEquipmentYesNo" : true,
+            |    "equipmentsAndCharges" : {
+            |      "equipments" : [
+            |        {
+            |          "containerIdentificationNumber" : "container id 1",
+            |          "seals" : [
+            |            {
+            |              "identificationNumber" : "seal 1"
+            |            },
+            |            {
+            |              "identificationNumber" : "seal 2"
+            |            }
+            |          ]
+            |        }
+            |      ]
+            |    }
+            |  },
+            |  "items" : [
+            |    {
+            |      "transportEquipment" : 1
+            |    },
+            |    {
+            |      "transportEquipment" : 1
+            |    },
+            |    {
+            |      "transportEquipment" : 1
+            |    }
+            |  ]
+            |}
+            |""".stripMargin)
+
+        val result = json.as[Seq[TransportEquipmentType06]](transportEquipmentReads)
+
+        result shouldBe Seq(
+          TransportEquipmentType06(
+            sequenceNumber = "1",
+            containerIdentificationNumber = Some("container id 1"),
+            numberOfSeals = BigInt(2),
+            Seal = Seq(
+              SealType05("1", "seal 1"),
+              SealType05("2", "seal 2")
+            ),
+            GoodsReference = Seq(
+              GoodsReferenceType02("1", 1),
+              GoodsReferenceType02("2", 2),
+              GoodsReferenceType02("3", 3)
+            )
+          )
+        )
+      }
+
+      "there are multiple transport equipments" in {
+        val json = Json.parse("""
+            |{
+            |  "transportDetails" : {
+            |    "addTransportEquipmentYesNo" : true,
+            |    "equipmentsAndCharges" : {
+            |      "equipments" : [
+            |        {
+            |          "containerIdentificationNumber" : "container id 1",
+            |          "seals" : []
+            |        },
+            |        {
+            |          "containerIdentificationNumber" : "container id 2",
+            |          "seals" : []
+            |        },
+            |        {
+            |          "containerIdentificationNumber" : "container id 3",
+            |          "seals" : []
+            |        }
+            |      ]
+            |    }
+            |  },
+            |  "items" : [
+            |    {
+            |      "transportEquipment" : 3
+            |    },
+            |    {
+            |      "transportEquipment" : 2
+            |    },
+            |    {
+            |      "transportEquipment" : 1
+            |    },
+            |    {
+            |      "transportEquipment" : 3
+            |    }
+            |  ]
+            |}
+            |""".stripMargin)
+
+        val result = json.as[Seq[TransportEquipmentType06]](transportEquipmentReads)
+
+        result shouldBe Seq(
+          TransportEquipmentType06(
+            sequenceNumber = "1",
+            containerIdentificationNumber = Some("container id 1"),
+            numberOfSeals = BigInt(0),
+            Seal = Nil,
+            GoodsReference = Seq(
+              GoodsReferenceType02("1", 3)
+            )
+          ),
+          TransportEquipmentType06(
+            sequenceNumber = "2",
+            containerIdentificationNumber = Some("container id 2"),
+            numberOfSeals = BigInt(0),
+            Seal = Nil,
+            GoodsReference = Seq(
+              GoodsReferenceType02("1", 2)
+            )
+          ),
+          TransportEquipmentType06(
+            sequenceNumber = "3",
+            containerIdentificationNumber = Some("container id 3"),
+            numberOfSeals = BigInt(0),
+            Seal = Nil,
+            GoodsReference = Seq(
+              GoodsReferenceType02("1", 1),
+              GoodsReferenceType02("2", 4)
+            )
+          )
+        )
       }
     }
   }
