@@ -241,122 +241,125 @@ class ConsignmentSpec extends SpecBase {
             |        "paymentMethod" : "cash"
             |      }
             |    },
-            |    "documents" : [
-            |      {
-            |        "attachToAllItems" : false,
-            |        "previousDocumentType" : {
-            |          "type" : "Previous",
-            |          "code" : "CO",
-            |          "description" : "SAD - Community goods subject"
-            |        },
-            |        "details" : {
-            |          "documentReferenceNumber" : "previous1",
-            |          "uuid" : "ac50154c-cad1-4320-8def-d282eea63b2e",
-            |          "addGoodsItemNumberYesNo" : false,
-            |          "addTypeOfPackageYesNo" : false,
-            |          "addNumberOfPackagesYesNo" : false,
-            |          "declareQuantityOfGoodsYesNo" : false,
-            |          "addAdditionalInformationYesNo" : false
-            |        }
-            |      },
-            |      {
-            |        "attachToAllItems" : false,
-            |        "type" : {
-            |          "type" : "Transport",
-            |          "code" : "235",
-            |          "description" : "Container list"
-            |        },
-            |        "details" : {
-            |          "documentReferenceNumber" : "transport1",
-            |          "uuid" : "1794d93b-17d5-44fe-a18d-aaa2059d06fe"
-            |        }
-            |      },
-            |      {
-            |        "inferredAttachToAllItems" : false,
-            |        "type" : {
-            |          "type" : "Support",
-            |          "code" : "C673",
-            |          "description" : "Catch certificate"
-            |        },
-            |        "details" : {
-            |          "documentReferenceNumber" : "support1",
-            |          "uuid" : "a573bfd3-6470-40c4-a290-ea2d8d43c02a",
-            |          "addLineItemNumberYesNo" : true,
-            |          "lineItemNumber" : 678,
-            |          "addAdditionalInformationYesNo" : true,
-            |          "additionalInformation" : "complement of information support1"
-            |        }
-            |      },
-            |      {
-            |        "attachToAllItems" : false,
-            |        "type" : {
-            |          "type" : "Previous",
-            |          "code" : "T2F",
-            |          "description" : "Internal Community transit Declaration"
-            |        },
-            |        "details" : {
-            |          "documentReferenceNumber" : "previous2",
-            |          "uuid" : "3882459f-b7bc-478d-9d24-359533aa8fe3",
-            |          "addGoodsItemNumberYesNo" : true,
-            |          "goodsItemNumber" : 78689,
-            |          "addTypeOfPackageYesNo" : true,
-            |          "packageType" : {
-            |            "code" : "AT",
-            |            "description" : "Atomizer"
+            |    "documents" : {
+            |      "addDocumentsYesNo" : true,
+            |      "documents" : [
+            |        {
+            |          "attachToAllItems" : false,
+            |          "previousDocumentType" : {
+            |            "type" : "Previous",
+            |            "code" : "CO",
+            |            "description" : "SAD - Community goods subject"
             |          },
-            |          "addNumberOfPackagesYesNo" : true,
-            |          "numberOfPackages" : 12,
-            |          "declareQuantityOfGoodsYesNo" : true,
-            |          "metric" : {
-            |            "code" : "MIL",
-            |            "description" : "1000 items"
+            |          "details" : {
+            |            "documentReferenceNumber" : "previous1",
+            |            "uuid" : "ac50154c-cad1-4320-8def-d282eea63b2e",
+            |            "addGoodsItemNumberYesNo" : false,
+            |            "addTypeOfPackageYesNo" : false,
+            |            "addNumberOfPackagesYesNo" : false,
+            |            "declareQuantityOfGoodsYesNo" : false,
+            |            "addAdditionalInformationYesNo" : false
+            |          }
+            |        },
+            |        {
+            |          "attachToAllItems" : false,
+            |          "type" : {
+            |            "type" : "Transport",
+            |            "code" : "235",
+            |            "description" : "Container list"
             |          },
-            |          "quantity" : 13,
-            |          "addAdditionalInformationYesNo" : true,
-            |          "additionalInformation" : "complement of information previous2"
-            |        }
-            |      },
-            |      {
-            |        "attachToAllItems" : true,
-            |        "type" : {
-            |          "type" : "Transport",
-            |          "code" : "235",
-            |          "description" : "Container list"
+            |          "details" : {
+            |            "documentReferenceNumber" : "transport1",
+            |            "uuid" : "1794d93b-17d5-44fe-a18d-aaa2059d06fe"
+            |          }
             |        },
-            |        "details" : {
-            |          "documentReferenceNumber" : "transport2",
-            |          "uuid" : "4ab6bc5a-608d-41f6-acf7-241eb387cad9"
-            |        }
-            |      },
-            |      {
-            |        "attachToAllItems" : true,
-            |        "type" : {
-            |          "type" : "Support",
-            |          "code" : "C673",
-            |          "description" : "Catch certificate"
+            |        {
+            |          "inferredAttachToAllItems" : false,
+            |          "type" : {
+            |            "type" : "Support",
+            |            "code" : "C673",
+            |            "description" : "Catch certificate"
+            |          },
+            |          "details" : {
+            |            "documentReferenceNumber" : "support1",
+            |            "uuid" : "a573bfd3-6470-40c4-a290-ea2d8d43c02a",
+            |            "addLineItemNumberYesNo" : true,
+            |            "lineItemNumber" : 678,
+            |            "addAdditionalInformationYesNo" : true,
+            |            "additionalInformation" : "complement of information support1"
+            |          }
             |        },
-            |        "details" : {
-            |          "documentReferenceNumber" : "support2",
-            |          "uuid" : "92626b24-d08e-4d96-ac2c-33b5549361c8",
-            |          "addLineItemNumberYesNo" : false,
-            |          "addAdditionalInformationYesNo" : false
-            |        }
-            |      },
-            |      {
-            |        "attachToAllItems" : true,
-            |        "type" : {
-            |          "type" : "Previous",
-            |          "code" : "IM",
-            |          "description" : "Single Administrative Document"
+            |        {
+            |          "attachToAllItems" : false,
+            |          "type" : {
+            |            "type" : "Previous",
+            |            "code" : "T2F",
+            |            "description" : "Internal Community transit Declaration"
+            |          },
+            |          "details" : {
+            |            "documentReferenceNumber" : "previous2",
+            |            "uuid" : "3882459f-b7bc-478d-9d24-359533aa8fe3",
+            |            "addGoodsItemNumberYesNo" : true,
+            |            "goodsItemNumber" : 78689,
+            |            "addTypeOfPackageYesNo" : true,
+            |            "packageType" : {
+            |              "code" : "AT",
+            |              "description" : "Atomizer"
+            |            },
+            |            "addNumberOfPackagesYesNo" : true,
+            |            "numberOfPackages" : 12,
+            |            "declareQuantityOfGoodsYesNo" : true,
+            |            "metric" : {
+            |              "code" : "MIL",
+            |              "description" : "1000 items"
+            |            },
+            |            "quantity" : 13,
+            |            "addAdditionalInformationYesNo" : true,
+            |            "additionalInformation" : "complement of information previous2"
+            |          }
             |        },
-            |        "details" : {
-            |          "documentReferenceNumber" : "previous3",
-            |          "uuid" : "a3184d85-9860-4258-b5ce-28201f0407d3",
-            |          "addAdditionalInformationYesNo" : true,
-            |          "additionalInformation" : "complement of information previous3"
+            |        {
+            |          "attachToAllItems" : true,
+            |          "type" : {
+            |            "type" : "Transport",
+            |            "code" : "235",
+            |            "description" : "Container list"
+            |          },
+            |          "details" : {
+            |            "documentReferenceNumber" : "transport2",
+            |            "uuid" : "4ab6bc5a-608d-41f6-acf7-241eb387cad9"
+            |          }
+            |        },
+            |        {
+            |          "attachToAllItems" : true,
+            |          "type" : {
+            |            "type" : "Support",
+            |            "code" : "C673",
+            |            "description" : "Catch certificate"
+            |          },
+            |          "details" : {
+            |            "documentReferenceNumber" : "support2",
+            |            "uuid" : "92626b24-d08e-4d96-ac2c-33b5549361c8",
+            |            "addLineItemNumberYesNo" : false,
+            |            "addAdditionalInformationYesNo" : false
+            |          }
+            |        },
+            |        {
+            |          "attachToAllItems" : true,
+            |          "type" : {
+            |            "type" : "Previous",
+            |            "code" : "IM",
+            |            "description" : "Single Administrative Document"
+            |          },
+            |          "details" : {
+            |            "documentReferenceNumber" : "previous3",
+            |            "uuid" : "a3184d85-9860-4258-b5ce-28201f0407d3",
+            |            "addAdditionalInformationYesNo" : true,
+            |            "additionalInformation" : "complement of information previous3"
+            |          }
             |        }
-            |      }
-            |    ],
+            |      ]
+            |    },
             |    "items" : [
             |      {
             |        "description" : "Description 1",
