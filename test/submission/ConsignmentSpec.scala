@@ -235,7 +235,8 @@ class ConsignmentSpec extends SpecBase {
             |              {
             |                "identificationNumber" : "seal 2"
             |              }
-            |            ]
+            |            ],
+            |            "uuid" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |          }
             |        ],
             |        "paymentMethod" : "cash"
@@ -485,7 +486,7 @@ class ConsignmentSpec extends SpecBase {
             |            "additionalInformation" : "ai2"
             |          }
             |        ],
-            |        "transportEquipment" : 1
+            |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |      },
             |      {
             |        "description" : "Description 2",
@@ -533,7 +534,7 @@ class ConsignmentSpec extends SpecBase {
             |            "additionalInformation" : "ai1"
             |          }
             |        ],
-            |        "transportEquipment" : 1
+            |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |      }
             |    ]
             |  },
@@ -1289,20 +1290,21 @@ class ConsignmentSpec extends SpecBase {
             |            {
             |              "identificationNumber" : "seal 2"
             |            }
-            |          ]
+            |          ],
+            |          "uuid" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |        }
             |      ]
             |    }
             |  },
             |  "items" : [
             |    {
-            |      "transportEquipment" : 1
+            |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |    },
             |    {
-            |      "transportEquipment" : 1
+            |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |    },
             |    {
-            |      "transportEquipment" : 1
+            |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |    }
             |  ]
             |}
@@ -1337,31 +1339,34 @@ class ConsignmentSpec extends SpecBase {
             |      "equipments" : [
             |        {
             |          "containerIdentificationNumber" : "container id 1",
-            |          "seals" : []
+            |          "seals" : [],
+            |          "uuid" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |        },
             |        {
             |          "containerIdentificationNumber" : "container id 2",
-            |          "seals" : []
+            |          "seals" : [],
+            |          "uuid" : "b8f72766-3781-49f2-8788-db8913d41f8c"
             |        },
             |        {
             |          "containerIdentificationNumber" : "container id 3",
-            |          "seals" : []
+            |          "seals" : [],
+            |          "uuid" : "00602057-2652-43f4-8fe5-d97460d708ec"
             |        }
             |      ]
             |    }
             |  },
             |  "items" : [
             |    {
-            |      "transportEquipment" : 3
+            |      "transportEquipment" : "00602057-2652-43f4-8fe5-d97460d708ec"
             |    },
             |    {
-            |      "transportEquipment" : 2
+            |      "transportEquipment" : "b8f72766-3781-49f2-8788-db8913d41f8c"
             |    },
             |    {
-            |      "transportEquipment" : 1
+            |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |    },
             |    {
-            |      "transportEquipment" : 3
+            |      "transportEquipment" : "00602057-2652-43f4-8fe5-d97460d708ec"
             |    }
             |  ]
             |}

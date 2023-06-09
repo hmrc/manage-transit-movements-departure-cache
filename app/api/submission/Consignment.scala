@@ -23,6 +23,8 @@ import models.UserAnswers
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
+import java.util.UUID
+
 object Consignment {
 
   def transform(uA: UserAnswers): ConsignmentType20 =
@@ -191,13 +193,13 @@ object transportEquipmentType06 {
   ): TransportEquipmentType06 =
     TransportEquipmentType06(sequenceNumber, containerIdentificationNumber, Seal.length, Seal, GoodsReference)
 
-  private def goodsReferencesReads(transportEquipmentIndex: Int, items: Seq[JsValue]): Reads[Seq[GoodsReferenceType02]] =
+  private def goodsReferencesReads(transportEquipmentUuid: String, items: Seq[JsValue]): Reads[Seq[GoodsReferenceType02]] =
     items.zipWithSequenceNumber
       .foldLeft[Seq[Int]](Nil) {
         case (acc, (value, itemIndex)) =>
           value.transform((__ \ "transportEquipment").json.pick) match {
-            case JsSuccess(JsNumber(value), _) if value == transportEquipmentIndex => acc :+ itemIndex
-            case _                                                                 => acc
+            case JsSuccess(JsString(`transportEquipmentUuid`), _) => acc :+ itemIndex
+            case _                                                => acc
           }
       }
       .zipWithSequenceNumber
@@ -210,7 +212,7 @@ object transportEquipmentType06 {
     (index.toString: Reads[String]) and
       (__ \ "containerIdentificationNumber").readNullable[String] and
       (__ \ "seals").readArray[SealType05](sealType05.reads) and
-      goodsReferencesReads(index, items)
+      (__ \ "uuid").read[UUID].map(_.toString).flatMap(goodsReferencesReads(_, items))
   )(transportEquipmentType06.apply _)
 }
 
