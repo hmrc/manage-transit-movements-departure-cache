@@ -32,7 +32,7 @@ class TestOnlySubmissionController @Inject() (
 
   def submit(): Action[JsValue] = Action(parse.json) {
     request =>
-      request.body.validate[UserAnswers] match {
+      request.body.validate[UserAnswers](UserAnswers.reads orElse UserAnswers.mongoFormat) match {
         case JsSuccess(userAnswers, _) =>
           Ok(Declaration.transformToXML(userAnswers))
         case JsError(errors) =>
