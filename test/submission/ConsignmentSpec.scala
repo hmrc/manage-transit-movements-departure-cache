@@ -385,7 +385,7 @@ class ConsignmentSpec extends SpecBase {
             |            "unNumber" : "UN number 1_2"
             |          }
             |        ],
-            |        "grossWeight" : 123,
+            |        "grossWeight" : 123.456,
             |        "netWeight" : 1234,
             |        "supplementaryUnits" : 12345,
             |        "packages" : [
@@ -511,7 +511,7 @@ class ConsignmentSpec extends SpecBase {
             |            "unNumber" : "UN number 2_2"
             |          }
             |        ],
-            |        "grossWeight" : 456,
+            |        "grossWeight" : 456.789,
             |        "addSupplyChainActorYesNo" : false,
             |        "addDocumentsYesNo" : false,
             |        "addAdditionalReferenceYesNo" : true,
@@ -561,7 +561,7 @@ class ConsignmentSpec extends SpecBase {
         converted.containerIndicator shouldBe Some(Number1)
         converted.inlandModeOfTransport shouldBe Some("1")
         converted.modeOfTransportAtTheBorder shouldBe Some("1")
-        converted.grossMass shouldBe 579
+        converted.grossMass shouldBe 580.245
         converted.referenceNumberUCR shouldBe Some("ucr123")
 
         converted.Carrier shouldBe Some(
@@ -803,7 +803,7 @@ class ConsignmentSpec extends SpecBase {
         converted.HouseConsignment.head shouldBe HouseConsignmentType10(
           sequenceNumber = "1",
           countryOfDispatch = None,
-          grossMass = 579,
+          grossMass = 580.245,
           referenceNumberUCR = None,
           Consignor = None,
           Consignee = None,
@@ -867,7 +867,7 @@ class ConsignmentSpec extends SpecBase {
                 ),
                 GoodsMeasure = Some(
                   GoodsMeasureType02(
-                    grossMass = Some(BigDecimal(123)),
+                    grossMass = Some(BigDecimal(123.456)),
                     netMass = Some(BigDecimal(1234)),
                     supplementaryUnits = Some(BigDecimal(12345))
                   )
@@ -989,7 +989,7 @@ class ConsignmentSpec extends SpecBase {
                 ),
                 GoodsMeasure = Some(
                   GoodsMeasureType02(
-                    grossMass = Some(BigDecimal(456)),
+                    grossMass = Some(BigDecimal(456.789)),
                     netMass = None,
                     supplementaryUnits = None
                   )
