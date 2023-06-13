@@ -381,19 +381,7 @@ object houseConsignmentType10 {
       consignmentItems <- itemsPath.readArray[ConsignmentItemType09](consignmentItemType09.reads(_, documents))
     } yield HouseConsignmentType10(
       sequenceNumber = "1",
-      countryOfDispatch = None, // TODO
       grossMass = consignmentItems.flatMap(_.Commodity.GoodsMeasure.flatMap(_.grossMass)).sum,
-      referenceNumberUCR = None, // TODO
-      Consignor = None, // TODO
-      Consignee = None, // TODO
-      AdditionalSupplyChainActor = Nil, // TODO
-      DepartureTransportMeans = Nil, // TODO
-      PreviousDocument = Nil, // TODO
-      SupportingDocument = Nil, // TODO
-      TransportDocument = Nil, // TODO
-      AdditionalReference = Nil, // TODO
-      AdditionalInformation = Nil, // TODO
-      TransportCharges = None, // TODO
       ConsignmentItem = consignmentItems
     )
   }
@@ -449,7 +437,7 @@ object consignmentItemType09 {
               countryOfDispatch = countryOfDispatch,
               countryOfDestination = countryOfDestination,
               referenceNumberUCR = referenceNumberUCR,
-              Consignee = None, // TODO
+              Consignee = None, // TODO - this will be captured during transition period only
               AdditionalSupplyChainActor = AdditionalSupplyChainActor,
               Commodity = Commodity,
               Packaging = Packaging,
@@ -458,7 +446,7 @@ object consignmentItemType09 {
               TransportDocument = TransportDocument,
               AdditionalReference = AdditionalReference,
               AdditionalInformation = AdditionalInformation,
-              TransportCharges = None // TODO
+              TransportCharges = None // TODO - this will be captured during transition period only
             )
         }
     }
