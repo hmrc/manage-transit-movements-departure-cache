@@ -23,6 +23,8 @@ import models.UserAnswers
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
+import java.util.UUID
+
 object Consignment {
 
   def transform(uA: UserAnswers): ConsignmentType20 =
@@ -42,7 +44,7 @@ object consignmentType20 {
     consignor                   <- (consignmentPath \ "consignor").readNullable[ConsignorType07](consignorType07.reads)
     consignee                   <- (consignmentPath \ "consignee").readNullable[ConsigneeType05](consigneeType05.reads)
     additionalSupplyChainActors <- (transportDetailsPath \ "supplyChainActors").readArray[AdditionalSupplyChainActorType](additionalSupplyChainActorType.reads)
-    transportEquipment          <- equipmentsPath.readArray[TransportEquipmentType06](transportEquipmentType06.reads)
+    transportEquipment          <- transportEquipmentReads
     locationOfGoods             <- (routeDetailsPath \ "locationOfGoods").readNullable[LocationOfGoodsType05](locationOfGoodsType05.reads)
     departureTransportMeans     <- departureTransportMeansReads
     countriesOfRouting          <- countriesOfRoutingReads
@@ -83,6 +85,12 @@ object consignmentType20 {
     TransportCharges = transportCharges,
     HouseConsignment = houseConsignments
   )
+
+  def transportEquipmentReads: Reads[Seq[TransportEquipmentType06]] =
+    itemsPath.read[Seq[JsValue]].flatMap {
+      items =>
+        equipmentsPath.readArray[TransportEquipmentType06](transportEquipmentType06.reads(_, items))
+    }
 
   private def departureTransportMeansReads: Reads[Seq[DepartureTransportMeansType03]] =
     (transportDetailsPath \ "transportMeansDeparture")
@@ -185,11 +193,26 @@ object transportEquipmentType06 {
   ): TransportEquipmentType06 =
     TransportEquipmentType06(sequenceNumber, containerIdentificationNumber, Seal.length, Seal, GoodsReference)
 
-  def reads(index: Int): Reads[TransportEquipmentType06] = (
+  private def goodsReferencesReads(transportEquipmentUuid: String, items: Seq[JsValue]): Reads[Seq[GoodsReferenceType02]] =
+    items.zipWithSequenceNumber
+      .foldLeft[Seq[Int]](Nil) {
+        case (acc, (value, itemIndex)) =>
+          value.transform((__ \ "transportEquipment").json.pick) match {
+            case JsSuccess(JsString(`transportEquipmentUuid`), _) => acc :+ itemIndex
+            case _                                                => acc
+          }
+      }
+      .zipWithSequenceNumber
+      .map {
+        case (declarationGoodsItemNumber, sequenceNumber) =>
+          GoodsReferenceType02(sequenceNumber.toString, BigInt(declarationGoodsItemNumber))
+      }
+
+  def reads(index: Int, items: Seq[JsValue]): Reads[TransportEquipmentType06] = (
     (index.toString: Reads[String]) and
       (__ \ "containerIdentificationNumber").readNullable[String] and
       (__ \ "seals").readArray[SealType05](sealType05.reads) and
-      (__ \ "itemNumbers").readArray[GoodsReferenceType02](goodsReferenceType02.reads)
+      (__ \ "uuid").read[UUID].map(_.toString).flatMap(goodsReferencesReads(_, items))
   )(transportEquipmentType06.apply _)
 }
 
@@ -199,14 +222,6 @@ object sealType05 {
     (index.toString: Reads[String]) and
       (__ \ "identificationNumber").read[String]
   )(SealType05.apply _)
-}
-
-object goodsReferenceType02 {
-
-  def reads(index: Int): Reads[GoodsReferenceType02] = (
-    (index.toString: Reads[String]) and
-      (__ \ "itemNumber").read[String].map(BigInt(_))
-  )(GoodsReferenceType02.apply _)
 }
 
 object locationOfGoodsType05 {
@@ -366,19 +381,7 @@ object houseConsignmentType10 {
       consignmentItems <- itemsPath.readArray[ConsignmentItemType09](consignmentItemType09.reads(_, documents))
     } yield HouseConsignmentType10(
       sequenceNumber = "1",
-      countryOfDispatch = None, // TODO
       grossMass = consignmentItems.flatMap(_.Commodity.GoodsMeasure.flatMap(_.grossMass)).sum,
-      referenceNumberUCR = None, // TODO
-      Consignor = None, // TODO
-      Consignee = None, // TODO
-      AdditionalSupplyChainActor = Nil, // TODO
-      DepartureTransportMeans = Nil, // TODO
-      PreviousDocument = Nil, // TODO
-      SupportingDocument = Nil, // TODO
-      TransportDocument = Nil, // TODO
-      AdditionalReference = Nil, // TODO
-      AdditionalInformation = Nil, // TODO
-      TransportCharges = None, // TODO
       ConsignmentItem = consignmentItems
     )
   }
@@ -434,7 +437,7 @@ object consignmentItemType09 {
               countryOfDispatch = countryOfDispatch,
               countryOfDestination = countryOfDestination,
               referenceNumberUCR = referenceNumberUCR,
-              Consignee = None, // TODO
+              Consignee = None, // TODO - this will be captured during transition period only
               AdditionalSupplyChainActor = AdditionalSupplyChainActor,
               Commodity = Commodity,
               Packaging = Packaging,
@@ -443,7 +446,7 @@ object consignmentItemType09 {
               TransportDocument = TransportDocument,
               AdditionalReference = AdditionalReference,
               AdditionalInformation = AdditionalInformation,
-              TransportCharges = None // TODO
+              TransportCharges = None // TODO - this will be captured during transition period only
             )
         }
     }

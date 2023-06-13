@@ -262,7 +262,8 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |          }
                                     |        }
                                     |      ]
-                                    |    }
+                                    |    },
+                                    |    "items" : []
                                     |  },
                                     |  "tasks" : {},
                                     |  "createdAt" : {
