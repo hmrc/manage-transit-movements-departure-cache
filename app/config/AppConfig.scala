@@ -33,6 +33,4 @@ class AppConfig @Inject() (config: Configuration) {
 
   val apiUrl: String = config.get[Service]("microservice.services.common-transit-convention-traders").baseUrl
 
-  val maxErrorsForAmendableDeclaration: Int = config.get[Int]("maxErrorsForAmendableDeclaration")
-
 }
