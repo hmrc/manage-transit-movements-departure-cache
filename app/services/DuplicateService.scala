@@ -36,15 +36,15 @@ class DuplicateService @Inject() (
   def apiLRNCheck(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
     apiConnector.getDepartures(Seq("localReferenceNumber" -> lrn)).map {
       case Some(_) => true
-      case None => false
+      case None    => false
     }
 
 //  def cacheLRNCheck(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] = ??? //TODO Check cache
 
-  def isLRNDuplicate(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
+  def isDuplicateLRN(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
     apiLRNCheck(lrn).flatMap {
-      case true => ??? //TODO: Check cache
-      case false    => Future.successful(false)
+      case true  => ??? //TODO: Check cache
+      case false => Future.successful(false)
     }
 
 }

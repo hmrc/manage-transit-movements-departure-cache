@@ -39,9 +39,9 @@ class DuplicateController @Inject() (
     extends BackendController(cc)
     with Logging {
 
-  def isLRNDuplicate(lrn: String): Action[AnyContent] = authenticate().async {
+  def isDuplicateLRN(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
-      duplicateService.isLRNDuplicate(lrn).map(JsBoolean).map(Ok(_))
+      duplicateService.isDuplicateLRN(lrn).map(JsBoolean).map(Ok(_))
 
   }
 

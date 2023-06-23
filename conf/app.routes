@@ -15,3 +15,7 @@ DELETE     /user-answers/:lrn/lock                              controllers.Lock
 
 POST       /x-paths/:lrn/is-declaration-amendable               controllers.XPathController.isDeclarationAmendable(lrn: String)
 POST       /x-paths/:lrn/handle-errors                          controllers.XPathController.handleErrors(lrn: String)
+
+
+
+GET       /is-duplicate-lrn/:lrn                                controllers.DuplicateController.isDuplicateLRN(lrn: String)
