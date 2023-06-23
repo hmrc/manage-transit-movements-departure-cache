@@ -18,13 +18,14 @@ package connectors
 
 import api.submission._
 import config.AppConfig
-import models.UserAnswers
+import models.{Departures, UserAnswers}
 import play.api.Logging
 import play.api.http.HeaderNames
+import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErrorFunctions, HttpResponse}
-
+import connectors.CustomHttpReads.rawHttpResponseHttpReads
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -34,6 +35,28 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
     HeaderNames.ACCEPT       -> "application/vnd.hmrc.2.0+json",
     HeaderNames.CONTENT_TYPE -> "application/xml"
   )
+
+  def getDepartures(queryParams: Seq[(String, String)] = Seq.empty)(implicit hc: HeaderCarrier): Future[Option[Departures]] = {
+    val url = s"${appConfig.apiUrl}/movements/departures"
+
+    val headers = hc.withExtraHeaders(("Accept", "application/vnd.hmrc.2.0+json"))
+
+    httpClient
+      .GET[HttpResponse](url, queryParams)(rawHttpResponseHttpReads, headers, ec)
+      .map {
+        response =>
+          response.status match {
+            case OK        => response.json.asOpt[Departures]
+            case NOT_FOUND => Some(Departures(Seq.empty))
+            case _         => None
+          }
+      }
+      .recover {
+        case e =>
+          logger.error(s"Failed to get departure movements with error: $e")
+          None
+      }
+  }
 
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
 
