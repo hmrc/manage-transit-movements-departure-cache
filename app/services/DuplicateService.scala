@@ -39,6 +39,8 @@ class DuplicateService @Inject() (
       case None    => false
     }
 
+  //if( call && call true) else false
+
 //  def cacheLRNCheck(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] = ??? //TODO Check cache
 
   def isDuplicateLRN(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
