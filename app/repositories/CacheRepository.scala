@@ -151,6 +151,31 @@ class CacheRepository @Inject() (
       totalMatchingDocuments
     )
   }
+
+  def existsLRN(lrn: String): Future[Boolean] = {
+
+    val lrnRegex = lrn.replace(" ", "")
+
+    val lrnFilter: Bson = Aggregates.filter(regex("lrn", lrnRegex))
+
+    val primaryFilter = Aggregates.filter(lrnFilter)
+
+    val aggregates: Seq[Bson] = Seq(
+      primaryFilter
+    )
+
+//    for {
+//      lrnExists <- collection.aggregate[UserAnswers](aggregates).toFuture().map(_.nonEmpty) // TODO: Return first instance, if exists return true else false
+//    } yield lrnExists
+    for {
+      lrnExists <- collection.countDocuments(lrnFilter).toFuture().map(_.toInt != 0)
+    } yield lrnExists
+
+  }
+//
+//    collection.find(lrnFilter).first.toFutureOption().map(_.isDefined)
+//
+//  }
 }
 
 object CacheRepository {

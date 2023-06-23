@@ -30,21 +30,6 @@ class DepartureSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
       lrn =>
         val json: JsValue = Json.parse(s"""
     {
-      "_links": {
-        "self": {
-          "href": "/customs/transits/movements/departures"
-        }
-      },
-      "departures": [
-        {
-          "_links": {
-            "self": {
-              "href": "/customs/transits/movements/departures/63651574c3447b12"
-            },
-            "messages": {
-              "href": "/customs/transits/movements/departures/63651574c3447b12/messages"
-            }
-          },
           "id": "63651574c3447b12",
           "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
           "localReferenceNumber": "$lrn",
@@ -52,12 +37,10 @@ class DepartureSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
           "updated": "2022-11-04T13:36:52.332Z",
           "enrollmentEORINumber": "9999912345",
           "movementEORINumber": "GB1234567890"
-        }
-      ]
     }
     """)
 
-        val result = json.validate[Departure].asOpt.value
+        val result = json.as[Departure]
         result shouldBe Departure(lrn)
     }
   }

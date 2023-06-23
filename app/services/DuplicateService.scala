@@ -34,18 +34,14 @@ class DuplicateService @Inject() (
     extends Logging {
 
   def apiLRNCheck(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
-    apiConnector.getDepartures(Seq("localReferenceNumber" -> lrn)).map {
-      case Some(_) => true
-      case None    => false
-    }
+    apiConnector.getDepartures(Seq("localReferenceNumber" -> lrn)).map(_.isDefined)
 
-  //if( call && call true) else false
-
-//  def cacheLRNCheck(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] = ??? //TODO Check cache
+  def cacheLRNCheck(lrn: String): Future[Boolean] =
+    cacheRepository.existsLRN(lrn)
 
   def isDuplicateLRN(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
     apiLRNCheck(lrn).flatMap {
-      case true  => ??? //TODO: Check cache
+      case true  => cacheLRNCheck(lrn)
       case false => Future.successful(false)
     }
 

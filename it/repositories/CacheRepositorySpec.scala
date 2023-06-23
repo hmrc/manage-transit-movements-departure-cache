@@ -22,6 +22,8 @@ import models.{Metadata, Status, UserAnswers, UserAnswersSummary}
 import org.mongodb.scala.Document
 import org.mongodb.scala.bson.{BsonDocument, BsonString}
 import org.mongodb.scala.model.Filters
+import org.scalacheck.Gen
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.libs.json.Json
 
 import java.time.Instant
@@ -150,6 +152,24 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       firstGet.metadata shouldNot equal(secondGet.metadata)
       firstGet.createdAt shouldBe secondGet.createdAt
       firstGet.lastUpdated isBefore secondGet.lastUpdated shouldBe true
+    }
+  }
+
+  "existsLRN" must {
+    "return true if LRN is found" in {
+
+      findOne(userAnswers1.lrn, userAnswers1.eoriNumber) shouldBe defined
+
+      val setResult = repository.existsLRN(userAnswers1.lrn).futureValue
+      setResult shouldBe true
+    }
+
+    "return false if LRN is not found" in {
+      forAll(Gen.alphaNumStr) {
+        lrn =>
+          val result = repository.existsLRN(lrn).futureValue
+          result shouldBe false
+      }
     }
   }
 

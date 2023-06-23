@@ -27,6 +27,7 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import repositories.{CacheRepository, DefaultLockRepository}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.concurrent.Future
@@ -36,17 +37,23 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
   val lrn                        = "lrn"
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val mockApiConnector: ApiConnector = mock[ApiConnector]
+  val mockApiConnector: ApiConnector            = mock[ApiConnector]
+  val mockCacheRepository: CacheRepository      = mock[CacheRepository]
+  val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockApiConnector)
+    reset(mockCacheRepository)
+    reset(mockLockRepository)
   }
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
       .guiceApplicationBuilder()
       .overrides(
+        bind[CacheRepository].toInstance(mockCacheRepository),
+        bind[DefaultLockRepository].toInstance(mockLockRepository),
         bind[ApiConnector].toInstance(mockApiConnector)
       )
 
@@ -58,8 +65,6 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
       "when Some(_) is returned from getDepartures" in {
 
         val mockedResponse: Option[Departures] = Some(Departures(Seq(Departure(lrn))))
-
-        // val x = eqTo(Seq("localReferenceNumber" -> lrn)
 
         when(mockApiConnector.getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())).thenReturn(Future.successful(mockedResponse))
 
@@ -83,6 +88,35 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
         result mustBe false
 
         verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
+      }
+    }
+  }
+
+  "cacheLRNCheck" - {
+
+    "must return true" - {
+      "when Some(_) is returned from getDepartures" in {
+
+        when(mockCacheRepository.existsLRN(eqTo(lrn))).thenReturn(Future.successful(true))
+
+        val result = service.cacheLRNCheck(lrn).futureValue
+
+        result mustBe true
+
+        verify(mockCacheRepository).existsLRN(eqTo(lrn))
+      }
+    }
+
+    "must return false" - {
+      "when None is returned from getDepartures" in {
+
+        when(mockCacheRepository.existsLRN(eqTo(lrn))).thenReturn(Future.successful(false))
+
+        val result = service.cacheLRNCheck(lrn).futureValue
+
+        result mustBe false
+
+        verify(mockCacheRepository).existsLRN(eqTo(lrn))
       }
     }
   }
