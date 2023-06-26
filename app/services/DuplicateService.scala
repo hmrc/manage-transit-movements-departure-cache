@@ -36,12 +36,12 @@ class DuplicateService @Inject() (
   def apiLRNCheck(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
     apiConnector.getDepartures(Seq("localReferenceNumber" -> lrn)).map(_.isDefined)
 
-  def cacheLRNCheck(lrn: String): Future[Boolean] =
-    cacheRepository.existsLRN(lrn)
+  def cacheLRNCheck(lrn: String, eoriNumber: String): Future[Boolean] =
+    cacheRepository.existsLRN(lrn, eoriNumber)
 
-  def isDuplicateLRN(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
+  def isDuplicateLRN(lrn: String, eoriNumber: String)(implicit hc: HeaderCarrier): Future[Boolean] =
     apiLRNCheck(lrn).flatMap {
-      case true  => cacheLRNCheck(lrn)
+      case true  => cacheLRNCheck(lrn, eoriNumber) // TODO: Ask Sayak what we do if the lrn exists in cache e.g drafts
       case false => Future.successful(false)
     }
 

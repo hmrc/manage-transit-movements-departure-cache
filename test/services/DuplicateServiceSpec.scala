@@ -35,6 +35,7 @@ import scala.concurrent.Future
 class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with ScalaFutures {
 
   val lrn                        = "lrn"
+  val eoriNumber                 = "eoriNumber"
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   val mockApiConnector: ApiConnector            = mock[ApiConnector]
@@ -97,26 +98,26 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
     "must return true" - {
       "when Some(_) is returned from getDepartures" in {
 
-        when(mockCacheRepository.existsLRN(eqTo(lrn))).thenReturn(Future.successful(true))
+        when(mockCacheRepository.existsLRN(eqTo(lrn), eqTo(eoriNumber))).thenReturn(Future.successful(true))
 
-        val result = service.cacheLRNCheck(lrn).futureValue
+        val result = service.cacheLRNCheck(lrn, eoriNumber).futureValue
 
         result mustBe true
 
-        verify(mockCacheRepository).existsLRN(eqTo(lrn))
+        verify(mockCacheRepository).existsLRN(eqTo(lrn), eqTo(eoriNumber))
       }
     }
 
     "must return false" - {
       "when None is returned from getDepartures" in {
 
-        when(mockCacheRepository.existsLRN(eqTo(lrn))).thenReturn(Future.successful(false))
+        when(mockCacheRepository.existsLRN(eqTo(lrn), eqTo(eoriNumber))).thenReturn(Future.successful(false))
 
-        val result = service.cacheLRNCheck(lrn).futureValue
+        val result = service.cacheLRNCheck(lrn, eoriNumber).futureValue
 
         result mustBe false
 
-        verify(mockCacheRepository).existsLRN(eqTo(lrn))
+        verify(mockCacheRepository).existsLRN(eqTo(lrn), eqTo(eoriNumber))
       }
     }
   }

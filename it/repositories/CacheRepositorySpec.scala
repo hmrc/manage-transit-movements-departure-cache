@@ -160,14 +160,14 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       findOne(userAnswers1.lrn, userAnswers1.eoriNumber) shouldBe defined
 
-      val setResult = repository.existsLRN(userAnswers1.lrn).futureValue
+      val setResult = repository.existsLRN(userAnswers1.lrn, userAnswers1.eoriNumber).futureValue
       setResult shouldBe true
     }
 
     "return false if LRN is not found" in {
-      forAll(Gen.alphaNumStr) {
-        lrn =>
-          val result = repository.existsLRN(lrn).futureValue
+      forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
+        (lrn, eoriNumber) =>
+          val result = repository.existsLRN(lrn, eoriNumber).futureValue
           result shouldBe false
       }
     }
