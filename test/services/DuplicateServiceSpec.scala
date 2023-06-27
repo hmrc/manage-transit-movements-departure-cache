@@ -96,7 +96,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
   "cacheLRNCheck" - {
 
     "must return true" - {
-      "when Some(_) is returned from getDepartures" in {
+      "when there is a document in cache with the given lrn" in {
 
         when(mockCacheRepository.existsLRN(eqTo(lrn), eqTo(eoriNumber))).thenReturn(Future.successful(true))
 
@@ -109,7 +109,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
     }
 
     "must return false" - {
-      "when None is returned from getDepartures" in {
+      "when there is not a document in the cache with the given lrn" in {
 
         when(mockCacheRepository.existsLRN(eqTo(lrn), eqTo(eoriNumber))).thenReturn(Future.successful(false))
 
