@@ -16,13 +16,12 @@
 
 package services
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.AppWithDefaultMockFixtures
 import connectors.ApiConnector
 import models.{Departure, Departures}
-import org.mockito.ArgumentMatchers.any
+import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.concurrent.ScalaFutures
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import play.api.inject.bind

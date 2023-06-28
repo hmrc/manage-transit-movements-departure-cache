@@ -18,7 +18,6 @@ package services
 
 import config.AppConfig
 import connectors.ApiConnector
-import models.Departures
 import play.api.Logging
 import repositories.CacheRepository
 import uk.gov.hmrc.http.HeaderCarrier

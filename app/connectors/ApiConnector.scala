@@ -18,6 +18,7 @@ package connectors
 
 import api.submission._
 import config.AppConfig
+import connectors.CustomHttpReads.rawHttpResponseHttpReads
 import models.{Departures, UserAnswers}
 import play.api.Logging
 import play.api.http.HeaderNames
@@ -25,7 +26,7 @@ import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErrorFunctions, HttpResponse}
-import connectors.CustomHttpReads.rawHttpResponseHttpReads
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 

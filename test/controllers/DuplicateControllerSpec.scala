@@ -18,17 +18,14 @@ package controllers
 
 import base.SpecBase
 import generators.Generators
-import models.XPath
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{never, reset, verify, when}
-import org.scalacheck.Arbitrary.arbitrary
-import org.scalacheck.Gen
+import org.mockito.Mockito.{reset, verify, when}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsArray, JsBoolean, JsString, Json}
+import play.api.libs.json.JsBoolean
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.{DuplicateService, XPathService}
+import services.DuplicateService
 
 import scala.concurrent.Future
 

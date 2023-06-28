@@ -17,17 +17,14 @@
 package controllers
 
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
-import models.Metadata
 import play.api.Logging
-import play.api.libs.json.{JsBoolean, JsError, JsSuccess, JsValue, Json}
+import play.api.libs.json.JsBoolean
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import repositories.CacheRepository
 import services.DuplicateService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import java.time.Clock
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton()
 class DuplicateController @Inject() (
@@ -35,7 +32,7 @@ class DuplicateController @Inject() (
   authenticate: AuthenticateActionProvider,
   authenticateAndLock: AuthenticateAndLockActionProvider,
   duplicateService: DuplicateService
-)(implicit ec: ExecutionContext, clock: Clock)
+)(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
 
