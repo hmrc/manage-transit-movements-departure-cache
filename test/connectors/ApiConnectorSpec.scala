@@ -396,7 +396,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                 .willReturn(aResponse().withStatus(error))
             )
 
-            connector.getDepartures().futureValue mustBe None
+            await(connector.getDepartures()) mustBe None
         }
       }
     }
