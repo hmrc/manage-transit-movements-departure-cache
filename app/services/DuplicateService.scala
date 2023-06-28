@@ -45,11 +45,7 @@ class DuplicateService @Inject() (
   def isDuplicateLRN(lrn: String, eoriNumber: String)(implicit hc: HeaderCarrier): Future[Boolean] =
     apiLRNCheck(lrn).flatMap {
       case true => Future.successful(true)
-      case false =>
-        cacheLRNCheck(lrn, eoriNumber) flatMap {
-          case true  => Future.successful(true)
-          case false => Future.successful(false)
-        } // TODO: Ask Sayak what we do if the lrn exists in cache e.g drafts
+      case false => cacheLRNCheck(lrn, eoriNumber) // TODO: Ask Sayak what we do if the lrn exists in cache e.g drafts
     }
 
 }
