@@ -121,4 +121,43 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
       }
     }
   }
+
+  "isDuplicateLRN" - {
+    "must return true" - {
+      "when apiLRNCheck returns departures" in {
+        when(mockApiConnector.getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any()))
+          .thenReturn(Future.successful(Some(Departures(Seq(Departure(lrn))))))
+
+        val result = service.isDuplicateLRN(lrn, eoriNumber).futureValue
+
+        result mustBe true
+
+        verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
+      }
+      "when apiLRNCheck returns no departures and cacheLRNCheck returns true" in {
+        when(mockApiConnector.getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())).thenReturn(Future.successful(None))
+        when(mockCacheRepository.existsLRN(eqTo(lrn), eqTo(eoriNumber))).thenReturn(Future.successful(true))
+
+        val result = service.isDuplicateLRN(lrn, eoriNumber).futureValue
+
+        result mustBe true
+
+        verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
+        verify(mockCacheRepository).existsLRN(eqTo(lrn), eqTo(eoriNumber))
+      }
+    }
+
+    "must return false when both apiLRNCheck and cacheLRNCheck return false" in {
+      when(mockApiConnector.getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())).thenReturn(Future.successful(None))
+      when(mockCacheRepository.existsLRN(eqTo(lrn), eqTo(eoriNumber))).thenReturn(Future.successful(false))
+
+      val result = service.isDuplicateLRN(lrn, eoriNumber).futureValue
+
+      result mustBe false
+
+      verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
+      verify(mockCacheRepository).existsLRN(eqTo(lrn), eqTo(eoriNumber))
+    }
+  }
+
 }
