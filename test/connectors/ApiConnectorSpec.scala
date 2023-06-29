@@ -18,6 +18,7 @@ package connectors
 
 import base.AppWithDefaultMockFixtures
 import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.http.Fault
 import helper.WireMockServerHandler
 import models.{Departure, Departures, UserAnswers}
 import org.scalacheck.Gen
@@ -29,7 +30,9 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Results.{BadRequest, InternalServerError}
 import play.api.test.Helpers._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpResponse}
+
+import scala.concurrent.Future
 
 class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with WireMockServerHandler with Matchers {
 
