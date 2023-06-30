@@ -35,7 +35,7 @@ class GuaranteeSpec extends SpecBase {
             |  "_id" : "$uuid",
             |  "lrn" : "$lrn",
             |  "eoriNumber" : "$eoriNumber",
-            |  "isSubmitted" : false,
+            |  "isSubmitted" : "notSubmitted",
             |  "data" : {
             |    "guaranteeDetails" : [
             |      {

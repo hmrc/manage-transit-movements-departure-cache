@@ -38,7 +38,7 @@ class TransitOperationSpec extends SpecBase {
                |  "_id" : "$uuid",
                |  "lrn" : "$lrn",
                |  "eoriNumber" : "$eoriNumber",
-               |  "isSubmitted" : false,
+               |  "isSubmitted" : "notSubmitted",
                |  "data" : {
                |    "preTaskList" : {
                |      "officeOfDeparture" : {
@@ -107,7 +107,7 @@ class TransitOperationSpec extends SpecBase {
                |  "_id" : "$uuid",
                |  "lrn" : "$lrn",
                |  "eoriNumber" : "$eoriNumber",
-               |  "isSubmitted" : false,
+               |  "isSubmitted" : "notSubmitted",
                |  "data" : {
                |    "preTaskList" : {
                |      "officeOfDeparture" : {
@@ -176,7 +176,7 @@ class TransitOperationSpec extends SpecBase {
                |  "_id" : "$uuid",
                |  "lrn" : "$lrn",
                |  "eoriNumber" : "$eoriNumber",
-               |  "isSubmitted" : false,
+               |  "isSubmitted" : "notSubmitted",
                |  "data" : {
                |    "preTaskList" : {
                |      "officeOfDeparture" : {
@@ -245,7 +245,7 @@ class TransitOperationSpec extends SpecBase {
                |  "_id" : "$uuid",
                |  "lrn" : "$lrn",
                |  "eoriNumber" : "$eoriNumber",
-               |  "isSubmitted" : false,
+               |  "isSubmitted" : "notSubmitted",
                |  "data" : {
                |    "preTaskList" : {
                |      "officeOfDeparture" : {
@@ -314,7 +314,7 @@ class TransitOperationSpec extends SpecBase {
                |  "_id" : "$uuid",
                |  "lrn" : "$lrn",
                |  "eoriNumber" : "$eoriNumber",
-               |  "isSubmitted" : false,
+               |  "isSubmitted" : "notSubmitted",
                |  "data" : {
                |    "preTaskList" : {
                |      "officeOfDeparture" : {

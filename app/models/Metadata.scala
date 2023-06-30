@@ -16,6 +16,7 @@
 
 package models
 
+import models.SubmissionState.NotSubmitted
 import play.api.libs.json.{Format, JsObject, Json}
 
 case class Metadata(
@@ -23,7 +24,7 @@ case class Metadata(
   eoriNumber: String,
   data: JsObject,
   tasks: Map[String, Status.Value],
-  isSubmitted: Option[Boolean] = Some(false)
+  isSubmitted: Option[SubmissionState] = Some(NotSubmitted)
 )
 
 object Metadata {

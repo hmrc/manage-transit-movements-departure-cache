@@ -18,7 +18,6 @@ package connectors
 
 import base.AppWithDefaultMockFixtures
 import com.github.tomakehurst.wiremock.client.WireMock._
-import com.github.tomakehurst.wiremock.http.Fault
 import helper.WireMockServerHandler
 import models.{Departure, Departures, UserAnswers}
 import org.scalacheck.Gen
@@ -30,9 +29,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Results.{BadRequest, InternalServerError}
 import play.api.test.Helpers._
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpResponse}
-
-import scala.concurrent.Future
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with WireMockServerHandler with Matchers {
 
@@ -47,7 +44,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |  "_id" : "$uuid",
                                     |  "lrn" : "$lrn",
                                     |  "eoriNumber" : "$eoriNumber",
-                                    |  "isSubmitted": false,
+                                    |  "isSubmitted": "notSubmitted",
                                     |  "data" : {
                                     |    "preTaskList" : {
                                     |      "officeOfDeparture" : {
@@ -376,7 +373,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
 
         val expectedResult = Departures(Seq(Departure(lrn1), Departure(lrn2)))
 
-        connector.getDepartures().futureValue mustBe Some(expectedResult)
+        await(connector.getDepartures()) mustBe Some(expectedResult)
       }
 
       "must return empty Departures when 404 is returned" in {

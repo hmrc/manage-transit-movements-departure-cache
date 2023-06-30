@@ -18,7 +18,7 @@ package repositories
 
 import itbase.CacheRepositorySpecBase
 import models.Sort.{SortByCreatedAtAsc, SortByCreatedAtDesc, SortByLRNAsc, SortByLRNDesc}
-import models.{Metadata, Status, UserAnswers, UserAnswersSummary}
+import models.{Metadata, Status, SubmissionState, UserAnswers, UserAnswersSummary}
 import org.mongodb.scala.Document
 import org.mongodb.scala.bson.{BsonDocument, BsonString}
 import org.mongodb.scala.model.Filters
@@ -84,7 +84,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
     "not create a new document when given valid UserAnswers" in {
 
-      repository.setFlag(userAnswers3.metadata, flag = true).futureValue
+      repository.setFlag(userAnswers3.metadata, SubmissionState.Submitted).futureValue
 
       val getResult = findOne(userAnswers3.lrn, userAnswers3.eoriNumber)
 
@@ -99,9 +99,9 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       val metadata = userAnswers1.metadata.copy(
         data = Json.obj("foo" -> "bar"),
         tasks = Map(".task" -> Status.Completed),
-        isSubmitted = Some(false)
+        isSubmitted = Some(SubmissionState.NotSubmitted)
       )
-      val setResult = repository.setFlag(metadata, flag = true).futureValue
+      val setResult = repository.setFlag(metadata, SubmissionState.Submitted).futureValue
 
       setResult shouldBe true
 

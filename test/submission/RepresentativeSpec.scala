@@ -39,7 +39,7 @@ class RepresentativeSpec extends SpecBase {
                 |  "_id" : "$uuid",
                 |  "lrn" : "$lrn",
                 |  "eoriNumber" : "$eoriNumber",
-                |  "isSubmitted" : false,
+                |  "isSubmitted" : "notSubmitted",
                 |  "data" : {
                 |    "traderDetails" : {
                 |      "actingAsRepresentative" : true,
@@ -91,7 +91,7 @@ class RepresentativeSpec extends SpecBase {
                 |  "_id" : "$uuid",
                 |  "lrn" : "$lrn",
                 |  "eoriNumber" : "$eoriNumber",
-                |  "isSubmitted" : false,
+                |  "isSubmitted" : "notSubmitted",
                 |  "data" : {
                 |    "traderDetails" : {
                 |      "actingAsRepresentative" : true,
@@ -136,7 +136,7 @@ class RepresentativeSpec extends SpecBase {
               |  "_id" : "$uuid",
               |  "lrn" : "$lrn",
               |  "eoriNumber" : "$eoriNumber",
-              |  "isSubmitted" : false,
+              |  "isSubmitted" : "notSubmitted",
               |  "data" : {
               |    "traderDetails" : {
               |      "actingAsRepresentative" : false
