@@ -152,7 +152,7 @@ class CacheRepository @Inject() (
     )
   }
 
-  def existsLRN(lrn: String, eoriNumber: String): Future[Boolean] = { // TODO: CTCP-#### Will want to filter for non submitted declarations (e.g drafts) can do this off the back of isSubmitted flag in userAnswers - if one is found set a flag potentially to say it is being used elsewhere
+  def existsLRN(lrn: String, eoriNumber: String): Future[Boolean] = { // TODO: CTCP-3469 Will want to filter for non submitted declarations (e.g drafts) can do this off the back of isSubmitted flag in userAnswers - if one is found set a flag potentially to say it is being used elsewhere
     val lrnFilter     = Filters.eq("lrn", lrn)
     val eoriFilter    = Filters.eq("eoriNumber", eoriNumber)
     val primaryFilter = Filters.and(eoriFilter, lrnFilter)

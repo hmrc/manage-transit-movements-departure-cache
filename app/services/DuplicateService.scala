@@ -44,6 +44,6 @@ class DuplicateService @Inject() (
   def isDuplicateLRN(lrn: String, eoriNumber: String)(implicit hc: HeaderCarrier): Future[Boolean] =
     apiLRNCheck(lrn) //.flatMap {
   //case true => Future.successful(true)
-  //case false => cacheLRNCheck(lrn, eoriNumber) // TODO: CTCP-#### Check if their is a duplicate LRN in draft state, then handle the draft e.g set a flag on it to change local reference number
+  //case false => cacheLRNCheck(lrn, eoriNumber) // TODO: CTCP-3469 Check if their is a duplicate LRN in draft state, then handle the draft e.g set a flag on it to change local reference number
 
 }
