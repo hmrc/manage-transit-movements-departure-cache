@@ -43,6 +43,29 @@ class SubmissionStateSpec extends AnyFreeSpec with Generators with Matchers with
       }
     }
 
+    "must return isAmendable" - {
+      "when NotSubmitted must be false" in {
+        val value = SubmissionState.NotSubmitted
+        value.amendable mustEqual false
+      }
+
+      "when RejectedAndResubmitted must be false" in {
+        val value = SubmissionState.RejectedAndResubmitted
+        value.amendable mustEqual false
+      }
+
+      "when Submitted must be true" in {
+        val value = SubmissionState.Submitted
+        value.amendable mustEqual true
+      }
+
+      "when RejectedPendingChanges must be true" in {
+        val value = SubmissionState.RejectedPendingChanges
+        value.amendable mustEqual true
+      }
+
+    }
+
     "must return correct state" - {
 
       "when notSubmitted" in {
