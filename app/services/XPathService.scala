@@ -18,7 +18,7 @@ package services
 
 import config.AppConfig
 import models.SubmissionState.NotSubmitted
-import models.{Status, SubmissionState, XPath}
+import models.{Status, XPath}
 import play.api.Logging
 import repositories.CacheRepository
 

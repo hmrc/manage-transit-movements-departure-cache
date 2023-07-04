@@ -43,7 +43,37 @@ class DuplicateControllerSpec extends SpecBase with Generators {
       .guiceApplicationBuilder()
       .overrides(bind[DuplicateService].toInstance(mockDuplicateService))
 
-  ""
+  "apiLRNCheck" should {
+
+    "return 200 with false" when {
+      "lrn does not exist in the API" in {
+        when(mockDuplicateService.apiLRNCheck(eqTo(lrn))(any())).thenReturn(Future.successful(false))
+
+        val request = FakeRequest(GET, routes.DuplicateController.apiLRNCheck(lrn).url)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe JsBoolean(false)
+        verify(mockDuplicateService).apiLRNCheck(eqTo(lrn))(any())
+      }
+    }
+
+    "return 200 with true" when {
+      "when lrn exists in the API" in {
+        when(mockDuplicateService.apiLRNCheck(eqTo(lrn))(any())).thenReturn(Future.successful(true))
+
+        val request = FakeRequest(GET, routes.DuplicateController.apiLRNCheck(lrn).url)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe JsBoolean(true)
+        verify(mockDuplicateService).apiLRNCheck(eqTo(lrn))(any())
+      }
+
+    }
+  }
 
   "isDuplicateLRN" should {
 

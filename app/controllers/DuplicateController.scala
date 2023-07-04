@@ -41,4 +41,9 @@ class DuplicateController @Inject() (
       duplicateService.isDuplicateLRN(lrn, request.eoriNumber).map(JsBoolean).map(Ok(_))
   }
 
+  def apiLRNCheck(lrn: String): Action[AnyContent] = authenticate().async {
+    implicit request =>
+      duplicateService.apiLRNCheck(lrn).map(JsBoolean).map(Ok(_))
+  }
+
 }

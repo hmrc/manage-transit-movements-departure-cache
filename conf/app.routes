@@ -17,3 +17,4 @@ POST       /x-paths/:lrn/is-declaration-amendable               controllers.XPat
 POST       /x-paths/:lrn/handle-errors                          controllers.XPathController.handleErrors(lrn: String)
 
 GET       /is-duplicate-lrn/:lrn                                controllers.DuplicateController.isDuplicateLRN(lrn: String)
+GET       /is-lrn-in-api/:lrn                                   controllers.DuplicateController.apiLRNCheck(lrn: String)
