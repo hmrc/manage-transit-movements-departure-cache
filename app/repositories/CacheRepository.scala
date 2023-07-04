@@ -155,11 +155,11 @@ class CacheRepository @Inject() (
   }
 
   def existsLRN(lrn: String): Future[Boolean] = { // TODO: CTCP-3469 set a flag on isSubmitted to potentially to say it is being used elsewhere so we can update it later?. Update README with this new functionality once added.
-    val lrnFilter                    = Filters.eq("lrn", lrn)
-    val notSubmittedFilter           = Filters.eq("isSubmitted", SubmissionState.NotSubmitted.toString)
-    val rejectedPendingChangesFilter = Filters.eq("isSubmitted", SubmissionState.RejectedPendingChanges.toString)
+    val lrnFilter = Filters.eq("lrn", lrn)
 
-    val primaryFilter = Filters.and(Filters.or(notSubmittedFilter, rejectedPendingChangesFilter), lrnFilter)
+    val isSubmittedFilter = Filters.in("isSubmitted", SubmissionState.NotSubmitted.toString, SubmissionState.RejectedPendingChanges.toString)
+
+    val primaryFilter = Filters.and(isSubmittedFilter, lrnFilter)
     collection.countDocuments(primaryFilter).toFuture().map(_ > 0)
   }
 }
