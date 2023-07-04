@@ -191,6 +191,34 @@
 
 ---
 
+##  `GET /does-draft-or-submission-exist-for-lrn/:lrn`
+
+### Successful response
+
+#### 200 OK
+
+* A call is made to the `GET` endpoint with:
+  * a valid bearer token
+  * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
+  * a valid `String` request body representing the LRN
+* Then, for the given local reference number in the url,  it is checked against the API to see if that local reference number exists, if false, the local reference number is then checked against the cache and the result is returned as a boolean.
+
+---
+
+##  `GET /does-submission-exist-for-lrn/:lrn`
+
+### Successful response
+
+#### 200 OK
+
+* A call is made to the `GET` endpoint with:
+  * a valid bearer token
+  * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
+  * a valid `String` request body representing the LRN
+* Then, for the given local reference number in the url, it is checked against the API to see if that local reference number exists and returns the result as a boolean.
+
+---
+
 # Running the Service
 * Start the service locally with `sbt run` in the root directory
 * The service can be started via service manager, depending on the version of service manager you are using, with either:

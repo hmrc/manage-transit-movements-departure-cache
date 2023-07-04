@@ -32,18 +32,18 @@ class DuplicateService @Inject() (
 )(implicit ec: ExecutionContext)
     extends Logging {
 
-  def apiLRNCheck(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
+  def doesSubmissionExistForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
     apiConnector.getDepartures(Seq("localReferenceNumber" -> lrn)) map {
       case Some(departures) => departures.departures.nonEmpty
       case None             => false
     }
 
-  def cacheLRNCheck(lrn: String, eoriNumber: String): Future[Boolean] =
-    cacheRepository.existsLRN(lrn, eoriNumber)
+  def doesDraftExistForLrn(lrn: String): Future[Boolean] =
+    cacheRepository.existsLRN(lrn)
 
-  def isDuplicateLRN(lrn: String, eoriNumber: String)(implicit hc: HeaderCarrier): Future[Boolean] =
-    apiLRNCheck(lrn) //.flatMap {
+  def doesDraftOrSubmissionExistForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
+    doesSubmissionExistForLrn(lrn) //.flatMap {
   //case true => Future.successful(true)
-  //case false => cacheLRNCheck(lrn, eoriNumber) // TODO: CTCP-3469 Check if their is a duplicate LRN in draft state, then handle the draft e.g set a flag on it to change local reference number
+  //case false => doesDraftExistForLrn(lrn, eoriNumber) // TODO: CTCP-3469 Check if their is a duplicate LRN in draft state, then handle the draft e.g set a flag on it to change local reference number
 
 }

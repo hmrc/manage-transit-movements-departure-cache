@@ -59,7 +59,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
 
   private val service = app.injector.instanceOf[DuplicateService]
 
-  "apiLRNCheck" - {
+  "doesSubmissionExistForLrn" - {
 
     "must return true" - {
       "when Some(_) is returned from getDepartures" in {
@@ -68,7 +68,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
 
         when(mockApiConnector.getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())).thenReturn(Future.successful(mockedResponse))
 
-        val result = service.apiLRNCheck(lrn).futureValue
+        val result = service.doesSubmissionExistForLrn(lrn).futureValue
 
         result mustBe true
 
@@ -83,7 +83,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
 
         when(mockApiConnector.getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())).thenReturn(Future.successful(mockedResponse))
 
-        val result = service.apiLRNCheck(lrn).futureValue
+        val result = service.doesSubmissionExistForLrn(lrn).futureValue
 
         result mustBe false
 
@@ -92,70 +92,70 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
     }
   }
 
-  "cacheLRNCheck" - { // TODO Update as part of CTCP-3469
+  "doesDraftExistForLrn" - { // TODO Update as part of CTCP-3469
 
     "must return true" - {
       "when there is a document in cache with the given lrn" in {
 
-        when(mockCacheRepository.existsLRN(eqTo(lrn), eqTo(eoriNumber))).thenReturn(Future.successful(true))
+        when(mockCacheRepository.existsLRN(eqTo(lrn))).thenReturn(Future.successful(true))
 
-        val result = service.cacheLRNCheck(lrn, eoriNumber).futureValue
+        val result = service.doesDraftExistForLrn(lrn).futureValue
 
         result mustBe true
 
-        verify(mockCacheRepository).existsLRN(eqTo(lrn), eqTo(eoriNumber))
+        verify(mockCacheRepository).existsLRN(eqTo(lrn))
       }
     }
 
     "must return false" - {
       "when there is not a document in the cache with the given lrn" in {
 
-        when(mockCacheRepository.existsLRN(eqTo(lrn), eqTo(eoriNumber))).thenReturn(Future.successful(false))
+        when(mockCacheRepository.existsLRN(eqTo(lrn))).thenReturn(Future.successful(false))
 
-        val result = service.cacheLRNCheck(lrn, eoriNumber).futureValue
+        val result = service.doesDraftExistForLrn(lrn).futureValue
 
         result mustBe false
 
-        verify(mockCacheRepository).existsLRN(eqTo(lrn), eqTo(eoriNumber))
+        verify(mockCacheRepository).existsLRN(eqTo(lrn))
       }
     }
   }
 
-  "isDuplicateLRN" - {
+  "doesDraftOrSubmissionExistForLrn" - {
     "must return true" - {
-      "when apiLRNCheck returns departures" in {
+      "when doesSubmissionExistForLrn returns departures" in {
         when(mockApiConnector.getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any()))
           .thenReturn(Future.successful(Some(Departures(Seq(Departure(lrn))))))
 
-        val result = service.isDuplicateLRN(lrn, eoriNumber).futureValue
+        val result = service.doesDraftOrSubmissionExistForLrn(lrn).futureValue
 
         result mustBe true
 
         verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
       }
-      "when apiLRNCheck returns no departures and cacheLRNCheck returns true" ignore { // TODO CTCP-3469
+      "when doesSubmissionExistForLrn returns no departures and doesDraftExistForLrn returns true" ignore { // TODO CTCP-3469
         when(mockApiConnector.getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())).thenReturn(Future.successful(None))
-        when(mockCacheRepository.existsLRN(eqTo(lrn), eqTo(eoriNumber))).thenReturn(Future.successful(true))
+        when(mockCacheRepository.existsLRN(eqTo(lrn))).thenReturn(Future.successful(true))
 
-        val result = service.isDuplicateLRN(lrn, eoriNumber).futureValue
+        val result = service.doesDraftOrSubmissionExistForLrn(lrn).futureValue
 
         result mustBe true
 
         verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
-        verify(mockCacheRepository).existsLRN(eqTo(lrn), eqTo(eoriNumber))
+        verify(mockCacheRepository).existsLRN(eqTo(lrn))
       }
     }
 
-    "must return false when both apiLRNCheck and cacheLRNCheck return false" in {
+    "must return false when both doesSubmissionExistForLrn and doesDraftExistForLrn return false" in {
       when(mockApiConnector.getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())).thenReturn(Future.successful(None))
-      // when(mockCacheRepository.existsLRN(eqTo(lrn), eqTo(eoriNumber))).thenReturn(Future.successful(false)) // TODO CTCP-3469
+      // when(mockCacheRepository.existsLRN(eqTo(lrn))).thenReturn(Future.successful(false)) // TODO CTCP-3469
 
-      val result = service.isDuplicateLRN(lrn, eoriNumber).futureValue
+      val result = service.doesDraftOrSubmissionExistForLrn(lrn).futureValue
 
       result mustBe false
 
       verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
-      // verify(mockCacheRepository).existsLRN(eqTo(lrn), eqTo(eoriNumber)) // TODO CTCP-3469
+      // verify(mockCacheRepository).existsLRN(eqTo(lrn)) // TODO CTCP-3469
     }
   }
 

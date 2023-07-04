@@ -154,10 +154,12 @@ class CacheRepository @Inject() (
     )
   }
 
-  def existsLRN(lrn: String, eoriNumber: String): Future[Boolean] = { // TODO: CTCP-3469 Will want to filter for non submitted declarations (e.g drafts) can do this off the back of isSubmitted flag in userAnswers - if one is found set a flag potentially to say it is being used elsewhere
-    val lrnFilter     = Filters.eq("lrn", lrn)
-    val eoriFilter    = Filters.eq("eoriNumber", eoriNumber)
-    val primaryFilter = Filters.and(eoriFilter, lrnFilter)
+  def existsLRN(lrn: String): Future[Boolean] = { // TODO: CTCP-3469 set a flag on isSubmitted to potentially to say it is being used elsewhere so we can update it later?. Update README with this new functionality once added.
+    val lrnFilter                    = Filters.eq("lrn", lrn)
+    val notSubmittedFilter           = Filters.eq("isSubmitted", SubmissionState.NotSubmitted.toString)
+    val rejectedPendingChangesFilter = Filters.eq("isSubmitted", SubmissionState.RejectedPendingChanges.toString)
+
+    val primaryFilter = Filters.and(Filters.or(notSubmittedFilter, rejectedPendingChangesFilter), lrnFilter)
     collection.countDocuments(primaryFilter).toFuture().map(_ > 0)
   }
 }
@@ -177,7 +179,12 @@ object CacheRepository {
       indexOptions = IndexOptions().name("eoriNumber-lrn-index")
     )
 
-    Seq(userAnswersCreatedAtIndex, eoriNumberAndLrnCompoundIndex)
+    val _idAndLrnIndex: IndexModel = IndexModel(
+      keys = compoundIndex(ascending("lrn"), ascending("_id")),
+      indexOptions = IndexOptions().name("_id-lrn-index")
+    )
+
+    Seq(userAnswersCreatedAtIndex, eoriNumberAndLrnCompoundIndex, _idAndLrnIndex)
   }
 
 }

@@ -18,6 +18,7 @@ package repositories
 
 import itbase.CacheRepositorySpecBase
 import models.Sort.{SortByCreatedAtAsc, SortByCreatedAtDesc, SortByLRNAsc, SortByLRNDesc}
+import models.SubmissionState.{NotSubmitted, RejectedAndResubmitted, RejectedPendingChanges, Submitted}
 import models.{Metadata, Status, SubmissionState, UserAnswers, UserAnswersSummary}
 import org.mongodb.scala.Document
 import org.mongodb.scala.bson.{BsonDocument, BsonString}
@@ -155,20 +156,60 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
     }
   }
 
-  "existsLRN" must {
-    "return true if LRN is found" in {
+  "existsLRN" should {
+    "return true if LRN is found when notSubmitted" in {
 
-      findOne(userAnswers1.lrn, userAnswers1.eoriNumber) shouldBe defined
+      val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1").copy(isSubmitted = Some(NotSubmitted))
+      val userAnswers = emptyUserAnswers.copy(metadata = metaData)
 
-      val setResult = repository.existsLRN(userAnswers1.lrn, userAnswers1.eoriNumber).futureValue
+      insert(userAnswers)
+
+      findOne(userAnswers.lrn, userAnswers.eoriNumber) shouldBe defined
+
+      val setResult = repository.existsLRN(userAnswers.lrn).futureValue
       setResult shouldBe true
     }
 
-    "return false if LRN is not found" in {
-      forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-        (lrn, eoriNumber) =>
-          val result = repository.existsLRN(lrn, eoriNumber).futureValue
-          result shouldBe false
+    "return true if LRN is found when rejectedPendingChanges" in {
+
+      val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1").copy(isSubmitted = Some(RejectedPendingChanges))
+      val userAnswers = emptyUserAnswers.copy(metadata = metaData)
+
+      insert(userAnswers)
+
+      findOne(userAnswers.lrn, userAnswers.eoriNumber) shouldBe defined
+
+      val setResult = repository.existsLRN(userAnswers.lrn).futureValue
+      setResult shouldBe true
+    }
+
+    "return false" when {
+      "LRN is not found" in {
+        forAll(Gen.alphaNumStr) {
+          lrn =>
+            val result = repository.existsLRN(lrn).futureValue
+            result shouldBe false
+        }
+      }
+
+      "submissionState is Submitted" in {
+
+        val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1").copy(isSubmitted = Some(Submitted))
+        val userAnswers = emptyUserAnswers.copy(metadata = metaData)
+        insert(userAnswers)
+
+        val result = repository.existsLRN(userAnswers.lrn).futureValue
+        result shouldBe false
+      }
+
+      "submissionState is RejectedAndResubmitted" in {
+
+        val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1").copy(isSubmitted = Some(RejectedAndResubmitted))
+        val userAnswers = emptyUserAnswers.copy(metadata = metaData)
+        insert(userAnswers)
+
+        val result = repository.existsLRN(userAnswers.lrn).futureValue
+        result shouldBe false
       }
     }
   }
@@ -539,7 +580,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
   "ensureIndexes" must {
     "ensure the correct indexes" in {
       val indexes = repository.collection.listIndexes().toFuture().futureValue
-      indexes.length shouldBe 3
+      indexes.length shouldBe 4
 
       indexes.head.get("name").get shouldBe BsonString("_id_")
 
@@ -551,6 +592,9 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       val eoriLrnIndex = findIndex("eoriNumber-lrn-index")
       eoriLrnIndex.get("key").get shouldBe BsonDocument("eoriNumber" -> 1, "lrn" -> 1)
+
+      val idLrnIndex = findIndex("_id-lrn-index")
+      idLrnIndex.get("key").get shouldBe BsonDocument("_id" -> 1, "lrn" -> 1)
     }
   }
 }

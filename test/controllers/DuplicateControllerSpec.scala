@@ -43,82 +43,82 @@ class DuplicateControllerSpec extends SpecBase with Generators {
       .guiceApplicationBuilder()
       .overrides(bind[DuplicateService].toInstance(mockDuplicateService))
 
-  "apiLRNCheck" should {
+  "doesSubmissionExistForLrn" should {
 
     "return 200 with false" when {
       "lrn does not exist in the API" in {
-        when(mockDuplicateService.apiLRNCheck(eqTo(lrn))(any())).thenReturn(Future.successful(false))
+        when(mockDuplicateService.doesSubmissionExistForLrn(eqTo(lrn))(any())).thenReturn(Future.successful(false))
 
-        val request = FakeRequest(GET, routes.DuplicateController.apiLRNCheck(lrn).url)
+        val request = FakeRequest(GET, routes.DuplicateController.doesSubmissionExistForLrn(lrn).url)
 
         val result = route(app, request).value
 
         status(result) shouldBe OK
         contentAsJson(result) shouldBe JsBoolean(false)
-        verify(mockDuplicateService).apiLRNCheck(eqTo(lrn))(any())
+        verify(mockDuplicateService).doesSubmissionExistForLrn(eqTo(lrn))(any())
       }
     }
 
     "return 200 with true" when {
       "when lrn exists in the API" in {
-        when(mockDuplicateService.apiLRNCheck(eqTo(lrn))(any())).thenReturn(Future.successful(true))
+        when(mockDuplicateService.doesSubmissionExistForLrn(eqTo(lrn))(any())).thenReturn(Future.successful(true))
 
-        val request = FakeRequest(GET, routes.DuplicateController.apiLRNCheck(lrn).url)
+        val request = FakeRequest(GET, routes.DuplicateController.doesSubmissionExistForLrn(lrn).url)
 
         val result = route(app, request).value
 
         status(result) shouldBe OK
         contentAsJson(result) shouldBe JsBoolean(true)
-        verify(mockDuplicateService).apiLRNCheck(eqTo(lrn))(any())
+        verify(mockDuplicateService).doesSubmissionExistForLrn(eqTo(lrn))(any())
       }
 
     }
   }
 
-  "isDuplicateLRN" should {
+  "doesDraftOrSubmissionExistForLrn" should {
 
     "return 200 with false" when {
       "lrn does not exist in the API or the cache" in {
-        when(mockDuplicateService.apiLRNCheck(any())(any())).thenReturn(Future.successful(false))
-        when(mockDuplicateService.cacheLRNCheck(any(), any())).thenReturn(Future.successful(false))
-        when(mockDuplicateService.isDuplicateLRN(any(), any())(any())).thenReturn(Future.successful(false))
+        when(mockDuplicateService.doesSubmissionExistForLrn(any())(any())).thenReturn(Future.successful(false))
+        when(mockDuplicateService.doesDraftExistForLrn(any())).thenReturn(Future.successful(false))
+        when(mockDuplicateService.doesDraftOrSubmissionExistForLrn(any())(any())).thenReturn(Future.successful(false))
 
-        val request = FakeRequest(GET, routes.DuplicateController.isDuplicateLRN(lrn).url)
+        val request = FakeRequest(GET, routes.DuplicateController.doesDraftOrSubmissionExistForLrn(lrn).url)
 
         val result = route(app, request).value
 
         status(result) shouldBe OK
         contentAsJson(result) shouldBe JsBoolean(false)
-        verify(mockDuplicateService).isDuplicateLRN(eqTo(lrn), eqTo(eoriNumber))(any())
+        verify(mockDuplicateService).doesDraftOrSubmissionExistForLrn(eqTo(lrn))(any())
       }
     }
 
     "return 200 with true" when {
       "when lrn exists in the API" in {
-        when(mockDuplicateService.apiLRNCheck(any())(any())).thenReturn(Future.successful(true))
-        when(mockDuplicateService.isDuplicateLRN(any(), any())(any())).thenReturn(Future.successful(true))
+        when(mockDuplicateService.doesSubmissionExistForLrn(any())(any())).thenReturn(Future.successful(true))
+        when(mockDuplicateService.doesDraftOrSubmissionExistForLrn(any())(any())).thenReturn(Future.successful(true))
 
-        val request = FakeRequest(GET, routes.DuplicateController.isDuplicateLRN(lrn).url)
+        val request = FakeRequest(GET, routes.DuplicateController.doesDraftOrSubmissionExistForLrn(lrn).url)
 
         val result = route(app, request).value
 
         status(result) shouldBe OK
         contentAsJson(result) shouldBe JsBoolean(true)
-        verify(mockDuplicateService).isDuplicateLRN(eqTo(lrn), eqTo(eoriNumber))(any())
+        verify(mockDuplicateService).doesDraftOrSubmissionExistForLrn(eqTo(lrn))(any())
       }
 
       "when lrn exists in the cache, but not the API" in {
-        when(mockDuplicateService.apiLRNCheck(any())(any())).thenReturn(Future.successful(false))
-        when(mockDuplicateService.cacheLRNCheck(any(), any())).thenReturn(Future.successful(true))
-        when(mockDuplicateService.isDuplicateLRN(any(), any())(any())).thenReturn(Future.successful(true))
+        when(mockDuplicateService.doesSubmissionExistForLrn(any())(any())).thenReturn(Future.successful(false))
+        when(mockDuplicateService.doesDraftExistForLrn(any())).thenReturn(Future.successful(true))
+        when(mockDuplicateService.doesDraftOrSubmissionExistForLrn(any())(any())).thenReturn(Future.successful(true))
 
-        val request = FakeRequest(GET, routes.DuplicateController.isDuplicateLRN(lrn).url)
+        val request = FakeRequest(GET, routes.DuplicateController.doesDraftOrSubmissionExistForLrn(lrn).url)
 
         val result = route(app, request).value
 
         status(result) shouldBe OK
         contentAsJson(result) shouldBe JsBoolean(true)
-        verify(mockDuplicateService).isDuplicateLRN(eqTo(lrn), eqTo(eoriNumber))(any())
+        verify(mockDuplicateService).doesDraftOrSubmissionExistForLrn(eqTo(lrn))(any())
       }
 
     }
