@@ -86,7 +86,7 @@ class CacheRepository @Inject() (
       Filters.eq("eoriNumber", data.eoriNumber)
     )
 
-    val updates = Updates.combine(
+    val updates = Seq(
       Updates.setOnInsert("lrn", data.lrn),
       Updates.setOnInsert("eoriNumber", data.eoriNumber),
       Updates.setOnInsert("isSubmitted", data.isSubmitted.getOrElse(NotSubmitted).toString),
@@ -95,13 +95,17 @@ class CacheRepository @Inject() (
       Updates.setOnInsert("createdAt", now),
       Updates.set("lastUpdated", now),
       Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID()))
-    )
+    ) ++ Seq(
+      data.resubmittedLrn.map(Updates.set("resubmittedLrn", _))
+    ).flatten
+
     val options = UpdateOptions().upsert(true)
 
     collection
-      .updateOne(filter, updates, options)
+      .updateOne(filter, Updates.combine(updates: _*), options)
       .toFuture()
       .map(_.wasAcknowledged())
+
   }
 
   def remove(lrn: String, eoriNumber: String): Future[Boolean] = {

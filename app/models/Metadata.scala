@@ -24,7 +24,8 @@ case class Metadata(
   eoriNumber: String,
   data: JsObject,
   tasks: Map[String, Status.Value],
-  isSubmitted: Option[SubmissionState] = Some(NotSubmitted)
+  isSubmitted: Option[SubmissionState] = Some(NotSubmitted),
+  resubmittedLrn: Option[String] = None
 )
 
 object Metadata {
