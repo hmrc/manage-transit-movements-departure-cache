@@ -16,11 +16,17 @@
 
 package generators
 
-import models.XPath
+import models.{SubmissionState, XPath}
 import org.scalacheck.{Arbitrary, Gen}
-import org.scalacheck.Arbitrary.arbitrary
 
 trait ModelGenerators {
+
+  implicit lazy val arbitrarySubmissionState: Arbitrary[SubmissionState] = Arbitrary {
+    val validStates = Seq("notSubmitted", "submitted", "rejectedPendingChanges", "rejectedAndResubmitted")
+    for {
+      state <- Gen.oneOf(validStates)
+    } yield SubmissionState(state)
+  }
 
   implicit lazy val arbitraryXPath: Arbitrary[XPath] = Arbitrary {
     val validXPaths = Seq(
