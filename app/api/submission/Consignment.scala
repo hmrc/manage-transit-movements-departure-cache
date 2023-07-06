@@ -408,7 +408,7 @@ object consignmentItemType09 {
             (__ \ "supplyChainActors").readArray[AdditionalSupplyChainActorType](additionalSupplyChainActorType.reads) and
             __.read[CommodityType06](commodityType06.reads) and
             (__ \ "packages").readArray[PackagingType03](packagingType03.reads) and
-            readDocuments[PreviousDocumentType08]("Previous")(previousDocumentType08.reads) and
+            readDocuments[PreviousDocumentType08]("Previous")(previousDocumentType08.reads(index, _)) and
             readDocuments[SupportingDocumentType05]("Support")(supportingDocumentType05.reads) and
             readDocuments[TransportDocumentType04]("Transport")(transportDocumentType04.reads) and
             (__ \ "additionalReferences").readArray[AdditionalReferenceType05](additionalReferenceType05.reads) and
@@ -542,11 +542,11 @@ object documentType {
 
 object previousDocumentType08 {
 
-  def reads(index: Int): Reads[PreviousDocumentType08] = (
-    (index.toString: Reads[String]) and
+  def reads(itemIndex: Int, documentIndex: Int): Reads[PreviousDocumentType08] = (
+    (documentIndex.toString: Reads[String]) and
       documentType.codeReads and
       (__ \ "details" \ "documentReferenceNumber").read[String] and
-      (__ \ "details" \ "goodsItemNumber").readNullable[BigInt] and
+      (itemIndex: Reads[Int]).map(BigInt(_)).map(Some(_)) and
       (__ \ "details" \ "packageType" \ "code").readNullable[String] and
       (__ \ "details" \ "numberOfPackages").readNullable[BigInt] and
       (__ \ "details" \ "metric" \ "code").readNullable[String] and

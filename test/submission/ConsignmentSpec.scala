@@ -255,7 +255,6 @@ class ConsignmentSpec extends SpecBase {
             |          "details" : {
             |            "documentReferenceNumber" : "previous1",
             |            "uuid" : "ac50154c-cad1-4320-8def-d282eea63b2e",
-            |            "addGoodsItemNumberYesNo" : false,
             |            "addTypeOfPackageYesNo" : false,
             |            "addNumberOfPackagesYesNo" : false,
             |            "declareQuantityOfGoodsYesNo" : false,
@@ -300,8 +299,6 @@ class ConsignmentSpec extends SpecBase {
             |          "details" : {
             |            "documentReferenceNumber" : "previous2",
             |            "uuid" : "3882459f-b7bc-478d-9d24-359533aa8fe3",
-            |            "addGoodsItemNumberYesNo" : true,
-            |            "goodsItemNumber" : 78689,
             |            "addTypeOfPackageYesNo" : true,
             |            "packageType" : {
             |              "code" : "AT",
@@ -898,7 +895,7 @@ class ConsignmentSpec extends SpecBase {
                   sequenceNumber = "1",
                   typeValue = "CO",
                   referenceNumber = "previous1",
-                  goodsItemNumber = None,
+                  goodsItemNumber = Some(1),
                   typeOfPackages = None,
                   numberOfPackages = None,
                   measurementUnitAndQualifier = None,
@@ -909,7 +906,7 @@ class ConsignmentSpec extends SpecBase {
                   sequenceNumber = "2",
                   typeValue = "T2F",
                   referenceNumber = "previous2",
-                  goodsItemNumber = Some(78689),
+                  goodsItemNumber = Some(1),
                   typeOfPackages = Some("AT"),
                   numberOfPackages = Some(12),
                   measurementUnitAndQualifier = Some("MIL"),
