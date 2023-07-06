@@ -17,23 +17,10 @@
 package models
 
 import models.SubmissionState.NotSubmitted
-import play.api.libs.json.{Format, JsObject, Json}
+import play.api.libs.json.{Format, Json}
 
-case class Metadata(
-  lrn: String,
-  eoriNumber: String,
-  data: JsObject,
-  tasks: Map[String, Status.Value],
-  isSubmitted: Option[SubmissionState] = Some(NotSubmitted),
-  resubmittedLrn: Option[String] = None
-)
+case class LinkedLrn(lrn: Option[String], isSubmitted: Option[SubmissionState] = Some(NotSubmitted))
 
-object Metadata {
-
-  def apply(lrn: String, eoriNumber: String): Metadata = Metadata(lrn, eoriNumber, Json.obj(), Map())
-
-  def apply(lrn: String, eoriNumber: String, resubmittedLrn: Option[String]): Metadata =
-    Metadata(lrn, eoriNumber, Json.obj(), Map(), Some(NotSubmitted), resubmittedLrn)
-
-  implicit val format: Format[Metadata] = Json.format[Metadata]
+object LinkedLrn {
+  implicit val format: Format[LinkedLrn] = Json.format[LinkedLrn]
 }
