@@ -32,5 +32,8 @@ object Metadata {
 
   def apply(lrn: String, eoriNumber: String): Metadata = Metadata(lrn, eoriNumber, Json.obj(), Map())
 
+  def apply(lrn: String, eoriNumber: String, resubmittedLrn: Option[String]): Metadata =
+    Metadata(lrn, eoriNumber, Json.obj(), Map(), Some(NotSubmitted), resubmittedLrn)
+
   implicit val format: Format[Metadata] = Json.format[Metadata]
 }

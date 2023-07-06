@@ -34,10 +34,11 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
   private lazy val userAnswers1 = emptyUserAnswers.copy(metadata = Metadata("ABCD1111111111111", "EoriNumber1"))
   private lazy val userAnswers2 = emptyUserAnswers.copy(metadata = Metadata("ABCD2222222222222", "EoriNumber2"))
-  private lazy val userAnswers3 = emptyUserAnswers.copy(metadata = Metadata("ABCD3333333333333", "EoriNumber3"))
+  private lazy val userAnswers3 = emptyUserAnswers.copy(metadata = Metadata("ABCD3333333333333", "EoriNumber3", resubmittedLrn = Some("lrnLinked")))
   private lazy val userAnswers4 = emptyUserAnswers.copy(metadata = Metadata("ABCD1111111111111", "EoriNumber4"), createdAt = Instant.now())
   private lazy val userAnswers5 = emptyUserAnswers.copy(metadata = Metadata("ABCD2222222222222", "EoriNumber4"), createdAt = Instant.now().minus(1, HOURS))
   private lazy val userAnswers6 = emptyUserAnswers.copy(metadata = Metadata("EFGH3333333333333", "EoriNumber4"))
+  private lazy val userAnswers7 = emptyUserAnswers.copy(metadata = Metadata("ABCD3333333333333", "EoriNumber3", resubmittedLrn = None))
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -131,6 +132,23 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       getResult.lrn shouldBe userAnswers3.lrn
       getResult.eoriNumber shouldBe userAnswers3.eoriNumber
       getResult.metadata shouldBe userAnswers3.metadata
+      getResult.metadata.resubmittedLrn shouldBe userAnswers3.metadata.resubmittedLrn
+    }
+
+    "create new document when given valid UserAnswers and no resubmittedLrn in Metadata" in {
+
+      findOne(userAnswers7.lrn, userAnswers7.eoriNumber) should not be defined
+
+      val setResult = repository.set(userAnswers7.metadata).futureValue
+
+      setResult shouldBe true
+
+      val getResult = findOne(userAnswers7.lrn, userAnswers7.eoriNumber).get
+
+      getResult.lrn shouldBe userAnswers7.lrn
+      getResult.eoriNumber shouldBe userAnswers7.eoriNumber
+      getResult.metadata shouldBe userAnswers7.metadata
+      getResult.metadata.resubmittedLrn shouldBe userAnswers7.metadata.resubmittedLrn
     }
 
     "update document when it already exists" in {
