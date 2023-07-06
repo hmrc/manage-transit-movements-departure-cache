@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.{Metadata, SubmissionState, UserAnswers, UserAnswersSummary}
+import models._
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, verify, when}
@@ -59,6 +59,43 @@ class CacheControllerSpec extends SpecBase {
     }
 
     "return 500" when {
+      "read from mongo fails" in {
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.failed(new Throwable()))
+
+        val request = FakeRequest(GET, routes.CacheController.get(lrn).url)
+        val result  = route(app, request).value
+
+        status(result) shouldBe INTERNAL_SERVER_ERROR
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+      }
+    }
+
+    "fetchSubmittedLinkedLrn should return 200" when {
+      "read from mongo is successful" in {
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswersForSubmitted)))
+
+        val request = FakeRequest(GET, routes.CacheController.fetchSubmittedLinkedLrn(lrn).url)
+        val result  = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(linkedLrn)
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+      }
+    }
+
+    "fetchSubmittedLinkedLrn should return 404" when {
+      "document not found in mongo for given lrn and eori number" in {
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
+
+        val request = FakeRequest(GET, routes.CacheController.get(lrn).url)
+        val result  = route(app, request).value
+
+        status(result) shouldBe NOT_FOUND
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+      }
+    }
+
+    "fetchSubmittedLinkedLrn should return 500" when {
       "read from mongo fails" in {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.failed(new Throwable()))
 

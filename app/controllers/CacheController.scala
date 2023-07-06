@@ -17,9 +17,10 @@
 package controllers
 
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
-import models.Metadata
+import models.{LinkedLrn, Metadata}
+import models.SubmissionState.Submitted
 import play.api.Logging
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsError, JsNull, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -45,6 +46,24 @@ class CacheController @Inject() (
         .get(lrn, request.eoriNumber)
         .map {
           case Some(userAnswers) => Ok(Json.toJson(userAnswers))
+          case None =>
+            logger.warn(s"No document found for LRN '$lrn' and EORI '${request.eoriNumber}'")
+            NotFound
+        }
+        .recover {
+          case e =>
+            logger.error("Failed to read user answers from mongo", e)
+            InternalServerError
+        }
+  }
+
+  def fetchSubmittedLinkedLrn(lrn: String): Action[AnyContent] = authenticate().async {
+    implicit request =>
+      cacheRepository
+        .get(lrn, request.eoriNumber)
+        .map {
+          case Some(userAnswers) =>
+            Ok(Json.toJson(LinkedLrn(userAnswers.metadata.resubmittedLrn, userAnswers.metadata.isSubmitted)))
           case None =>
             logger.warn(s"No document found for LRN '$lrn' and EORI '${request.eoriNumber}'")
             NotFound
