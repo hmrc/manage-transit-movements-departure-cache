@@ -18,6 +18,7 @@ package controllers
 
 import connectors.ApiConnector
 import controllers.actions.AuthenticateActionProvider
+import models.SubmissionState
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{Action, ControllerComponents}
@@ -44,7 +45,7 @@ class SubmissionController @Inject() (
           cacheRepository.get(lrn, request.eoriNumber).flatMap {
             case Some(uA) =>
               //TODO: Here for testing purposes, once submission works put back on the Right(response) case
-              cacheRepository.setFlag(uA.metadata, flag = true).flatMap {
+              cacheRepository.setFlag(uA.metadata, SubmissionState.Submitted).flatMap {
                 _ =>
                   apiConnector.submitDeclaration(uA).map {
                     case Right(response) => Ok(response.body)

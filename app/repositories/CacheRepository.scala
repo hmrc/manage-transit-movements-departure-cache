@@ -18,6 +18,7 @@ package repositories
 
 import com.mongodb.client.model.Filters.{regex, and => mAnd, eq => mEq}
 import config.AppConfig
+import models.SubmissionState.NotSubmitted
 import models._
 import org.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
@@ -57,7 +58,7 @@ class CacheRepository @Inject() (
       .toFutureOption()
   }
 
-  def setFlag(data: Metadata, flag: Boolean): Future[Boolean] = {
+  def setFlag(data: Metadata, submissionState: SubmissionState): Future[Boolean] = {
 
     val now = Instant.now(clock)
 
@@ -66,7 +67,7 @@ class CacheRepository @Inject() (
       Filters.eq("eoriNumber", data.eoriNumber)
     )
     val updates = Updates.combine(
-      Updates.set("isSubmitted", flag),
+      Updates.set("isSubmitted", submissionState.toString),
       Updates.set("lastUpdated", now)
     )
 
@@ -84,10 +85,11 @@ class CacheRepository @Inject() (
       Filters.eq("lrn", data.lrn),
       Filters.eq("eoriNumber", data.eoriNumber)
     )
+
     val updates = Updates.combine(
       Updates.setOnInsert("lrn", data.lrn),
       Updates.setOnInsert("eoriNumber", data.eoriNumber),
-      Updates.setOnInsert("isSubmitted", data.isSubmitted.getOrElse(false)),
+      Updates.setOnInsert("isSubmitted", data.isSubmitted.getOrElse(NotSubmitted).toString),
       Updates.set("data", Codecs.toBson(data.data)),
       Updates.set("tasks", Codecs.toBson(data.tasks)),
       Updates.setOnInsert("createdAt", now),
@@ -151,6 +153,15 @@ class CacheRepository @Inject() (
       totalMatchingDocuments
     )
   }
+
+  def existsLRN(lrn: String): Future[Boolean] = { // TODO: CTCP-3469 set a flag on isSubmitted to potentially to say it is being used elsewhere so we can update it later?. Update README with this new functionality once added.
+    val lrnFilter = Filters.eq("lrn", lrn)
+
+    val isSubmittedFilter = Filters.in("isSubmitted", SubmissionState.NotSubmitted.toString, SubmissionState.RejectedPendingChanges.toString)
+
+    val primaryFilter = Filters.and(isSubmittedFilter, lrnFilter)
+    collection.countDocuments(primaryFilter).toFuture().map(_ > 0)
+  }
 }
 
 object CacheRepository {
@@ -168,7 +179,12 @@ object CacheRepository {
       indexOptions = IndexOptions().name("eoriNumber-lrn-index")
     )
 
-    Seq(userAnswersCreatedAtIndex, eoriNumberAndLrnCompoundIndex)
+    val _idAndLrnIndex: IndexModel = IndexModel(
+      keys = compoundIndex(ascending("lrn"), ascending("_id")),
+      indexOptions = IndexOptions().name("_id-lrn-index")
+    )
+
+    Seq(userAnswersCreatedAtIndex, eoriNumberAndLrnCompoundIndex, _idAndLrnIndex)
   }
 
 }

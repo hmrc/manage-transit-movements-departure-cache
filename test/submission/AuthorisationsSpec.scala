@@ -35,7 +35,7 @@ class AuthorisationsSpec extends SpecBase with ScalaCheckPropertyChecks {
             |  "_id" : "$uuid",
             |  "lrn" : "$lrn",
             |  "eoriNumber" : "$eoriNumber",
-            |  "isSubmitted" : false,
+            |  "isSubmitted" : "notSubmitted",
             |  "data" : {
             |    "transportDetails" : {
             |      "authorisationsAndLimit" : {

@@ -16,20 +16,10 @@
 
 package models
 
-import models.SubmissionState.NotSubmitted
-import play.api.libs.json.{Format, JsObject, Json}
+import play.api.libs.json.{__, Reads}
 
-case class Metadata(
-  lrn: String,
-  eoriNumber: String,
-  data: JsObject,
-  tasks: Map[String, Status.Value],
-  isSubmitted: Option[SubmissionState] = Some(NotSubmitted)
-)
+case class Departure(localReferenceNumber: String)
 
-object Metadata {
-
-  def apply(lrn: String, eoriNumber: String): Metadata = Metadata(lrn, eoriNumber, Json.obj(), Map())
-
-  implicit val format: Format[Metadata] = Json.format[Metadata]
+object Departure {
+  implicit val reads: Reads[Departure] = (__ \ "localReferenceNumber").read[String].map(Departure(_))
 }

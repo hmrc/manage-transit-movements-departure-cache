@@ -28,7 +28,7 @@ object Declaration {
 
   def transform(uA: UserAnswers): CC015CType =
     CC015CType(
-      messagE_FROM_TRADERSequence1 = Header.message,
+      messagE_FROM_TRADERSequence1 = Header.message(uA),
       messageType = Header.messageType,
       correlatioN_IDENTIFIERSequence3 = Header.correlationIdentifier,
       TransitOperation = TransitOperation.transform(uA),

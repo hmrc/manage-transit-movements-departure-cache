@@ -17,7 +17,7 @@
 package services
 
 import base.SpecBase
-import models.XPath
+import models.{SubmissionState, XPath}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verify, verifyNoInteractions, verifyNoMoreInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
@@ -37,9 +37,9 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
     "return true" when {
       "a document exists in the cache for the given LRN and EORI" +
         "and at least one of the errors is amendable" +
-        "and isSubmitted is true" in {
+        "and isSubmitted is SubmissionState.Submitted" in {
 
-          val userAnswers = emptyUserAnswers.copy(emptyMetadata.copy(isSubmitted = Some(true)))
+          val userAnswers = emptyUserAnswers.copy(emptyMetadata.copy(isSubmitted = Some(SubmissionState.Submitted)))
 
           when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 

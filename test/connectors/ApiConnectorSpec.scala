@@ -19,9 +19,12 @@ package connectors
 import base.AppWithDefaultMockFixtures
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
-import models.UserAnswers
+import models.{Departure, Departures, UserAnswers}
+import org.scalacheck.Gen
+import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Results.{BadRequest, InternalServerError}
@@ -41,7 +44,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |  "_id" : "$uuid",
                                     |  "lrn" : "$lrn",
                                     |  "eoriNumber" : "$eoriNumber",
-                                    |  "isSubmitted": false,
+                                    |  "isSubmitted": "notSubmitted",
                                     |  "data" : {
                                     |    "preTaskList" : {
                                     |      "officeOfDeparture" : {
@@ -307,6 +310,96 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
   val uri = "/movements/departures"
 
   "ApiConnector" - {
+
+    "getDepartures" - {
+
+      val lrn1 = "3CnsTh79I7vtOy6"
+      val lrn2 = "DEF456"
+
+      val responseJson: JsValue = Json.parse(
+        s"""
+          {
+            "_links": {
+              "self": {
+                "href": "/customs/transits/movements/departures"
+              }
+            },
+            "departures": [
+              {
+                "_links": {
+                  "self": {
+                    "href": "/customs/transits/movements/departures/63651574c3447b12"
+                  },
+                  "messages": {
+                    "href": "/customs/transits/movements/departures/63651574c3447b12/messages"
+                  }
+                },
+                "id": "63651574c3447b12",
+                "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
+                "localReferenceNumber": "$lrn1",
+                "created": "2022-11-04T13:36:52.332Z",
+                "updated": "2022-11-04T13:36:52.332Z",
+                "enrollmentEORINumber": "9999912345",
+                "movementEORINumber": "GB1234567890"
+              },
+              {
+                "_links": {
+                  "self": {
+                    "href": "/customs/transits/movements/departures/6365135ba5e821ee"
+                  },
+                  "messages": {
+                    "href": "/customs/transits/movements/departures/6365135ba5e821ee/messages"
+                  }
+                },
+                "id": "6365135ba5e821ee",
+                "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
+                "localReferenceNumber": "$lrn2",
+                "created": "2022-11-04T13:27:55.522Z",
+                "updated": "2022-11-04T13:27:55.522Z",
+                "enrollmentEORINumber": "9999912345",
+                "movementEORINumber": "GB1234567890"
+              }
+            ]
+          }
+          """
+      )
+
+      "must return Departures" in {
+
+        server.stubFor(
+          get(urlEqualTo(s"/movements/departures"))
+            .willReturn(okJson(responseJson.toString()))
+        )
+
+        val expectedResult = Departures(Seq(Departure(lrn1), Departure(lrn2)))
+
+        await(connector.getDepartures()) mustBe Some(expectedResult)
+      }
+
+      "must return empty Departures when 404 is returned" in {
+
+        server.stubFor(
+          get(urlEqualTo(s"/movements/departures"))
+            .willReturn(aResponse().withStatus(404))
+        )
+
+        connector.getDepartures().futureValue mustBe Some(Departures(Seq.empty))
+      }
+
+      "must return None when an error is returned" in {
+        val genError = Gen.chooseNum(400, 599).suchThat(_ != 404)
+
+        forAll(genError) {
+          error =>
+            server.stubFor(
+              get(urlEqualTo(s"/movements/departures"))
+                .willReturn(aResponse().withStatus(error))
+            )
+
+            await(connector.getDepartures()) mustBe None
+        }
+      }
+    }
 
     "submitDeclaration is called" - {
 
