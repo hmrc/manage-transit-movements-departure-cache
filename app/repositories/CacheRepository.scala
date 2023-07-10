@@ -94,10 +94,9 @@ class CacheRepository @Inject() (
       Updates.set("tasks", Codecs.toBson(data.tasks)),
       Updates.setOnInsert("createdAt", now),
       Updates.set("lastUpdated", now),
+      Updates.set("resubmittedLrn", Codecs.toBson(data.resubmittedLrn)),
       Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID()))
-    ) ++ Seq(
-      data.resubmittedLrn.map(Updates.set("resubmittedLrn", _))
-    ).flatten
+    )
 
     val options = UpdateOptions().upsert(true)
 
