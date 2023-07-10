@@ -80,7 +80,6 @@ class CacheController @Inject() (
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
           if (request.eoriNumber == data.eoriNumber) {
-            println(s"******** $data")
             set(data)
           } else {
             logger.error(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
