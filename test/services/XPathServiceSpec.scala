@@ -36,7 +36,6 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
 
     "return true" when {
       "a document exists in the cache for the given LRN and EORI" +
-        "and there are 10 or fewer errors" +
         "and at least one of the errors is amendable" +
         "and isSubmitted is SubmissionState.Submitted" in {
 
@@ -71,22 +70,6 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
         }
 
       "a document exists in the cache for the given LRN and EORI" +
-        "and there are more than 10 errors" +
-        "and at least one of the errors is amendable" in {
-
-          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
-
-          val xPaths = Seq.fill(10)(unamendableXPath) :+ amendableXPath
-
-          val result = service.isDeclarationAmendable(lrn, eoriNumber, xPaths).futureValue
-
-          result shouldBe false
-
-          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        }
-
-      "a document exists in the cache for the given LRN and EORI" +
-        "and there are more than 10 errors" +
         "and none of the errors are amendable" in {
 
           when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
