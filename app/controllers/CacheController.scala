@@ -17,10 +17,9 @@
 package controllers
 
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
-import models.{LinkedLrn, Metadata}
-import models.SubmissionState.Submitted
+import models.Metadata
 import play.api.Logging
-import play.api.libs.json.{JsError, JsNull, JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -63,7 +62,7 @@ class CacheController @Inject() (
         .get(lrn, request.eoriNumber)
         .map {
           case Some(userAnswers) =>
-            Ok(Json.toJson(LinkedLrn(userAnswers.metadata.resubmittedLrn, userAnswers.metadata.isSubmitted)))
+            Ok(Json.toJson(userAnswers.metadata)(Metadata.linkedLrnWrites))
           case None =>
             logger.warn(s"No document found for LRN '$lrn' and EORI '${request.eoriNumber}'")
             NotFound

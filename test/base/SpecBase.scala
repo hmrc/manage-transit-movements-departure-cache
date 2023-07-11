@@ -18,7 +18,7 @@ package base
 
 import config.AppConfig
 import models.SubmissionState.Submitted
-import models.{LinkedLrn, Metadata, UserAnswers}
+import models.{Metadata, UserAnswers}
 import org.mockito.Mockito.reset
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -47,7 +47,6 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
 
   val emptyUserAnswersForSubmitted: UserAnswers =
     emptyUserAnswers.copy(metadata = emptyMetadata.copy(isSubmitted = Some(Submitted), resubmittedLrn = Some("lrn")))
-  val linkedLrn: LinkedLrn = LinkedLrn(Some(lrn), Some(Submitted))
 
   val mockCacheRepository: CacheRepository      = mock[CacheRepository]
   val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]

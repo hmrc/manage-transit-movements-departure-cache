@@ -78,7 +78,7 @@ class CacheControllerSpec extends SpecBase {
         val result  = route(app, request).value
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(linkedLrn)
+        contentAsJson(result).toString shouldBe """{"resubmittedLrn":"lrn","isSubmitted":"submitted"}"""
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
       }
     }

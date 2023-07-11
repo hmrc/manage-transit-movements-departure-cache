@@ -17,7 +17,7 @@
 package models
 
 import models.SubmissionState.NotSubmitted
-import play.api.libs.json.{Format, JsObject, Json}
+import play.api.libs.json.{Format, JsObject, Json, Writes}
 
 case class Metadata(
   lrn: String,
@@ -36,4 +36,8 @@ object Metadata {
     Metadata(lrn, eoriNumber, Json.obj(), Map(), Some(NotSubmitted), resubmittedLrn)
 
   implicit val format: Format[Metadata] = Json.format[Metadata]
+
+  val linkedLrnWrites: Writes[Metadata] = Writes {
+    metaData => Json.obj("resubmittedLrn" -> metaData.resubmittedLrn, "isSubmitted" -> metaData.isSubmitted)
+  }
 }
