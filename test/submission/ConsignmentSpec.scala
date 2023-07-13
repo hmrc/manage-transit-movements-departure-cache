@@ -1295,13 +1295,13 @@ class ConsignmentSpec extends SpecBase {
             |  },
             |  "items" : [
             |    {
-            |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+            |      "inferredTransportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |    },
             |    {
-            |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+            |      "inferredTransportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |    },
             |    {
-            |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+            |      "inferredTransportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |    }
             |  ]
             |}
