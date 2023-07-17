@@ -42,7 +42,7 @@ class XPathController @Inject() (
         case JsSuccess(xPaths, _) =>
           xPathService.isDeclarationAmendable(lrn, request.eoriNumber, xPaths).map(JsBoolean).map(Ok(_))
         case JsError(errors) =>
-          logger.error(s"Failed to validate request body as sequence of xPaths: $errors")
+          logger.warn(s"Failed to validate request body as sequence of xPaths: $errors")
           Future.successful(BadRequest)
       }
   }
@@ -53,7 +53,7 @@ class XPathController @Inject() (
         case JsSuccess(xPaths, _) =>
           xPathService.handleErrors(lrn, request.eoriNumber, xPaths).map(JsBoolean).map(Ok(_))
         case JsError(errors) =>
-          logger.error(s"Failed to validate request body as sequence of xPaths: $errors")
+          logger.warn(s"Failed to validate request body as sequence of xPaths: $errors")
           Future.successful(BadRequest)
       }
   }
