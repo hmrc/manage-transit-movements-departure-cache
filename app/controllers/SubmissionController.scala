@@ -55,7 +55,7 @@ class SubmissionController @Inject() (
             case None => Future.successful(InternalServerError)
           }
         case JsError(errors) =>
-          logger.error(s"Failed to validate request body as String: $errors")
+          logger.warn(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)
       }
   }

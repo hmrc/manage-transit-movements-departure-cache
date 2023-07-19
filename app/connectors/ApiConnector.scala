@@ -54,7 +54,7 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
       }
       .recover {
         case e =>
-          logger.error(s"Failed to get departure movements with error: $e")
+          logger.warn(s"Failed to get departure movements with error: $e")
           None
       }
   }
@@ -64,7 +64,6 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
     val declarationUrl  = s"${appConfig.apiUrl}/movements/departures"
     val payload: String = Declaration.transformToXML(userAnswers).toString
 
-    // TODO - can we log and audit here and send a generic error to the FE?
     httpClient
       .POSTString[HttpResponse](declarationUrl, payload, requestHeaders)
       .map {
@@ -74,7 +73,7 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
       }
       .recover {
         case httpEx: BadRequestException =>
-          logger.warn(s"ApiConnector:submitDeclaration: bad request: ${httpEx.responseCode}-${httpEx.getMessage}")
+          logger.info(s"ApiConnector:submitDeclaration: bad request: ${httpEx.responseCode}-${httpEx.getMessage}")
           Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
         case e: Exception =>
           logger.error(s"ApiConnector:submitDeclaration: something went wrong: ${e.getMessage}")

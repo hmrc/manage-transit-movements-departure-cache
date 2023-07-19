@@ -53,12 +53,12 @@ class XPathService @Inject() (
               .map {
                 case true => true
                 case false =>
-                  logger.error("Write was not acknowledged")
+                  logger.warn("Write was not acknowledged")
                   false
               }
               .recover {
                 case e =>
-                  logger.error("Failed to write user answers to mongo", e)
+                  logger.warn("Failed to write user answers to mongo", e)
                   false
               }
           case _ => Future.successful(false)

@@ -63,11 +63,11 @@ class CacheController @Inject() (
           if (request.eoriNumber == data.eoriNumber) {
             set(data)
           } else {
-            logger.error(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
+            logger.warn(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
             Future.successful(Forbidden)
           }
         case JsError(errors) =>
-          logger.error(s"Failed to validate request body as UserAnswers: $errors")
+          logger.warn(s"Failed to validate request body as UserAnswers: $errors")
           Future.successful(BadRequest)
       }
   }
@@ -77,7 +77,7 @@ class CacheController @Inject() (
       request.body.validate[String] match {
         case JsSuccess(lrn, _) => set(Metadata(lrn, request.eoriNumber))
         case JsError(errors) =>
-          logger.error(s"Failed to validate request body as String: $errors")
+          logger.warn(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)
       }
   }
