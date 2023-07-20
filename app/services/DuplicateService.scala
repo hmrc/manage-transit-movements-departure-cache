@@ -42,8 +42,6 @@ class DuplicateService @Inject() (
     cacheRepository.existsLRN(lrn)
 
   def doesDraftOrSubmissionExistForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
-    doesSubmissionExistForLrn(lrn) //.flatMap {
-  //case true => Future.successful(true)
-  //case false => doesDraftExistForLrn(lrn, eoriNumber) // TODO: CTCP-3481 Check if their is a duplicate LRN in draft state, then handle the draft e.g set a flag on it to change local reference number
+    doesSubmissionExistForLrn(lrn)
 
 }
