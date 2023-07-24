@@ -50,8 +50,12 @@ class CustomsOfficesSpec extends SpecBase {
             |        "phoneNumber" : "+44 (0)121 781 7850"
             |      },
             |      "procedureType" : "normal",
-            |      "declarationType" : "T1",
-            |      "securityDetailsType" : "noSecurity",
+            |      "declarationType" : {
+            |        "code" : "T1"
+            |      },
+            |      "securityDetailsType" : {
+            |        "code" : "0"
+            |      },
             |      "detailsConfirmed" : true
             |    }
             |  },

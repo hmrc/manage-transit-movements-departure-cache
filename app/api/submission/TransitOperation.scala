@@ -32,9 +32,9 @@ object TransitOperation {
 object transitOperationType06 {
 
   def reads(lrn: String): Reads[TransitOperationType06] = (
-    (preTaskListPath \ "declarationType").read[String] and
+    (preTaskListPath \ "declarationType" \ "code").read[String] and
       (preTaskListPath \ "tirCarnetReference").readNullable[String] and
-      (preTaskListPath \ "securityDetailsType").read[String] and
+      (preTaskListPath \ "securityDetailsType" \ "code").read[String] and
       reducedDatasetIndicatorReads and
       (routeDetailsPath \ "routing" \ "bindingItinerary").readWithDefault[Boolean](false) and
       (transportDetailsPath \ "authorisationsAndLimit" \ "limit" \ "limitDate").readNullable[LocalDate]
@@ -46,20 +46,12 @@ object transitOperationType06 {
         additionalDeclarationType = "A",
         TIRCarnetNumber = TIRCarnetNumber,
         presentationOfTheGoodsDateAndTime = None, // TODO - do we collect this?
-        security = convertSecurity(security),
+        security = security,
         reducedDatasetIndicator = reducedDatasetIndicator,
         specificCircumstanceIndicator = None, // TODO - do we collect this?
         communicationLanguageAtDeparture = None, // TODO - do we collect this?
         bindingItinerary = bindingItinerary,
         limitDate = limitDate
       )
-  }
-
-  private lazy val convertSecurity: String => String = {
-    case "noSecurity"                     => "0"
-    case "entrySummaryDeclaration"        => "1"
-    case "exitSummaryDeclaration"         => "2"
-    case "entryAndExitSummaryDeclaration" => "3"
-    case _                                => throw new Exception("Invalid security value")
   }
 }

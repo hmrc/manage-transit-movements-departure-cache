@@ -53,9 +53,13 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |        "phoneNumber" : "+44 (0)02896 931537"
                                     |      },
                                     |      "procedureType" : "normal",
-                                    |      "declarationType" : "TIR",
+                                    |      "declarationType" : {
+                                    |        "code" : "TIR"
+                                    |      },
                                     |      "tirCarnetReference" : "1234567",
-                                    |      "securityDetailsType" : "entrySummaryDeclaration",
+                                    |      "securityDetailsType" : {
+                                    |        "code" : "1"
+                                    |      },
                                     |      "detailsConfirmed" : true
                                     |    },
                                     |    "traderDetails" : {
