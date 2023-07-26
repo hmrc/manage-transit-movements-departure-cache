@@ -1438,5 +1438,148 @@ class ConsignmentSpec extends SpecBase {
         )
       }
     }
+
+    "consigneeType05 reads is called" when {
+      "consignee defined at consignment level" in {
+        val json = Json.parse("""
+            |{
+            |  "traderDetails" : {
+            |    "consignment" : {
+            |      "consignee" : {
+            |        "eori" : "consignee1",
+            |        "name" : "Connor Signee",
+            |        "country" : {
+            |          "code" : "GB",
+            |          "description" : "United Kingdom"
+            |        },
+            |        "address" : {
+            |          "numberAndStreet" : "1 Test Lane",
+            |          "city" : "Testville",
+            |          "postalCode" : "TE1 1ST"
+            |        }
+            |      }
+            |    }
+            |  }
+            |}
+            |""".stripMargin)
+
+        val result = json.as[Option[ConsigneeType05]](consigneeType05.reads)
+
+        result.value shouldBe ConsigneeType05(
+          identificationNumber = Some("consignee1"),
+          name = Some("Connor Signee"),
+          Address = Some(
+            AddressType17(
+              streetAndNumber = "1 Test Lane",
+              postcode = Some("TE1 1ST"),
+              city = "Testville",
+              country = "GB"
+            )
+          )
+        )
+      }
+
+      "consignee undefined at consignment level" when {
+        "items have same consignee" in {
+          val json = Json.parse("""
+              |{
+              |  "items" : [
+              |    {
+              |      "consignee" : {
+              |        "addConsigneeEoriNumberYesNo" : true,
+              |        "identificationNumber" : "consignee1",
+              |        "name" : "Connor Signee",
+              |        "country" : {
+              |          "code" : "GB",
+              |          "description" : "United Kingdom"
+              |        },
+              |        "address" : {
+              |          "numberAndStreet" : "1 Test Lane",
+              |          "city" : "Testville",
+              |          "postalCode" : "TE1 1ST"
+              |        }
+              |      }
+              |    },
+              |    {
+              |      "consignee" : {
+              |        "addConsigneeEoriNumberYesNo" : true,
+              |        "identificationNumber" : "consignee1",
+              |        "name" : "Connor Signee",
+              |        "country" : {
+              |          "code" : "GB",
+              |          "description" : "United Kingdom"
+              |        },
+              |        "address" : {
+              |          "numberAndStreet" : "1 Test Lane",
+              |          "city" : "Testville",
+              |          "postalCode" : "TE1 1ST"
+              |        }
+              |      }
+              |    }
+              |  ]
+              |}
+              |""".stripMargin)
+
+          val result = json.as[Option[ConsigneeType05]](consigneeType05.reads)
+
+          result.value shouldBe ConsigneeType05(
+            identificationNumber = Some("consignee1"),
+            name = Some("Connor Signee"),
+            Address = Some(
+              AddressType17(
+                streetAndNumber = "1 Test Lane",
+                postcode = Some("TE1 1ST"),
+                city = "Testville",
+                country = "GB"
+              )
+            )
+          )
+        }
+
+        "items have different consignees" in {
+          val json = Json.parse("""
+              |{
+              |  "items" : [
+              |    {
+              |      "consignee" : {
+              |        "addConsigneeEoriNumberYesNo" : true,
+              |        "identificationNumber" : "consignee1",
+              |        "name" : "Connor Signee",
+              |        "country" : {
+              |          "code" : "GB",
+              |          "description" : "United Kingdom"
+              |        },
+              |        "address" : {
+              |          "numberAndStreet" : "1 Test Lane",
+              |          "city" : "Testville",
+              |          "postalCode" : "TE1 1ST"
+              |        }
+              |      }
+              |    },
+              |    {
+              |      "consignee" : {
+              |        "addConsigneeEoriNumberYesNo" : false,
+              |        "name" : "Joe Bloggs",
+              |        "country" : {
+              |          "code" : "FR",
+              |          "description" : "France"
+              |        },
+              |        "address" : {
+              |          "numberAndStreet" : "1 Test Rue",
+              |          "city" : "Paris",
+              |          "postalCode" : "PA1 1PA"
+              |        }
+              |      }
+              |    }
+              |  ]
+              |}
+              |""".stripMargin)
+
+          val result = json.as[Option[ConsigneeType05]](consigneeType05.reads)
+
+          result shouldBe None
+        }
+      }
+    }
   }
 }
