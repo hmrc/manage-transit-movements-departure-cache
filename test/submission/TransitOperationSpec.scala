@@ -52,6 +52,12 @@ class TransitOperationSpec extends SpecBase {
                |      "securityDetailsType" : "noSecurity",
                |      "detailsConfirmed" : true
                |    },
+               |    "routeDetails" : {
+               |      "specificCircumstanceIndicator" : {
+               |        "code" : "A20",
+               |        "description" : "Express consignments in the context of exit summary declarations"
+               |      }
+               |    },
                |    "transportDetails" : {
                |      "authorisationsAndLimit" : {
                |        "limit": {
@@ -85,7 +91,7 @@ class TransitOperationSpec extends SpecBase {
               presentationOfTheGoodsDateAndTime = None,
               security = "0",
               reducedDatasetIndicator = Number0,
-              specificCircumstanceIndicator = None,
+              specificCircumstanceIndicator = Some("A20"),
               communicationLanguageAtDeparture = None,
               bindingItinerary = Number0,
               limitDate = Some(XMLCalendar("2022-07-15"))
