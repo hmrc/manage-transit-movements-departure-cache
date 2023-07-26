@@ -174,7 +174,7 @@ object consigneeType05 {
     for {
       items <- itemsPath.read[JsArray]
       consignees = items.value.flatMap {
-        _.validate((__ \ "consignee").read[ConsigneeType02](consigneeType02.reads).map(_.asConsigneeType05)).asOpt
+        _.validate(itemConsigneePath.read[ConsigneeType02](consigneeType02.reads).map(_.asConsigneeType05)).asOpt
       }.toSeq
     } yield consignees match {
       case head :: tail => if (tail.forall(_ == head)) Some(head) else None
@@ -463,7 +463,7 @@ object consignmentItemType09 {
             (__ \ "countryOfDispatch" \ "code").readNullable[String] and
             (__ \ "countryOfDestination" \ "code").readNullable[String] and
             (__ \ "uniqueConsignmentReference").readNullable[String] and
-            (__ \ "consignee").readNullable[ConsigneeType02](consigneeType02.reads) and
+            itemConsigneePath.readNullable[ConsigneeType02](consigneeType02.reads) and
             (__ \ "supplyChainActors").readArray[AdditionalSupplyChainActorType](additionalSupplyChainActorType.reads) and
             __.read[CommodityType06](commodityType06.reads) and
             (__ \ "packages").readArray[PackagingType03](packagingType03.reads) and

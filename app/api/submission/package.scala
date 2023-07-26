@@ -44,7 +44,8 @@ package object submission {
 
   lazy val documentsPath: JsPath = __ \ "documents" \ "documents"
 
-  lazy val itemsPath: JsPath = __ \ "items"
+  lazy val itemsPath: JsPath         = __ \ "items"
+  lazy val itemConsigneePath: JsPath = __ \ "consignee"
 
   lazy val reducedDatasetIndicatorReads: Reads[Boolean] =
     (consignmentPath \ "approvedOperator").readWithDefault[Boolean](false)
