@@ -36,10 +36,11 @@ object transitOperationType06 {
       (preTaskListPath \ "tirCarnetReference").readNullable[String] and
       (preTaskListPath \ "securityDetailsType").read[String] and
       reducedDatasetIndicatorReads and
+      (routeDetailsPath \ "specificCircumstanceIndicator" \ "code").readNullable[String] and
       (routeDetailsPath \ "routing" \ "bindingItinerary").readWithDefault[Boolean](false) and
       (transportDetailsPath \ "authorisationsAndLimit" \ "limit" \ "limitDate").readNullable[LocalDate]
   ).apply {
-    (declarationType, TIRCarnetNumber, security, reducedDatasetIndicator, bindingItinerary, limitDate) =>
+    (declarationType, TIRCarnetNumber, security, reducedDatasetIndicator, specificCircumstanceIndicator, bindingItinerary, limitDate) =>
       TransitOperationType06(
         LRN = lrn,
         declarationType = declarationType,
@@ -48,7 +49,7 @@ object transitOperationType06 {
         presentationOfTheGoodsDateAndTime = None, // TODO - do we collect this?
         security = convertSecurity(security),
         reducedDatasetIndicator = reducedDatasetIndicator,
-        specificCircumstanceIndicator = None, // TODO - do we collect this?
+        specificCircumstanceIndicator = specificCircumstanceIndicator,
         communicationLanguageAtDeparture = None, // TODO - do we collect this?
         bindingItinerary = bindingItinerary,
         limitDate = limitDate

@@ -385,6 +385,10 @@ class ConsignmentSpec extends SpecBase {
             |        "grossWeight" : 123.456,
             |        "netWeight" : 1234,
             |        "supplementaryUnits" : 12345,
+            |        "methodOfPayment" : {
+            |          "code" : "A",
+            |          "description" : "Payment in cash"
+            |        },
             |        "packages" : [
             |          {
             |            "packageType" : {
@@ -483,7 +487,21 @@ class ConsignmentSpec extends SpecBase {
             |            "additionalInformation" : "ai2"
             |          }
             |        ],
-            |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+            |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371",
+            |        "consignee" : {
+            |          "addConsigneeEoriNumberYesNo" : true,
+            |          "identificationNumber" : "GE00101001",
+            |          "name" : "Mr. Consignee",
+            |          "country" : {
+            |            "code" : "GB",
+            |            "description" : "United Kingdom"
+            |          },
+            |          "address" : {
+            |            "numberAndStreet" : "1 Merry Lane",
+            |            "city" : "Godrics Hollow",
+            |            "postalCode" : "CA1 9AA"
+            |          }
+            |        }
             |      },
             |      {
             |        "description" : "Description 2",
@@ -820,7 +838,20 @@ class ConsignmentSpec extends SpecBase {
               countryOfDispatch = Some("GB"),
               countryOfDestination = Some("FR"),
               referenceNumberUCR = Some("UCR 1"),
-              Consignee = None,
+              Consignee = Some(
+                ConsigneeType02(
+                  identificationNumber = Some("GE00101001"),
+                  name = Some("Mr. Consignee"),
+                  Address = Some(
+                    AddressType12(
+                      streetAndNumber = "1 Merry Lane",
+                      postcode = Some("CA1 9AA"),
+                      city = "Godrics Hollow",
+                      country = "GB"
+                    )
+                  )
+                )
+              ),
               AdditionalSupplyChainActor = Seq(
                 AdditionalSupplyChainActorType(
                   sequenceNumber = "1",
@@ -954,7 +985,11 @@ class ConsignmentSpec extends SpecBase {
                   text = Some("ai2")
                 )
               ),
-              TransportCharges = None
+              TransportCharges = Some(
+                TransportChargesType(
+                  methodOfPayment = "A"
+                )
+              )
             ),
             ConsignmentItemType09(
               goodsItemNumber = "2",
