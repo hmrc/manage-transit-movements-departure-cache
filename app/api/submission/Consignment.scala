@@ -56,7 +56,7 @@ object consignmentType20 {
     transportDocuments          <- transportDocumentsReads
     additionalReferences        <- itemsPath.readCommonValuesInNestedArrays[AdditionalReferenceType06]("additionalReferences")(additionalReferenceType06.reads)
     additionalInformation       <- additionalInformationReads
-    transportCharges            <- (equipmentsAndChargesPath \ "paymentMethod").readNullable[TransportChargesType](transportChargesType.reads)
+    transportCharges            <- (equipmentsAndChargesPath \ "paymentMethod").readNullable[TransportChargesType](transportChargesType.consignmentReads)
     houseConsignments           <- __.read[HouseConsignmentType10](houseConsignmentType10.reads).map(Seq(_))
   } yield ConsignmentType20(
     countryOfDispatch = countryOfDispatch,
@@ -164,6 +164,11 @@ object consigneeType05 {
       (__ \ "name").readNullable[String] and
       __.read[Option[AddressType17]](addressType17.optionalReads)
   )(ConsigneeType05.apply _)
+}
+
+object consigneeType02 {
+
+  implicit val reads: Reads[ConsigneeType02] = ??? // TODO
 }
 
 object additionalSupplyChainActorType {
@@ -359,7 +364,10 @@ object placeOfUnloadingType01 {
 
 object transportChargesType {
 
-  implicit val reads: Reads[TransportChargesType] =
+  val itemReads: Reads[Option[TransportChargesType]] =
+    (__ \ "methodOfPayment" \ "code").readNullable[String].map(_.map(TransportChargesType))
+
+  val consignmentReads: Reads[TransportChargesType] =
     __.read[String].map(convertMethodOfPayment).map(TransportChargesType)
 
   private lazy val convertMethodOfPayment: String => String = {
@@ -413,7 +421,8 @@ object consignmentItemType09 {
             readDocuments[SupportingDocumentType05]("Support")(supportingDocumentType05.reads) and
             readDocuments[TransportDocumentType04]("Transport")(transportDocumentType04.reads) and
             (__ \ "additionalReferences").readArray[AdditionalReferenceType05](additionalReferenceType05.reads) and
-            (__ \ "additionalInformationList").readArray[AdditionalInformationType03](additionalInformationType03.reads)
+            (__ \ "additionalInformationList").readArray[AdditionalInformationType03](additionalInformationType03.reads) and
+            __.read[Option[TransportChargesType]](transportChargesType.itemReads)
         ).apply { // TODO - Should be able to change this to `(ConsignmentItemType09.apply _)` once this is all done
           (
             goodsItemNumber,
@@ -429,7 +438,8 @@ object consignmentItemType09 {
             SupportingDocument,
             TransportDocument,
             AdditionalReference,
-            AdditionalInformation
+            AdditionalInformation,
+            TransportCharges
           ) =>
             ConsignmentItemType09(
               goodsItemNumber = goodsItemNumber,
@@ -447,7 +457,7 @@ object consignmentItemType09 {
               TransportDocument = TransportDocument,
               AdditionalReference = AdditionalReference,
               AdditionalInformation = AdditionalInformation,
-              TransportCharges = None // TODO - this will be captured during transition period only
+              TransportCharges = TransportCharges
             )
         }
     }

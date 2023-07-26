@@ -385,6 +385,10 @@ class ConsignmentSpec extends SpecBase {
             |        "grossWeight" : 123.456,
             |        "netWeight" : 1234,
             |        "supplementaryUnits" : 12345,
+            |        "methodOfPayment" : {
+            |          "code" : "A",
+            |          "description" : "Payment in cash"
+            |        },
             |        "packages" : [
             |          {
             |            "packageType" : {
@@ -954,7 +958,11 @@ class ConsignmentSpec extends SpecBase {
                   text = Some("ai2")
                 )
               ),
-              TransportCharges = None
+              TransportCharges = Some(
+                TransportChargesType(
+                  methodOfPayment = "A"
+                )
+              )
             ),
             ConsignmentItemType09(
               goodsItemNumber = "2",
