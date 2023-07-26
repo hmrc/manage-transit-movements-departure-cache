@@ -168,7 +168,11 @@ object consigneeType05 {
 
 object consigneeType02 {
 
-  implicit val reads: Reads[ConsigneeType02] = ??? // TODO
+  implicit val reads: Reads[ConsigneeType02] = (
+    (__ \ "identificationNumber").readNullable[String] and
+      (__ \ "name").readNullable[String] and
+      __.read[Option[AddressType12]](addressType12.optionalReads)
+  )(ConsigneeType02.apply _)
 }
 
 object additionalSupplyChainActorType {
@@ -409,11 +413,12 @@ object consignmentItemType09 {
 
         (
           (index.toString: Reads[String]) and
-            (index: Reads[Int]) and
+            (index: Reads[Int]).map(BigInt(_)) and
             (__ \ "declarationType").readNullable[String] and
             (__ \ "countryOfDispatch" \ "code").readNullable[String] and
             (__ \ "countryOfDestination" \ "code").readNullable[String] and
             (__ \ "uniqueConsignmentReference").readNullable[String] and
+            (__ \ "consignee").readNullable[ConsigneeType02](consigneeType02.reads) and
             (__ \ "supplyChainActors").readArray[AdditionalSupplyChainActorType](additionalSupplyChainActorType.reads) and
             __.read[CommodityType06](commodityType06.reads) and
             (__ \ "packages").readArray[PackagingType03](packagingType03.reads) and
@@ -423,43 +428,7 @@ object consignmentItemType09 {
             (__ \ "additionalReferences").readArray[AdditionalReferenceType05](additionalReferenceType05.reads) and
             (__ \ "additionalInformationList").readArray[AdditionalInformationType03](additionalInformationType03.reads) and
             __.read[Option[TransportChargesType]](transportChargesType.itemReads)
-        ).apply { // TODO - Should be able to change this to `(ConsignmentItemType09.apply _)` once this is all done
-          (
-            goodsItemNumber,
-            declarationGoodsItemNumber,
-            declarationType,
-            countryOfDispatch,
-            countryOfDestination,
-            referenceNumberUCR,
-            AdditionalSupplyChainActor,
-            Commodity,
-            Packaging,
-            PreviousDocument,
-            SupportingDocument,
-            TransportDocument,
-            AdditionalReference,
-            AdditionalInformation,
-            TransportCharges
-          ) =>
-            ConsignmentItemType09(
-              goodsItemNumber = goodsItemNumber,
-              declarationGoodsItemNumber = declarationGoodsItemNumber,
-              declarationType = declarationType,
-              countryOfDispatch = countryOfDispatch,
-              countryOfDestination = countryOfDestination,
-              referenceNumberUCR = referenceNumberUCR,
-              Consignee = None, // TODO - this will be captured during transition period only
-              AdditionalSupplyChainActor = AdditionalSupplyChainActor,
-              Commodity = Commodity,
-              Packaging = Packaging,
-              PreviousDocument = PreviousDocument,
-              SupportingDocument = SupportingDocument,
-              TransportDocument = TransportDocument,
-              AdditionalReference = AdditionalReference,
-              AdditionalInformation = AdditionalInformation,
-              TransportCharges = TransportCharges
-            )
-        }
+        )(ConsignmentItemType09.apply _)
     }
 }
 
