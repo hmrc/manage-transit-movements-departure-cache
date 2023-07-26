@@ -56,7 +56,7 @@ object consignmentType20 {
     transportDocuments          <- transportDocumentsReads
     additionalReferences        <- itemsPath.readCommonValuesInNestedArrays[AdditionalReferenceType06]("additionalReferences")(additionalReferenceType06.reads)
     additionalInformation       <- additionalInformationReads
-    transportCharges            <- (equipmentsAndChargesPath \ "paymentMethod").readNullable[TransportChargesType](transportChargesType.consignmentReads)
+    transportCharges            <- __.read[Option[TransportChargesType]](transportChargesType.reads)
     houseConsignments           <- __.read[HouseConsignmentType10](houseConsignmentType10.reads).map(Seq(_))
   } yield ConsignmentType20(
     countryOfDispatch = countryOfDispatch,
@@ -399,8 +399,25 @@ object transportChargesType {
   val itemReads: Reads[Option[TransportChargesType]] =
     (__ \ "methodOfPayment" \ "code").readNullable[String].map(_.map(TransportChargesType))
 
-  val consignmentReads: Reads[TransportChargesType] =
-    __.read[String].map(convertMethodOfPayment).map(TransportChargesType)
+  private val itemsReads: Reads[Option[TransportChargesType]] =
+    for {
+      items <- itemsPath.read[JsArray]
+      transportCharges = items.value.flatMap {
+        _.validate(__.read[Option[TransportChargesType]](itemReads)).asOpt.flatten
+      }.toSeq
+    } yield transportCharges match {
+      case head :: tail => if (tail.forall(_ == head)) Some(head) else None
+      case _            => None
+    }
+
+  private val consignmentReads: Reads[Option[TransportChargesType]] =
+    (equipmentsAndChargesPath \ "paymentMethod")
+      .read[String]
+      .map(convertMethodOfPayment)
+      .map(TransportChargesType)
+      .map(Some(_))
+
+  val reads: Reads[Option[TransportChargesType]] = consignmentReads orElse itemsReads
 
   private lazy val convertMethodOfPayment: String => String = {
     case "cash"                     => "A"

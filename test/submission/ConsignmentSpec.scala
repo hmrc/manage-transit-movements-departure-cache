@@ -1439,143 +1439,74 @@ class ConsignmentSpec extends SpecBase {
       }
     }
 
-    "consigneeType05 reads is called" when {
-      "consignee defined at consignment level" in {
+    "transportChargesType reads is called" when {
+      "transport charges defined at consignment level" in {
         val json = Json.parse("""
             |{
-            |  "traderDetails" : {
-            |    "consignment" : {
-            |      "consignee" : {
-            |        "eori" : "consignee1",
-            |        "name" : "Connor Signee",
-            |        "country" : {
-            |          "code" : "GB",
-            |          "description" : "United Kingdom"
-            |        },
-            |        "address" : {
-            |          "numberAndStreet" : "1 Test Lane",
-            |          "city" : "Testville",
-            |          "postalCode" : "TE1 1ST"
-            |        }
-            |      }
+            |  "transportDetails" : {
+            |    "equipmentsAndCharges" : {
+            |      "paymentMethod" : "cash"
             |    }
             |  }
             |}
             |""".stripMargin)
 
-        val result = json.as[Option[ConsigneeType05]](consigneeType05.reads)
+        val result = json.as[Option[TransportChargesType]](transportChargesType.reads)
 
-        result.value shouldBe ConsigneeType05(
-          identificationNumber = Some("consignee1"),
-          name = Some("Connor Signee"),
-          Address = Some(
-            AddressType17(
-              streetAndNumber = "1 Test Lane",
-              postcode = Some("TE1 1ST"),
-              city = "Testville",
-              country = "GB"
-            )
-          )
+        result.value shouldBe TransportChargesType(
+          methodOfPayment = "A"
         )
       }
 
-      "consignee undefined at consignment level" when {
-        "items have same consignee" in {
+      "transport charges undefined at consignment level" when {
+        "items have same transport charges" in {
           val json = Json.parse("""
               |{
               |  "items" : [
               |    {
-              |      "consignee" : {
-              |        "addConsigneeEoriNumberYesNo" : true,
-              |        "identificationNumber" : "consignee1",
-              |        "name" : "Connor Signee",
-              |        "country" : {
-              |          "code" : "GB",
-              |          "description" : "United Kingdom"
-              |        },
-              |        "address" : {
-              |          "numberAndStreet" : "1 Test Lane",
-              |          "city" : "Testville",
-              |          "postalCode" : "TE1 1ST"
-              |        }
+              |      "methodOfPayment" : {
+              |        "code" : "A",
+              |        "description" : "Payment in cash"
               |      }
               |    },
               |    {
-              |      "consignee" : {
-              |        "addConsigneeEoriNumberYesNo" : true,
-              |        "identificationNumber" : "consignee1",
-              |        "name" : "Connor Signee",
-              |        "country" : {
-              |          "code" : "GB",
-              |          "description" : "United Kingdom"
-              |        },
-              |        "address" : {
-              |          "numberAndStreet" : "1 Test Lane",
-              |          "city" : "Testville",
-              |          "postalCode" : "TE1 1ST"
-              |        }
+              |      "methodOfPayment" : {
+              |        "code" : "A",
+              |        "description" : "Payment in cash"
               |      }
               |    }
               |  ]
               |}
               |""".stripMargin)
 
-          val result = json.as[Option[ConsigneeType05]](consigneeType05.reads)
+          val result = json.as[Option[TransportChargesType]](transportChargesType.reads)
 
-          result.value shouldBe ConsigneeType05(
-            identificationNumber = Some("consignee1"),
-            name = Some("Connor Signee"),
-            Address = Some(
-              AddressType17(
-                streetAndNumber = "1 Test Lane",
-                postcode = Some("TE1 1ST"),
-                city = "Testville",
-                country = "GB"
-              )
-            )
+          result.value shouldBe TransportChargesType(
+            methodOfPayment = "A"
           )
         }
 
-        "items have different consignees" in {
+        "items have different transport charges" in {
           val json = Json.parse("""
               |{
               |  "items" : [
               |    {
-              |      "consignee" : {
-              |        "addConsigneeEoriNumberYesNo" : true,
-              |        "identificationNumber" : "consignee1",
-              |        "name" : "Connor Signee",
-              |        "country" : {
-              |          "code" : "GB",
-              |          "description" : "United Kingdom"
-              |        },
-              |        "address" : {
-              |          "numberAndStreet" : "1 Test Lane",
-              |          "city" : "Testville",
-              |          "postalCode" : "TE1 1ST"
-              |        }
+              |      "methodOfPayment" : {
+              |        "code" : "A",
+              |        "description" : "Payment in cash"
               |      }
               |    },
               |    {
-              |      "consignee" : {
-              |        "addConsigneeEoriNumberYesNo" : false,
-              |        "name" : "Joe Bloggs",
-              |        "country" : {
-              |          "code" : "FR",
-              |          "description" : "France"
-              |        },
-              |        "address" : {
-              |          "numberAndStreet" : "1 Test Rue",
-              |          "city" : "Paris",
-              |          "postalCode" : "PA1 1PA"
-              |        }
+              |      "methodOfPayment" : {
+              |        "code" : "B",
+              |        "description" : "Payment by credit card"
               |      }
               |    }
               |  ]
               |}
               |""".stripMargin)
 
-          val result = json.as[Option[ConsigneeType05]](consigneeType05.reads)
+          val result = json.as[Option[TransportChargesType]](transportChargesType.reads)
 
           result shouldBe None
         }
