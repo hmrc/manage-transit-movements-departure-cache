@@ -59,4 +59,14 @@ object addressType12 {
 
   implicit val optionalReads: Reads[Option[AddressType12]] =
     addressType.optionalReads(AddressType12)
+
+  implicit class RichAddressType12(value: AddressType12) {
+
+    def asAddressType17: AddressType17 = AddressType17(
+      streetAndNumber = value.streetAndNumber,
+      postcode = value.postcode,
+      city = value.city,
+      country = value.country
+    )
+  }
 }

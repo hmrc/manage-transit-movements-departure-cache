@@ -1438,5 +1438,79 @@ class ConsignmentSpec extends SpecBase {
         )
       }
     }
+
+    "transportChargesType reads is called" when {
+      "transport charges defined at consignment level" in {
+        val json = Json.parse("""
+            |{
+            |  "transportDetails" : {
+            |    "equipmentsAndCharges" : {
+            |      "paymentMethod" : "cash"
+            |    }
+            |  }
+            |}
+            |""".stripMargin)
+
+        val result = json.as[Option[TransportChargesType]](transportChargesType.reads)
+
+        result.value shouldBe TransportChargesType(
+          methodOfPayment = "A"
+        )
+      }
+
+      "transport charges undefined at consignment level" when {
+        "items have same transport charges" in {
+          val json = Json.parse("""
+              |{
+              |  "items" : [
+              |    {
+              |      "methodOfPayment" : {
+              |        "code" : "A",
+              |        "description" : "Payment in cash"
+              |      }
+              |    },
+              |    {
+              |      "methodOfPayment" : {
+              |        "code" : "A",
+              |        "description" : "Payment in cash"
+              |      }
+              |    }
+              |  ]
+              |}
+              |""".stripMargin)
+
+          val result = json.as[Option[TransportChargesType]](transportChargesType.reads)
+
+          result.value shouldBe TransportChargesType(
+            methodOfPayment = "A"
+          )
+        }
+
+        "items have different transport charges" in {
+          val json = Json.parse("""
+              |{
+              |  "items" : [
+              |    {
+              |      "methodOfPayment" : {
+              |        "code" : "A",
+              |        "description" : "Payment in cash"
+              |      }
+              |    },
+              |    {
+              |      "methodOfPayment" : {
+              |        "code" : "B",
+              |        "description" : "Payment by credit card"
+              |      }
+              |    }
+              |  ]
+              |}
+              |""".stripMargin)
+
+          val result = json.as[Option[TransportChargesType]](transportChargesType.reads)
+
+          result shouldBe None
+        }
+      }
+    }
   }
 }
