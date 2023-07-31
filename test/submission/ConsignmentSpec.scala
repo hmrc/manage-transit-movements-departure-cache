@@ -74,10 +74,6 @@ class ConsignmentSpec extends SpecBase {
             |    },
             |    "routeDetails" : {
             |      "routing" : {
-            |        "countryOfDestination" : {
-            |          "code" : "IT",
-            |          "description" : "Italy"
-            |        },
             |        "countriesOfRouting" : [
             |          {
             |            "countryOfRouting" : {
@@ -169,6 +165,10 @@ class ConsignmentSpec extends SpecBase {
             |        "countryOfDispatch" : {
             |          "code" : "FR",
             |          "description" : "France"
+            |        },
+            |        "itemsDestinationCountry" : {
+            |          "code" : "IT",
+            |          "description" : "Italy"
             |        },
             |        "containerIndicator" : true
             |      },
