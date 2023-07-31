@@ -23,6 +23,7 @@ import models._
 import org.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
 import org.mongodb.scala.model._
+import services.TTLService
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
@@ -148,7 +149,6 @@ class CacheRepository @Inject() (
     } yield UserAnswersSummary(
       eoriNumber,
       aggregateResult,
-      appConfig.mongoTtlInDays,
       totalDocuments.toInt,
       totalMatchingDocuments
     )
