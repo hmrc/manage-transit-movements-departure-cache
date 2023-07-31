@@ -35,7 +35,7 @@ object consignmentType20 {
 
   implicit val reads: Reads[ConsignmentType20] = for {
     countryOfDispatch           <- (preRequisitesPath \ "countryOfDispatch" \ "code").readNullable[String]
-    countryOfDestination        <- (routeDetailsPath \ "routing" \ "countryOfDestination" \ "code").readNullable[String]
+    countryOfDestination        <- (preRequisitesPath \ "itemsDestinationCountry" \ "code").readNullable[String]
     containerIndicator          <- (preRequisitesPath \ "containerIndicator").readNullable[Boolean]
     inlandModeOfTransport       <- inlandModeReads.map(Some(_)).map(convertModeOfTransport)
     modeOfTransportAtTheBorder  <- borderModeOfTransportReads.map(convertModeOfTransport)
