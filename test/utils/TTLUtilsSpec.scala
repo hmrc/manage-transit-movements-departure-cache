@@ -14,16 +14,25 @@
  * limitations under the License.
  */
 
-package services
+package utils
 
-import config.AppConfig
-
+import base.SpecBase
+import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import java.time.temporal.ChronoUnit.DAYS
-import java.time.{Clock, Duration, Instant}
 
-object TTLService {
+import java.time.Instant
 
-  def expiresInDays(createdAt: Instant)(implicit clock: Clock, appConfig: AppConfig): Long =
-    Duration.between(Instant.now(clock), createdAt.plus(appConfig.mongoTtlInDays, DAYS)).toDays + 1
+class TTLUtilsSpec extends SpecBase {
+
+  "expiresInDays" should {
+
+    "return correct days for a date today" in {
+      TTLUtils.expiresInDays(Instant.now()) mustBe 30L
+    }
+
+    "return correct days for a date 5 days ago" in {
+      TTLUtils.expiresInDays(Instant.now().minus(5, DAYS)) mustBe 25L
+    }
+  }
 
 }

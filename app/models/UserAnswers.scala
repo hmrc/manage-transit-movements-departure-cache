@@ -18,8 +18,8 @@ package models
 
 import config.AppConfig
 import play.api.libs.json._
-import services.TTLService
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+import utils.TTLUtils
 
 import java.time.{Clock, Instant}
 import java.util.UUID
@@ -38,7 +38,7 @@ final case class UserAnswers(
   def get[A](path: JsPath)(implicit rds: Reads[A]): Option[A] =
     Reads.optionNoError(Reads.at(path)).reads(metadata.data).getOrElse(None)
 
-  def withExpiryDate(implicit clock: Clock, appConfig: AppConfig) = this.copy(expiryInDays = Some(TTLService.expiresInDays(createdAt)))
+  def withExpiryDate(implicit clock: Clock, appConfig: AppConfig) = this.copy(expiryInDays = Some(TTLUtils.expiresInDays(createdAt)))
 }
 
 object UserAnswers {
@@ -68,10 +68,5 @@ object UserAnswers {
     customReads(MongoJavatimeFormats.instantReads),
     customWrites(MongoJavatimeFormats.instantWrites)
   )
-
-  def writesWithExpiryDate(implicit instantWrites: Writes[Instant]): Writes[UserAnswers] =
-    x =>
-      Json.obj(
-      )
 
 }

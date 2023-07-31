@@ -18,7 +18,7 @@ package models
 
 import config.AppConfig
 import play.api.libs.json.{JsObject, Json}
-import services.TTLService
+import utils.TTLUtils
 
 import java.time.Clock
 
@@ -38,7 +38,7 @@ case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers],
             ),
             "createdAt"     -> userAnswer.createdAt,
             "lastUpdated"   -> userAnswer.lastUpdated,
-            "expiresInDays" -> TTLService.expiresInDays(userAnswer.createdAt),
+            "expiresInDays" -> TTLUtils.expiresInDays(userAnswer.createdAt),
             "_id"           -> userAnswer.id
           )
       }
