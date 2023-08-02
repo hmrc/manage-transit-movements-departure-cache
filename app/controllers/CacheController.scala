@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.AppConfig
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
 import models.Metadata
 import play.api.Logging
@@ -34,7 +35,7 @@ class CacheController @Inject() (
   authenticate: AuthenticateActionProvider,
   authenticateAndLock: AuthenticateAndLockActionProvider,
   cacheRepository: CacheRepository
-)(implicit ec: ExecutionContext, clock: Clock)
+)(implicit ec: ExecutionContext, clock: Clock, appConfig: AppConfig)
     extends BackendController(cc)
     with Logging {
 
@@ -44,7 +45,7 @@ class CacheController @Inject() (
       cacheRepository
         .get(lrn, request.eoriNumber)
         .map {
-          case Some(userAnswers) => Ok(Json.toJson(userAnswers))
+          case Some(userAnswers) => Ok(Json.toJson(userAnswers.withExpiryDate))
           case None =>
             logger.warn(s"No document found for LRN '$lrn' and EORI '${request.eoriNumber}'")
             NotFound

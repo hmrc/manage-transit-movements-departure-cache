@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.{Metadata, SubmissionState, UserAnswers, UserAnswersSummary}
+import models.{Metadata, Status, SubmissionState, UserAnswers, UserAnswersSummary}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, verify, when}
@@ -28,6 +28,7 @@ import play.api.test.Helpers._
 import java.time.Instant
 import java.util.UUID
 import scala.concurrent.Future
+import java.time.temporal.ChronoUnit.DAYS
 
 class CacheControllerSpec extends SpecBase {
 
@@ -35,13 +36,14 @@ class CacheControllerSpec extends SpecBase {
 
     "return 200" when {
       "read from mongo is successful" in {
-        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+        val userAnswers = UserAnswers(emptyMetadata, Instant.now(), Some(30L), Instant.now(), UUID.randomUUID())
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
         val request = FakeRequest(GET, routes.CacheController.get(lrn).url)
         val result  = route(app, request).value
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(emptyUserAnswers)
+        contentAsJson(result) shouldBe Json.toJson(userAnswers)
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
       }
     }
@@ -257,17 +259,17 @@ class CacheControllerSpec extends SpecBase {
     "return 200" when {
 
       "read from mongo is successful" in {
-        val userAnswer1 = UserAnswers(Metadata("AB123", eoriNumber), Instant.now(), Instant.now(), UUID.randomUUID())
-        val userAnswer2 = UserAnswers(Metadata("CD123", eoriNumber), Instant.now(), Instant.now(), UUID.randomUUID())
+        val userAnswer1 = UserAnswers(Metadata("AB123", eoriNumber), Instant.now(), None, Instant.now(), UUID.randomUUID())
+        val userAnswer2 = UserAnswers(Metadata("CD123", eoriNumber), Instant.now(), None, Instant.now(), UUID.randomUUID())
 
         when(mockCacheRepository.getAll(any(), any(), any(), any(), any()))
-          .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 30, 2, 2)))
+          .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 2, 2)))
 
         val request = FakeRequest(GET, routes.CacheController.getAll().url)
         val result  = route(app, request).value
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 30, 2, 2).toHateoas()
+        contentAsJson(result) shouldBe UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 2, 2).toHateoas()
         verify(mockCacheRepository).getAll(eqTo(eoriNumber), any(), any(), any(), any())
       }
     }

@@ -25,6 +25,7 @@ import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
 import org.mongodb.scala.model._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
+import utils.TTLUtils
 
 import java.time.{Clock, Instant}
 import java.util.UUID
@@ -148,7 +149,6 @@ class CacheRepository @Inject() (
     } yield UserAnswersSummary(
       eoriNumber,
       aggregateResult,
-      appConfig.mongoTtlInDays,
       totalDocuments.toInt,
       totalMatchingDocuments
     )

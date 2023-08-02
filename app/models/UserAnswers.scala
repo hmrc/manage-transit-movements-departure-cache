@@ -16,15 +16,18 @@
 
 package models
 
+import config.AppConfig
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
+import utils.TTLUtils
 
-import java.time.Instant
+import java.time.{Clock, Instant}
 import java.util.UUID
 
 final case class UserAnswers(
   metadata: Metadata,
   createdAt: Instant,
+  expiryInDays: Option[Long] = None,
   lastUpdated: Instant,
   id: UUID
 ) {
@@ -34,6 +37,8 @@ final case class UserAnswers(
 
   def get[A](path: JsPath)(implicit rds: Reads[A]): Option[A] =
     Reads.optionNoError(Reads.at(path)).reads(metadata.data).getOrElse(None)
+
+  def withExpiryDate(implicit clock: Clock, appConfig: AppConfig) = this.copy(expiryInDays = Some(TTLUtils.expiresInDays(createdAt)))
 }
 
 object UserAnswers {
@@ -46,6 +51,7 @@ object UserAnswers {
   private def customReads(implicit instantReads: Reads[Instant]): Reads[UserAnswers] = (
     __.read[Metadata] and
       (__ \ "createdAt").read[Instant] and
+      (__ \ "expiryInDays").readNullable[Long] and
       (__ \ "lastUpdated").read[Instant] and
       (__ \ "_id").read[UUID]
   )(UserAnswers.apply _)
@@ -53,6 +59,7 @@ object UserAnswers {
   private def customWrites(implicit instantWrites: Writes[Instant]): Writes[UserAnswers] = (
     __.write[Metadata] and
       (__ \ "createdAt").write[Instant] and
+      (__ \ "expiryInDays").writeNullable[Long] and
       (__ \ "lastUpdated").write[Instant] and
       (__ \ "_id").write[UUID]
   )(unlift(UserAnswers.unapply))
@@ -61,4 +68,5 @@ object UserAnswers {
     customReads(MongoJavatimeFormats.instantReads),
     customWrites(MongoJavatimeFormats.instantWrites)
   )
+
 }
