@@ -16,7 +16,6 @@
 
 package services
 
-import config.AppConfig
 import models.SubmissionState.NotSubmitted
 import models.{Status, XPath}
 import play.api.Logging
@@ -26,8 +25,7 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class XPathService @Inject() (
-  cacheRepository: CacheRepository,
-  config: AppConfig
+  cacheRepository: CacheRepository
 )(implicit ec: ExecutionContext)
     extends Logging {
 
