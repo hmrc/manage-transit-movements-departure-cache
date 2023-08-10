@@ -58,27 +58,6 @@ class CacheRepository @Inject() (
       .toFutureOption()
   }
 
-  def setFlag(data: Metadata, submissionState: SubmissionState): Future[Boolean] = {
-
-    val now = Instant.now(clock)
-
-    val filter = Filters.and(
-      Filters.eq("lrn", data.lrn),
-      Filters.eq("eoriNumber", data.eoriNumber)
-    )
-    val updates = Updates.combine(
-      Updates.set("isSubmitted", submissionState.toString),
-      Updates.set("lastUpdated", now)
-    )
-
-    val options = UpdateOptions().upsert(false)
-
-    collection
-      .updateOne(filter, updates, options)
-      .toFuture()
-      .map(_.wasAcknowledged())
-  }
-
   def set(data: Metadata): Future[Boolean] = {
     val now = Instant.now(clock)
     val filter = Filters.and(

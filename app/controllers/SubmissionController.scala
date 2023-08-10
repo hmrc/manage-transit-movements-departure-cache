@@ -16,13 +16,12 @@
 
 package controllers
 
-import connectors.ApiConnector
 import controllers.actions.AuthenticateActionProvider
-import models.SubmissionState
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
-import play.api.mvc.{Action, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
+import services.ApiService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -32,31 +31,33 @@ import scala.concurrent.{ExecutionContext, Future}
 class SubmissionController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
-  apiConnector: ApiConnector,
+  apiService: ApiService,
   cacheRepository: CacheRepository
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
 
-  def post(): Action[JsValue] = authenticate().async(parse.json) {
+  def post(): Action[JsValue] =
+    authenticate().async(parse.json) {
+      implicit request =>
+        request.body.validate[String] match {
+          case JsSuccess(lrn, _) =>
+            cacheRepository.get(lrn, request.eoriNumber).flatMap {
+              case Some(uA) =>
+                apiService.submitDeclaration(uA).map {
+                  case Right(response) => Ok(response.body)
+                  case Left(error)     => error
+                }
+              case None => Future.successful(InternalServerError)
+            }
+          case JsError(errors) =>
+            logger.warn(s"Failed to validate request body as String: $errors")
+            Future.successful(BadRequest)
+        }
+    }
+
+  def getSubmissionStatus(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
-      request.body.validate[String] match {
-        case JsSuccess(lrn, _) =>
-          cacheRepository.get(lrn, request.eoriNumber).flatMap {
-            case Some(uA) =>
-              //TODO: Here for testing purposes, once submission works put back on the Right(response) case
-              cacheRepository.setFlag(uA.metadata, SubmissionState.Submitted).flatMap {
-                _ =>
-                  apiConnector.submitDeclaration(uA).map {
-                    case Right(response) => Ok(response.body)
-                    case Left(error)     => error
-                  }
-              }
-            case None => Future.successful(InternalServerError)
-          }
-        case JsError(errors) =>
-          logger.warn(s"Failed to validate request body as String: $errors")
-          Future.successful(BadRequest)
-      }
+      ???
   }
 }

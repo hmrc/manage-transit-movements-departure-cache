@@ -16,8 +16,6 @@
 
 package services
 
-import config.AppConfig
-import connectors.ApiConnector
 import play.api.Logging
 import repositories.CacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
@@ -27,13 +25,12 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class DuplicateService @Inject() (
   cacheRepository: CacheRepository,
-  apiConnector: ApiConnector,
-  config: AppConfig
+  apiService: ApiService
 )(implicit ec: ExecutionContext)
     extends Logging {
 
   def doesSubmissionExistForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
-    apiConnector.getDepartures(Seq("localReferenceNumber" -> lrn)) map {
+    apiService.getDeparturesForLrn(lrn).map {
       case Some(departures) => departures.departures.nonEmpty
       case None             => false
     }
