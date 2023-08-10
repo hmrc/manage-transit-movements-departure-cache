@@ -17,7 +17,7 @@
 package services
 
 import connectors.ApiConnector
-import models.{Departure, DepartureMessage, SubmissionState, UserAnswers}
+import models._
 import play.api.mvc.Result
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -25,7 +25,8 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ApiService @Inject() (
-  apiConnector: ApiConnector
+  apiConnector: ApiConnector,
+  xPathService: XPathService
 )(implicit ec: ExecutionContext) {
 
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
@@ -34,26 +35,27 @@ class ApiService @Inject() (
   def getDeparturesForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Option[Seq[Departure]]] =
     apiConnector.getDepartures(Seq("localReferenceNumber" -> lrn))
 
-  def getSubmissionStatus(lrn: String)(implicit hc: HeaderCarrier): Future[SubmissionState] =
+  def getSubmissionStatus(lrn: String, eoriNumber: String)(implicit hc: HeaderCarrier): Future[SubmissionState] =
     getDeparturesForLrn(lrn).flatMap {
       case Some(departures) =>
         departures.sortBy(_.created).reverse.headOption match {
           case Some(departure) =>
-            apiConnector.getDepartureMessages(departure.id).map {
+            apiConnector.getDepartureMessages(departure.id).flatMap {
               case Some(messages) =>
                 messages.sortBy(_.received).reverse.headOption match {
-                  case Some(DepartureMessage(_, "IE015", _))         => SubmissionState.Submitted
+                  case Some(DepartureMessage(_, "IE015", _)) => Future.successful(SubmissionState.Submitted)
                   case Some(DepartureMessage(messageId, "IE056", _)) =>
-                    // get message
-                    // get functional errors
-                    // pass to XPathService isAmendable
-                    // if amendable => RejectedPendingChanges
-                    // if not amendable => SubmissionState.Submitted
-                    SubmissionState.RejectedPendingChanges
-                  case _ => SubmissionState.NotSubmitted
+                    apiConnector.getDepartureMessage[IE056Message](departure.id, messageId).map(_.body.xPaths).flatMap {
+                      xPaths =>
+                        xPathService.isDeclarationAmendable(lrn, eoriNumber, xPaths).map {
+                          case true  => SubmissionState.RejectedPendingChanges
+                          case false => SubmissionState.Submitted
+                        }
+                    }
+                  case _ => Future.successful(SubmissionState.NotSubmitted)
                 }
               case None =>
-                SubmissionState.NotSubmitted
+                Future.successful(SubmissionState.NotSubmitted)
             }
           case None =>
             Future.successful(SubmissionState.NotSubmitted)

@@ -123,7 +123,7 @@ class SubmissionControllerSpec extends SpecBase {
 
   "getSubmissionStatus" should {
     "return submission status" in {
-      when(mockApiService.getSubmissionStatus(any())(any()))
+      when(mockApiService.getSubmissionStatus(any(), any())(any()))
         .thenReturn(Future.successful(SubmissionState.Submitted))
 
       val request = FakeRequest(GET, routes.SubmissionController.getSubmissionStatus(lrn).url)
@@ -133,7 +133,7 @@ class SubmissionControllerSpec extends SpecBase {
 
       status(result) shouldBe OK
 
-      verify(mockApiService).getSubmissionStatus(eqTo(lrn))(any())
+      verify(mockApiService).getSubmissionStatus(eqTo(lrn), eqTo(eoriNumber))(any())
     }
   }
 }

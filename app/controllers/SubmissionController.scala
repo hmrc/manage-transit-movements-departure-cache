@@ -58,6 +58,6 @@ class SubmissionController @Inject() (
 
   def getSubmissionStatus(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
-      apiService.getSubmissionStatus(lrn).map(Json.toJson(_)).map(Ok(_))
+      apiService.getSubmissionStatus(lrn, request.eoriNumber).map(Json.toJson(_)).map(Ok(_))
   }
 }

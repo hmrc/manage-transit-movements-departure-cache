@@ -524,14 +524,10 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
              |    "n1:CC056C": {
              |      "FunctionalError": [
              |        {
-             |          "errorPointer": "1",
-             |          "errorCode": "12",
-             |          "errorReason": "Codelist violation"
+             |          "errorPointer": "/CC015C/Authorisation[1]/referenceNumber"
              |        },
              |        {
-             |          "errorPointer": "2",
-             |          "errorCode": "14",
-             |          "errorReason": "Rule violation"
+             |          "errorPointer": "/CC015C/Guarantee[1]/guaranteeType"
              |        }
              |      ]
              |    }
@@ -549,8 +545,8 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
           val expectedResult = IE056Message(
             IE056Body(
               Seq(
-                FunctionalError("1", "12", "Codelist violation", None),
-                FunctionalError("2", "14", "Rule violation", None)
+                FunctionalError("/CC015C/Authorisation[1]/referenceNumber"),
+                FunctionalError("/CC015C/Guarantee[1]/guaranteeType")
               )
             )
           )

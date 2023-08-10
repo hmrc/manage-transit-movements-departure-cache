@@ -19,10 +19,7 @@ package models
 import play.api.libs.json.{Json, OFormat}
 
 case class FunctionalError(
-  errorPointer: String,
-  errorCode: String,
-  errorReason: String,
-  originalAttributeValue: Option[String]
+  errorPointer: String
 )
 
 object FunctionalError {

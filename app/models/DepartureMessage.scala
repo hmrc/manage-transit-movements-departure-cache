@@ -65,7 +65,9 @@ object IE056Message {
 
 sealed trait Body
 
-case class IE056Body(functionalErrors: Seq[FunctionalError]) extends Body
+case class IE056Body(functionalErrors: Seq[FunctionalError]) extends Body {
+  val xPaths: Seq[XPath] = functionalErrors.map(_.errorPointer).map(XPath(_))
+}
 
 object IE056Body {
 
