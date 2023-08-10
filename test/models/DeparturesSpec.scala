@@ -26,56 +26,56 @@ class DeparturesSpec extends SpecBase with ScalaCheckPropertyChecks with Generat
 
   "must deserialise" in {
 
-    forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-      (lrn1, lrn2) =>
+    forAll(Gen.alphaNumStr, Gen.alphaNumStr, Gen.alphaNumStr, Gen.alphaNumStr) {
+      (departureId1, departureId2, lrn1, lrn2) =>
         val json: JsValue = Json.parse(s"""
-    {
-      "_links": {
-        "self": {
-          "href": "/customs/transits/movements/departures"
-        }
-      },
-      "departures": [
-        {
-          "_links": {
-            "self": {
-              "href": "/customs/transits/movements/departures/63651574c3447b12"
-            },
-            "messages": {
-              "href": "/customs/transits/movements/departures/63651574c3447b12/messages"
-            }
-          },
-          "id": "63651574c3447b12",
-          "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
-          "localReferenceNumber": "$lrn1",
-          "created": "2022-11-04T13:36:52.332Z",
-          "updated": "2022-11-04T13:36:52.332Z",
-          "enrollmentEORINumber": "9999912345",
-          "movementEORINumber": "GB1234567890"
-        },
-        {
-          "_links": {
-            "self": {
-              "href": "/customs/transits/movements/departures/6365135ba5e821ee"
-            },
-            "messages": {
-              "href": "/customs/transits/movements/departures/6365135ba5e821ee/messages"
-            }
-          },
-          "id": "6365135ba5e821ee",
-          "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
-          "localReferenceNumber": "$lrn2",
-          "created": "2022-11-04T13:27:55.522Z",
-          "updated": "2022-11-04T13:27:55.522Z",
-          "enrollmentEORINumber": "9999912345",
-          "movementEORINumber": "GB1234567890"
-        }
-      ]
-    }
-    """)
+             |{
+             |  "_links": {
+             |    "self": {
+             |      "href": "/customs/transits/movements/departures"
+             |    }
+             |  },
+             |  "departures": [
+             |    {
+             |      "_links": {
+             |        "self": {
+             |          "href": "/customs/transits/movements/departures/63651574c3447b12"
+             |        },
+             |        "messages": {
+             |          "href": "/customs/transits/movements/departures/63651574c3447b12/messages"
+             |        }
+             |      },
+             |      "id": "$departureId1",
+             |      "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
+             |      "localReferenceNumber": "$lrn1",
+             |      "created": "2022-11-04T13:36:52.332Z",
+             |      "updated": "2022-11-04T13:36:52.332Z",
+             |      "enrollmentEORINumber": "9999912345",
+             |      "movementEORINumber": "GB1234567890"
+             |    },
+             |    {
+             |      "_links": {
+             |        "self": {
+             |          "href": "/customs/transits/movements/departures/6365135ba5e821ee"
+             |        },
+             |        "messages": {
+             |          "href": "/customs/transits/movements/departures/6365135ba5e821ee/messages"
+             |        }
+             |      },
+             |      "id": "$departureId2",
+             |      "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
+             |      "localReferenceNumber": "$lrn2",
+             |      "created": "2022-11-04T13:27:55.522Z",
+             |      "updated": "2022-11-04T13:27:55.522Z",
+             |      "enrollmentEORINumber": "9999912345",
+             |      "movementEORINumber": "GB1234567890"
+             |    }
+             |  ]
+             |}
+             |""".stripMargin)
 
         val result = json.validate[Departures].asOpt.value
-        result shouldBe Departures(Seq(Departure(lrn1), Departure(lrn2)))
+        result shouldBe Departures(Seq(Departure(departureId1, lrn1), Departure(departureId2, lrn2)))
     }
   }
 

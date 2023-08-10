@@ -26,22 +26,22 @@ class DepartureSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
 
   "must deserialise" in {
 
-    forAll(Gen.alphaNumStr) {
-      lrn =>
+    forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
+      (departureId, lrn) =>
         val json: JsValue = Json.parse(s"""
-    {
-          "id": "63651574c3447b12",
-          "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
-          "localReferenceNumber": "$lrn",
-          "created": "2022-11-04T13:36:52.332Z",
-          "updated": "2022-11-04T13:36:52.332Z",
-          "enrollmentEORINumber": "9999912345",
-          "movementEORINumber": "GB1234567890"
-    }
-    """)
+            |{
+            |  "id": "$departureId",
+            |  "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
+            |  "localReferenceNumber": "$lrn",
+            |  "created": "2022-11-04T13:36:52.332Z",
+            |  "updated": "2022-11-04T13:36:52.332Z",
+            |  "enrollmentEORINumber": "9999912345",
+            |  "movementEORINumber": "GB1234567890"
+            |}
+            |""".stripMargin)
 
         val result = json.as[Departure]
-        result shouldBe Departure(lrn)
+        result shouldBe Departure(departureId, lrn)
     }
   }
 

@@ -59,6 +59,8 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
       }
   }
 
+  def getDepartureMessages() = ???
+
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
 
     val declarationUrl  = s"${appConfig.apiUrl}/movements/departures"

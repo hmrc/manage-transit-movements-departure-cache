@@ -313,8 +313,10 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
 
     "getDepartures" - {
 
-      val lrn1 = "3CnsTh79I7vtOy6"
-      val lrn2 = "DEF456"
+      val departureId1 = "63651574c3447b12"
+      val departureId2 = "6365135ba5e821ee"
+      val lrn1         = "3CnsTh79I7vtOy6"
+      val lrn2         = "DEF456"
 
       val responseJson: JsValue = Json.parse(
         s"""
@@ -334,7 +336,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                     "href": "/customs/transits/movements/departures/63651574c3447b12/messages"
                   }
                 },
-                "id": "63651574c3447b12",
+                "id": "$departureId1",
                 "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
                 "localReferenceNumber": "$lrn1",
                 "created": "2022-11-04T13:36:52.332Z",
@@ -351,7 +353,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                     "href": "/customs/transits/movements/departures/6365135ba5e821ee/messages"
                   }
                 },
-                "id": "6365135ba5e821ee",
+                "id": "$departureId2",
                 "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
                 "localReferenceNumber": "$lrn2",
                 "created": "2022-11-04T13:27:55.522Z",
@@ -371,7 +373,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
             .willReturn(okJson(responseJson.toString()))
         )
 
-        val expectedResult = Departures(Seq(Departure(lrn1), Departure(lrn2)))
+        val expectedResult = Departures(Seq(Departure(departureId1, lrn1), Departure(departureId2, lrn2)))
 
         await(connector.getDepartures()) mustBe Some(expectedResult)
       }

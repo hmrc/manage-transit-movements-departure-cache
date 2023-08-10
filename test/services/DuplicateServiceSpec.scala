@@ -32,6 +32,7 @@ import scala.concurrent.Future
 
 class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with ScalaFutures {
 
+  val departureId                = "departureId"
   val lrn                        = "lrn"
   val eoriNumber                 = "eoriNumber"
   implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -63,7 +64,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
     "must return true" - {
       "when Some(_) is returned from getDepartures" in {
 
-        val mockedResponse: Option[Departures] = Some(Departures(Seq(Departure(lrn))))
+        val mockedResponse: Option[Departures] = Some(Departures(Seq(Departure(departureId, lrn))))
 
         when(mockApiService.getDeparturesForLrn(any())(any())).thenReturn(Future.successful(mockedResponse))
 
@@ -124,7 +125,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
     "must return true" - {
       "when doesSubmissionExistForLrn returns departures" in {
         when(mockApiService.getDeparturesForLrn(any())(any()))
-          .thenReturn(Future.successful(Some(Departures(Seq(Departure(lrn))))))
+          .thenReturn(Future.successful(Some(Departures(Seq(Departure(departureId, lrn))))))
 
         val result = service.doesDraftOrSubmissionExistForLrn(lrn).futureValue
 
