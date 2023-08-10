@@ -78,7 +78,7 @@ class ApiServiceSpec extends SpecBase with ScalaFutures {
         )
 
         val messages = Seq(
-          DepartureMessage("IE015", Instant.ofEpochMilli(1667569012332L))
+          DepartureMessage("messageId", "IE015", Instant.ofEpochMilli(1667569012332L))
         )
 
         when(mockApiConnector.getDepartures(any())(any())).thenReturn(Future.successful(Some(departures)))
@@ -100,8 +100,8 @@ class ApiServiceSpec extends SpecBase with ScalaFutures {
         )
 
         val messages = Seq(
-          DepartureMessage("IE015", Instant.ofEpochMilli(1667568475522L)),
-          DepartureMessage("IE056", Instant.ofEpochMilli(1667569012332L))
+          DepartureMessage("messageId1", "IE015", Instant.ofEpochMilli(1667568475522L)),
+          DepartureMessage("messageId2", "IE056", Instant.ofEpochMilli(1667569012332L))
         )
 
         when(mockApiConnector.getDepartures(any())(any())).thenReturn(Future.successful(Some(departures)))

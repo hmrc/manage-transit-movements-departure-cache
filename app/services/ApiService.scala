@@ -17,7 +17,7 @@
 package services
 
 import connectors.ApiConnector
-import models.{Departure, SubmissionState, UserAnswers}
+import models.{Departure, DepartureMessage, SubmissionState, UserAnswers}
 import play.api.mvc.Result
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
@@ -41,10 +41,16 @@ class ApiService @Inject() (
           case Some(departure) =>
             apiConnector.getDepartureMessages(departure.id).map {
               case Some(messages) =>
-                messages.sortBy(_.received).reverse.map(_.`type`).headOption match {
-                  case Some("IE015") => SubmissionState.Submitted
-                  case Some("IE056") => SubmissionState.RejectedPendingChanges
-                  case _             => SubmissionState.NotSubmitted
+                messages.sortBy(_.received).reverse.headOption match {
+                  case Some(DepartureMessage(_, "IE015", _))         => SubmissionState.Submitted
+                  case Some(DepartureMessage(messageId, "IE056", _)) =>
+                    // get message
+                    // get functional errors
+                    // pass to XPathService isAmendable
+                    // if amendable => RejectedPendingChanges
+                    // if not amendable => SubmissionState.Submitted
+                    SubmissionState.RejectedPendingChanges
+                  case _ => SubmissionState.NotSubmitted
                 }
               case None =>
                 SubmissionState.NotSubmitted
