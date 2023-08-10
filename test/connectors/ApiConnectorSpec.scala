@@ -19,7 +19,7 @@ package connectors
 import base.AppWithDefaultMockFixtures
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
-import models.{Departure, Departures, UserAnswers}
+import models.{Departure, DepartureMessage, UserAnswers}
 import org.scalacheck.Gen
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
@@ -30,6 +30,8 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Results.{BadRequest, InternalServerError}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+
+import java.time.Instant
 
 class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with WireMockServerHandler with Matchers {
 
@@ -373,7 +375,10 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
             .willReturn(okJson(responseJson.toString()))
         )
 
-        val expectedResult = Departures(Seq(Departure(departureId1, lrn1), Departure(departureId2, lrn2)))
+        val expectedResult = Seq(
+          Departure(departureId1, lrn1, Instant.ofEpochMilli(1667569012332L)),
+          Departure(departureId2, lrn2, Instant.ofEpochMilli(1667568475522L))
+        )
 
         await(connector.getDepartures()) mustBe Some(expectedResult)
       }
@@ -385,7 +390,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
             .willReturn(aResponse().withStatus(404))
         )
 
-        connector.getDepartures().futureValue mustBe Some(Departures(Seq.empty))
+        connector.getDepartures().futureValue mustBe Some(Seq.empty)
       }
 
       "must return None when an error is returned" in {
@@ -432,6 +437,64 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
 
       }
 
+    }
+
+    "getDepartureMessages" - {
+
+      val departureId = "6365135ba5e821ee"
+
+      val responseJson: JsValue = Json.parse(s"""
+           |{
+           |  "_links": {
+           |    "self": {
+           |      "href": "/customs/transits/movements/departures/$departureId/messages"
+           |    },
+           |    "departure": {
+           |      "href": "/customs/transits/movements/departures/$departureId"
+           |    }
+           |  },
+           |  "totalCount": 1,
+           |  "messages": [
+           |    {
+           |      "_links": {
+           |        "self": {
+           |          "href": "/customs/transits/movements/departures/$departureId/message/634982098f02f00a"
+           |        },
+           |        "departure": {
+           |          "href": "/customs/transits/movements/departures/$departureId"
+           |        }
+           |      },
+           |      "id": "634982098f02f00a",
+           |      "departureId": "$departureId",
+           |      "received": "2023-08-10T12:04:39.779Z",
+           |      "type": "IE015",
+           |      "status": "Success"
+           |    }
+           |  ]
+           |}
+           |""".stripMargin)
+
+      "must return some messages for given departure ID" in {
+
+        server.stubFor(
+          get(urlEqualTo(s"/movements/departures/$departureId/messages"))
+            .willReturn(okJson(responseJson.toString()))
+        )
+
+        val expectedResult = Seq(DepartureMessage("IE015", Instant.ofEpochMilli(1691669079779L)))
+
+        await(connector.getDepartureMessages(departureId)) mustBe Some(expectedResult)
+      }
+
+      "must return None Departures when 404 is returned" in {
+
+        server.stubFor(
+          get(urlEqualTo(s"/movements/departures/$departureId/messages"))
+            .willReturn(aResponse().withStatus(404))
+        )
+
+        connector.getDepartureMessages(departureId).futureValue mustBe None
+      }
     }
 
   }

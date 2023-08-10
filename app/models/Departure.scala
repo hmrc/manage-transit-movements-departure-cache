@@ -19,12 +19,15 @@ package models
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{__, Reads}
 
-case class Departure(id: String, localReferenceNumber: String)
+import java.time.Instant
+
+case class Departure(id: String, localReferenceNumber: String, created: Instant)
 
 object Departure {
 
   implicit val reads: Reads[Departure] = (
     (__ \ "id").read[String] and
-      (__ \ "localReferenceNumber").read[String]
+      (__ \ "localReferenceNumber").read[String] and
+      (__ \ "created").read[Instant]
   )(Departure.apply _)
 }

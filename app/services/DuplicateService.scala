@@ -31,7 +31,7 @@ class DuplicateService @Inject() (
 
   def doesSubmissionExistForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
     apiService.getDeparturesForLrn(lrn).map {
-      case Some(departures) => departures.departures.nonEmpty
+      case Some(departures) => departures.nonEmpty
       case None             => false
     }
 

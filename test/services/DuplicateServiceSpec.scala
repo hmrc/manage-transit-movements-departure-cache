@@ -17,7 +17,7 @@
 package services
 
 import base.AppWithDefaultMockFixtures
-import models.{Departure, Departures}
+import models.Departure
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.concurrent.ScalaFutures
@@ -28,6 +28,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import repositories.{CacheRepository, DefaultLockRepository}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.Instant
 import scala.concurrent.Future
 
 class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with ScalaFutures {
@@ -64,7 +65,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
     "must return true" - {
       "when Some(_) is returned from getDepartures" in {
 
-        val mockedResponse: Option[Departures] = Some(Departures(Seq(Departure(departureId, lrn))))
+        val mockedResponse: Option[Seq[Departure]] = Some(Seq(Departure(departureId, lrn, Instant.now())))
 
         when(mockApiService.getDeparturesForLrn(any())(any())).thenReturn(Future.successful(mockedResponse))
 
@@ -125,7 +126,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
     "must return true" - {
       "when doesSubmissionExistForLrn returns departures" in {
         when(mockApiService.getDeparturesForLrn(any())(any()))
-          .thenReturn(Future.successful(Some(Departures(Seq(Departure(departureId, lrn))))))
+          .thenReturn(Future.successful(Some(Seq(Departure(departureId, lrn, Instant.now())))))
 
         val result = service.doesDraftOrSubmissionExistForLrn(lrn).futureValue
 

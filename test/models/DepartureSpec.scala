@@ -22,6 +22,8 @@ import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.{JsValue, Json}
 
+import java.time.Instant
+
 class DepartureSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
 
   "must deserialise" in {
@@ -41,7 +43,7 @@ class DepartureSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
             |""".stripMargin)
 
         val result = json.as[Departure]
-        result shouldBe Departure(departureId, lrn)
+        result shouldBe Departure(departureId, lrn, Instant.ofEpochMilli(1667569012332L))
     }
   }
 

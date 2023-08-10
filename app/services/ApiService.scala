@@ -17,20 +17,42 @@
 package services
 
 import connectors.ApiConnector
-import models.{Departures, UserAnswers}
+import models.{Departure, SubmissionState, UserAnswers}
 import play.api.mvc.Result
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.Inject
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class ApiService @Inject() (
   apiConnector: ApiConnector
-) {
+)(implicit ec: ExecutionContext) {
 
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
     apiConnector.submitDeclaration(userAnswers)
 
-  def getDeparturesForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Option[Departures]] =
+  def getDeparturesForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Option[Seq[Departure]]] =
     apiConnector.getDepartures(Seq("localReferenceNumber" -> lrn))
+
+  def getSubmissionStatus(lrn: String)(implicit hc: HeaderCarrier): Future[SubmissionState] =
+    getDeparturesForLrn(lrn).flatMap {
+      case Some(departures) =>
+        departures.sortBy(_.created).reverse.headOption match {
+          case Some(departure) =>
+            apiConnector.getDepartureMessages(departure.id).map {
+              case Some(messages) =>
+                messages.sortBy(_.received).reverse.map(_.`type`).headOption match {
+                  case Some("IE015") => SubmissionState.Submitted
+                  case Some("IE056") => SubmissionState.RejectedPendingChanges
+                  case _             => SubmissionState.NotSubmitted
+                }
+              case None =>
+                SubmissionState.NotSubmitted
+            }
+          case None =>
+            Future.successful(SubmissionState.NotSubmitted)
+        }
+      case None =>
+        Future.successful(SubmissionState.NotSubmitted)
+    }
 }

@@ -16,10 +16,17 @@
 
 package models
 
+import play.api.libs.functional.syntax._
 import play.api.libs.json.{__, Reads}
 
-case class Departures(departures: Seq[Departure])
+import java.time.Instant
 
-object Departures {
-  implicit val reads: Reads[Departures] = (__ \ "departures").read[Seq[Departure]].map(Departures(_))
+case class DepartureMessage(`type`: String, received: Instant)
+
+object DepartureMessage {
+
+  implicit val reads: Reads[DepartureMessage] = (
+    (__ \ "type").read[String] and
+      (__ \ "received").read[Instant]
+  )(DepartureMessage.apply _)
 }

@@ -9,6 +9,7 @@ GET        /user-answers/expiry/:lrn                            controllers.Cach
 
 # Submission
 POST       /declaration/submit                                  controllers.SubmissionController.post()
+GET        /submission-status/:lrn                              controllers.SubmissionController.getSubmissionStatus(lrn: String)
 
 
 GET        /user-answers/:lrn/lock                              controllers.LockController.checkLock(lrn: String)

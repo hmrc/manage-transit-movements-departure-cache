@@ -17,6 +17,7 @@
 package controllers
 
 import base.SpecBase
+import models.SubmissionState
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
 import play.api.inject.bind
@@ -120,5 +121,19 @@ class SubmissionControllerSpec extends SpecBase {
     }
   }
 
-  "getSubmissionStatus" should {}
+  "getSubmissionStatus" should {
+    "return submission status" in {
+      when(mockApiService.getSubmissionStatus(any())(any()))
+        .thenReturn(Future.successful(SubmissionState.Submitted))
+
+      val request = FakeRequest(GET, routes.SubmissionController.getSubmissionStatus(lrn).url)
+        .withBody(Json.toJson(lrn))
+
+      val result = route(app, request).value
+
+      status(result) shouldBe OK
+
+      verify(mockApiService).getSubmissionStatus(eqTo(lrn))(any())
+    }
+  }
 }

@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions.AuthenticateActionProvider
 import play.api.Logging
-import play.api.libs.json.{JsError, JsSuccess, JsValue}
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
 import services.ApiService
@@ -58,6 +58,6 @@ class SubmissionController @Inject() (
 
   def getSubmissionStatus(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
-      ???
+      apiService.getSubmissionStatus(lrn).map(Json.toJson(_)).map(Ok(_))
   }
 }
