@@ -120,6 +120,5 @@ class SubmissionControllerSpec extends SpecBase {
     }
   }
 
-  "getSubmissionStatus" should {
-  }
+  "getSubmissionStatus" should {}
 }
