@@ -17,14 +17,12 @@
 package services
 
 import play.api.Logging
-import repositories.CacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class DuplicateService @Inject() (
-  cacheRepository: CacheRepository,
   apiService: ApiService
 )(implicit ec: ExecutionContext)
     extends Logging {
@@ -34,9 +32,6 @@ class DuplicateService @Inject() (
       case Some(departures) => departures.nonEmpty
       case None             => false
     }
-
-  def doesDraftExistForLrn(lrn: String): Future[Boolean] =
-    cacheRepository.existsLRN(lrn)
 
   def doesDraftOrSubmissionExistForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
     doesSubmissionExistForLrn(lrn)

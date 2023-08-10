@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.{Metadata, SubmissionState, UserAnswers, UserAnswersSummary}
+import models.{Metadata, UserAnswers, UserAnswersSummary}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, verify, when}
@@ -76,7 +76,7 @@ class CacheControllerSpec extends SpecBase {
 
     "return 200" when {
       "write to mongo was acknowledged" in {
-        val metaData = emptyMetadata.copy(isSubmitted = Some(SubmissionState.Submitted))
+        val metaData = emptyMetadata
         when(mockCacheRepository.set(any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)

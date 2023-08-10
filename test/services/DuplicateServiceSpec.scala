@@ -93,35 +93,6 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
     }
   }
 
-  "doesDraftExistForLrn" - {
-
-    "must return true" - {
-      "when there is a document in cache with the given lrn" in {
-
-        when(mockCacheRepository.existsLRN(eqTo(lrn))).thenReturn(Future.successful(true))
-
-        val result = service.doesDraftExistForLrn(lrn).futureValue
-
-        result mustBe true
-
-        verify(mockCacheRepository).existsLRN(eqTo(lrn))
-      }
-    }
-
-    "must return false" - {
-      "when there is not a document in the cache with the given lrn" in {
-
-        when(mockCacheRepository.existsLRN(eqTo(lrn))).thenReturn(Future.successful(false))
-
-        val result = service.doesDraftExistForLrn(lrn).futureValue
-
-        result mustBe false
-
-        verify(mockCacheRepository).existsLRN(eqTo(lrn))
-      }
-    }
-  }
-
   "doesDraftOrSubmissionExistForLrn" - {
     "must return true" - {
       "when doesSubmissionExistForLrn returns departures" in {

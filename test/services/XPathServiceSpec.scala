@@ -17,7 +17,7 @@
 package services
 
 import base.SpecBase
-import models.{SubmissionState, XPath}
+import models.XPath
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verify, verifyNoInteractions, verifyNoMoreInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
@@ -36,12 +36,9 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
 
     "return true" when {
       "a document exists in the cache for the given LRN and EORI" +
-        "and at least one of the errors is amendable" +
-        "and isSubmitted is SubmissionState.Submitted" in {
+        "and at least one of the errors is amendable" in {
 
-          val userAnswers = emptyUserAnswers.copy(emptyMetadata.copy(isSubmitted = Some(SubmissionState.Submitted)))
-
-          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
 
           val xPaths = Seq.fill(9)(unamendableXPath) :+ amendableXPath
 
@@ -75,22 +72,6 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
           when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
 
           val xPaths = Seq.fill(10)(unamendableXPath)
-
-          val result = service.isDeclarationAmendable(lrn, eoriNumber, xPaths).futureValue
-
-          result shouldBe false
-
-          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        }
-
-      "a document exists in the cache for the given LRN and EORI" +
-        "and there are less than 10 errors" +
-        "and all of the errors are amendable" +
-        "and isSubmitted is false" in {
-
-          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
-
-          val xPaths = Seq.fill(3)(unamendableXPath) :+ amendableXPath
 
           val result = service.isDeclarationAmendable(lrn, eoriNumber, xPaths).futureValue
 

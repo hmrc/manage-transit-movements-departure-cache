@@ -16,7 +16,6 @@
 
 package services
 
-import models.SubmissionState.NotSubmitted
 import models.{Status, XPath}
 import play.api.Logging
 import repositories.CacheRepository
@@ -31,9 +30,8 @@ class XPathService @Inject() (
 
   def isDeclarationAmendable(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
     cacheRepository.get(lrn, eoriNumber).map {
-      case Some(userAnswers) =>
-        userAnswers.metadata.isSubmitted.getOrElse(NotSubmitted).amendable && xPaths.exists(_.isAmendable)
-      case _ => false
+      case Some(_) => xPaths.exists(_.isAmendable)
+      case _       => false
     }
 
   def handleErrors(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =

@@ -18,7 +18,6 @@ package repositories
 
 import com.mongodb.client.model.Filters.{regex, and => mAnd, eq => mEq}
 import config.AppConfig
-import models.SubmissionState.NotSubmitted
 import models._
 import org.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
@@ -68,7 +67,6 @@ class CacheRepository @Inject() (
     val updates = Updates.combine(
       Updates.setOnInsert("lrn", data.lrn),
       Updates.setOnInsert("eoriNumber", data.eoriNumber),
-      Updates.setOnInsert("isSubmitted", data.isSubmitted.getOrElse(NotSubmitted).toString),
       Updates.set("data", Codecs.toBson(data.data)),
       Updates.set("tasks", Codecs.toBson(data.tasks)),
       Updates.setOnInsert("createdAt", now),
@@ -130,15 +128,6 @@ class CacheRepository @Inject() (
       totalDocuments.toInt,
       totalMatchingDocuments
     )
-  }
-
-  def existsLRN(lrn: String): Future[Boolean] = {
-    val lrnFilter = Filters.eq("lrn", lrn)
-
-    val isSubmittedFilter = Filters.in("isSubmitted", SubmissionState.NotSubmitted.toString, SubmissionState.RejectedPendingChanges.toString)
-
-    val primaryFilter = Filters.and(isSubmittedFilter, lrnFilter)
-    collection.countDocuments(primaryFilter).toFuture().map(_ > 0)
   }
 }
 

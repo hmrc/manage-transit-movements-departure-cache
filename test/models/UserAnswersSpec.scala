@@ -58,8 +58,7 @@ class UserAnswersSpec extends SpecBase {
           |        "task4" : "cannot-start-yet"
           |    },
           |    "createdAt" : "2022-09-05T15:58:44.188Z",
-          |    "lastUpdated" : "2022-09-07T10:33:23.472Z",
-          |    "isSubmitted" : "notSubmitted"
+          |    "lastUpdated" : "2022-09-07T10:33:23.472Z"
           |}
           |""".stripMargin)
 
@@ -103,9 +102,7 @@ class UserAnswersSpec extends SpecBase {
           |        "$$date" : {
           |            "$$numberLong" : "1662546803472"
           |        }
-          |    },
-          |    "isSubmitted" : "notSubmitted"
-          |
+          |    }
           |}
           |""".stripMargin)
 
