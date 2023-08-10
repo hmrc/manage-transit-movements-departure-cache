@@ -33,8 +33,8 @@ class UserAnswersSummarySpec extends SpecBase {
       val id1 = UUID.randomUUID()
       val id2 = UUID.randomUUID()
 
-      val userAnswers1 = UserAnswers(Metadata("AB123", eoriNumber), now, None, now, id1)
-      val userAnswers2 = UserAnswers(Metadata("CD123", eoriNumber), now.minus(1, DAYS), None, now.minus(1, DAYS), id2)
+      val userAnswers1 = UserAnswers(Metadata("AB123", eoriNumber), now, now, id1)
+      val userAnswers2 = UserAnswers(Metadata("CD123", eoriNumber), now.minus(1, DAYS), now.minus(1, DAYS), id2)
 
       val userAnswersSummary = UserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2), 2, 2)
 

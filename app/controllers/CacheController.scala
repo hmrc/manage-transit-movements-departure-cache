@@ -45,7 +45,7 @@ class CacheController @Inject() (
       cacheRepository
         .get(lrn, request.eoriNumber)
         .map {
-          case Some(userAnswers) => Ok(Json.toJson(userAnswers.withExpiryDate))
+          case Some(userAnswers) => Ok(Json.toJson(userAnswers))
           case None =>
             logger.warn(s"No document found for LRN '$lrn' and EORI '${request.eoriNumber}'")
             NotFound
@@ -126,4 +126,22 @@ class CacheController @Inject() (
               InternalServerError
           }
     }
+
+  def getExpiry(lrn: String): Action[AnyContent] = authenticate().async {
+    implicit request =>
+      cacheRepository
+        .get(lrn, request.eoriNumber)
+        .map {
+          case Some(userAnswers) =>
+            Ok(Json.toJson(userAnswers.expiryInDays))
+          case None =>
+            logger.warn(s"No document found for LRN '$lrn' and EORI '${request.eoriNumber}'")
+            NotFound
+        }
+        .recover {
+          case e =>
+            logger.error("Failed to read user answers from mongo", e)
+            InternalServerError
+        }
+  }
 }

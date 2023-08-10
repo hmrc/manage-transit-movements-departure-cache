@@ -45,7 +45,7 @@ trait ItSpecBase extends AnyWordSpec with Matchers with ScalaFutures with Option
   val eoriNumber = "eori"
 
   def emptyMetadata: Metadata       = Metadata(lrn, eoriNumber)
-  def emptyUserAnswers: UserAnswers = UserAnswers(emptyMetadata, Instant.now(), Some(30), Instant.now(), UUID.randomUUID())
+  def emptyUserAnswers: UserAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
 
   val wsClient: WSClient = app.injector.instanceOf[WSClient]
   val baseUrl            = s"http://localhost:$port"

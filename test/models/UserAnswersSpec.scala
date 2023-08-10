@@ -41,24 +41,6 @@ class UserAnswersSpec extends SpecBase {
     id = UUID.fromString(uuid)
   )
 
-  private val userAnswersWithExpiryDate = UserAnswers(
-    metadata = Metadata(
-      lrn = lrn,
-      eoriNumber = eoriNumber,
-      data = Json.obj(),
-      tasks = Map(
-        "task1" -> Status.Completed,
-        "task2" -> Status.InProgress,
-        "task3" -> Status.NotStarted,
-        "task4" -> Status.CannotStartYet
-      )
-    ),
-    createdAt = Instant.ofEpochMilli(1662393524188L),
-    expiryInDays = Some(10L),
-    lastUpdated = Instant.ofEpochMilli(1662546803472L),
-    id = UUID.fromString(uuid)
-  )
-
   "User answers" when {
 
     "being passed between backend and frontend" should {
@@ -134,47 +116,6 @@ class UserAnswersSpec extends SpecBase {
 
       "write correctly" in {
         val result = Json.toJson(userAnswers)(UserAnswers.mongoFormat)
-        result shouldBe json
-      }
-    }
-    "when expiryInDays is fetched" should {
-
-      val json: JsValue = Json.parse(s"""
-          |{
-          |    "_id" : "$uuid",
-          |    "lrn" : "$lrn",
-          |    "eoriNumber" : "$eoriNumber",
-          |    "data" : {},
-          |    "tasks" : {
-          |        "task1" : "completed",
-          |        "task2" : "in-progress",
-          |        "task3" : "not-started",
-          |        "task4" : "cannot-start-yet"
-          |    },
-          |    "createdAt" : {
-          |        "$$date" : {
-          |            "$$numberLong" : "1662393524188"
-          |        }
-          |    },
-          |    "expiryInDays" : 10,
-          |
-          |    "lastUpdated" : {
-          |        "$$date" : {
-          |            "$$numberLong" : "1662546803472"
-          |        }
-          |    },
-          |    "isSubmitted" : "notSubmitted"
-          |
-          |}
-          |""".stripMargin)
-
-      "read correctly" in {
-        val result = json.as[UserAnswers](UserAnswers.mongoFormat)
-        result shouldBe userAnswersWithExpiryDate
-      }
-
-      "write correctly" in {
-        val result = Json.toJson(userAnswersWithExpiryDate)(UserAnswers.mongoFormat)
         result shouldBe json
       }
     }

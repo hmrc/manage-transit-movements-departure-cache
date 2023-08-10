@@ -5,6 +5,7 @@ GET        /user-answers/:lrn                                   controllers.Cach
 POST       /user-answers/:lrn                                   controllers.CacheController.post(lrn: String)
 PUT        /user-answers                                        controllers.CacheController.put()
 DELETE     /user-answers/:lrn                                   controllers.CacheController.delete(lrn: String)
+GET        /user-answers/expiry/:lrn                            controllers.CacheController.getExpiry(lrn: String)
 
 # Submission
 POST       /declaration/submit                                  controllers.SubmissionController.post()

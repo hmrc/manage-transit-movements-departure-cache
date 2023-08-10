@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.{Metadata, Status, SubmissionState, UserAnswers, UserAnswersSummary}
+import models.{Metadata, SubmissionState, UserAnswers, UserAnswersSummary}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, verify, when}
@@ -28,7 +28,6 @@ import play.api.test.Helpers._
 import java.time.Instant
 import java.util.UUID
 import scala.concurrent.Future
-import java.time.temporal.ChronoUnit.DAYS
 
 class CacheControllerSpec extends SpecBase {
 
@@ -36,7 +35,7 @@ class CacheControllerSpec extends SpecBase {
 
     "return 200" when {
       "read from mongo is successful" in {
-        val userAnswers = UserAnswers(emptyMetadata, Instant.now(), Some(30L), Instant.now(), UUID.randomUUID())
+        val userAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
         val request = FakeRequest(GET, routes.CacheController.get(lrn).url)
@@ -259,8 +258,8 @@ class CacheControllerSpec extends SpecBase {
     "return 200" when {
 
       "read from mongo is successful" in {
-        val userAnswer1 = UserAnswers(Metadata("AB123", eoriNumber), Instant.now(), None, Instant.now(), UUID.randomUUID())
-        val userAnswer2 = UserAnswers(Metadata("CD123", eoriNumber), Instant.now(), None, Instant.now(), UUID.randomUUID())
+        val userAnswer1 = UserAnswers(Metadata("AB123", eoriNumber), Instant.now(), Instant.now(), UUID.randomUUID())
+        val userAnswer2 = UserAnswers(Metadata("CD123", eoriNumber), Instant.now(), Instant.now(), UUID.randomUUID())
 
         when(mockCacheRepository.getAll(any(), any(), any(), any(), any()))
           .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, Seq(userAnswer1, userAnswer2), 2, 2)))
@@ -287,4 +286,44 @@ class CacheControllerSpec extends SpecBase {
     }
   }
 
+  "getExpiry" should {
+
+    "return 200" when {
+      "read from mongo is successful" in {
+        val userAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
+
+        val request = FakeRequest(GET, routes.CacheController.getExpiry(lrn).url)
+        val result  = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(30)
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+      }
+    }
+
+    "return 404" when {
+      "document not found in mongo for given lrn and eori number" in {
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
+
+        val request = FakeRequest(GET, routes.CacheController.getExpiry(lrn).url)
+        val result  = route(app, request).value
+
+        status(result) shouldBe NOT_FOUND
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+      }
+    }
+
+    "return 500" when {
+      "read from mongo fails" in {
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.failed(new Throwable()))
+
+        val request = FakeRequest(GET, routes.CacheController.getExpiry(lrn).url)
+        val result  = route(app, request).value
+
+        status(result) shouldBe INTERNAL_SERVER_ERROR
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+      }
+    }
+  }
 }

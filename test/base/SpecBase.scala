@@ -42,7 +42,7 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
   val emptyMetadata: Metadata       = Metadata(lrn, eoriNumber)
-  val emptyUserAnswers: UserAnswers = UserAnswers(emptyMetadata, Instant.now(), None, Instant.now(), UUID.randomUUID())
+  val emptyUserAnswers: UserAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
 
   val mockCacheRepository: CacheRepository      = mock[CacheRepository]
   val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]
