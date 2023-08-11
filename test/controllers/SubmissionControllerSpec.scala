@@ -17,7 +17,7 @@
 package controllers
 
 import base.SpecBase
-import models.SubmissionState
+import models.{SubmissionState, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
 import play.api.inject.bind
@@ -46,7 +46,7 @@ class SubmissionControllerSpec extends SpecBase {
     super.beforeEach()
     reset(mockCacheRepository)
     reset(mockApiService)
-    when(mockCacheRepository.set(any(), any())).thenReturn(Future.successful(true))
+    when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState)).thenReturn(Future.successful(true))
   }
 
   "post" should {

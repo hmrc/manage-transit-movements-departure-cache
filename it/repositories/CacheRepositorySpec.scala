@@ -86,7 +86,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       findOne(userAnswers3.lrn, userAnswers3.eoriNumber) should not be defined
 
-      val setResult = repository.set(userAnswers3.metadata).futureValue
+      val setResult = repository.set(userAnswers3.metadata, None).futureValue
 
       setResult shouldBe true
 
@@ -98,6 +98,22 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       getResult.status shouldBe SubmissionState.NotSubmitted
     }
 
+    "create new document when given valid UserAnswers and stats" in {
+
+      findOne(userAnswers3.lrn, userAnswers3.eoriNumber) should not be defined
+
+      val setResult = repository.set(userAnswers3.metadata, Some(SubmissionState.RejectedPendingChanges)).futureValue
+
+      setResult shouldBe true
+
+      val getResult = findOne(userAnswers3.lrn, userAnswers3.eoriNumber).get
+
+      getResult.lrn shouldBe userAnswers3.lrn
+      getResult.eoriNumber shouldBe userAnswers3.eoriNumber
+      getResult.metadata shouldBe userAnswers3.metadata
+      getResult.status shouldBe SubmissionState.RejectedPendingChanges
+    }
+
     "update document when it already exists" in {
 
       val firstGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
@@ -106,7 +122,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         data = Json.obj("foo" -> "bar"),
         tasks = Map(".task" -> Status.InProgress)
       )
-      val setResult = repository.set(metadata).futureValue
+      val setResult = repository.set(metadata, None).futureValue
 
       setResult shouldBe true
 

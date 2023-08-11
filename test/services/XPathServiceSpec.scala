@@ -17,7 +17,7 @@
 package services
 
 import base.SpecBase
-import models.{SubmissionState, XPath}
+import models.{SubmissionState, UserAnswers, XPath}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verify, verifyNoInteractions, verifyNoMoreInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
@@ -94,7 +94,7 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
         "and setting the document tasks to error succeeds" in {
 
           when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
-          when(mockCacheRepository.set(any(), any())).thenReturn(Future.successful(true))
+          when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState)).thenReturn(Future.successful(true))
 
           val result = service.handleErrors(lrn, eoriNumber, xPaths).futureValue
 
@@ -122,7 +122,7 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
         "and setting the document tasks to error fails" in {
 
           when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
-          when(mockCacheRepository.set(any(), any())).thenReturn(Future.successful(false))
+          when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState)).thenReturn(Future.successful(false))
 
           val result = service.handleErrors(lrn, eoriNumber, xPaths).futureValue
 

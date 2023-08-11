@@ -18,7 +18,7 @@ package controllers
 
 import config.AppConfig
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
-import models.{Metadata, UserAnswers}
+import models.{Metadata, SubmissionState, UserAnswers}
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
@@ -50,7 +50,8 @@ class CacheController @Inject() (
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
           if (request.eoriNumber == data.eoriNumber) {
-            set(data)
+            val status: Option[SubmissionState] = (request.body \ "isSubmitted").validate[SubmissionState].asOpt
+            set(data, status)
           } else {
             logger.warn(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
             Future.successful(Forbidden)
@@ -71,9 +72,9 @@ class CacheController @Inject() (
       }
   }
 
-  private def set(data: Metadata): Future[Status] =
+  private def set(data: Metadata, status: Option[SubmissionState] = None): Future[Status] =
     cacheRepository
-      .set(data)
+      .set(data, status)
       .map {
         case true => Ok
         case false =>
