@@ -39,6 +39,19 @@ final case class UserAnswers(
 
   def expiryInDays(implicit clock: Clock, appConfig: AppConfig): Long =
     TTLUtils.expiresInDays(createdAt)
+
+  def toHateoas(status: SubmissionState)(implicit clock: Clock, config: AppConfig): JsObject =
+    Json.obj(
+      "lrn" -> lrn,
+      "_links" -> Json.obj(
+        "self" -> Json.obj("href" -> controllers.routes.CacheController.get(lrn).url)
+      ),
+      "createdAt"     -> createdAt,
+      "lastUpdated"   -> lastUpdated,
+      "expiresInDays" -> expiryInDays,
+      "_id"           -> id,
+      "status"        -> status
+    )
 }
 
 object UserAnswers {

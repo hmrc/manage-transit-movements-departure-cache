@@ -30,8 +30,7 @@ class XPathService @Inject() (
 
   def isDeclarationAmendable(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
     cacheRepository.get(lrn, eoriNumber).map {
-      case Some(_) => xPaths.exists(_.isAmendable)
-      case _       => false
+      _.isDefined && xPaths.exists(_.isAmendable)
     }
 
   def handleErrors(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =

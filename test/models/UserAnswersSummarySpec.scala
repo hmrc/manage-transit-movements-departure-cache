@@ -38,36 +38,38 @@ class UserAnswersSummarySpec extends SpecBase {
 
       val userAnswersSummary = UserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2), 2, 2)
 
+      val userAnswers = Json.arr(
+        Json.obj(
+          "lrn" -> "AB123",
+          "_links" -> Json.obj(
+            "self" -> Json.obj("href" -> controllers.routes.CacheController.get("AB123").url)
+          ),
+          "createdAt"     -> now,
+          "lastUpdated"   -> now,
+          "expiresInDays" -> 30,
+          "_id"           -> id1
+        ),
+        Json.obj(
+          "lrn" -> "CD123",
+          "_links" -> Json.obj(
+            "self" -> Json.obj("href" -> controllers.routes.CacheController.get("CD123").url)
+          ),
+          "createdAt"     -> now.minus(1, DAYS),
+          "lastUpdated"   -> now.minus(1, DAYS),
+          "expiresInDays" -> 29,
+          "_id"           -> id2
+        )
+      )
+
       val expectedResult =
         Json.obj(
           "eoriNumber"             -> eoriNumber,
           "totalMovements"         -> 2,
           "totalMatchingMovements" -> 2,
-          "userAnswers" -> Json.arr(
-            Json.obj(
-              "lrn" -> "AB123",
-              "_links" -> Json.obj(
-                "self" -> Json.obj("href" -> controllers.routes.CacheController.get("AB123").url)
-              ),
-              "createdAt"     -> now,
-              "lastUpdated"   -> now,
-              "expiresInDays" -> 30,
-              "_id"           -> id1
-            ),
-            Json.obj(
-              "lrn" -> "CD123",
-              "_links" -> Json.obj(
-                "self" -> Json.obj("href" -> controllers.routes.CacheController.get("CD123").url)
-              ),
-              "createdAt"     -> now.minus(1, DAYS),
-              "lastUpdated"   -> now.minus(1, DAYS),
-              "expiresInDays" -> 29,
-              "_id"           -> id2
-            )
-          )
+          "userAnswers"            -> userAnswers
         )
 
-      userAnswersSummary.toHateoas() shouldBe expectedResult
+      userAnswersSummary.toHateoas(userAnswers) shouldBe expectedResult
     }
   }
 }

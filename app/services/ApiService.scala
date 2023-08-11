@@ -35,6 +35,7 @@ class ApiService @Inject() (
   def getDeparturesForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Option[Seq[Departure]]] =
     apiConnector.getDepartures(Seq("localReferenceNumber" -> lrn))
 
+  // TODO - can this be refactored to use OptionT?
   def getSubmissionStatus(lrn: String, eoriNumber: String)(implicit hc: HeaderCarrier): Future[SubmissionState] =
     getDeparturesForLrn(lrn).flatMap {
       case Some(departures) =>

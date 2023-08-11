@@ -17,12 +17,15 @@
 package models
 
 import base.SpecBase
+import generators.Generators
+import org.scalacheck.Arbitrary.arbitrary
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.{JsSuccess, JsValue, Json}
 
 import java.time.{Instant, LocalDateTime}
 import java.util.UUID
 
-class UserAnswersSpec extends SpecBase {
+class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
 
   private val userAnswers = UserAnswers(
     metadata = Metadata(
@@ -114,6 +117,34 @@ class UserAnswersSpec extends SpecBase {
       "write correctly" in {
         val result = Json.toJson(userAnswers)(UserAnswers.mongoFormat)
         result shouldBe json
+      }
+    }
+
+    "toHateoas" must {
+
+      "turn a UserAnswers to Hateoas jsObject" in {
+
+        val now = Instant.now(clock)
+        val id  = UUID.randomUUID()
+
+        val userAnswers = UserAnswers(Metadata("AB123", eoriNumber), now, now, id)
+
+        forAll(arbitrary[SubmissionState]) {
+          status =>
+            val expectedResult = Json.obj(
+              "lrn" -> "AB123",
+              "_links" -> Json.obj(
+                "self" -> Json.obj("href" -> controllers.routes.CacheController.get("AB123").url)
+              ),
+              "createdAt"     -> now,
+              "lastUpdated"   -> now,
+              "expiresInDays" -> 30,
+              "_id"           -> id,
+              "status"        -> status.asString
+            )
+
+            userAnswers.toHateoas(status) shouldBe expectedResult
+        }
       }
     }
   }

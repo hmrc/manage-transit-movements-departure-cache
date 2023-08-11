@@ -16,31 +16,16 @@
 
 package models
 
-import config.AppConfig
-import play.api.libs.json.{JsObject, Json}
-
-import java.time.Clock
+import play.api.libs.json.{JsArray, JsObject, Json}
 
 case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers], totalMovements: Int, totalMatchingMovements: Int) {
 
-  def toHateoas()(implicit clock: Clock, appConfig: AppConfig): JsObject =
+  def toHateoas(userAnswersObjects: JsArray): JsObject =
     Json.obj(
       "eoriNumber"             -> eoriNumber,
       "totalMovements"         -> totalMovements,
       "totalMatchingMovements" -> totalMatchingMovements,
-      "userAnswers" -> userAnswers.map {
-        userAnswer =>
-          Json.obj(
-            "lrn" -> userAnswer.lrn,
-            "_links" -> Json.obj(
-              "self" -> Json.obj("href" -> controllers.routes.CacheController.get(userAnswer.lrn).url)
-            ),
-            "createdAt"     -> userAnswer.createdAt,
-            "lastUpdated"   -> userAnswer.lastUpdated,
-            "expiresInDays" -> userAnswer.expiryInDays,
-            "_id"           -> userAnswer.id
-          )
-      }
+      "userAnswers"            -> userAnswersObjects
     )
 
 }
