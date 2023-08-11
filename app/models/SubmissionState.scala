@@ -36,15 +36,10 @@ object SubmissionState {
     override val asString: String = "rejectedPendingChanges"
   }
 
-  case object RejectedAndResubmitted extends SubmissionState {
-    override val asString: String = "rejectedAndResubmitted"
-  }
-
   implicit val reads: Reads[SubmissionState] = Reads {
     case JsString(NotSubmitted.asString)           => JsSuccess(NotSubmitted)
     case JsString(Submitted.asString)              => JsSuccess(Submitted)
     case JsString(RejectedPendingChanges.asString) => JsSuccess(RejectedPendingChanges)
-    case JsString(RejectedAndResubmitted.asString) => JsSuccess(RejectedAndResubmitted)
     case x                                         => JsError(s"Could not read $x as SubmissionState")
   }
 
