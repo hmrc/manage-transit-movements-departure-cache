@@ -45,12 +45,12 @@ class SubmissionController @Inject() (
           case JsSuccess(lrn, _) =>
             cacheRepository.get(lrn, request.eoriNumber).flatMap {
               case Some(uA) =>
-                cacheRepository.set(uA, SubmissionState.Submitted).flatMap {
-                  _ =>
-                    apiService.submitDeclaration(uA).map {
-                      case Right(response) => Ok(response.body)
-                      case Left(error)     => error
+                apiService.submitDeclaration(uA).flatMap {
+                  case Right(response) =>
+                    cacheRepository.set(uA, SubmissionState.Submitted).map {
+                      _ => Ok(response.body)
                     }
+                  case Left(error) => Future.successful(error)
                 }
               case None => Future.successful(InternalServerError)
             }
