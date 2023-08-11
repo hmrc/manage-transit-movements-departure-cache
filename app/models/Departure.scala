@@ -16,18 +16,10 @@
 
 package models
 
-import play.api.libs.functional.syntax._
 import play.api.libs.json.{__, Reads}
 
-import java.time.Instant
-
-case class Departure(id: String, localReferenceNumber: String, created: Instant)
+case class Departure(localReferenceNumber: String)
 
 object Departure {
-
-  implicit val reads: Reads[Departure] = (
-    (__ \ "id").read[String] and
-      (__ \ "localReferenceNumber").read[String] and
-      (__ \ "created").read[Instant]
-  )(Departure.apply _)
+  implicit val reads: Reads[Departure] = (__ \ "localReferenceNumber").read[String].map(Departure(_))
 }

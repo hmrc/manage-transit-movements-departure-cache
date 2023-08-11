@@ -22,28 +22,26 @@ import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.{JsValue, Json}
 
-import java.time.Instant
-
 class DepartureSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
 
   "must deserialise" in {
 
-    forAll(Gen.alphaNumStr, Gen.alphaNumStr) {
-      (departureId, lrn) =>
+    forAll(Gen.alphaNumStr) {
+      lrn =>
         val json: JsValue = Json.parse(s"""
-            |{
-            |  "id": "$departureId",
-            |  "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
-            |  "localReferenceNumber": "$lrn",
-            |  "created": "2022-11-04T13:36:52.332Z",
-            |  "updated": "2022-11-04T13:36:52.332Z",
-            |  "enrollmentEORINumber": "9999912345",
-            |  "movementEORINumber": "GB1234567890"
-            |}
-            |""".stripMargin)
+    {
+          "id": "63651574c3447b12",
+          "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
+          "localReferenceNumber": "$lrn",
+          "created": "2022-11-04T13:36:52.332Z",
+          "updated": "2022-11-04T13:36:52.332Z",
+          "enrollmentEORINumber": "9999912345",
+          "movementEORINumber": "GB1234567890"
+    }
+    """)
 
         val result = json.as[Departure]
-        result shouldBe Departure(departureId, lrn, Instant.ofEpochMilli(1667569012332L))
+        result shouldBe Departure(lrn)
     }
   }
 

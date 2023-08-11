@@ -28,12 +28,10 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import repositories.{CacheRepository, DefaultLockRepository}
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.Instant
 import scala.concurrent.Future
 
 class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with ScalaFutures {
 
-  val departureId                = "departureId"
   val lrn                        = "lrn"
   val eoriNumber                 = "eoriNumber"
   implicit val hc: HeaderCarrier = HeaderCarrier()
@@ -65,7 +63,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
     "must return true" - {
       "when Some(_) is returned from getDepartures" in {
 
-        val mockedResponse: Option[Seq[Departure]] = Some(Seq(Departure(departureId, lrn, Instant.now())))
+        val mockedResponse: Option[Seq[Departure]] = Some(Seq(Departure(lrn)))
 
         when(mockApiService.getDeparturesForLrn(any())(any())).thenReturn(Future.successful(mockedResponse))
 
@@ -93,11 +91,40 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
     }
   }
 
+  "doesDraftExistForLrn" - {
+
+    "must return true" - {
+      "when there is a document in cache with the given lrn" in {
+
+        when(mockCacheRepository.doesDraftExistForLrn(eqTo(lrn))).thenReturn(Future.successful(true))
+
+        val result = service.doesDraftExistForLrn(lrn).futureValue
+
+        result mustBe true
+
+        verify(mockCacheRepository).doesDraftExistForLrn(eqTo(lrn))
+      }
+    }
+
+    "must return false" - {
+      "when there is not a document in the cache with the given lrn" in {
+
+        when(mockCacheRepository.doesDraftExistForLrn(eqTo(lrn))).thenReturn(Future.successful(false))
+
+        val result = service.doesDraftExistForLrn(lrn).futureValue
+
+        result mustBe false
+
+        verify(mockCacheRepository).doesDraftExistForLrn(eqTo(lrn))
+      }
+    }
+  }
+
   "doesDraftOrSubmissionExistForLrn" - {
     "must return true" - {
       "when doesSubmissionExistForLrn returns departures" in {
         when(mockApiService.getDeparturesForLrn(any())(any()))
-          .thenReturn(Future.successful(Some(Seq(Departure(departureId, lrn, Instant.now())))))
+          .thenReturn(Future.successful(Some(Seq(Departure(lrn)))))
 
         val result = service.doesDraftOrSubmissionExistForLrn(lrn).futureValue
 

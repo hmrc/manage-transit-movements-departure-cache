@@ -23,7 +23,6 @@ import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.CacheRepository
-import services.ApiService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import java.time.Clock
@@ -35,8 +34,7 @@ class CacheController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
   authenticateAndLock: AuthenticateAndLockActionProvider,
-  cacheRepository: CacheRepository,
-  apiService: ApiService
+  cacheRepository: CacheRepository
 )(implicit ec: ExecutionContext, clock: Clock, appConfig: AppConfig)
     extends BackendController(cc)
     with Logging {

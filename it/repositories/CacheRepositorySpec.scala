@@ -22,6 +22,8 @@ import models._
 import org.mongodb.scala.Document
 import org.mongodb.scala.bson.{BsonDocument, BsonString}
 import org.mongodb.scala.model.Filters
+import org.scalacheck.Gen
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.libs.json.Json
 
 import java.time.Instant
@@ -137,6 +139,54 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       firstGet.lastUpdated isBefore secondGet.lastUpdated shouldBe true
       firstGet.status shouldBe SubmissionState.NotSubmitted
       secondGet.status shouldBe SubmissionState.RejectedPendingChanges
+    }
+  }
+
+  "doesDraftExistForLrn" should {
+    "return true if LRN is found when notSubmitted" in {
+
+      val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1")
+      val userAnswers = emptyUserAnswers.copy(metadata = metaData, status = SubmissionState.NotSubmitted)
+
+      insert(userAnswers)
+
+      findOne(userAnswers.lrn, userAnswers.eoriNumber) shouldBe defined
+
+      val setResult = repository.doesDraftExistForLrn(userAnswers.lrn).futureValue
+      setResult shouldBe true
+    }
+
+    "return true if LRN is found when rejectedPendingChanges" in {
+
+      val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1")
+      val userAnswers = emptyUserAnswers.copy(metadata = metaData, status = SubmissionState.RejectedPendingChanges)
+
+      insert(userAnswers)
+
+      findOne(userAnswers.lrn, userAnswers.eoriNumber) shouldBe defined
+
+      val setResult = repository.doesDraftExistForLrn(userAnswers.lrn).futureValue
+      setResult shouldBe true
+    }
+
+    "return false" when {
+      "LRN is not found" in {
+        forAll(Gen.alphaNumStr) {
+          lrn =>
+            val result = repository.doesDraftExistForLrn(lrn).futureValue
+            result shouldBe false
+        }
+      }
+
+      "submissionState is Submitted" in {
+
+        val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1")
+        val userAnswers = emptyUserAnswers.copy(metadata = metaData, status = SubmissionState.Submitted)
+        insert(userAnswers)
+
+        val result = repository.doesDraftExistForLrn(userAnswers.lrn).futureValue
+        result shouldBe false
+      }
     }
   }
 

@@ -19,7 +19,7 @@ package connectors
 import base.AppWithDefaultMockFixtures
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
-import models._
+import models.{Departure, UserAnswers}
 import org.scalacheck.Gen
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
@@ -30,8 +30,6 @@ import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Results.{BadRequest, InternalServerError}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
-
-import java.time.Instant
 
 class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with WireMockServerHandler with Matchers {
 
@@ -315,10 +313,8 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
 
     "getDepartures" - {
 
-      val departureId1 = "63651574c3447b12"
-      val departureId2 = "6365135ba5e821ee"
-      val lrn1         = "3CnsTh79I7vtOy6"
-      val lrn2         = "DEF456"
+      val lrn1 = "3CnsTh79I7vtOy6"
+      val lrn2 = "DEF456"
 
       val responseJson: JsValue = Json.parse(
         s"""
@@ -338,7 +334,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                     "href": "/customs/transits/movements/departures/63651574c3447b12/messages"
                   }
                 },
-                "id": "$departureId1",
+                "id": "63651574c3447b12",
                 "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
                 "localReferenceNumber": "$lrn1",
                 "created": "2022-11-04T13:36:52.332Z",
@@ -355,7 +351,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                     "href": "/customs/transits/movements/departures/6365135ba5e821ee/messages"
                   }
                 },
-                "id": "$departureId2",
+                "id": "6365135ba5e821ee",
                 "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
                 "localReferenceNumber": "$lrn2",
                 "created": "2022-11-04T13:27:55.522Z",
@@ -375,10 +371,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
             .willReturn(okJson(responseJson.toString()))
         )
 
-        val expectedResult = Seq(
-          Departure(departureId1, lrn1, Instant.ofEpochMilli(1667569012332L)),
-          Departure(departureId2, lrn2, Instant.ofEpochMilli(1667568475522L))
-        )
+        val expectedResult = Seq(Departure(lrn1), Departure(lrn2))
 
         await(connector.getDepartures()) mustBe Some(expectedResult)
       }
@@ -438,5 +431,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
       }
 
     }
+
   }
+
 }

@@ -20,31 +20,14 @@ import base.SpecBase
 import models.{Metadata, UserAnswersSummary}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{never, reset, verify, when}
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
+import org.mockito.Mockito.{never, verify, when}
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.ApiService
 
 import scala.concurrent.Future
 
 class CacheControllerSpec extends SpecBase {
-
-  private lazy val mockApiService = mock[ApiService]
-
-  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
-    super
-      .guiceApplicationBuilder()
-      .overrides(
-        bind[ApiService].toInstance(mockApiService)
-      )
-
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    reset(mockApiService)
-  }
 
   "get" should {
 
