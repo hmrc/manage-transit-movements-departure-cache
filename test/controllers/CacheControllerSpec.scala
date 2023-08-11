@@ -20,16 +20,33 @@ import base.SpecBase
 import models.{Metadata, SubmissionState, UserAnswers, UserAnswersSummary}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{never, verify, when}
+import org.mockito.Mockito.{never, reset, verify, when}
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsArray, JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import services.ApiService
 
 import java.time.Instant
 import java.util.UUID
 import scala.concurrent.Future
 
 class CacheControllerSpec extends SpecBase {
+
+  private lazy val mockApiService = mock[ApiService]
+
+  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
+    super
+      .guiceApplicationBuilder()
+      .overrides(
+        bind[ApiService].toInstance(mockApiService)
+      )
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockApiService)
+  }
 
   "get" should {
 
@@ -255,13 +272,17 @@ class CacheControllerSpec extends SpecBase {
     "return 200" when {
 
       "read from mongo is successful" in {
-        val userAnswer1 = UserAnswers(Metadata("AB123", eoriNumber), Instant.now(), Instant.now(), UUID.randomUUID())
-        val userAnswer2 = UserAnswers(Metadata("CD123", eoriNumber), Instant.now(), Instant.now(), UUID.randomUUID())
-        val userAnswers = Seq(userAnswer1, userAnswer2)
-        val objects     = userAnswers.map(_.toHateoas(SubmissionState.NotSubmitted))
+        val userAnswer1     = UserAnswers(Metadata("AB123", eoriNumber), Instant.now(), Instant.now(), UUID.randomUUID())
+        val userAnswer2     = UserAnswers(Metadata("CD123", eoriNumber), Instant.now(), Instant.now(), UUID.randomUUID())
+        val userAnswers     = Seq(userAnswer1, userAnswer2)
+        val submissionState = SubmissionState.NotSubmitted
+        val objects         = userAnswers.map(_.toHateoas(submissionState))
 
         when(mockCacheRepository.getAll(any(), any(), any(), any(), any()))
           .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, userAnswers, 2, 2)))
+
+        when(mockApiService.getSubmissionStatus(any(), any())(any()))
+          .thenReturn(Future.successful(submissionState))
 
         val request = FakeRequest(GET, routes.CacheController.getAll().url)
         val result  = route(app, request).value
