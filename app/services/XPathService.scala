@@ -29,11 +29,7 @@ class XPathService @Inject() (
     extends Logging {
 
   def isDeclarationAmendable(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
-    cacheRepository.get(lrn, eoriNumber).map {
-      case Some(userAnswers) =>
-        userAnswers.status.isAmendable && xPaths.exists(_.isAmendable)
-      case _ => false
-    }
+    cacheRepository.get(lrn, eoriNumber).map(_.isDefined && xPaths.exists(_.isAmendable))
 
   def handleErrors(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
     xPaths.flatMap {

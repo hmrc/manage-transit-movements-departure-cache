@@ -20,7 +20,6 @@ import play.api.libs.json._
 
 sealed trait SubmissionState {
   val asString: String
-  def isAmendable: Boolean = this == SubmissionState.RejectedPendingChanges
 }
 
 object SubmissionState {
