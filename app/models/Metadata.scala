@@ -23,7 +23,11 @@ case class Metadata(
   eoriNumber: String,
   data: JsObject,
   tasks: Map[String, Status.Value]
-)
+) {
+
+  def updateTasks(tasks: Map[String, Status.Value]): Metadata =
+    this.copy(tasks = tasks)
+}
 
 object Metadata {
 

@@ -18,7 +18,6 @@ package models
 
 import base.SpecBase
 import generators.Generators
-import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.{JsSuccess, JsValue, Json}
 
@@ -41,7 +40,8 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
     ),
     createdAt = Instant.ofEpochMilli(1662393524188L),
     lastUpdated = Instant.ofEpochMilli(1662546803472L),
-    id = UUID.fromString(uuid)
+    id = UUID.fromString(uuid),
+    status = SubmissionState.NotSubmitted
   )
 
   "User answers" when {
@@ -61,7 +61,8 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
           |        "task4" : "cannot-start-yet"
           |    },
           |    "createdAt" : "2022-09-05T15:58:44.188Z",
-          |    "lastUpdated" : "2022-09-07T10:33:23.472Z"
+          |    "lastUpdated" : "2022-09-07T10:33:23.472Z",
+          |    "isSubmitted" : "notSubmitted"
           |}
           |""".stripMargin)
 
@@ -89,6 +90,7 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
           |    "lrn" : "$lrn",
           |    "eoriNumber" : "$eoriNumber",
           |    "data" : {},
+          |    "isSubmitted" : "notSubmitted",
           |    "tasks" : {
           |        "task1" : "completed",
           |        "task2" : "in-progress",
@@ -117,34 +119,6 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
       "write correctly" in {
         val result = Json.toJson(userAnswers)(UserAnswers.mongoFormat)
         result shouldBe json
-      }
-    }
-
-    "toHateoas" must {
-
-      "turn a UserAnswers to Hateoas jsObject" in {
-
-        val now = Instant.now(clock)
-        val id  = UUID.randomUUID()
-
-        val userAnswers = UserAnswers(Metadata("AB123", eoriNumber), now, now, id)
-
-        forAll(arbitrary[SubmissionState]) {
-          status =>
-            val expectedResult = Json.obj(
-              "lrn" -> "AB123",
-              "_links" -> Json.obj(
-                "self" -> Json.obj("href" -> controllers.routes.CacheController.get("AB123").url)
-              ),
-              "createdAt"     -> now,
-              "lastUpdated"   -> now,
-              "expiresInDays" -> 30,
-              "_id"           -> id,
-              "status"        -> status.asString
-            )
-
-            userAnswers.toHateoas(status) shouldBe expectedResult
-        }
       }
     }
   }

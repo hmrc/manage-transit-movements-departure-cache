@@ -57,7 +57,13 @@ class CacheRepository @Inject() (
       .toFutureOption()
   }
 
-  def set(data: Metadata): Future[Boolean] = {
+  def set(data: Metadata): Future[Boolean] =
+    set(data, Updates.setOnInsert("isSubmitted", SubmissionState.NotSubmitted.asString))
+
+  def set(userAnswers: UserAnswers, status: SubmissionState): Future[Boolean] =
+    set(userAnswers.metadata, Updates.set("isSubmitted", status.asString))
+
+  private def set(data: Metadata, statusUpdate: Bson): Future[Boolean] = {
     val now = Instant.now(clock)
     val filter = Filters.and(
       Filters.eq("lrn", data.lrn),
@@ -71,7 +77,8 @@ class CacheRepository @Inject() (
       Updates.set("tasks", Codecs.toBson(data.tasks)),
       Updates.setOnInsert("createdAt", now),
       Updates.set("lastUpdated", now),
-      Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID()))
+      Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID())),
+      statusUpdate
     )
     val options = UpdateOptions().upsert(true)
 

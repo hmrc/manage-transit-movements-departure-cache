@@ -18,7 +18,7 @@ package repositories
 
 import itbase.CacheRepositorySpecBase
 import models.Sort.{SortByCreatedAtAsc, SortByCreatedAtDesc, SortByLRNAsc, SortByLRNDesc}
-import models.{Metadata, Status, UserAnswers, UserAnswersSummary}
+import models._
 import org.mongodb.scala.Document
 import org.mongodb.scala.bson.{BsonDocument, BsonString}
 import org.mongodb.scala.model.Filters
@@ -93,6 +93,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       getResult.lrn shouldBe userAnswers3.lrn
       getResult.eoriNumber shouldBe userAnswers3.eoriNumber
       getResult.metadata shouldBe userAnswers3.metadata
+      getResult.status shouldBe SubmissionState.NotSubmitted
     }
 
     "update document when it already exists" in {
@@ -115,6 +116,27 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       firstGet.metadata shouldNot equal(secondGet.metadata)
       firstGet.createdAt shouldBe secondGet.createdAt
       firstGet.lastUpdated isBefore secondGet.lastUpdated shouldBe true
+      firstGet.status shouldBe secondGet.status
+    }
+
+    "update document when it already exists with new status" in {
+
+      val firstGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
+
+      val setResult = repository.set(userAnswers1, SubmissionState.RejectedPendingChanges).futureValue
+
+      setResult shouldBe true
+
+      val secondGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
+
+      firstGet.id shouldBe secondGet.id
+      firstGet.lrn shouldBe secondGet.lrn
+      firstGet.eoriNumber shouldBe secondGet.eoriNumber
+      firstGet.metadata shouldBe secondGet.metadata
+      firstGet.createdAt shouldBe secondGet.createdAt
+      firstGet.lastUpdated isBefore secondGet.lastUpdated shouldBe true
+      firstGet.status shouldBe SubmissionState.NotSubmitted
+      secondGet.status shouldBe SubmissionState.RejectedPendingChanges
     }
   }
 

@@ -18,7 +18,6 @@ package services
 
 import base.SpecBase
 import connectors.ApiConnector
-import models._
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
@@ -27,7 +26,6 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import uk.gov.hmrc.http.HttpResponse
 
-import java.time.Instant
 import scala.concurrent.Future
 
 class ApiServiceSpec extends SpecBase with ScalaFutures {
@@ -69,156 +67,6 @@ class ApiServiceSpec extends SpecBase with ScalaFutures {
       val result = service.getDeparturesForLrn(lrn).futureValue
       result shouldBe expectedResult
       verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
-    }
-  }
-
-  "getSubmissionStatus" must {
-    "return Submitted" when {
-      "most recently received message is an IE015" in {
-        val departures = Seq(
-          Departure("departureId1", "lrn1", Instant.ofEpochMilli(1667569012332L)),
-          Departure("departureId2", "lrn2", Instant.ofEpochMilli(1667568475522L))
-        )
-
-        val messages = Seq(
-          DepartureMessage("messageId", "IE015", Instant.ofEpochMilli(1667569012332L))
-        )
-
-        when(mockApiConnector.getDepartures(any())(any())).thenReturn(Future.successful(Some(departures)))
-        when(mockApiConnector.getDepartureMessages(any())(any())).thenReturn(Future.successful(Some(messages)))
-
-        val result = service.getSubmissionStatus(lrn, eoriNumber).futureValue
-        result shouldBe SubmissionState.Submitted
-
-        verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
-        verify(mockApiConnector).getDepartureMessages(eqTo("departureId1"))(any())
-      }
-
-      "most recently received message is an IE056 and is not amendable" in {
-        val departures = Seq(
-          Departure("departureId1", "lrn1", Instant.ofEpochMilli(1667569012332L)),
-          Departure("departureId2", "lrn2", Instant.ofEpochMilli(1667568475522L))
-        )
-
-        val messages = Seq(
-          DepartureMessage("messageId1", "IE015", Instant.ofEpochMilli(1667568475522L)),
-          DepartureMessage("messageId2", "IE056", Instant.ofEpochMilli(1667569012332L))
-        )
-
-        val functionalErrors = Seq(
-          FunctionalError("/CC015C/Authorisation[1]/referenceNumber"),
-          FunctionalError("/CC015C/Guarantee[1]/guaranteeType")
-        )
-
-        val xPaths = Seq(
-          XPath("/CC015C/Authorisation[1]/referenceNumber"),
-          XPath("/CC015C/Guarantee[1]/guaranteeType")
-        )
-
-        when(mockApiConnector.getDepartures(any())(any())).thenReturn(Future.successful(Some(departures)))
-        when(mockApiConnector.getDepartureMessages(any())(any())).thenReturn(Future.successful(Some(messages)))
-        when(mockApiConnector.getDepartureMessage[IE056Message](any(), any())(any(), any()))
-          .thenReturn(Future.successful(IE056Message(IE056Body(functionalErrors))))
-        when(mockXPathService.isDeclarationAmendable(any(), any(), any())).thenReturn(Future.successful(false))
-
-        val result = service.getSubmissionStatus(lrn, eoriNumber).futureValue
-        result shouldBe SubmissionState.Submitted
-
-        verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
-        verify(mockApiConnector).getDepartureMessages(eqTo("departureId1"))(any())
-        verify(mockApiConnector).getDepartureMessage[IE056Message](eqTo("departureId1"), eqTo("messageId2"))(any(), any())
-        verify(mockXPathService).isDeclarationAmendable(eqTo(lrn), eqTo(eoriNumber), eqTo(xPaths))
-      }
-    }
-
-    "return RejectedPendingChanges" when {
-      "most recently received message is an IE056 and is amendable" in {
-        val departures = Seq(
-          Departure("departureId1", "lrn1", Instant.ofEpochMilli(1667569012332L)),
-          Departure("departureId2", "lrn2", Instant.ofEpochMilli(1667568475522L))
-        )
-
-        val messages = Seq(
-          DepartureMessage("messageId1", "IE015", Instant.ofEpochMilli(1667568475522L)),
-          DepartureMessage("messageId2", "IE056", Instant.ofEpochMilli(1667569012332L))
-        )
-
-        val functionalErrors = Seq(
-          FunctionalError("/CC015C/Authorisation[1]/referenceNumber"),
-          FunctionalError("/CC015C/Guarantee[1]/guaranteeType")
-        )
-
-        val xPaths = Seq(
-          XPath("/CC015C/Authorisation[1]/referenceNumber"),
-          XPath("/CC015C/Guarantee[1]/guaranteeType")
-        )
-
-        when(mockApiConnector.getDepartures(any())(any())).thenReturn(Future.successful(Some(departures)))
-        when(mockApiConnector.getDepartureMessages(any())(any())).thenReturn(Future.successful(Some(messages)))
-        when(mockApiConnector.getDepartureMessage[IE056Message](any(), any())(any(), any()))
-          .thenReturn(Future.successful(IE056Message(IE056Body(functionalErrors))))
-        when(mockXPathService.isDeclarationAmendable(any(), any(), any())).thenReturn(Future.successful(true))
-
-        val result = service.getSubmissionStatus(lrn, eoriNumber).futureValue
-        result shouldBe SubmissionState.RejectedPendingChanges
-
-        verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
-        verify(mockApiConnector).getDepartureMessages(eqTo("departureId1"))(any())
-        verify(mockApiConnector).getDepartureMessage[IE056Message](eqTo("departureId1"), eqTo("messageId2"))(any(), any())
-        verify(mockXPathService).isDeclarationAmendable(eqTo(lrn), eqTo(eoriNumber), eqTo(xPaths))
-      }
-    }
-
-    "return NotSubmitted" when {
-      "error retrieving departures for LRN" in {
-        when(mockApiConnector.getDepartures(any())(any())).thenReturn(Future.successful(None))
-
-        val result = service.getSubmissionStatus(lrn, eoriNumber).futureValue
-        result shouldBe SubmissionState.NotSubmitted
-
-        verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
-      }
-
-      "no departures found for LRN" in {
-        when(mockApiConnector.getDepartures(any())(any())).thenReturn(Future.successful(Some(Nil)))
-
-        val result = service.getSubmissionStatus(lrn, eoriNumber).futureValue
-        result shouldBe SubmissionState.NotSubmitted
-
-        verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
-      }
-
-      "error retrieving messages for departure ID" in {
-        val departures = Seq(
-          Departure("departureId1", "lrn1", Instant.ofEpochMilli(1667569012332L)),
-          Departure("departureId2", "lrn2", Instant.ofEpochMilli(1667568475522L))
-        )
-
-        when(mockApiConnector.getDepartures(any())(any())).thenReturn(Future.successful(Some(departures)))
-        when(mockApiConnector.getDepartureMessages(any())(any())).thenReturn(Future.successful(None))
-
-        val result = service.getSubmissionStatus(lrn, eoriNumber).futureValue
-        result shouldBe SubmissionState.NotSubmitted
-
-        verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
-        verify(mockApiConnector).getDepartureMessages(eqTo("departureId1"))(any())
-      }
-
-      "no messages found for departure ID" in {
-        val departures = Seq(
-          Departure("departureId1", "lrn1", Instant.ofEpochMilli(1667569012332L)),
-          Departure("departureId2", "lrn2", Instant.ofEpochMilli(1667568475522L))
-        )
-
-        when(mockApiConnector.getDepartures(any())(any())).thenReturn(Future.successful(Some(departures)))
-        when(mockApiConnector.getDepartureMessages(any())(any())).thenReturn(Future.successful(Some(Nil)))
-
-        val result = service.getSubmissionStatus(lrn, eoriNumber).futureValue
-        result shouldBe SubmissionState.NotSubmitted
-
-        verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
-        verify(mockApiConnector).getDepartureMessages(eqTo("departureId1"))(any())
-      }
     }
   }
 }

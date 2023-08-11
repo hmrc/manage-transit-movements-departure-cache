@@ -19,11 +19,10 @@ package connectors
 import api.submission._
 import config.AppConfig
 import connectors.CustomHttpReads.rawHttpResponseHttpReads
-import models.{Departure, DepartureMessage, Message, UserAnswers}
+import models.{Departure, UserAnswers}
 import play.api.Logging
 import play.api.http.HeaderNames
 import play.api.http.Status.{NOT_FOUND, OK}
-import play.api.libs.json.Reads
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErrorFunctions, HttpResponse}
@@ -53,30 +52,6 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
           logger.warn(s"Failed to get departure movements with error: $e")
           None
       }
-  }
-
-  def getDepartureMessages(departureId: String)(implicit hc: HeaderCarrier): Future[Option[Seq[DepartureMessage]]] = {
-    val url = s"${appConfig.apiUrl}/movements/departures/$departureId/messages"
-
-    val headers = hc.withExtraHeaders(("Accept", "application/vnd.hmrc.2.0+json"))
-
-    httpClient
-      .GET[HttpResponse](url)(rawHttpResponseHttpReads, headers, ec)
-      .map {
-        response =>
-          response.status match {
-            case OK => (response.json \ "messages").validate[Seq[DepartureMessage]].asOpt
-            case _  => None
-          }
-      }
-  }
-
-  def getDepartureMessage[T <: Message](departureId: String, messageId: String)(implicit hc: HeaderCarrier, reads: Reads[T]): Future[T] = {
-    val url = s"${appConfig.apiUrl}/movements/departures/$departureId/messages/$messageId"
-
-    val headers = hc.withExtraHeaders(("Accept", "application/vnd.hmrc.2.0+json"))
-
-    httpClient.GET[T](url)(Message.httpReads[T], headers, ec)
   }
 
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {

@@ -28,7 +28,8 @@ final case class UserAnswers(
   metadata: Metadata,
   createdAt: Instant,
   lastUpdated: Instant,
-  id: UUID
+  id: UUID,
+  status: SubmissionState
 ) {
 
   val lrn: String        = metadata.lrn
@@ -40,18 +41,8 @@ final case class UserAnswers(
   def expiryInDays(implicit clock: Clock, appConfig: AppConfig): Long =
     TTLUtils.expiresInDays(createdAt)
 
-  def toHateoas(status: SubmissionState)(implicit clock: Clock, config: AppConfig): JsObject =
-    Json.obj(
-      "lrn" -> lrn,
-      "_links" -> Json.obj(
-        "self" -> Json.obj("href" -> controllers.routes.CacheController.get(lrn).url)
-      ),
-      "createdAt"     -> createdAt,
-      "lastUpdated"   -> lastUpdated,
-      "expiresInDays" -> expiryInDays,
-      "_id"           -> id,
-      "status"        -> status
-    )
+  def updateTasks(tasks: Map[String, Status.Value]): UserAnswers =
+    this.copy(metadata = metadata.updateTasks(tasks))
 }
 
 object UserAnswers {
@@ -65,14 +56,16 @@ object UserAnswers {
     __.read[Metadata] and
       (__ \ "createdAt").read[Instant] and
       (__ \ "lastUpdated").read[Instant] and
-      (__ \ "_id").read[UUID]
+      (__ \ "_id").read[UUID] and
+      (__ \ "isSubmitted").read[SubmissionState]
   )(UserAnswers.apply _)
 
   private def customWrites(implicit instantWrites: Writes[Instant]): Writes[UserAnswers] = (
     __.write[Metadata] and
       (__ \ "createdAt").write[Instant] and
       (__ \ "lastUpdated").write[Instant] and
-      (__ \ "_id").write[UUID]
+      (__ \ "_id").write[UUID] and
+      (__ \ "isSubmitted").write[SubmissionState]
   )(unlift(UserAnswers.unapply))
 
   lazy val mongoFormat: Format[UserAnswers] = Format(

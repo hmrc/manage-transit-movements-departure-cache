@@ -17,9 +17,10 @@
 package controllers
 
 import controllers.actions.AuthenticateActionProvider
+import models.SubmissionState
 import play.api.Logging
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.libs.json.{JsError, JsSuccess, JsValue}
+import play.api.mvc.{Action, ControllerComponents}
 import repositories.CacheRepository
 import services.ApiService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -44,9 +45,12 @@ class SubmissionController @Inject() (
           case JsSuccess(lrn, _) =>
             cacheRepository.get(lrn, request.eoriNumber).flatMap {
               case Some(uA) =>
-                apiService.submitDeclaration(uA).map {
-                  case Right(response) => Ok(response.body)
-                  case Left(error)     => error
+                cacheRepository.set(uA, SubmissionState.Submitted).flatMap {
+                  _ =>
+                    apiService.submitDeclaration(uA).map {
+                      case Right(response) => Ok(response.body)
+                      case Left(error)     => error
+                    }
                 }
               case None => Future.successful(InternalServerError)
             }
@@ -55,9 +59,4 @@ class SubmissionController @Inject() (
             Future.successful(BadRequest)
         }
     }
-
-  def getSubmissionStatus(lrn: String): Action[AnyContent] = authenticate().async {
-    implicit request =>
-      apiService.getSubmissionStatus(lrn, request.eoriNumber).map(Json.toJson(_)).map(Ok(_))
-  }
 }

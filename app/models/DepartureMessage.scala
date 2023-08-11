@@ -16,10 +16,8 @@
 
 package models
 
-import play.api.http.Status.OK
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{__, Reads}
-import uk.gov.hmrc.http.{HttpReads, HttpResponse}
 
 import java.time.Instant
 
@@ -32,45 +30,4 @@ object DepartureMessage {
       (__ \ "type").read[String] and
       (__ \ "received").read[Instant]
   )(DepartureMessage.apply _)
-}
-
-sealed trait Message {
-  val body: Body
-}
-
-object Message {
-
-  implicit def httpReads[T <: Message](implicit reads: Reads[T]): HttpReads[T] =
-    (_: String, _: String, response: HttpResponse) => {
-      response.status match {
-        case OK =>
-          (response.json \ "body")
-            .validate[T]
-            .getOrElse(
-              throw new IllegalStateException("[Message][httpReads] Message could not be parsed")
-            )
-        case e =>
-          throw new IllegalStateException(s"[Message][httpReads] Error: $e")
-      }
-    }
-}
-
-case class IE056Message(body: IE056Body) extends Message
-
-object IE056Message {
-
-  implicit val reads: Reads[IE056Message] =
-    (__ \ "n1:CC056C").read[IE056Body].map(IE056Message(_))
-}
-
-sealed trait Body
-
-case class IE056Body(functionalErrors: Seq[FunctionalError]) extends Body {
-  val xPaths: Seq[XPath] = functionalErrors.map(_.errorPointer).map(XPath(_))
-}
-
-object IE056Body {
-
-  implicit val reads: Reads[IE056Body] =
-    (__ \ "FunctionalError").readWithDefault[Seq[FunctionalError]](Nil).map(IE056Body(_))
 }

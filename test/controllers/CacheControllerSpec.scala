@@ -17,19 +17,17 @@
 package controllers
 
 import base.SpecBase
-import models.{Metadata, SubmissionState, UserAnswers, UserAnswersSummary}
+import models.{Metadata, UserAnswersSummary}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsArray, JsString, Json}
+import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
 import services.ApiService
 
-import java.time.Instant
-import java.util.UUID
 import scala.concurrent.Future
 
 class CacheControllerSpec extends SpecBase {
@@ -52,7 +50,7 @@ class CacheControllerSpec extends SpecBase {
 
     "return 200" when {
       "read from mongo is successful" in {
-        val userAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
+        val userAnswers = emptyUserAnswers
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
         val request = FakeRequest(GET, routes.CacheController.get(lrn).url)
@@ -272,23 +270,18 @@ class CacheControllerSpec extends SpecBase {
     "return 200" when {
 
       "read from mongo is successful" in {
-        val userAnswer1     = UserAnswers(Metadata("AB123", eoriNumber), Instant.now(), Instant.now(), UUID.randomUUID())
-        val userAnswer2     = UserAnswers(Metadata("CD123", eoriNumber), Instant.now(), Instant.now(), UUID.randomUUID())
-        val userAnswers     = Seq(userAnswer1, userAnswer2)
-        val submissionState = SubmissionState.NotSubmitted
-        val objects         = userAnswers.map(_.toHateoas(submissionState))
+        val userAnswer1 = emptyUserAnswers.copy(metadata = Metadata("AB123", eoriNumber))
+        val userAnswer2 = emptyUserAnswers.copy(metadata = Metadata("CD123", eoriNumber))
+        val userAnswers = Seq(userAnswer1, userAnswer2)
 
         when(mockCacheRepository.getAll(any(), any(), any(), any(), any()))
           .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, userAnswers, 2, 2)))
-
-        when(mockApiService.getSubmissionStatus(any(), any())(any()))
-          .thenReturn(Future.successful(submissionState))
 
         val request = FakeRequest(GET, routes.CacheController.getAll().url)
         val result  = route(app, request).value
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe UserAnswersSummary(eoriNumber, userAnswers, 2, 2).toHateoas(JsArray(objects))
+        contentAsJson(result) shouldBe UserAnswersSummary(eoriNumber, userAnswers, 2, 2).toHateoas()
         verify(mockCacheRepository).getAll(eqTo(eoriNumber), any(), any(), any(), any())
       }
     }
@@ -310,8 +303,7 @@ class CacheControllerSpec extends SpecBase {
 
     "return 200" when {
       "read from mongo is successful" in {
-        val userAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
-        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
 
         val request = FakeRequest(GET, routes.CacheController.getExpiry(lrn).url)
         val result  = route(app, request).value

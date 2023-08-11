@@ -46,6 +46,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |  "_id" : "$uuid",
                                     |  "lrn" : "$lrn",
                                     |  "eoriNumber" : "$eoriNumber",
+                                    |  "isSubmitted": "notSubmitted",
                                     |  "data" : {
                                     |    "preTaskList" : {
                                     |      "officeOfDeparture" : {
@@ -436,123 +437,6 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
 
       }
 
-    }
-
-    "getDepartureMessages" - {
-
-      val messageId   = "634982098f02f00a"
-      val departureId = "6365135ba5e821ee"
-
-      val responseJson: JsValue = Json.parse(s"""
-          |{
-          |  "_links": {
-          |    "self": {
-          |      "href": "/customs/transits/movements/departures/$departureId/messages"
-          |    },
-          |    "departure": {
-          |      "href": "/customs/transits/movements/departures/$departureId"
-          |    }
-          |  },
-          |  "totalCount": 1,
-          |  "messages": [
-          |    {
-          |      "_links": {
-          |        "self": {
-          |          "href": "/customs/transits/movements/departures/$departureId/message/634982098f02f00a"
-          |        },
-          |        "departure": {
-          |          "href": "/customs/transits/movements/departures/$departureId"
-          |        }
-          |      },
-          |      "id": "$messageId",
-          |      "departureId": "$departureId",
-          |      "received": "2023-08-10T12:04:39.779Z",
-          |      "type": "IE015",
-          |      "status": "Success"
-          |    }
-          |  ]
-          |}
-          |""".stripMargin)
-
-      "must return some messages for given departure ID" in {
-
-        server.stubFor(
-          get(urlEqualTo(s"/movements/departures/$departureId/messages"))
-            .willReturn(okJson(responseJson.toString()))
-        )
-
-        val expectedResult = Seq(DepartureMessage(messageId, "IE015", Instant.ofEpochMilli(1691669079779L)))
-
-        await(connector.getDepartureMessages(departureId)) mustBe Some(expectedResult)
-      }
-
-      "must return None Departures when 404 is returned" in {
-
-        server.stubFor(
-          get(urlEqualTo(s"/movements/departures/$departureId/messages"))
-            .willReturn(aResponse().withStatus(404))
-        )
-
-        connector.getDepartureMessages(departureId).futureValue mustBe None
-      }
-    }
-
-    "getDepartureMessage" - {
-
-      val messageId   = "62f4ebbb765ba8c2"
-      val departureId = "62f4ebbbf581d4aa"
-
-      "when IE056" - {
-
-        val responseJson: JsValue = Json.parse(s"""
-             |{
-             |  "_links": {
-             |    "self": {
-             |      "href": "/customs/transits/movements/departures/$departureId/messages/62f4ebbb765ba8c2"
-             |    },
-             |    "departure": {
-             |      "href": "/customs/transits/movements/departures/$departureId"
-             |    }
-             |  },
-             |  "id": "$messageId",
-             |  "departureId": "$departureId",
-             |  "received": "2022-08-11T11:44:59.83705",
-             |  "type": "IE015",
-             |  "status": "Success",
-             |  "body": {
-             |    "n1:CC056C": {
-             |      "FunctionalError": [
-             |        {
-             |          "errorPointer": "/CC015C/Authorisation[1]/referenceNumber"
-             |        },
-             |        {
-             |          "errorPointer": "/CC015C/Guarantee[1]/guaranteeType"
-             |        }
-             |      ]
-             |    }
-             |  }
-             |}
-             |""".stripMargin)
-
-        "must return message for given departure ID and message ID" in {
-
-          server.stubFor(
-            get(urlEqualTo(s"/movements/departures/$departureId/messages/$messageId"))
-              .willReturn(okJson(responseJson.toString()))
-          )
-
-          val expectedResult = IE056Message(
-            IE056Body(
-              Seq(
-                FunctionalError("/CC015C/Authorisation[1]/referenceNumber"),
-                FunctionalError("/CC015C/Guarantee[1]/guaranteeType")
-              )
-            )
-          )
-
-          await(connector.getDepartureMessage[IE056Message](departureId, messageId)) mustBe expectedResult
-        }
-      }
     }
   }
 }

@@ -107,18 +107,9 @@ class CacheController @Inject() (
       implicit request =>
         cacheRepository
           .getAll(request.eoriNumber, lrn, limit, skip, sortBy)
-          .flatMap {
-            result =>
-              Future
-                .sequence {
-                  result.userAnswers.map {
-                    ua => apiService.getSubmissionStatus(ua.lrn, ua.eoriNumber).map(ua.toHateoas(_))
-                  }
-                }
-                .map(JsArray(_))
-                .map(result.toHateoas)
-                .map(Ok(_))
-          }
+          .map(
+            result => Ok(result.toHateoas())
+          )
           .recover {
             case e =>
               logger.error("Failed to read user answers summary from mongo", e)

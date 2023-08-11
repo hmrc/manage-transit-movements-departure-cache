@@ -33,43 +33,43 @@ class UserAnswersSummarySpec extends SpecBase {
       val id1 = UUID.randomUUID()
       val id2 = UUID.randomUUID()
 
-      val userAnswers1 = UserAnswers(Metadata("AB123", eoriNumber), now, now, id1)
-      val userAnswers2 = UserAnswers(Metadata("CD123", eoriNumber), now.minus(1, DAYS), now.minus(1, DAYS), id2)
+      val userAnswers1 = UserAnswers(Metadata("AB123", eoriNumber), now, now, id1, SubmissionState.NotSubmitted)
+      val userAnswers2 = UserAnswers(Metadata("CD123", eoriNumber), now.minus(1, DAYS), now.minus(1, DAYS), id2, SubmissionState.Submitted)
 
       val userAnswersSummary = UserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2), 2, 2)
-
-      val userAnswers = Json.arr(
-        Json.obj(
-          "lrn" -> "AB123",
-          "_links" -> Json.obj(
-            "self" -> Json.obj("href" -> controllers.routes.CacheController.get("AB123").url)
-          ),
-          "createdAt"     -> now,
-          "lastUpdated"   -> now,
-          "expiresInDays" -> 30,
-          "_id"           -> id1
-        ),
-        Json.obj(
-          "lrn" -> "CD123",
-          "_links" -> Json.obj(
-            "self" -> Json.obj("href" -> controllers.routes.CacheController.get("CD123").url)
-          ),
-          "createdAt"     -> now.minus(1, DAYS),
-          "lastUpdated"   -> now.minus(1, DAYS),
-          "expiresInDays" -> 29,
-          "_id"           -> id2
-        )
-      )
 
       val expectedResult =
         Json.obj(
           "eoriNumber"             -> eoriNumber,
           "totalMovements"         -> 2,
           "totalMatchingMovements" -> 2,
-          "userAnswers"            -> userAnswers
+          "userAnswers" -> Json.arr(
+            Json.obj(
+              "lrn" -> "AB123",
+              "_links" -> Json.obj(
+                "self" -> Json.obj("href" -> controllers.routes.CacheController.get("AB123").url)
+              ),
+              "createdAt"     -> now,
+              "lastUpdated"   -> now,
+              "expiresInDays" -> 30,
+              "_id"           -> id1,
+              "isSubmitted"   -> "notSubmitted"
+            ),
+            Json.obj(
+              "lrn" -> "CD123",
+              "_links" -> Json.obj(
+                "self" -> Json.obj("href" -> controllers.routes.CacheController.get("CD123").url)
+              ),
+              "createdAt"     -> now.minus(1, DAYS),
+              "lastUpdated"   -> now.minus(1, DAYS),
+              "expiresInDays" -> 29,
+              "_id"           -> id2,
+              "isSubmitted"   -> "submitted"
+            )
+          )
         )
 
-      userAnswersSummary.toHateoas(userAnswers) shouldBe expectedResult
+      userAnswersSummary.toHateoas() shouldBe expectedResult
     }
   }
 }

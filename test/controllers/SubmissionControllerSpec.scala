@@ -46,6 +46,7 @@ class SubmissionControllerSpec extends SpecBase {
     super.beforeEach()
     reset(mockCacheRepository)
     reset(mockApiService)
+    when(mockCacheRepository.set(any(), any())).thenReturn(Future.successful(true))
   }
 
   "post" should {
@@ -68,6 +69,7 @@ class SubmissionControllerSpec extends SpecBase {
         contentAsJson(result) shouldBe body
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.Submitted))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers))(any())
       }
     }
@@ -118,22 +120,6 @@ class SubmissionControllerSpec extends SpecBase {
         verify(mockCacheRepository, never()).get(any(), any())
         verify(mockApiService, never()).submitDeclaration(any())(any())
       }
-    }
-  }
-
-  "getSubmissionStatus" should {
-    "return submission status" in {
-      when(mockApiService.getSubmissionStatus(any(), any())(any()))
-        .thenReturn(Future.successful(SubmissionState.Submitted))
-
-      val request = FakeRequest(GET, routes.SubmissionController.getSubmissionStatus(lrn).url)
-        .withBody(Json.toJson(lrn))
-
-      val result = route(app, request).value
-
-      status(result) shouldBe OK
-
-      verify(mockApiService).getSubmissionStatus(eqTo(lrn), eqTo(eoriNumber))(any())
     }
   }
 }
