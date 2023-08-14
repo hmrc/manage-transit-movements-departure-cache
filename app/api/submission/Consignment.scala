@@ -92,10 +92,10 @@ object consignmentType20 {
         equipmentsPath.readArray[TransportEquipmentType06](transportEquipmentType06.reads(_, items))
     }
 
-  private def departureTransportMeansReads: Reads[Seq[DepartureTransportMeansType03]] =
+  def departureTransportMeansReads: Reads[Seq[DepartureTransportMeansType03]] =
     (transportDetailsPath \ "transportMeansDeparture")
-      .read[DepartureTransportMeansType03](departureTransportMeansType03.reads)
-      .map(Seq(_))
+      .readNullable[DepartureTransportMeansType03](departureTransportMeansType03.reads)
+      .map(Seq(_).flatten)
 
   private def countriesOfRoutingReads: Reads[Seq[CountryOfRoutingOfConsignmentType01]] =
     (routeDetailsPath \ "routing" \ "countriesOfRouting")
