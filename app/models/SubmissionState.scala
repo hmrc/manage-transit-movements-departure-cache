@@ -16,50 +16,35 @@
 
 package models
 
-import play.api.libs.json.{__, JsString, Reads, Writes}
+import play.api.libs.json._
 
 sealed trait SubmissionState {
-  def toString: String
-  val amendable: Boolean = SubmissionState.isAmendable(this)
+  val asString: String
 }
 
 object SubmissionState {
 
   case object NotSubmitted extends SubmissionState {
-    override def toString: String = "notSubmitted"
+    override val asString: String = "notSubmitted"
   }
 
   case object Submitted extends SubmissionState {
-    override def toString: String = "submitted"
+    override val asString: String = "submitted"
   }
 
   case object RejectedPendingChanges extends SubmissionState {
-    override def toString: String = "rejectedPendingChanges"
+    override val asString: String = "rejectedPendingChanges"
   }
 
-  case object RejectedAndResubmitted extends SubmissionState {
-    override def toString: String = "rejectedAndResubmitted"
+  implicit val reads: Reads[SubmissionState] = Reads {
+    case JsString(NotSubmitted.asString)           => JsSuccess(NotSubmitted)
+    case JsString(Submitted.asString)              => JsSuccess(Submitted)
+    case JsString(RejectedPendingChanges.asString) => JsSuccess(RejectedPendingChanges)
+    case x                                         => JsError(s"Could not read $x as SubmissionState")
   }
 
-  def isAmendable(state: SubmissionState): Boolean = state match {
-    case NotSubmitted           => false
-    case RejectedAndResubmitted => false
-    case Submitted              => true
-    case RejectedPendingChanges => true
-  }
-
-  def apply(state: String): SubmissionState = state match {
-    case "submitted"              => Submitted
-    case "rejectedPendingChanges" => RejectedPendingChanges
-    case "rejectedAndResubmitted" => RejectedAndResubmitted
-    case _                        => NotSubmitted
-  }
-
-  implicit def reads: Reads[SubmissionState] =
-    __.readWithDefault[String](NotSubmitted.toString).map(SubmissionState.apply)
-
-  implicit def writes: Writes[SubmissionState] = Writes {
-    state => JsString(state.toString)
+  implicit val writes: Writes[SubmissionState] = Writes {
+    state => JsString(state.asString)
   }
 
 }

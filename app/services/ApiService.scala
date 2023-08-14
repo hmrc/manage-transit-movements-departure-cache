@@ -14,12 +14,23 @@
  * limitations under the License.
  */
 
-package models
+package services
 
-import play.api.libs.json.{__, Reads}
+import connectors.ApiConnector
+import models._
+import play.api.mvc.Result
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
-case class Departures(departures: Seq[Departure])
+import javax.inject.Inject
+import scala.concurrent.Future
 
-object Departures {
-  implicit val reads: Reads[Departures] = (__ \ "departures").read[Seq[Departure]].map(Departures(_))
+class ApiService @Inject() (
+  apiConnector: ApiConnector
+) {
+
+  def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
+    apiConnector.submitDeclaration(userAnswers)
+
+  def getDeparturesForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Option[Seq[Departure]]] =
+    apiConnector.getDepartures(Seq("localReferenceNumber" -> lrn))
 }

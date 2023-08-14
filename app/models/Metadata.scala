@@ -16,16 +16,18 @@
 
 package models
 
-import models.SubmissionState.NotSubmitted
 import play.api.libs.json.{Format, JsObject, Json}
 
 case class Metadata(
   lrn: String,
   eoriNumber: String,
   data: JsObject,
-  tasks: Map[String, Status.Value],
-  isSubmitted: Option[SubmissionState] = Some(NotSubmitted)
-)
+  tasks: Map[String, Status.Value]
+) {
+
+  def updateTasks(tasks: Map[String, Status.Value]): Metadata =
+    this.copy(tasks = tasks)
+}
 
 object Metadata {
 

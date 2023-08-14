@@ -33,8 +33,8 @@ class UserAnswersSummarySpec extends SpecBase {
       val id1 = UUID.randomUUID()
       val id2 = UUID.randomUUID()
 
-      val userAnswers1 = UserAnswers(Metadata("AB123", eoriNumber), now, None, now, id1)
-      val userAnswers2 = UserAnswers(Metadata("CD123", eoriNumber), now.minus(1, DAYS), None, now.minus(1, DAYS), id2)
+      val userAnswers1 = UserAnswers(Metadata("AB123", eoriNumber), now, now, id1, SubmissionState.NotSubmitted)
+      val userAnswers2 = UserAnswers(Metadata("CD123", eoriNumber), now.minus(1, DAYS), now.minus(1, DAYS), id2, SubmissionState.Submitted)
 
       val userAnswersSummary = UserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2), 2, 2)
 
@@ -52,7 +52,8 @@ class UserAnswersSummarySpec extends SpecBase {
               "createdAt"     -> now,
               "lastUpdated"   -> now,
               "expiresInDays" -> 30,
-              "_id"           -> id1
+              "_id"           -> id1,
+              "isSubmitted"   -> "notSubmitted"
             ),
             Json.obj(
               "lrn" -> "CD123",
@@ -62,7 +63,8 @@ class UserAnswersSummarySpec extends SpecBase {
               "createdAt"     -> now.minus(1, DAYS),
               "lastUpdated"   -> now.minus(1, DAYS),
               "expiresInDays" -> 29,
-              "_id"           -> id2
+              "_id"           -> id2,
+              "isSubmitted"   -> "submitted"
             )
           )
         )

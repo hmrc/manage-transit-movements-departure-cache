@@ -16,9 +16,7 @@
 
 package services
 
-import config.AppConfig
-import models.SubmissionState.NotSubmitted
-import models.{Status, XPath}
+import models.{Status, SubmissionState, XPath}
 import play.api.Logging
 import repositories.CacheRepository
 
@@ -26,30 +24,23 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class XPathService @Inject() (
-  cacheRepository: CacheRepository,
-  config: AppConfig
+  cacheRepository: CacheRepository
 )(implicit ec: ExecutionContext)
     extends Logging {
 
   def isDeclarationAmendable(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
-    cacheRepository.get(lrn, eoriNumber).map {
-      case Some(userAnswers) =>
-        userAnswers.metadata.isSubmitted.getOrElse(NotSubmitted).amendable && xPaths.exists(_.isAmendable)
-      case _ => false
-    }
+    cacheRepository.get(lrn, eoriNumber).map(_.isDefined && xPaths.exists(_.isAmendable))
 
   def handleErrors(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
     xPaths.flatMap {
-      xPath =>
-        xPath.taskError
+      _.taskError
     }.toMap match {
       case tasks if tasks.nonEmpty =>
         cacheRepository.get(lrn, eoriNumber).flatMap {
           case Some(userAnswers) =>
             val updatedTasks: Map[String, Status.Value] = (userAnswers.metadata.tasks.toSeq ++ tasks.toSeq).toMap
-            val metaData                                = userAnswers.metadata.copy(tasks = updatedTasks)
             cacheRepository
-              .set(metaData)
+              .set(userAnswers.updateTasks(updatedTasks), SubmissionState.RejectedPendingChanges)
               .map {
                 case true => true
                 case false =>

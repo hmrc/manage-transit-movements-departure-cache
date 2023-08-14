@@ -19,7 +19,7 @@ package connectors
 import base.AppWithDefaultMockFixtures
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
-import models.{Departure, Departures, UserAnswers}
+import models.{Departure, UserAnswers}
 import org.scalacheck.Gen
 import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
@@ -371,7 +371,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
             .willReturn(okJson(responseJson.toString()))
         )
 
-        val expectedResult = Departures(Seq(Departure(lrn1), Departure(lrn2)))
+        val expectedResult = Seq(Departure(lrn1), Departure(lrn2))
 
         await(connector.getDepartures()) mustBe Some(expectedResult)
       }
@@ -383,7 +383,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
             .willReturn(aResponse().withStatus(404))
         )
 
-        connector.getDepartures().futureValue mustBe Some(Departures(Seq.empty))
+        connector.getDepartures().futureValue mustBe Some(Seq.empty)
       }
 
       "must return None when an error is returned" in {

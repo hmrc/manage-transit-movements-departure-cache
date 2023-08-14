@@ -18,14 +18,12 @@ package repositories
 
 import com.mongodb.client.model.Filters.{regex, and => mAnd, eq => mEq}
 import config.AppConfig
-import models.SubmissionState.NotSubmitted
 import models._
 import org.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
 import org.mongodb.scala.model._
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
-import utils.TTLUtils
 
 import java.time.{Clock, Instant}
 import java.util.UUID
@@ -59,28 +57,13 @@ class CacheRepository @Inject() (
       .toFutureOption()
   }
 
-  def setFlag(data: Metadata, submissionState: SubmissionState): Future[Boolean] = {
+  def set(data: Metadata, status: Option[SubmissionState]): Future[Boolean] =
+    set(data, Updates.setOnInsert("isSubmitted", status.getOrElse(SubmissionState.NotSubmitted).asString))
 
-    val now = Instant.now(clock)
+  def set(userAnswers: UserAnswers, status: SubmissionState): Future[Boolean] =
+    set(userAnswers.metadata, Updates.set("isSubmitted", status.asString))
 
-    val filter = Filters.and(
-      Filters.eq("lrn", data.lrn),
-      Filters.eq("eoriNumber", data.eoriNumber)
-    )
-    val updates = Updates.combine(
-      Updates.set("isSubmitted", submissionState.toString),
-      Updates.set("lastUpdated", now)
-    )
-
-    val options = UpdateOptions().upsert(false)
-
-    collection
-      .updateOne(filter, updates, options)
-      .toFuture()
-      .map(_.wasAcknowledged())
-  }
-
-  def set(data: Metadata): Future[Boolean] = {
+  private def set(data: Metadata, statusUpdate: Bson): Future[Boolean] = {
     val now = Instant.now(clock)
     val filter = Filters.and(
       Filters.eq("lrn", data.lrn),
@@ -90,12 +73,12 @@ class CacheRepository @Inject() (
     val updates = Updates.combine(
       Updates.setOnInsert("lrn", data.lrn),
       Updates.setOnInsert("eoriNumber", data.eoriNumber),
-      Updates.setOnInsert("isSubmitted", data.isSubmitted.getOrElse(NotSubmitted).toString),
       Updates.set("data", Codecs.toBson(data.data)),
       Updates.set("tasks", Codecs.toBson(data.tasks)),
       Updates.setOnInsert("createdAt", now),
       Updates.set("lastUpdated", now),
-      Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID()))
+      Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID())),
+      statusUpdate
     )
     val options = UpdateOptions().upsert(true)
 
@@ -154,13 +137,11 @@ class CacheRepository @Inject() (
     )
   }
 
-  def existsLRN(lrn: String): Future[Boolean] = {
-    val lrnFilter = Filters.eq("lrn", lrn)
-
-    val isSubmittedFilter = Filters.in("isSubmitted", SubmissionState.NotSubmitted.toString, SubmissionState.RejectedPendingChanges.toString)
-
-    val primaryFilter = Filters.and(isSubmittedFilter, lrnFilter)
-    collection.countDocuments(primaryFilter).toFuture().map(_ > 0)
+  def doesDraftExistForLrn(lrn: String): Future[Boolean] = {
+    val lrnFilter         = Filters.eq("lrn", lrn)
+    val isSubmittedFilter = Filters.in("isSubmitted", SubmissionState.NotSubmitted.asString, SubmissionState.RejectedPendingChanges.asString)
+    val filters           = Filters.and(isSubmittedFilter, lrnFilter)
+    collection.find(filters).toFuture().map(_.nonEmpty)
   }
 }
 
