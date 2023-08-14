@@ -1512,5 +1512,36 @@ class ConsignmentSpec extends SpecBase {
         }
       }
     }
+
+    "commodityType06 reads is called" when {
+      "commodity code defined" in {
+        val json = Json.parse("""
+            |{
+            |  "description" : "Description",
+            |  "commodityCode" : "commodity code",
+            |  "combinedNomenclatureCode" : "CN code"
+            |}
+            |""".stripMargin)
+
+        val result = json.as[CommodityType06](commodityType06.reads)
+
+        result.CommodityCode.value shouldBe CommodityCodeType02(
+          harmonizedSystemSubHeadingCode = "commodity code",
+          combinedNomenclatureCode = Some("CN code")
+        )
+      }
+
+      "commodity code undefined" in {
+        val json = Json.parse("""
+            |{
+            |  "description" : "Description"
+            |}
+            |""".stripMargin)
+
+        val result = json.as[CommodityType06](commodityType06.reads)
+
+        result.CommodityCode shouldBe None
+      }
+    }
   }
 }

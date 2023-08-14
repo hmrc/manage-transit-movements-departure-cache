@@ -482,7 +482,7 @@ object commodityType06 {
   implicit val reads: Reads[CommodityType06] = (
     (__ \ "description").read[String] and
       (__ \ "customsUnionAndStatisticsCode").readNullable[String] and
-      __.readNullable[CommodityCodeType02](commodityCodeType02.reads) and
+      __.read[Option[CommodityCodeType02]](commodityCodeType02.reads) and
       (__ \ "dangerousGoodsList").readArray[DangerousGoodsType01](dangerousGoodsType01.reads) and
       __.readNullable[GoodsMeasureType02](goodsMeasureType02.reads)
   )(CommodityType06.apply _)
@@ -490,10 +490,14 @@ object commodityType06 {
 
 object commodityCodeType02 {
 
-  implicit val reads: Reads[CommodityCodeType02] = (
-    (__ \ "commodityCode").read[String] and
+  implicit val reads: Reads[Option[CommodityCodeType02]] = (
+    (__ \ "commodityCode").readNullable[String] and
       (__ \ "combinedNomenclatureCode").readNullable[String]
-  )(CommodityCodeType02.apply _)
+  ).tupled.map {
+    case (Some(harmonizedSystemSubHeadingCode), combinedNomenclatureCode) =>
+      Some(CommodityCodeType02(harmonizedSystemSubHeadingCode, combinedNomenclatureCode))
+    case _ => None
+  }
 }
 
 object dangerousGoodsType01 {
