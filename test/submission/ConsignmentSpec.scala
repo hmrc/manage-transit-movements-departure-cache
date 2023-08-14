@@ -1512,5 +1512,78 @@ class ConsignmentSpec extends SpecBase {
         }
       }
     }
+
+    "commodityType06 reads is called" when {
+      "commodity code defined" in {
+        val json = Json.parse("""
+            |{
+            |  "description" : "Description",
+            |  "commodityCode" : "commodity code",
+            |  "combinedNomenclatureCode" : "CN code"
+            |}
+            |""".stripMargin)
+
+        val result = json.as[CommodityType06](commodityType06.reads)
+
+        result.CommodityCode.value shouldBe CommodityCodeType02(
+          harmonizedSystemSubHeadingCode = "commodity code",
+          combinedNomenclatureCode = Some("CN code")
+        )
+      }
+
+      "commodity code undefined" in {
+        val json = Json.parse("""
+            |{
+            |  "description" : "Description"
+            |}
+            |""".stripMargin)
+
+        val result = json.as[CommodityType06](commodityType06.reads)
+
+        result.CommodityCode shouldBe None
+      }
+    }
+
+    "departureTransportMeansReads is called" when {
+      "there are no departure transport means" in {
+        val json = Json.parse("""
+            |{
+            |  "transportDetails" : {}
+            |}
+            |""".stripMargin)
+
+        val result = json.as[Seq[DepartureTransportMeansType03]](consignmentType20.departureTransportMeansReads)
+
+        result shouldBe Nil
+      }
+
+      "there is a departure transport means" in {
+        val json = Json.parse("""
+            |{
+            |  "transportDetails" : {
+            |    "transportMeansDeparture" : {
+            |      "identification" : "imoShipIdNumber",
+            |      "meansIdentificationNumber" : "means id number",
+            |      "vehicleCountry" : {
+            |        "code" : "FR",
+            |        "desc" : "France"
+            |      }
+            |    }
+            |  }
+            |}
+            |""".stripMargin)
+
+        val result = json.as[Seq[DepartureTransportMeansType03]](consignmentType20.departureTransportMeansReads)
+
+        result shouldBe Seq(
+          DepartureTransportMeansType03(
+            sequenceNumber = "1",
+            typeOfIdentification = Some("10"),
+            identificationNumber = Some("means id number"),
+            nationality = Some("FR")
+          )
+        )
+      }
+    }
   }
 }
