@@ -27,9 +27,9 @@ import java.util.UUID
 final case class UserAnswers(
   metadata: Metadata,
   createdAt: Instant,
-  expiryInDays: Option[Long] = None,
   lastUpdated: Instant,
-  id: UUID
+  id: UUID,
+  status: SubmissionState
 ) {
 
   val lrn: String        = metadata.lrn
@@ -38,7 +38,11 @@ final case class UserAnswers(
   def get[A](path: JsPath)(implicit rds: Reads[A]): Option[A] =
     Reads.optionNoError(Reads.at(path)).reads(metadata.data).getOrElse(None)
 
-  def withExpiryDate(implicit clock: Clock, appConfig: AppConfig) = this.copy(expiryInDays = Some(TTLUtils.expiresInDays(createdAt)))
+  def expiryInDays(implicit clock: Clock, appConfig: AppConfig): Long =
+    TTLUtils.expiresInDays(createdAt)
+
+  def updateTasks(tasks: Map[String, Status.Value]): UserAnswers =
+    this.copy(metadata = metadata.updateTasks(tasks))
 }
 
 object UserAnswers {
@@ -51,17 +55,17 @@ object UserAnswers {
   private def customReads(implicit instantReads: Reads[Instant]): Reads[UserAnswers] = (
     __.read[Metadata] and
       (__ \ "createdAt").read[Instant] and
-      (__ \ "expiryInDays").readNullable[Long] and
       (__ \ "lastUpdated").read[Instant] and
-      (__ \ "_id").read[UUID]
+      (__ \ "_id").read[UUID] and
+      (__ \ "isSubmitted").read[SubmissionState]
   )(UserAnswers.apply _)
 
   private def customWrites(implicit instantWrites: Writes[Instant]): Writes[UserAnswers] = (
     __.write[Metadata] and
       (__ \ "createdAt").write[Instant] and
-      (__ \ "expiryInDays").writeNullable[Long] and
       (__ \ "lastUpdated").write[Instant] and
-      (__ \ "_id").write[UUID]
+      (__ \ "_id").write[UUID] and
+      (__ \ "isSubmitted").write[SubmissionState]
   )(unlift(UserAnswers.unapply))
 
   lazy val mongoFormat: Format[UserAnswers] = Format(

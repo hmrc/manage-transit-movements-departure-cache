@@ -22,10 +22,12 @@ import org.scalacheck.{Arbitrary, Gen}
 trait ModelGenerators {
 
   implicit lazy val arbitrarySubmissionState: Arbitrary[SubmissionState] = Arbitrary {
-    val validStates = Seq("notSubmitted", "submitted", "rejectedPendingChanges", "rejectedAndResubmitted")
-    for {
-      state <- Gen.oneOf(validStates)
-    } yield SubmissionState(state)
+    val values = Seq(
+      SubmissionState.NotSubmitted,
+      SubmissionState.Submitted,
+      SubmissionState.RejectedPendingChanges
+    )
+    Gen.oneOf(values)
   }
 
   implicit lazy val arbitraryXPath: Arbitrary[XPath] = Arbitrary {

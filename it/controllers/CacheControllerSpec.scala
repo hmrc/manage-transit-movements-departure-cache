@@ -17,7 +17,7 @@
 package controllers
 
 import itbase.CacheRepositorySpecBase
-import models.{Metadata, UserAnswers}
+import models.{Metadata, SubmissionState, UserAnswers}
 import org.mongodb.scala.model.Filters
 import play.api.libs.json.{JsObject, JsString, Json}
 
@@ -214,14 +214,16 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
           metadata = Metadata("AB123", eoriNumber),
           createdAt = Instant.now(),
           lastUpdated = Instant.now(),
-          id = UUID.randomUUID()
+          id = UUID.randomUUID(),
+          status = SubmissionState.NotSubmitted
         )
 
         val userAnswers2 = UserAnswers(
           metadata = Metadata("CD123", eoriNumber),
           createdAt = Instant.now().minus(1, DAYS),
           lastUpdated = Instant.now().minus(1, DAYS),
-          id = UUID.randomUUID()
+          id = UUID.randomUUID(),
+          status = SubmissionState.NotSubmitted
         )
 
         insert(userAnswers1).futureValue

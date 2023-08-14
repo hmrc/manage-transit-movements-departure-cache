@@ -22,7 +22,7 @@ import controllers.actions.{
   FakeAuthenticateActionProvider,
   FakeAuthenticateAndLockActionProvider
 }
-import models.{Metadata, UserAnswers}
+import models.{Metadata, SubmissionState, UserAnswers}
 import org.scalatest.OptionValues
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
@@ -45,7 +45,7 @@ trait ItSpecBase extends AnyWordSpec with Matchers with ScalaFutures with Option
   val eoriNumber = "eori"
 
   def emptyMetadata: Metadata       = Metadata(lrn, eoriNumber)
-  def emptyUserAnswers: UserAnswers = UserAnswers(emptyMetadata, Instant.now(), Some(30), Instant.now(), UUID.randomUUID())
+  def emptyUserAnswers: UserAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID(), SubmissionState.NotSubmitted)
 
   val wsClient: WSClient = app.injector.instanceOf[WSClient]
   val baseUrl            = s"http://localhost:$port"

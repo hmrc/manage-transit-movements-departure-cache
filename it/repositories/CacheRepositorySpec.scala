@@ -18,8 +18,7 @@ package repositories
 
 import itbase.CacheRepositorySpecBase
 import models.Sort.{SortByCreatedAtAsc, SortByCreatedAtDesc, SortByLRNAsc, SortByLRNDesc}
-import models.SubmissionState.{NotSubmitted, RejectedAndResubmitted, RejectedPendingChanges, Submitted}
-import models.{Metadata, Status, SubmissionState, UserAnswers, UserAnswersSummary}
+import models._
 import org.mongodb.scala.Document
 import org.mongodb.scala.bson.{BsonDocument, BsonString}
 import org.mongodb.scala.model.Filters
@@ -81,48 +80,13 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
     }
   }
 
-  "setFlag" must {
-
-    "not create a new document when given valid UserAnswers" in {
-
-      repository.setFlag(userAnswers3.metadata, SubmissionState.Submitted).futureValue
-
-      val getResult = findOne(userAnswers3.lrn, userAnswers3.eoriNumber)
-
-      getResult shouldBe None
-
-    }
-
-    "update flag when document already exists" in {
-
-      val firstGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
-
-      val metadata = userAnswers1.metadata.copy(
-        data = Json.obj("foo" -> "bar"),
-        tasks = Map(".task" -> Status.Completed),
-        isSubmitted = Some(SubmissionState.NotSubmitted)
-      )
-      val setResult = repository.setFlag(metadata, SubmissionState.Submitted).futureValue
-
-      setResult shouldBe true
-
-      val secondGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
-
-      firstGet.id shouldBe secondGet.id
-      firstGet.lrn shouldBe secondGet.lrn
-      firstGet.eoriNumber shouldBe secondGet.eoriNumber
-      firstGet.metadata shouldNot equal(secondGet.metadata)
-      firstGet.lastUpdated isBefore secondGet.lastUpdated shouldBe true
-    }
-  }
-
   "set" must {
 
     "create new document when given valid UserAnswers" in {
 
       findOne(userAnswers3.lrn, userAnswers3.eoriNumber) should not be defined
 
-      val setResult = repository.set(userAnswers3.metadata).futureValue
+      val setResult = repository.set(userAnswers3.metadata, None).futureValue
 
       setResult shouldBe true
 
@@ -131,6 +95,23 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       getResult.lrn shouldBe userAnswers3.lrn
       getResult.eoriNumber shouldBe userAnswers3.eoriNumber
       getResult.metadata shouldBe userAnswers3.metadata
+      getResult.status shouldBe SubmissionState.NotSubmitted
+    }
+
+    "create new document when given valid UserAnswers and stats" in {
+
+      findOne(userAnswers3.lrn, userAnswers3.eoriNumber) should not be defined
+
+      val setResult = repository.set(userAnswers3.metadata, Some(SubmissionState.RejectedPendingChanges)).futureValue
+
+      setResult shouldBe true
+
+      val getResult = findOne(userAnswers3.lrn, userAnswers3.eoriNumber).get
+
+      getResult.lrn shouldBe userAnswers3.lrn
+      getResult.eoriNumber shouldBe userAnswers3.eoriNumber
+      getResult.metadata shouldBe userAnswers3.metadata
+      getResult.status shouldBe SubmissionState.RejectedPendingChanges
     }
 
     "update document when it already exists" in {
@@ -141,7 +122,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         data = Json.obj("foo" -> "bar"),
         tasks = Map(".task" -> Status.InProgress)
       )
-      val setResult = repository.set(metadata).futureValue
+      val setResult = repository.set(metadata, None).futureValue
 
       setResult shouldBe true
 
@@ -153,33 +134,54 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       firstGet.metadata shouldNot equal(secondGet.metadata)
       firstGet.createdAt shouldBe secondGet.createdAt
       firstGet.lastUpdated isBefore secondGet.lastUpdated shouldBe true
+      firstGet.status shouldBe secondGet.status
+    }
+
+    "update document when it already exists with new status" in {
+
+      val firstGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
+
+      val setResult = repository.set(userAnswers1, SubmissionState.RejectedPendingChanges).futureValue
+
+      setResult shouldBe true
+
+      val secondGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
+
+      firstGet.id shouldBe secondGet.id
+      firstGet.lrn shouldBe secondGet.lrn
+      firstGet.eoriNumber shouldBe secondGet.eoriNumber
+      firstGet.metadata shouldBe secondGet.metadata
+      firstGet.createdAt shouldBe secondGet.createdAt
+      firstGet.lastUpdated isBefore secondGet.lastUpdated shouldBe true
+      firstGet.status shouldBe SubmissionState.NotSubmitted
+      secondGet.status shouldBe SubmissionState.RejectedPendingChanges
     }
   }
 
-  "existsLRN" should {
+  "doesDraftExistForLrn" should {
     "return true if LRN is found when notSubmitted" in {
 
-      val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1").copy(isSubmitted = Some(NotSubmitted))
-      val userAnswers = emptyUserAnswers.copy(metadata = metaData)
+      val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1")
+      val userAnswers = emptyUserAnswers.copy(metadata = metaData, status = SubmissionState.NotSubmitted)
 
       insert(userAnswers)
 
       findOne(userAnswers.lrn, userAnswers.eoriNumber) shouldBe defined
 
-      val setResult = repository.existsLRN(userAnswers.lrn).futureValue
+      val setResult = repository.doesDraftExistForLrn(userAnswers.lrn).futureValue
       setResult shouldBe true
     }
 
     "return true if LRN is found when rejectedPendingChanges" in {
 
-      val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1").copy(isSubmitted = Some(RejectedPendingChanges))
-      val userAnswers = emptyUserAnswers.copy(metadata = metaData)
+      val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1")
+      val userAnswers = emptyUserAnswers.copy(metadata = metaData, status = SubmissionState.RejectedPendingChanges)
 
       insert(userAnswers)
 
       findOne(userAnswers.lrn, userAnswers.eoriNumber) shouldBe defined
 
-      val setResult = repository.existsLRN(userAnswers.lrn).futureValue
+      val setResult = repository.doesDraftExistForLrn(userAnswers.lrn).futureValue
       setResult shouldBe true
     }
 
@@ -187,28 +189,18 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       "LRN is not found" in {
         forAll(Gen.alphaNumStr) {
           lrn =>
-            val result = repository.existsLRN(lrn).futureValue
+            val result = repository.doesDraftExistForLrn(lrn).futureValue
             result shouldBe false
         }
       }
 
       "submissionState is Submitted" in {
 
-        val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1").copy(isSubmitted = Some(Submitted))
-        val userAnswers = emptyUserAnswers.copy(metadata = metaData)
+        val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1")
+        val userAnswers = emptyUserAnswers.copy(metadata = metaData, status = SubmissionState.Submitted)
         insert(userAnswers)
 
-        val result = repository.existsLRN(userAnswers.lrn).futureValue
-        result shouldBe false
-      }
-
-      "submissionState is RejectedAndResubmitted" in {
-
-        val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1").copy(isSubmitted = Some(RejectedAndResubmitted))
-        val userAnswers = emptyUserAnswers.copy(metadata = metaData)
-        insert(userAnswers)
-
-        val result = repository.existsLRN(userAnswers.lrn).futureValue
+        val result = repository.doesDraftExistForLrn(userAnswers.lrn).futureValue
         result shouldBe false
       }
     }

@@ -17,8 +17,7 @@
 package services
 
 import base.AppWithDefaultMockFixtures
-import connectors.ApiConnector
-import models.{Departure, Departures}
+import models.Departure
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.concurrent.ScalaFutures
@@ -37,13 +36,13 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
   val eoriNumber                 = "eoriNumber"
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val mockApiConnector: ApiConnector            = mock[ApiConnector]
+  val mockApiService: ApiService                = mock[ApiService]
   val mockCacheRepository: CacheRepository      = mock[CacheRepository]
   val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    reset(mockApiConnector)
+    reset(mockApiService)
     reset(mockCacheRepository)
     reset(mockLockRepository)
   }
@@ -54,7 +53,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
       .overrides(
         bind[CacheRepository].toInstance(mockCacheRepository),
         bind[DefaultLockRepository].toInstance(mockLockRepository),
-        bind[ApiConnector].toInstance(mockApiConnector)
+        bind[ApiService].toInstance(mockApiService)
       )
 
   private val service = app.injector.instanceOf[DuplicateService]
@@ -64,15 +63,15 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
     "must return true" - {
       "when Some(_) is returned from getDepartures" in {
 
-        val mockedResponse: Option[Departures] = Some(Departures(Seq(Departure(lrn))))
+        val mockedResponse: Option[Seq[Departure]] = Some(Seq(Departure(lrn)))
 
-        when(mockApiConnector.getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())).thenReturn(Future.successful(mockedResponse))
+        when(mockApiService.getDeparturesForLrn(any())(any())).thenReturn(Future.successful(mockedResponse))
 
         val result = service.doesSubmissionExistForLrn(lrn).futureValue
 
         result mustBe true
 
-        verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
+        verify(mockApiService).getDeparturesForLrn(eqTo(lrn))(any())
       }
     }
 
@@ -81,13 +80,13 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
 
         val mockedResponse = None
 
-        when(mockApiConnector.getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())).thenReturn(Future.successful(mockedResponse))
+        when(mockApiService.getDeparturesForLrn(any())(any())).thenReturn(Future.successful(mockedResponse))
 
         val result = service.doesSubmissionExistForLrn(lrn).futureValue
 
         result mustBe false
 
-        verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
+        verify(mockApiService).getDeparturesForLrn(eqTo(lrn))(any())
       }
     }
   }
@@ -97,26 +96,26 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
     "must return true" - {
       "when there is a document in cache with the given lrn" in {
 
-        when(mockCacheRepository.existsLRN(eqTo(lrn))).thenReturn(Future.successful(true))
+        when(mockCacheRepository.doesDraftExistForLrn(eqTo(lrn))).thenReturn(Future.successful(true))
 
         val result = service.doesDraftExistForLrn(lrn).futureValue
 
         result mustBe true
 
-        verify(mockCacheRepository).existsLRN(eqTo(lrn))
+        verify(mockCacheRepository).doesDraftExistForLrn(eqTo(lrn))
       }
     }
 
     "must return false" - {
       "when there is not a document in the cache with the given lrn" in {
 
-        when(mockCacheRepository.existsLRN(eqTo(lrn))).thenReturn(Future.successful(false))
+        when(mockCacheRepository.doesDraftExistForLrn(eqTo(lrn))).thenReturn(Future.successful(false))
 
         val result = service.doesDraftExistForLrn(lrn).futureValue
 
         result mustBe false
 
-        verify(mockCacheRepository).existsLRN(eqTo(lrn))
+        verify(mockCacheRepository).doesDraftExistForLrn(eqTo(lrn))
       }
     }
   }
@@ -124,25 +123,25 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
   "doesDraftOrSubmissionExistForLrn" - {
     "must return true" - {
       "when doesSubmissionExistForLrn returns departures" in {
-        when(mockApiConnector.getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any()))
-          .thenReturn(Future.successful(Some(Departures(Seq(Departure(lrn))))))
+        when(mockApiService.getDeparturesForLrn(any())(any()))
+          .thenReturn(Future.successful(Some(Seq(Departure(lrn)))))
 
         val result = service.doesDraftOrSubmissionExistForLrn(lrn).futureValue
 
         result mustBe true
 
-        verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
+        verify(mockApiService).getDeparturesForLrn(eqTo(lrn))(any())
       }
     }
 
     "must return false when both doesSubmissionExistForLrn and doesDraftExistForLrn return false" in {
-      when(mockApiConnector.getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())).thenReturn(Future.successful(None))
+      when(mockApiService.getDeparturesForLrn(any())(any())).thenReturn(Future.successful(None))
 
       val result = service.doesDraftOrSubmissionExistForLrn(lrn).futureValue
 
       result mustBe false
 
-      verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
+      verify(mockApiService).getDeparturesForLrn(eqTo(lrn))(any())
     }
   }
 

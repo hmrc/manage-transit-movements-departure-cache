@@ -19,7 +19,7 @@ package connectors
 import api.submission._
 import config.AppConfig
 import connectors.CustomHttpReads.rawHttpResponseHttpReads
-import models.{Departures, UserAnswers}
+import models.{Departure, UserAnswers}
 import play.api.Logging
 import play.api.http.HeaderNames
 import play.api.http.Status.{NOT_FOUND, OK}
@@ -32,12 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(implicit ec: ExecutionContext) extends HttpErrorFunctions with Logging {
 
-  private val requestHeaders = Seq(
-    HeaderNames.ACCEPT       -> "application/vnd.hmrc.2.0+json",
-    HeaderNames.CONTENT_TYPE -> "application/xml"
-  )
-
-  def getDepartures(queryParams: Seq[(String, String)] = Seq.empty)(implicit hc: HeaderCarrier): Future[Option[Departures]] = {
+  def getDepartures(queryParams: Seq[(String, String)] = Seq.empty)(implicit hc: HeaderCarrier): Future[Option[Seq[Departure]]] = {
     val url = s"${appConfig.apiUrl}/movements/departures"
 
     val headers = hc.withExtraHeaders(("Accept", "application/vnd.hmrc.2.0+json"))
@@ -47,8 +42,8 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
       .map {
         response =>
           response.status match {
-            case OK        => response.json.asOpt[Departures]
-            case NOT_FOUND => Some(Departures(Seq.empty))
+            case OK        => (response.json \ "departures").validate[Seq[Departure]].asOpt
+            case NOT_FOUND => Some(Seq.empty)
             case _         => None
           }
       }
@@ -63,6 +58,11 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
 
     val declarationUrl  = s"${appConfig.apiUrl}/movements/departures"
     val payload: String = Declaration.transformToXML(userAnswers).toString
+
+    val requestHeaders = Seq(
+      HeaderNames.ACCEPT       -> "application/vnd.hmrc.2.0+json",
+      HeaderNames.CONTENT_TYPE -> "application/xml"
+    )
 
     httpClient
       .POSTString[HttpResponse](declarationUrl, payload, requestHeaders)

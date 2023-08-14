@@ -32,59 +32,15 @@ class SubmissionStateSpec extends AnyFreeSpec with Generators with Matchers with
     "must deserialise" in {
       forAll(arbitrary[SubmissionState]) {
         state =>
-          JsString(state.toString).as[SubmissionState] mustEqual state
+          JsString(state.asString).as[SubmissionState] mustEqual state
       }
     }
 
     "must serialise" in {
       forAll(arbitrary[SubmissionState]) {
         state =>
-          Json.toJson(state) mustEqual JsString(state.toString)
+          Json.toJson(state) mustEqual JsString(state.asString)
       }
-    }
-
-    "must return isAmendable" - {
-      "when NotSubmitted must be false" in {
-        val value = SubmissionState.NotSubmitted
-        value.amendable mustEqual false
-      }
-
-      "when RejectedAndResubmitted must be false" in {
-        val value = SubmissionState.RejectedAndResubmitted
-        value.amendable mustEqual false
-      }
-
-      "when Submitted must be true" in {
-        val value = SubmissionState.Submitted
-        value.amendable mustEqual true
-      }
-
-      "when RejectedPendingChanges must be true" in {
-        val value = SubmissionState.RejectedPendingChanges
-        value.amendable mustEqual true
-      }
-
-    }
-
-    "must return correct state" - {
-
-      "when notSubmitted" in {
-        val value = "notSubmitted"
-        SubmissionState(value) mustEqual NotSubmitted
-      }
-      "when submitted" in {
-        val value = "submitted"
-        SubmissionState(value) mustEqual Submitted
-      }
-      "when rejectedPendingChanges" in {
-        val value = "rejectedPendingChanges"
-        SubmissionState(value) mustEqual RejectedPendingChanges
-      }
-      "when rejectedAndResubmitted" in {
-        val value = "rejectedAndResubmitted"
-        SubmissionState(value) mustEqual RejectedAndResubmitted
-      }
-
     }
   }
 }
