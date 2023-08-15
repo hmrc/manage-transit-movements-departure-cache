@@ -22,7 +22,7 @@ import generated.{
   CustomsOfficeOfDepartureType03,
   CustomsOfficeOfDestinationDeclaredType01,
   CustomsOfficeOfExitForTransitDeclaredType02,
-  CustomsOfficeOfTransitDeclaredType03
+  CustomsOfficeOfTransitDeclaredType04
 }
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
@@ -182,19 +182,19 @@ class CustomsOfficesSpec extends SpecBase {
         val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
 
         val expected = Seq(
-          CustomsOfficeOfTransitDeclaredType03(
+          CustomsOfficeOfTransitDeclaredType04(
             sequenceNumber = "1",
             referenceNumber = "IT057101",
             arrivalDateAndTimeEstimated = Some(XMLCalendar("2023-02-23T08:45:00"))
           ),
-          CustomsOfficeOfTransitDeclaredType03(
+          CustomsOfficeOfTransitDeclaredType04(
             sequenceNumber = "2",
             referenceNumber = "AT330400",
             arrivalDateAndTimeEstimated = None
           )
         )
 
-        val converted: Seq[CustomsOfficeOfTransitDeclaredType03] = CustomsOffices.transformOfficeOfTransit(uA)
+        val converted: Seq[CustomsOfficeOfTransitDeclaredType04] = CustomsOffices.transformOfficeOfTransit(uA)
 
         converted shouldBe expected
       }

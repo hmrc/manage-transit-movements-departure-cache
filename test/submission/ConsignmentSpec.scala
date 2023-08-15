@@ -795,7 +795,7 @@ class ConsignmentSpec extends SpecBase {
         )
 
         converted.AdditionalReference shouldBe Seq(
-          AdditionalReferenceType06(
+          AdditionalReferenceType05(
             sequenceNumber = "1",
             typeValue = "ar1",
             referenceNumber = Some("arno1")
@@ -834,7 +834,7 @@ class ConsignmentSpec extends SpecBase {
             ConsignmentItemType09(
               goodsItemNumber = "1",
               declarationGoodsItemNumber = 1,
-              declarationType = Some("T1"),
+              DeclarationType = Some("T1"),
               countryOfDispatch = Some("GB"),
               countryOfDestination = Some("FR"),
               referenceNumberUCR = Some("UCR 1"),
@@ -874,7 +874,7 @@ class ConsignmentSpec extends SpecBase {
                   identificationNumber = "itemSCA4"
                 )
               ),
-              Commodity = CommodityType06(
+              Commodity = CommodityType07(
                 descriptionOfGoods = "Description 1",
                 cusCode = Some("CUS code 1"),
                 CommodityCode = Some(
@@ -962,12 +962,12 @@ class ConsignmentSpec extends SpecBase {
                 )
               ),
               AdditionalReference = Seq(
-                AdditionalReferenceType05(
+                AdditionalReferenceType04(
                   sequenceNumber = "1",
                   typeValue = "ar1",
                   referenceNumber = Some("arno1")
                 ),
-                AdditionalReferenceType05(
+                AdditionalReferenceType04(
                   sequenceNumber = "2",
                   typeValue = "ar2",
                   referenceNumber = None
@@ -994,13 +994,13 @@ class ConsignmentSpec extends SpecBase {
             ConsignmentItemType09(
               goodsItemNumber = "2",
               declarationGoodsItemNumber = 2,
-              declarationType = Some("T2"),
+              DeclarationType = Some("T2"),
               countryOfDispatch = Some("DE"),
               countryOfDestination = Some("ES"),
               referenceNumberUCR = Some("UCR 2"),
               Consignee = None,
               AdditionalSupplyChainActor = Nil,
-              Commodity = CommodityType06(
+              Commodity = CommodityType07(
                 descriptionOfGoods = "Description 2",
                 cusCode = Some("CUS code 2"),
                 CommodityCode = Some(
@@ -1032,7 +1032,7 @@ class ConsignmentSpec extends SpecBase {
               SupportingDocument = Nil,
               TransportDocument = Nil,
               AdditionalReference = Seq(
-                AdditionalReferenceType05(
+                AdditionalReferenceType04(
                   sequenceNumber = "1",
                   typeValue = "ar1",
                   referenceNumber = Some("arno1")
@@ -1523,7 +1523,7 @@ class ConsignmentSpec extends SpecBase {
             |}
             |""".stripMargin)
 
-        val result = json.as[CommodityType06](commodityType06.reads)
+        val result = json.as[CommodityType07](commodityType07.reads)
 
         result.CommodityCode.value shouldBe CommodityCodeType02(
           harmonizedSystemSubHeadingCode = "commodity code",
@@ -1538,7 +1538,7 @@ class ConsignmentSpec extends SpecBase {
             |}
             |""".stripMargin)
 
-        val result = json.as[CommodityType06](commodityType06.reads)
+        val result = json.as[CommodityType07](commodityType07.reads)
 
         result.CommodityCode shouldBe None
       }

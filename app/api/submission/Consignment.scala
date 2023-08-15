@@ -54,7 +54,7 @@ object consignmentType20 {
     previousDocuments           <- previousDocumentsReads
     supportingDocuments         <- supportingDocumentsReads
     transportDocuments          <- transportDocumentsReads
-    additionalReferences        <- itemsPath.readCommonValuesInNestedArrays[AdditionalReferenceType06]("additionalReferences")(additionalReferenceType06.reads)
+    additionalReferences        <- itemsPath.readCommonValuesInNestedArrays[AdditionalReferenceType05]("additionalReferences")(additionalReferenceType05.reads)
     additionalInformation       <- additionalInformationReads
     transportCharges            <- __.read[Option[TransportChargesType]](transportChargesType.reads)
     houseConsignments           <- __.read[HouseConsignmentType10](houseConsignmentType10.reads).map(Seq(_))
@@ -465,27 +465,27 @@ object consignmentItemType09 {
             (__ \ "uniqueConsignmentReference").readNullable[String] and
             itemConsigneePath.readNullable[ConsigneeType02](consigneeType02.reads) and
             (__ \ "supplyChainActors").readArray[AdditionalSupplyChainActorType](additionalSupplyChainActorType.reads) and
-            __.read[CommodityType06](commodityType06.reads) and
+            __.read[CommodityType07](commodityType07.reads) and
             (__ \ "packages").readArray[PackagingType03](packagingType03.reads) and
             readDocuments[PreviousDocumentType08]("Previous")(previousDocumentType08.reads(index, _)) and
             readDocuments[SupportingDocumentType05]("Support")(supportingDocumentType05.reads) and
             readDocuments[TransportDocumentType04]("Transport")(transportDocumentType04.reads) and
-            (__ \ "additionalReferences").readArray[AdditionalReferenceType05](additionalReferenceType05.reads) and
+            (__ \ "additionalReferences").readArray[AdditionalReferenceType04](additionalReferenceType04.reads) and
             (__ \ "additionalInformationList").readArray[AdditionalInformationType03](additionalInformationType03.reads) and
             __.read[Option[TransportChargesType]](transportChargesType.itemReads)
         )(ConsignmentItemType09.apply _)
     }
 }
 
-object commodityType06 {
+object commodityType07 {
 
-  implicit val reads: Reads[CommodityType06] = (
+  implicit val reads: Reads[CommodityType07] = (
     (__ \ "description").read[String] and
       (__ \ "customsUnionAndStatisticsCode").readNullable[String] and
       __.read[Option[CommodityCodeType02]](commodityCodeType02.reads) and
       (__ \ "dangerousGoodsList").readArray[DangerousGoodsType01](dangerousGoodsType01.reads) and
       __.readNullable[GoodsMeasureType02](goodsMeasureType02.reads)
-  )(CommodityType06.apply _)
+  )(CommodityType07.apply _)
 }
 
 object commodityCodeType02 {
@@ -629,10 +629,10 @@ object additionalReferenceType05 {
     additionalReference.reads(index)(AdditionalReferenceType05)
 }
 
-object additionalReferenceType06 {
+object additionalReferenceType04 {
 
-  def reads(index: Int): Reads[AdditionalReferenceType06] =
-    additionalReference.reads(index)(AdditionalReferenceType06)
+  def reads(index: Int): Reads[AdditionalReferenceType04] =
+    additionalReference.reads(index)(AdditionalReferenceType04)
 }
 
 object additionalInformationType03 {

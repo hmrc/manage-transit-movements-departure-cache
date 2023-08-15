@@ -43,7 +43,7 @@ object transitOperationType06 {
     (declarationType, TIRCarnetNumber, security, reducedDatasetIndicator, specificCircumstanceIndicator, bindingItinerary, limitDate) =>
       TransitOperationType06(
         LRN = lrn,
-        declarationType = declarationType,
+        DeclarationType = declarationType,
         additionalDeclarationType = "A",
         TIRCarnetNumber = TIRCarnetNumber,
         presentationOfTheGoodsDateAndTime = None, // TODO - do we collect this?

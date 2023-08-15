@@ -18,7 +18,7 @@ package submission
 
 import api.submission.Header
 import base.SpecBase
-import generated.{CORRELATION_IDENTIFIERSequence, MESSAGE_1Sequence, MESSAGE_FROM_TRADERSequence}
+import generated.{CC015C, MESSAGESequence}
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 
@@ -63,13 +63,13 @@ class HeaderSpec extends SpecBase {
 
         val converted = Header.message(uA)
 
-        val expected = MESSAGE_FROM_TRADERSequence(
-          messageSender = Some("NCTS"),
-          messagE_1Sequence2 = MESSAGE_1Sequence(
-            messageRecipient = "NTA.GB",
-            preparationDateAndTime = converted.messagE_1Sequence2.preparationDateAndTime,
-            messageIdentification = "CC015C"
-          )
+        val expected = MESSAGESequence(
+          messageSender = "NCTS",
+          messageRecipient = "NTA.GB",
+          preparationDateAndTime = converted.preparationDateAndTime,
+          messageIdentification = "CC015C",
+          messageType = CC015C,
+          correlationIdentifier = None
         )
 
         converted shouldBe expected
@@ -83,16 +83,6 @@ class HeaderSpec extends SpecBase {
       "will convert to API format" in {
 
         Header.messageType.toString shouldBe "CC015C"
-
-      }
-
-    }
-
-    "correlationIdentifier is called" when {
-
-      "will convert to API format" in {
-
-        Header.correlationIdentifier shouldBe CORRELATION_IDENTIFIERSequence(None)
 
       }
 

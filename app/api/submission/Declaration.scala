@@ -17,7 +17,7 @@
 package api.submission
 
 import api.submission.Header.scope
-import generated.{CC015CType, PhaseIDtype}
+import generated.{CC015CType, MESSAGESequence, PhaseIDtype}
 import models.UserAnswers
 import scalaxb.DataRecord
 import scalaxb.`package`.toXML
@@ -28,9 +28,7 @@ object Declaration {
 
   def transform(uA: UserAnswers): CC015CType =
     CC015CType(
-      messagE_FROM_TRADERSequence1 = Header.message(uA),
-      messageType = Header.messageType,
-      correlatioN_IDENTIFIERSequence3 = Header.correlationIdentifier,
+      messageSequence1 = Header.message(uA),
       TransitOperation = TransitOperation.transform(uA),
       Authorisation = Authorisations.transform(uA),
       CustomsOfficeOfDeparture = CustomsOffices.transformOfficeOfDeparture(uA),
