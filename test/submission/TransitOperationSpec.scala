@@ -85,7 +85,7 @@ class TransitOperationSpec extends SpecBase {
           val expected =
             TransitOperationType06(
               LRN = lrn,
-              DeclarationType = "TIR",
+              declarationType = "TIR",
               additionalDeclarationType = "A",
               TIRCarnetNumber = Some("1234567"),
               presentationOfTheGoodsDateAndTime = None,
@@ -154,7 +154,7 @@ class TransitOperationSpec extends SpecBase {
           val expected =
             TransitOperationType06(
               LRN = lrn,
-              DeclarationType = "TIR",
+              declarationType = "TIR",
               additionalDeclarationType = "A",
               TIRCarnetNumber = Some("1234567"),
               presentationOfTheGoodsDateAndTime = None,
@@ -223,7 +223,7 @@ class TransitOperationSpec extends SpecBase {
           val expected =
             TransitOperationType06(
               LRN = lrn,
-              DeclarationType = "TIR",
+              declarationType = "TIR",
               additionalDeclarationType = "A",
               TIRCarnetNumber = Some("1234567"),
               presentationOfTheGoodsDateAndTime = None,
@@ -292,7 +292,7 @@ class TransitOperationSpec extends SpecBase {
           val expected =
             TransitOperationType06(
               LRN = lrn,
-              DeclarationType = "TIR",
+              declarationType = "TIR",
               additionalDeclarationType = "A",
               TIRCarnetNumber = Some("1234567"),
               presentationOfTheGoodsDateAndTime = None,
@@ -355,7 +355,7 @@ class TransitOperationSpec extends SpecBase {
           val expected =
             TransitOperationType06(
               LRN = lrn,
-              DeclarationType = "TIR",
+              declarationType = "TIR",
               additionalDeclarationType = "A",
               TIRCarnetNumber = Some("1234567"),
               presentationOfTheGoodsDateAndTime = None,

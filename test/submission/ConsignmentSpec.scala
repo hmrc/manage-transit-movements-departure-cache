@@ -834,7 +834,7 @@ class ConsignmentSpec extends SpecBase {
             ConsignmentItemType09(
               goodsItemNumber = "1",
               declarationGoodsItemNumber = 1,
-              DeclarationType = Some("T1"),
+              declarationType = Some("T1"),
               countryOfDispatch = Some("GB"),
               countryOfDestination = Some("FR"),
               referenceNumberUCR = Some("UCR 1"),
@@ -994,7 +994,7 @@ class ConsignmentSpec extends SpecBase {
             ConsignmentItemType09(
               goodsItemNumber = "2",
               declarationGoodsItemNumber = 2,
-              DeclarationType = Some("T2"),
+              declarationType = Some("T2"),
               countryOfDispatch = Some("DE"),
               countryOfDestination = Some("ES"),
               referenceNumberUCR = Some("UCR 2"),
