@@ -48,6 +48,7 @@ class TransitOperationSpec extends SpecBase {
                |      },
                |      "procedureType" : "normal",
                |      "declarationType" : "TIR",
+               |      "additionalDeclarationType" : "A",
                |      "tirCarnetReference" : "1234567",
                |      "securityDetailsType" : "noSecurity",
                |      "detailsConfirmed" : true
@@ -123,6 +124,7 @@ class TransitOperationSpec extends SpecBase {
                |      },
                |      "procedureType" : "normal",
                |      "declarationType" : "TIR",
+               |      "additionalDeclarationType" : "D",
                |      "tirCarnetReference" : "1234567",
                |      "securityDetailsType" : "entrySummaryDeclaration",
                |      "detailsConfirmed" : true
@@ -155,7 +157,7 @@ class TransitOperationSpec extends SpecBase {
             TransitOperationType06(
               LRN = lrn,
               declarationType = "TIR",
-              additionalDeclarationType = "A",
+              additionalDeclarationType = "D",
               TIRCarnetNumber = Some("1234567"),
               presentationOfTheGoodsDateAndTime = None,
               security = "1",
@@ -192,6 +194,7 @@ class TransitOperationSpec extends SpecBase {
                |      },
                |      "procedureType" : "normal",
                |      "declarationType" : "TIR",
+               |      "additionalDeclarationType" : "A",
                |      "tirCarnetReference" : "1234567",
                |      "securityDetailsType" : "exitSummaryDeclaration",
                |      "detailsConfirmed" : true
@@ -261,6 +264,7 @@ class TransitOperationSpec extends SpecBase {
                |      },
                |      "procedureType" : "normal",
                |      "declarationType" : "TIR",
+               |      "additionalDeclarationType" : "A",
                |      "tirCarnetReference" : "1234567",
                |      "securityDetailsType" : "entryAndExitSummaryDeclaration",
                |      "detailsConfirmed" : true
@@ -330,6 +334,7 @@ class TransitOperationSpec extends SpecBase {
                |      },
                |      "procedureType" : "normal",
                |      "declarationType" : "TIR",
+               |      "additionalDeclarationType" : "A",
                |      "tirCarnetReference" : "1234567",
                |      "securityDetailsType" : "entrySummaryDeclaration",
                |      "detailsConfirmed" : true

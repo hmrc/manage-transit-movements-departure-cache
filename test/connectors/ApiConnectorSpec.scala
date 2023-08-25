@@ -54,6 +54,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |      },
                                     |      "procedureType" : "normal",
                                     |      "declarationType" : "TIR",
+                                    |      "additionalDeclarationType" : "A",
                                     |      "tirCarnetReference" : "1234567",
                                     |      "securityDetailsType" : "entrySummaryDeclaration",
                                     |      "detailsConfirmed" : true
