@@ -33,6 +33,7 @@ object transitOperationType06 {
 
   def reads(lrn: String): Reads[TransitOperationType06] = (
     (preTaskListPath \ "declarationType").read[String] and
+      (preTaskListPath \ "additionalDeclarationType").read[String] and
       (preTaskListPath \ "tirCarnetReference").readNullable[String] and
       (preTaskListPath \ "securityDetailsType").read[String] and
       reducedDatasetIndicatorReads and
@@ -40,11 +41,19 @@ object transitOperationType06 {
       (routeDetailsPath \ "routing" \ "bindingItinerary").readWithDefault[Boolean](false) and
       (transportDetailsPath \ "authorisationsAndLimit" \ "limit" \ "limitDate").readNullable[LocalDate]
   ).apply {
-    (declarationType, TIRCarnetNumber, security, reducedDatasetIndicator, specificCircumstanceIndicator, bindingItinerary, limitDate) =>
+    (declarationType,
+     additionalDeclarationType,
+     TIRCarnetNumber,
+     security,
+     reducedDatasetIndicator,
+     specificCircumstanceIndicator,
+     bindingItinerary,
+     limitDate
+    ) =>
       TransitOperationType06(
         LRN = lrn,
         declarationType = declarationType,
-        additionalDeclarationType = "A",
+        additionalDeclarationType = additionalDeclarationType,
         TIRCarnetNumber = TIRCarnetNumber,
         presentationOfTheGoodsDateAndTime = None, // TODO - do we collect this?
         security = convertSecurity(security),
