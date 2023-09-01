@@ -16,34 +16,29 @@
 
 package api.submission
 
-import generated.{CORRELATION_IDENTIFIERSequence, MESSAGE_1Sequence, MESSAGE_FROM_TRADERSequence, MessageType015}
+import generated.{CC015C, CORRELATION_IDENTIFIERSequence, MESSAGESequence, MESSAGE_1Sequence, MESSAGE_TYPESequence}
 import models.UserAnswers
 import play.api.libs.json.JsSuccess
 
 import java.time.LocalDateTime
-import scala.xml.NamespaceBinding
 
 object Header extends {
 
-  val scope: NamespaceBinding = scalaxb.toScope(Some("ncts") -> "http://ncts.dgtaxud.ec")
-
-  def message(uA: UserAnswers): MESSAGE_FROM_TRADERSequence =
+  def message(uA: UserAnswers): MESSAGESequence =
     uA.metadata.data.validate((preTaskListPath \ "officeOfDeparture" \ "id").read[String].map(_.take(2))) match {
       case JsSuccess(officeOfDepartureCountryCode, _) =>
-        MESSAGE_FROM_TRADERSequence(
-          messageSender = Some("NCTS"),
+        MESSAGESequence(
+          messageSender = uA.eoriNumber,
           messagE_1Sequence2 = MESSAGE_1Sequence(
             messageRecipient = s"NTA.$officeOfDepartureCountryCode",
             preparationDateAndTime = LocalDateTime.now(),
             messageIdentification = "CC015C" // TODO - check this with API team? What should this be set to?
+          ),
+          messagE_TYPESequence3 = MESSAGE_TYPESequence(CC015C),
+          correlatioN_IDENTIFIERSequence4 = CORRELATION_IDENTIFIERSequence(
+            correlationIdentifier = None // TODO - What should this be?
           )
         )
       case _ => throw new Exception("Json did not contain office of departure ID")
     }
-
-  def messageType: MessageType015 = MessageType015.fromString("CC015C", scope)
-
-  // TODO - What should this be?
-  def correlationIdentifier = CORRELATION_IDENTIFIERSequence(None)
-
 }
