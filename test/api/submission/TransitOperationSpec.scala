@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package submission
+package api.submission
 
-import api.submission.TransitOperation
 import base.SpecBase
-import generated.{Number0, TransitOperationType06}
+import generated._
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 import scalaxb.XMLCalendar

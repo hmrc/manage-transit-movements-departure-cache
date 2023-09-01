@@ -164,7 +164,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1")
       val userAnswers = emptyUserAnswers.copy(metadata = metaData, status = SubmissionState.NotSubmitted)
 
-      insert(userAnswers)
+      insert(userAnswers).futureValue
 
       findOne(userAnswers.lrn, userAnswers.eoriNumber) shouldBe defined
 
@@ -177,7 +177,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1")
       val userAnswers = emptyUserAnswers.copy(metadata = metaData, status = SubmissionState.RejectedPendingChanges)
 
-      insert(userAnswers)
+      insert(userAnswers).futureValue
 
       findOne(userAnswers.lrn, userAnswers.eoriNumber) shouldBe defined
 
@@ -198,7 +198,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
         val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1")
         val userAnswers = emptyUserAnswers.copy(metadata = metaData, status = SubmissionState.Submitted)
-        insert(userAnswers)
+        insert(userAnswers).futureValue
 
         val result = repository.doesDraftExistForLrn(userAnswers.lrn).futureValue
         result shouldBe false
