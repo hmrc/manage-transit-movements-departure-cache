@@ -17,7 +17,7 @@
 package services
 
 import base.AppWithDefaultMockFixtures
-import models.Departure
+import models.{Departure, Departures}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.concurrent.ScalaFutures
@@ -61,32 +61,24 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
   "doesIE028ExistForLrn" - {
 
     "must return true" - {
-      "when Some(_) is returned from getDepartures" in {
+      "when true is returned from isIE028DefinedForDeparture" in {
 
-        val mockedResponse: Option[Seq[Departure]] = Some(Seq(Departure(lrn)))
-
-        when(mockApiService.getDeparturesForLrn(any())(any())).thenReturn(Future.successful(mockedResponse))
+        when(mockApiService.isIE028DefinedForDeparture(any())(any(), any())).thenReturn(Future.successful(true))
 
         val result = service.doesIE028ExistForLrn(lrn).futureValue
 
         result mustBe true
-
-        verify(mockApiService).getDeparturesForLrn(eqTo(lrn))(any())
       }
     }
 
     "must return false" - {
-      "when None is returned from getDepartures" in {
+      "when false is returned from isIE028DefinedForDeparture" in {
 
-        val mockedResponse = None
-
-        when(mockApiService.getDeparturesForLrn(any())(any())).thenReturn(Future.successful(mockedResponse))
+        when(mockApiService.isIE028DefinedForDeparture(any())(any(), any())).thenReturn(Future.successful(false))
 
         val result = service.doesIE028ExistForLrn(lrn).futureValue
 
         result mustBe false
-
-        verify(mockApiService).getDeparturesForLrn(eqTo(lrn))(any())
       }
     }
   }
@@ -123,25 +115,26 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
   "doesDraftOrSubmissionExistForLrn" - {
     "must return true" - {
       "when doesIE028ExistForLrn returns departures" in {
-        when(mockApiService.getDeparturesForLrn(any())(any()))
-          .thenReturn(Future.successful(Some(Seq(Departure(lrn)))))
+        when(mockApiService.isIE028DefinedForDeparture(any())(any(), any()))
+          .thenReturn(Future.successful(true))
 
         val result = service.doesDraftOrSubmissionExistForLrn(lrn).futureValue
 
         result mustBe true
 
-        verify(mockApiService).getDeparturesForLrn(eqTo(lrn))(any())
+        verify(mockApiService).isIE028DefinedForDeparture(eqTo(lrn))(any(), any())
       }
     }
 
     "must return false when both doesIE028ExistForLrn and doesDraftExistForLrn return false" in {
-      when(mockApiService.getDeparturesForLrn(any())(any())).thenReturn(Future.successful(None))
+      when(mockApiService.isIE028DefinedForDeparture(any())(any(), any()))
+        .thenReturn(Future.successful(false))
 
       val result = service.doesDraftOrSubmissionExistForLrn(lrn).futureValue
 
       result mustBe false
 
-      verify(mockApiService).getDeparturesForLrn(eqTo(lrn))(any())
+      verify(mockApiService).isIE028DefinedForDeparture(eqTo(lrn))(any(), any())
     }
   }
 

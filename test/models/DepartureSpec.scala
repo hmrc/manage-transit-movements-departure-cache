@@ -29,7 +29,12 @@ class DepartureSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
     forAll(Gen.alphaNumStr) {
       lrn =>
         val json: JsValue = Json.parse(s"""
-    {
+          {
+            "_links": {
+            "messages": {
+              "href": "/customs/transits/movements/departures/6365135ba5e821ee/messages"
+            }
+          },
           "id": "63651574c3447b12",
           "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
           "localReferenceNumber": "$lrn",
@@ -41,7 +46,7 @@ class DepartureSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
     """)
 
         val result = json.as[Departure]
-        result shouldBe Departure(lrn)
+        result shouldBe Departure(lrn, "movements/departures/6365135ba5e821ee/messages")
     }
   }
 

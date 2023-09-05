@@ -49,7 +49,7 @@ class DuplicateControllerSpec extends SpecBase with Generators {
       "lrn does not exist in the API" in {
         when(mockDuplicateService.doesIE028ExistForLrn(eqTo(lrn))(any())).thenReturn(Future.successful(false))
 
-        val request = FakeRequest(GET, routes.DuplicateController.doesSubmissionExistForLrn(lrn).url)
+        val request = FakeRequest(GET, routes.DuplicateController.doesIE028ExistForLrn(lrn).url)
 
         val result = route(app, request).value
 
@@ -63,7 +63,7 @@ class DuplicateControllerSpec extends SpecBase with Generators {
       "when lrn exists in the API" in {
         when(mockDuplicateService.doesIE028ExistForLrn(eqTo(lrn))(any())).thenReturn(Future.successful(true))
 
-        val request = FakeRequest(GET, routes.DuplicateController.doesSubmissionExistForLrn(lrn).url)
+        val request = FakeRequest(GET, routes.DuplicateController.doesIE028ExistForLrn(lrn).url)
 
         val result = route(app, request).value
 

@@ -16,6 +16,7 @@
 
 package services
 
+import cats.implicits._
 import connectors.ApiConnector
 import models._
 import play.api.mvc.Result
@@ -31,12 +32,16 @@ class ApiService @Inject() (
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
     apiConnector.submitDeclaration(userAnswers)
 
-  def getDeparturesForLrn(lrn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Boolean] =
-    apiConnector.getDepartures().map {
-      case Some(departures) =>
-        departures.find(_.localReferenceNumber == lrn).map { departure =>
-          apiConnector.getMessagesByPath(departure.path)
+  def isIE028DefinedForDeparture(lrn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Boolean] =
+    apiConnector
+      .getDepartures()
+      .flatMap {
+        _.departures.find(_.localReferenceNumber == lrn).traverse {
+          departure =>
+            apiConnector.getMessageTypesByPath(departure.path).map {
+              _.messageTypes.exists(_.messageType == "IE028")
+            }
         }
-      case None => false
-    }
+      }
+      .map(_.getOrElse(false))
 }

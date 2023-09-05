@@ -18,11 +18,10 @@ package models
 
 import play.api.libs.json.{__, Reads}
 
-import java.time.LocalDateTime
+case class DepartureMessageTypes(messageTypes: Seq[DepartureMessageType])
 
-case class DepartureMessageType(messageType: String)
+object DepartureMessageTypes {
 
-object DepartureMessageType {
-
-  implicit lazy val reads: Reads[DepartureMessageType] = (__ \ "type").read[String].map(DepartureMessageType.apply)
+  implicit lazy val reads: Reads[DepartureMessageTypes] =
+    (__ \ "messages").read[Seq[DepartureMessageType]].map(DepartureMessageTypes.apply)
 }
