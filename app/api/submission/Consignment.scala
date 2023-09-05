@@ -17,7 +17,10 @@
 package api.submission
 
 import api.submission.Level._
+import api.submission.consigneeType02.RichConsigneeType02
+import api.submission.consignmentItemType09.RichConsignmentItemType09
 import api.submission.documentType.RichDocumentJsValue
+import api.submission.houseConsignmentType10.RichHouseConsignmentType10
 import generated._
 import models.UserAnswers
 import play.api.libs.functional.syntax._
@@ -29,6 +32,50 @@ object Consignment {
 
   def transform(uA: UserAnswers): ConsignmentType20 =
     uA.metadata.data.as[ConsignmentType20](consignmentType20.reads)
+
+  implicit class RichConsignmentType20(value: ConsignmentType20) {
+
+    def postProcess: ConsignmentType20 =
+      value.bubbleUpTransportCharges.bubbleUpConsignee
+
+    def bubbleUpTransportCharges: ConsignmentType20 =
+      bubbleUp[TransportChargesType, TransportChargesType](
+        consignmentLevel = _.TransportCharges,
+        itemLevel = _.TransportCharges,
+        updateConsignmentLevel = transportCharges => _.copy(TransportCharges = transportCharges),
+        updateItemLevel = _.removeTransportCharges()
+      )
+
+    def bubbleUpConsignee: ConsignmentType20 =
+      bubbleUp[ConsigneeType05, ConsigneeType02](
+        consignmentLevel = _.Consignee,
+        itemLevel = _.Consignee,
+        updateConsignmentLevel = consignee => _.copy(Consignee = consignee.map(_.asConsigneeType05)),
+        updateItemLevel = _.removeConsignee()
+      )
+
+    def update(f: ConsignmentType20 => ConsignmentType20): ConsignmentType20 = f(value)
+
+    private def bubbleUp[A, B](
+      consignmentLevel: ConsignmentType20 => Option[A],
+      itemLevel: ConsignmentItemType09 => Option[B],
+      updateConsignmentLevel: Option[B] => ConsignmentType20 => ConsignmentType20,
+      updateItemLevel: ConsignmentItemType09 => ConsignmentItemType09
+    ): ConsignmentType20 =
+      if (consignmentLevel(value).isEmpty) {
+        val values = value.HouseConsignment.flatMap(_.ConsignmentItem).map(itemLevel)
+        values match {
+          case head :: tail if tail.forall(_ == head) =>
+            value
+              .update(updateConsignmentLevel(head))
+              .update(_.copy(HouseConsignment = value.HouseConsignment.map(_.remove(updateItemLevel))))
+          case _ =>
+            value
+        }
+      } else {
+        value
+      }
+  }
 }
 
 object consignmentType20 {
@@ -42,7 +89,7 @@ object consignmentType20 {
     referenceNumberUCR          <- (preRequisitesPath \ "uniqueConsignmentReference").readNullable[String]
     carrier                     <- (transportDetailsPath \ "carrierDetails").readNullable[CarrierType04](carrierType04.reads)
     consignor                   <- (consignmentPath \ "consignor").readNullable[ConsignorType07](consignorType07.reads)
-    consignee                   <- __.read[Option[ConsigneeType05]](consigneeType05.reads)
+    consignee                   <- (consignmentPath \ "consignee").readNullable[ConsigneeType05](consigneeType05.reads)
     additionalSupplyChainActors <- (transportDetailsPath \ "supplyChainActors").readArray[AdditionalSupplyChainActorType](additionalSupplyChainActorType.reads)
     transportEquipment          <- transportEquipmentReads
     locationOfGoods             <- (routeDetailsPath \ "locationOfGoods").readNullable[LocationOfGoodsType05](locationOfGoodsType05.reads)
@@ -56,7 +103,7 @@ object consignmentType20 {
     transportDocuments          <- transportDocumentsReads
     additionalReferences        <- itemsPath.readCommonValuesInNestedArrays[AdditionalReferenceType05]("additionalReferences")(additionalReferenceType05.reads)
     additionalInformation       <- additionalInformationReads
-    transportCharges            <- __.read[Option[TransportChargesType]](transportChargesType.reads)
+    transportCharges            <- __.read[Option[TransportChargesType]](transportChargesType.consignmentReads)
     houseConsignments           <- __.read[HouseConsignmentType10](houseConsignmentType10.reads).map(Seq(_))
   } yield ConsignmentType20(
     countryOfDispatch = countryOfDispatch,
@@ -158,30 +205,12 @@ object consignorType07 {
 }
 
 object consigneeType05 {
-  import api.submission.consigneeType02.RichConsigneeType02
 
-  private val consignmentReads: Reads[Option[ConsigneeType05]] = {
-    implicit val reads: Reads[ConsigneeType05] = (
-      (__ \ "eori").readNullable[String] and
-        (__ \ "name").readNullable[String] and
-        __.read[Option[AddressType17]](addressType17.optionalReads)
-    )(ConsigneeType05.apply _)
-
-    (consignmentPath \ "consignee").read[ConsigneeType05].map(Some(_))
-  }
-
-  private val itemsReads: Reads[Option[ConsigneeType05]] =
-    for {
-      items <- itemsPath.read[JsArray]
-      consignees = items.value.flatMap {
-        _.validate(itemConsigneePath.read[ConsigneeType02](consigneeType02.reads).map(_.asConsigneeType05)).asOpt
-      }.toSeq
-    } yield consignees match {
-      case head :: tail => if (tail.forall(_ == head)) Some(head) else None
-      case _            => None
-    }
-
-  implicit val reads: Reads[Option[ConsigneeType05]] = consignmentReads orElse itemsReads
+  implicit val reads: Reads[ConsigneeType05] = (
+    (__ \ "eori").readNullable[String] and
+      (__ \ "name").readNullable[String] and
+      __.read[Option[AddressType17]](addressType17.optionalReads)
+  )(ConsigneeType05.apply _)
 }
 
 object consigneeType02 {
@@ -399,25 +428,10 @@ object transportChargesType {
   val itemReads: Reads[Option[TransportChargesType]] =
     (__ \ "methodOfPayment" \ "code").readNullable[String].map(_.map(TransportChargesType))
 
-  private val itemsReads: Reads[Option[TransportChargesType]] =
-    for {
-      items <- itemsPath.read[JsArray]
-      transportCharges = items.value.flatMap {
-        _.validate(__.read[Option[TransportChargesType]](itemReads)).asOpt.flatten
-      }.toSeq
-    } yield transportCharges match {
-      case head :: tail => if (tail.forall(_ == head)) Some(head) else None
-      case _            => None
-    }
-
-  private val consignmentReads: Reads[Option[TransportChargesType]] =
+  val consignmentReads: Reads[Option[TransportChargesType]] =
     (equipmentsAndChargesPath \ "paymentMethod")
-      .read[String]
-      .map(convertMethodOfPayment)
-      .map(TransportChargesType)
-      .map(Some(_))
-
-  val reads: Reads[Option[TransportChargesType]] = consignmentReads orElse itemsReads
+      .readNullable[String]
+      .map(_.map(convertMethodOfPayment).map(TransportChargesType))
 
   private lazy val convertMethodOfPayment: String => String = {
     case "cash"                     => "A"
@@ -442,6 +456,12 @@ object houseConsignmentType10 {
       grossMass = consignmentItems.flatMap(_.Commodity.GoodsMeasure.flatMap(_.grossMass)).sum,
       ConsignmentItem = consignmentItems
     )
+  }
+
+  implicit class RichHouseConsignmentType10(value: HouseConsignmentType10) {
+
+    def remove(f: ConsignmentItemType09 => ConsignmentItemType09): HouseConsignmentType10 =
+      value.copy(ConsignmentItem = value.ConsignmentItem.map(f))
   }
 }
 
@@ -475,6 +495,15 @@ object consignmentItemType09 {
             __.read[Option[TransportChargesType]](transportChargesType.itemReads)
         )(ConsignmentItemType09.apply _)
     }
+
+  implicit class RichConsignmentItemType09(value: ConsignmentItemType09) {
+
+    def removeTransportCharges(): ConsignmentItemType09 =
+      value.copy(TransportCharges = None)
+
+    def removeConsignee(): ConsignmentItemType09 =
+      value.copy(Consignee = None)
+  }
 }
 
 object commodityType07 {
