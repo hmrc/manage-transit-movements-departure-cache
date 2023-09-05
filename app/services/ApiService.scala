@@ -22,7 +22,7 @@ import play.api.mvc.Result
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.Inject
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class ApiService @Inject() (
   apiConnector: ApiConnector
@@ -31,6 +31,12 @@ class ApiService @Inject() (
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
     apiConnector.submitDeclaration(userAnswers)
 
-  def getDeparturesForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Option[Seq[Departure]]] =
-    apiConnector.getDepartures(Seq("localReferenceNumber" -> lrn))
+  def getDeparturesForLrn(lrn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Boolean] =
+    apiConnector.getDepartures().map {
+      case Some(departures) =>
+        departures.find(_.localReferenceNumber == lrn).map { departure =>
+          apiConnector.getMessagesByPath(departure.path)
+        }
+      case None => false
+    }
 }

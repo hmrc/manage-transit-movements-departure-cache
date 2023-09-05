@@ -29,16 +29,13 @@ class DuplicateService @Inject() (
 )(implicit ec: ExecutionContext)
     extends Logging {
 
-  def doesSubmissionExistForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
-    apiService.getDeparturesForLrn(lrn).map {
-      case Some(departures) => departures.nonEmpty
-      case None             => false
-    }
+  def doesIE028ExistForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
+    apiService.getDeparturesForLrn(lrn)
 
   def doesDraftExistForLrn(lrn: String): Future[Boolean] =
     cacheRepository.doesDraftExistForLrn(lrn)
 
   def doesDraftOrSubmissionExistForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
-    doesSubmissionExistForLrn(lrn)
+    doesIE028ExistForLrn(lrn)
 
 }

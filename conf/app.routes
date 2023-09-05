@@ -17,4 +17,4 @@ POST       /x-paths/:lrn/is-declaration-amendable               controllers.XPat
 POST       /x-paths/:lrn/handle-errors                          controllers.XPathController.handleErrors(lrn: String)
 
 GET       /does-draft-or-submission-exist-for-lrn/:lrn          controllers.DuplicateController.doesDraftOrSubmissionExistForLrn(lrn: String)
-GET       /does-submission-exist-for-lrn/:lrn                   controllers.DuplicateController.doesSubmissionExistForLrn(lrn: String)
+GET       /does-ie028-exist-for-lrn/:lrn                   controllers.DuplicateController.doesIE028ExistForLrn(lrn: String)

@@ -19,18 +19,19 @@ package connectors
 import api.submission._
 import config.AppConfig
 import connectors.CustomHttpReads.rawHttpResponseHttpReads
-import models.{Departure, UserAnswers}
+import models.{Departure, DepartureMessageMetaData, UserAnswers}
 import play.api.Logging
 import play.api.http.HeaderNames
 import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErrorFunctions, HttpResponse}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(implicit ec: ExecutionContext) extends HttpErrorFunctions with Logging {
+
 
   def getDepartures(queryParams: Seq[(String, String)] = Seq.empty)(implicit hc: HeaderCarrier): Future[Option[Seq[Departure]]] = {
     val url = s"${appConfig.apiUrl}/movements/departures"
@@ -52,6 +53,13 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
           logger.warn(s"Failed to get departure movements with error: $e")
           None
       }
+  }
+
+  def getSpecificMessageByPath(
+                                              path: String
+                                            )(implicit ec: ExecutionContext, hc: HeaderCarrier, HttpReads: HttpReads[MessageModel]): Future[Seq[DepartureMessageType]] = {
+    val url = s"${config.commonTransitConventionTradersUrl}$path"
+    httpClient.GET[MessageModel](url)(implicitly, headers, ec)
   }
 
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {

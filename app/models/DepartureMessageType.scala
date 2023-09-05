@@ -16,15 +16,14 @@
 
 package models
 
-import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{Reads, __}
 
-case class Departure(localReferenceNumber: String, path: String)
+import java.time.LocalDateTime
 
-object Departure {
-  implicit val reads: Reads[Departure] = (
-    (__ \ "localReferenceNumber").read[String] and
-  (__ \ "_links" \ "self" \ "href").read[String].map(_.replace("/customs/transits/", ""))
-    ) (Departure.apply _)
+case class DepartureMessageType(messageType: String)
 
+object DepartureMessageType {
+
+  implicit lazy val reads: Reads[DepartureMessageType] =
+        (__ \ "type").read[String].map(DepartureMessageType.apply)
 }

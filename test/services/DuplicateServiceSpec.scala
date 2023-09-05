@@ -58,7 +58,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
 
   private val service = app.injector.instanceOf[DuplicateService]
 
-  "doesSubmissionExistForLrn" - {
+  "doesIE028ExistForLrn" - {
 
     "must return true" - {
       "when Some(_) is returned from getDepartures" in {
@@ -67,7 +67,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
 
         when(mockApiService.getDeparturesForLrn(any())(any())).thenReturn(Future.successful(mockedResponse))
 
-        val result = service.doesSubmissionExistForLrn(lrn).futureValue
+        val result = service.doesIE028ExistForLrn(lrn).futureValue
 
         result mustBe true
 
@@ -82,7 +82,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
 
         when(mockApiService.getDeparturesForLrn(any())(any())).thenReturn(Future.successful(mockedResponse))
 
-        val result = service.doesSubmissionExistForLrn(lrn).futureValue
+        val result = service.doesIE028ExistForLrn(lrn).futureValue
 
         result mustBe false
 
@@ -122,7 +122,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
 
   "doesDraftOrSubmissionExistForLrn" - {
     "must return true" - {
-      "when doesSubmissionExistForLrn returns departures" in {
+      "when doesIE028ExistForLrn returns departures" in {
         when(mockApiService.getDeparturesForLrn(any())(any()))
           .thenReturn(Future.successful(Some(Seq(Departure(lrn)))))
 
@@ -134,7 +134,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
       }
     }
 
-    "must return false when both doesSubmissionExistForLrn and doesDraftExistForLrn return false" in {
+    "must return false when both doesIE028ExistForLrn and doesDraftExistForLrn return false" in {
       when(mockApiService.getDeparturesForLrn(any())(any())).thenReturn(Future.successful(None))
 
       val result = service.doesDraftOrSubmissionExistForLrn(lrn).futureValue
