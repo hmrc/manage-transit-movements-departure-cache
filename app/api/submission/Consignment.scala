@@ -31,14 +31,13 @@ import java.util.UUID
 object Consignment {
 
   def transform(uA: UserAnswers): ConsignmentType20 =
-    uA.metadata.data.as[ConsignmentType20](consignmentType20.reads)
+    uA.metadata.data.as[ConsignmentType20](consignmentType20.reads).postProcess()
 
   implicit class RichConsignmentType20(value: ConsignmentType20) {
 
-    def postProcess: ConsignmentType20 =
-      value.bubbleUpTransportCharges.bubbleUpConsignee
+    def postProcess(): ConsignmentType20 = value.bubbleUpTransportCharges().bubbleUpConsignee()
 
-    def bubbleUpTransportCharges: ConsignmentType20 =
+    def bubbleUpTransportCharges(): ConsignmentType20 =
       bubbleUp[TransportChargesType, TransportChargesType](
         consignmentLevel = _.TransportCharges,
         itemLevel = _.TransportCharges,
@@ -46,7 +45,7 @@ object Consignment {
         updateItemLevel = _.removeTransportCharges()
       )
 
-    def bubbleUpConsignee: ConsignmentType20 =
+    def bubbleUpConsignee(): ConsignmentType20 =
       bubbleUp[ConsigneeType05, ConsigneeType02](
         consignmentLevel = _.Consignee,
         itemLevel = _.Consignee,

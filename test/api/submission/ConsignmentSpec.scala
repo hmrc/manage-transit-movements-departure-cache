@@ -56,19 +56,6 @@ class ConsignmentSpec extends SpecBase {
             |            "name" : "Consignor Contact",
             |            "telephoneNumber" : "+44 101 157 0192"
             |          }
-            |        },
-            |        "consignee" : {
-            |          "eori" : "consignee1",
-            |          "name" : "Mr Consignee",
-            |          "country" : {
-            |            "code" : "FR",
-            |            "description" : "France"
-            |          },
-            |          "address" : {
-            |            "numberAndStreet" : "21 Test Rue",
-            |            "city" : "Paris",
-            |            "postalCode" : "PA1 1PA"
-            |          }
             |        }
             |      }
             |    },
@@ -238,8 +225,7 @@ class ConsignmentSpec extends SpecBase {
             |            ],
             |            "uuid" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |          }
-            |        ],
-            |        "paymentMethod" : "cash"
+            |        ]
             |      }
             |    },
             |    "documents" : {
@@ -493,13 +479,13 @@ class ConsignmentSpec extends SpecBase {
             |          "identificationNumber" : "GE00101001",
             |          "name" : "Mr. Consignee",
             |          "country" : {
-            |            "code" : "GB",
-            |            "description" : "United Kingdom"
+            |            "code" : "FR",
+            |            "description" : "France"
             |          },
             |          "address" : {
-            |            "numberAndStreet" : "1 Merry Lane",
-            |            "city" : "Godrics Hollow",
-            |            "postalCode" : "CA1 9AA"
+            |            "numberAndStreet" : "21 Test Rue",
+            |            "city" : "Paris",
+            |            "postalCode" : "PA1 1PA"
             |          }
             |        }
             |      },
@@ -527,6 +513,10 @@ class ConsignmentSpec extends SpecBase {
             |          }
             |        ],
             |        "grossWeight" : 456.789,
+            |        "methodOfPayment" : {
+            |          "code" : "A",
+            |          "description" : "Payment in cash"
+            |        },
             |        "addSupplyChainActorYesNo" : false,
             |        "addDocumentsYesNo" : false,
             |        "addAdditionalReferenceYesNo" : true,
@@ -549,7 +539,21 @@ class ConsignmentSpec extends SpecBase {
             |            "additionalInformation" : "ai1"
             |          }
             |        ],
-            |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+            |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371",
+            |        "consignee" : {
+            |          "addConsigneeEoriNumberYesNo" : true,
+            |          "identificationNumber" : "GE00101001",
+            |          "name" : "Mr. Consignee",
+            |          "country" : {
+            |            "code" : "FR",
+            |            "description" : "France"
+            |          },
+            |          "address" : {
+            |            "numberAndStreet" : "21 Test Rue",
+            |            "city" : "Paris",
+            |            "postalCode" : "PA1 1PA"
+            |          }
+            |        }
             |      }
             |    ]
             |  },
@@ -616,8 +620,8 @@ class ConsignmentSpec extends SpecBase {
 
         converted.Consignee shouldBe Some(
           ConsigneeType05(
-            identificationNumber = Some("consignee1"),
-            name = Some("Mr Consignee"),
+            identificationNumber = Some("GE00101001"),
+            name = Some("Mr. Consignee"),
             Address = Some(
               AddressType17(
                 streetAndNumber = "21 Test Rue",
@@ -838,20 +842,7 @@ class ConsignmentSpec extends SpecBase {
               countryOfDispatch = Some("GB"),
               countryOfDestination = Some("FR"),
               referenceNumberUCR = Some("UCR 1"),
-              Consignee = Some(
-                ConsigneeType02(
-                  identificationNumber = Some("GE00101001"),
-                  name = Some("Mr. Consignee"),
-                  Address = Some(
-                    AddressType12(
-                      streetAndNumber = "1 Merry Lane",
-                      postcode = Some("CA1 9AA"),
-                      city = "Godrics Hollow",
-                      country = "GB"
-                    )
-                  )
-                )
-              ),
+              Consignee = None,
               AdditionalSupplyChainActor = Seq(
                 AdditionalSupplyChainActorType(
                   sequenceNumber = "1",
@@ -985,11 +976,7 @@ class ConsignmentSpec extends SpecBase {
                   text = Some("ai2")
                 )
               ),
-              TransportCharges = Some(
-                TransportChargesType(
-                  methodOfPayment = "A"
-                )
-              )
+              TransportCharges = None
             ),
             ConsignmentItemType09(
               goodsItemNumber = "2",
@@ -1090,7 +1077,7 @@ class ConsignmentSpec extends SpecBase {
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess()
 
               result shouldBe ConsignmentType20(
                 grossMass = BigDecimal(1),
@@ -1164,7 +1151,7 @@ class ConsignmentSpec extends SpecBase {
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess()
 
               result shouldBe consignment
             }
@@ -1213,7 +1200,7 @@ class ConsignmentSpec extends SpecBase {
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess()
 
             result shouldBe consignment
           }
@@ -1263,7 +1250,7 @@ class ConsignmentSpec extends SpecBase {
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess()
 
             result shouldBe consignment
           }
@@ -1328,7 +1315,7 @@ class ConsignmentSpec extends SpecBase {
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess()
 
               result shouldBe ConsignmentType20(
                 grossMass = BigDecimal(1),
@@ -1444,7 +1431,7 @@ class ConsignmentSpec extends SpecBase {
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess()
 
               result shouldBe consignment
             }
@@ -1515,7 +1502,7 @@ class ConsignmentSpec extends SpecBase {
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess()
 
             result shouldBe consignment
           }
@@ -1598,7 +1585,7 @@ class ConsignmentSpec extends SpecBase {
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess()
 
             result shouldBe consignment
           }
