@@ -37,8 +37,8 @@ object consignmentType20 {
     countryOfDispatch           <- (preRequisitesPath \ "countryOfDispatch" \ "code").readNullable[String]
     countryOfDestination        <- (preRequisitesPath \ "itemsDestinationCountry" \ "code").readNullable[String]
     containerIndicator          <- (preRequisitesPath \ "containerIndicator").readNullable[Boolean]
-    inlandModeOfTransport       <- inlandModeReads.map(Some(_)).map(convertModeOfTransport)
-    modeOfTransportAtTheBorder  <- borderModeOfTransportReads.map(convertModeOfTransport)
+    inlandModeOfTransport       <- (transportDetailsPath \ "inlandMode").readNullable[String].map(convertModeOfTransport)
+    modeOfTransportAtTheBorder  <- (transportDetailsPath \ "borderModeOfTransport").readNullable[String].map(convertModeOfTransport)
     referenceNumberUCR          <- (preRequisitesPath \ "uniqueConsignmentReference").readNullable[String]
     carrier                     <- (transportDetailsPath \ "carrierDetails").readNullable[CarrierType04](carrierType04.reads)
     consignor                   <- (consignmentPath \ "consignor").readNullable[ConsignorType07](consignorType07.reads)
