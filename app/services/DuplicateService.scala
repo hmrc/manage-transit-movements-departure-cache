@@ -36,8 +36,10 @@ class DuplicateService @Inject() (
   def doesDraftExistForLrn(lrn: String): Future[Boolean] =
     cacheRepository.doesDraftExistForLrn(lrn)
 
-  // TODO this needs removing as it duplicates line 33
   def doesDraftOrSubmissionExistForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
-    doesIE028ExistForLrn(lrn)
+    doesIE028ExistForLrn(lrn).flatMap {
+      case true  => Future.successful(true)
+      case false => doesDraftExistForLrn(lrn)
+    }
 
 }

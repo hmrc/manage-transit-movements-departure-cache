@@ -17,7 +17,6 @@
 package services
 
 import base.AppWithDefaultMockFixtures
-import models.{Departure, Departures}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.concurrent.ScalaFutures
@@ -124,10 +123,25 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
 
         verify(mockApiService).isIE028DefinedForDeparture(eqTo(lrn))(any(), any())
       }
+      "when doesIE028ExistForLrn returns false, but doesDraftExistForLrn returns true" in {
+        when(mockApiService.isIE028DefinedForDeparture(any())(any(), any()))
+          .thenReturn(Future.successful(false))
+        when(mockCacheRepository.doesDraftExistForLrn(any()))
+          .thenReturn(Future.successful(true))
+
+        val result = service.doesDraftOrSubmissionExistForLrn(lrn).futureValue
+
+        result mustBe true
+
+        verify(mockApiService).isIE028DefinedForDeparture(eqTo(lrn))(any(), any())
+        verify(mockCacheRepository).doesDraftExistForLrn(eqTo(lrn))
+      }
     }
 
     "must return false when both doesIE028ExistForLrn and doesDraftExistForLrn return false" in {
       when(mockApiService.isIE028DefinedForDeparture(any())(any(), any()))
+        .thenReturn(Future.successful(false))
+      when(mockCacheRepository.doesDraftExistForLrn(any()))
         .thenReturn(Future.successful(false))
 
       val result = service.doesDraftOrSubmissionExistForLrn(lrn).futureValue

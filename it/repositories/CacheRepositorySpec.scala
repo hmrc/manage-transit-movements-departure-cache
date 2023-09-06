@@ -159,10 +159,10 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
   }
 
   "doesDraftExistForLrn" should {
-    "return true if LRN is found when notSubmitted" in {
+    "return true if LRN is found" in {
 
       val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1")
-      val userAnswers = emptyUserAnswers.copy(metadata = metaData, status = SubmissionState.NotSubmitted)
+      val userAnswers = emptyUserAnswers.copy(metadata = metaData)
 
       insert(userAnswers).futureValue
 
@@ -172,36 +172,11 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       setResult shouldBe true
     }
 
-    "return true if LRN is found when rejectedPendingChanges" in {
-
-      val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1")
-      val userAnswers = emptyUserAnswers.copy(metadata = metaData, status = SubmissionState.RejectedPendingChanges)
-
-      insert(userAnswers).futureValue
-
-      findOne(userAnswers.lrn, userAnswers.eoriNumber) shouldBe defined
-
-      val setResult = repository.doesDraftExistForLrn(userAnswers.lrn).futureValue
-      setResult shouldBe true
-    }
-
-    "return false" when {
-      "LRN is not found" in {
-        forAll(Gen.alphaNumStr) {
-          lrn =>
-            val result = repository.doesDraftExistForLrn(lrn).futureValue
-            result shouldBe false
-        }
-      }
-
-      "submissionState is Submitted" in {
-
-        val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1")
-        val userAnswers = emptyUserAnswers.copy(metadata = metaData, status = SubmissionState.Submitted)
-        insert(userAnswers).futureValue
-
-        val result = repository.doesDraftExistForLrn(userAnswers.lrn).futureValue
-        result shouldBe false
+    "return false if LRN is not found" in {
+      forAll(Gen.alphaNumStr) {
+        lrn =>
+          val result = repository.doesDraftExistForLrn(lrn).futureValue
+          result shouldBe false
       }
     }
   }
