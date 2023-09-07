@@ -18,7 +18,6 @@ package api.submission
 
 import api.submission.Level._
 import api.submission.consigneeType02.RichConsigneeType02
-import api.submission.consignmentItemType09.RichConsignmentItemType09
 import api.submission.documentType.RichDocumentJsValue
 import api.submission.houseConsignmentType10.RichHouseConsignmentType10
 import generated._
@@ -47,7 +46,7 @@ object Consignment {
         consignmentLevel = _.TransportCharges,
         itemLevel = _.TransportCharges,
         updateConsignmentLevel = transportCharges => _.copy(TransportCharges = transportCharges),
-        updateItemLevel = _.removeTransportCharges()
+        updateItemLevel = _.copy(TransportCharges = None)
       )
 
     def rollUpConsignee(): ConsignmentType20 =
@@ -55,7 +54,7 @@ object Consignment {
         consignmentLevel = _.Consignee,
         itemLevel = _.Consignee,
         updateConsignmentLevel = consignee => _.copy(Consignee = consignee.map(_.asConsigneeType05)),
-        updateItemLevel = _.removeConsignee()
+        updateItemLevel = _.copy(Consignee = None)
       )
 
     def rollUpUCR(): ConsignmentType20 =
@@ -63,7 +62,7 @@ object Consignment {
         consignmentLevel = _.referenceNumberUCR,
         itemLevel = _.referenceNumberUCR,
         updateConsignmentLevel = ucr => _.copy(referenceNumberUCR = ucr),
-        updateItemLevel = _.removeUCR()
+        updateItemLevel = _.copy(referenceNumberUCR = None)
       )
 
     def rollUpCountryOfDispatch(): ConsignmentType20 =
@@ -71,7 +70,7 @@ object Consignment {
         consignmentLevel = _.countryOfDispatch,
         itemLevel = _.countryOfDispatch,
         updateConsignmentLevel = countryOfDispatch => _.copy(countryOfDispatch = countryOfDispatch),
-        updateItemLevel = _.removeCountryOfDispatch()
+        updateItemLevel = _.copy(countryOfDispatch = None)
       )
 
     def rollUpCountryOfDestination(): ConsignmentType20 =
@@ -79,7 +78,7 @@ object Consignment {
         consignmentLevel = _.countryOfDestination,
         itemLevel = _.countryOfDestination,
         updateConsignmentLevel = countryOfDestination => _.copy(countryOfDestination = countryOfDestination),
-        updateItemLevel = _.removeCountryOfDestination()
+        updateItemLevel = _.copy(countryOfDestination = None)
       )
 
     def update(f: ConsignmentType20 => ConsignmentType20): ConsignmentType20 = f(value)
@@ -96,7 +95,7 @@ object Consignment {
           case head :: tail if tail.forall(_ == head) =>
             value
               .update(updateConsignmentLevel(head))
-              .update(_.copy(HouseConsignment = value.HouseConsignment.map(_.remove(updateItemLevel))))
+              .update(_.copy(HouseConsignment = value.HouseConsignment.map(_.updateItems(updateItemLevel))))
           case _ =>
             value
         }
@@ -488,7 +487,7 @@ object houseConsignmentType10 {
 
   implicit class RichHouseConsignmentType10(value: HouseConsignmentType10) {
 
-    def remove(f: ConsignmentItemType09 => ConsignmentItemType09): HouseConsignmentType10 =
+    def updateItems(f: ConsignmentItemType09 => ConsignmentItemType09): HouseConsignmentType10 =
       value.copy(ConsignmentItem = value.ConsignmentItem.map(f))
   }
 }
@@ -523,24 +522,6 @@ object consignmentItemType09 {
             __.read[Option[TransportChargesType]](transportChargesType.itemReads)
         )(ConsignmentItemType09.apply _)
     }
-
-  implicit class RichConsignmentItemType09(value: ConsignmentItemType09) {
-
-    def removeTransportCharges(): ConsignmentItemType09 =
-      value.copy(TransportCharges = None)
-
-    def removeConsignee(): ConsignmentItemType09 =
-      value.copy(Consignee = None)
-
-    def removeUCR(): ConsignmentItemType09 =
-      value.copy(referenceNumberUCR = None)
-
-    def removeCountryOfDispatch(): ConsignmentItemType09 =
-      value.copy(countryOfDispatch = None)
-
-    def removeCountryOfDestination(): ConsignmentItemType09 =
-      value.copy(countryOfDestination = None)
-  }
 }
 
 object commodityType07 {
