@@ -92,6 +92,51 @@ class XPathControllerSpec extends SpecBase with Generators {
     }
   }
 
+  "doesDeclarationExist" should {
+
+    "return 200 with true" when {
+      "declaration is amendable" in {
+        when(mockXPathService.isDeclarationAmendable(any(), any(), any())).thenReturn(Future.successful(true))
+
+        val request = FakeRequest(POST, routes.XPathController.isDeclarationAmendable(lrn).url)
+          .withBody(JsArray(xPaths.map(_.value).map(JsString)))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe JsBoolean(true)
+        verify(mockXPathService).isDeclarationAmendable(eqTo(lrn), eqTo(eoriNumber), eqTo(xPaths))
+      }
+    }
+
+    "return 200 with false" when {
+      "declaration is not amendable" in {
+        when(mockXPathService.isDeclarationAmendable(any(), any(), any())).thenReturn(Future.successful(false))
+
+        val request = FakeRequest(POST, routes.XPathController.isDeclarationAmendable(lrn).url)
+          .withBody(JsArray(xPaths.map(_.value).map(JsString)))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe JsBoolean(false)
+        verify(mockXPathService).isDeclarationAmendable(eqTo(lrn), eqTo(eoriNumber), eqTo(xPaths))
+      }
+    }
+
+    "return 400" when {
+      "request body is not an array of xpaths" in {
+        val request = FakeRequest(POST, routes.XPathController.isDeclarationAmendable(lrn).url)
+          .withBody(Json.obj("foo" -> "bar"))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe BAD_REQUEST
+        verify(mockXPathService, never()).isDeclarationAmendable(any(), any(), any())
+      }
+    }
+  }
+
   "handleErrors" should {
 
     "return 200 with true" when {

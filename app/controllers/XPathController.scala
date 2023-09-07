@@ -20,7 +20,7 @@ import controllers.actions.AuthenticateActionProvider
 import models.XPath
 import play.api.Logging
 import play.api.libs.json.{JsBoolean, JsError, JsSuccess, JsValue}
-import play.api.mvc.{Action, ControllerComponents}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import services.XPathService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 

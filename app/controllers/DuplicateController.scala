@@ -45,4 +45,9 @@ class DuplicateController @Inject() (
       duplicateService.doesSubmissionExistForLrn(lrn).map(JsBoolean).map(Ok(_))
   }
 
+  def doesDeclarationExist(lrn: String): Action[AnyContent] = authenticate().async {
+    implicit request =>
+      duplicateService.doesDeclarationExist(lrn, request.eoriNumber).map(JsBoolean).map(Ok(_))
+  }
+
 }

@@ -41,4 +41,7 @@ class DuplicateService @Inject() (
   def doesDraftOrSubmissionExistForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
     doesSubmissionExistForLrn(lrn)
 
+  def doesDeclarationExist(lrn: String, eoriNumber: String): Future[Boolean] =
+    cacheRepository.get(lrn, eoriNumber).map(_.isDefined)
+
 }

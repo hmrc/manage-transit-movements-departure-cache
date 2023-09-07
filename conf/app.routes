@@ -18,3 +18,4 @@ POST       /x-paths/:lrn/handle-errors                          controllers.XPat
 
 GET       /does-draft-or-submission-exist-for-lrn/:lrn          controllers.DuplicateController.doesDraftOrSubmissionExistForLrn(lrn: String)
 GET       /does-submission-exist-for-lrn/:lrn                   controllers.DuplicateController.doesSubmissionExistForLrn(lrn: String)
+GET       /does-cache-exists-for-lrn/:lrn                       controllers.DuplicateController.doesDeclarationExist(lrn: String)
