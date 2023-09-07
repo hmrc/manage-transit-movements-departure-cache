@@ -1043,10 +1043,10 @@ class ConsignmentSpec extends SpecBase {
 
     "postProcess is called" when {
 
-      "bubbleUpTransportCharges" when {
+      "rollUpTransportCharges" when {
         "every item has the same transport charges" when {
           "consignment transport charges undefined" must {
-            "bubble up transport charges to consignment level and remove them from each item" in {
+            "roll up transport charges to consignment level and remove them from each item" in {
               val consignment = ConsignmentType20(
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
@@ -1117,7 +1117,7 @@ class ConsignmentSpec extends SpecBase {
           }
 
           "consignment transport charges defined" must {
-            "not bubble up transport charges to consignment level and not remove them from each item" in {
+            "not roll up transport charges to consignment level and not remove them from each item" in {
               val consignment = ConsignmentType20(
                 grossMass = BigDecimal(1),
                 TransportCharges = Some(
@@ -1161,7 +1161,7 @@ class ConsignmentSpec extends SpecBase {
         }
 
         "some items have the same transport charges" must {
-          "not bubble up transport charges to consignment level" in {
+          "not roll up transport charges to consignment level" in {
             val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
@@ -1209,7 +1209,7 @@ class ConsignmentSpec extends SpecBase {
         }
 
         "no items have the same transport charges" must {
-          "not bubble up transport charges to consignment level" in {
+          "not roll up transport charges to consignment level" in {
             val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
@@ -1259,10 +1259,10 @@ class ConsignmentSpec extends SpecBase {
         }
       }
 
-      "bubbleUpConsignee" when {
+      "rollUpConsignee" when {
         "every item has the same consignee" when {
           "consignment consignee undefined" must {
-            "bubble up consignee to consignment level and remove them from each item" in {
+            "roll up consignee to consignment level and remove them from each item" in {
               val consignment = ConsignmentType20(
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
@@ -1364,7 +1364,7 @@ class ConsignmentSpec extends SpecBase {
           }
 
           "consignment consignee defined" must {
-            "not bubble up transport charges to consignment level and not remove them from each item" in {
+            "not roll up transport charges to consignment level and not remove them from each item" in {
               val consignment = ConsignmentType20(
                 grossMass = BigDecimal(1),
                 Consignee = Some(
@@ -1441,7 +1441,7 @@ class ConsignmentSpec extends SpecBase {
         }
 
         "some items have the same consignee" must {
-          "not bubble up consignee to consignment level" in {
+          "not roll up consignee to consignment level" in {
             val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
@@ -1511,7 +1511,7 @@ class ConsignmentSpec extends SpecBase {
         }
 
         "no items have the same consignee" must {
-          "not bubble up consignee to consignment level" in {
+          "not roll up consignee to consignment level" in {
             val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
@@ -1594,9 +1594,9 @@ class ConsignmentSpec extends SpecBase {
         }
       }
 
-      "bubbleUpUCR" when {
+      "rollUpUCR" when {
         "every item has the same UCR" must {
-          "bubble up UCR to consignment level and remove them from each item" in {
+          "roll up UCR to consignment level and remove them from each item" in {
             val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
@@ -1659,7 +1659,7 @@ class ConsignmentSpec extends SpecBase {
         }
 
         "some items have the same UCR" must {
-          "not bubble up UCR to consignment level" in {
+          "not roll up UCR to consignment level" in {
             val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
@@ -1703,7 +1703,7 @@ class ConsignmentSpec extends SpecBase {
         }
 
         "no items have the same UCR" must {
-          "not bubble up UCR to consignment level" in {
+          "not roll up UCR to consignment level" in {
             val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
@@ -1747,9 +1747,9 @@ class ConsignmentSpec extends SpecBase {
         }
       }
 
-      "bubbleUpCountryOfDispatch" when {
+      "rollUpCountryOfDispatch" when {
         "every item has the same country of dispatch" must {
-          "bubble up country of dispatch to consignment level and remove them from each item" in {
+          "roll up country of dispatch to consignment level and remove them from each item" in {
             val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
@@ -1812,7 +1812,7 @@ class ConsignmentSpec extends SpecBase {
         }
 
         "some items have the same country of dispatch" must {
-          "not bubble up country of dispatch to consignment level" in {
+          "not roll up country of dispatch to consignment level" in {
             val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
@@ -1856,7 +1856,7 @@ class ConsignmentSpec extends SpecBase {
         }
 
         "no items have the same country of dispatch" must {
-          "not bubble up country of dispatch to consignment level" in {
+          "not roll up country of dispatch to consignment level" in {
             val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
@@ -1900,9 +1900,9 @@ class ConsignmentSpec extends SpecBase {
         }
       }
 
-      "bubbleUpCountryOfDestination" when {
+      "rollUpCountryOfDestination" when {
         "every item has the same country of destination" must {
-          "bubble up country of destination to consignment level and remove them from each item" in {
+          "roll up country of destination to consignment level and remove them from each item" in {
             val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
@@ -1965,7 +1965,7 @@ class ConsignmentSpec extends SpecBase {
         }
 
         "some items have the same country of destination" must {
-          "not bubble up country of destination to consignment level" in {
+          "not roll up country of destination to consignment level" in {
             val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
@@ -2009,7 +2009,7 @@ class ConsignmentSpec extends SpecBase {
         }
 
         "no items have the same country of dispatch" must {
-          "not bubble up country of dispatch to consignment level" in {
+          "not roll up country of dispatch to consignment level" in {
             val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(

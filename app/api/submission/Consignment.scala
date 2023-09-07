@@ -36,46 +36,46 @@ object Consignment {
   implicit class RichConsignmentType20(value: ConsignmentType20) {
 
     def postProcess(): ConsignmentType20 = value
-      .bubbleUpTransportCharges()
-      .bubbleUpConsignee()
-      .bubbleUpUCR()
-      .bubbleUpCountryOfDispatch()
-      .bubbleUpCountryOfDestination()
+      .rollUpTransportCharges()
+      .rollUpConsignee()
+      .rollUpUCR()
+      .rollUpCountryOfDispatch()
+      .rollUpCountryOfDestination()
 
-    def bubbleUpTransportCharges(): ConsignmentType20 =
-      bubbleUp[TransportChargesType, TransportChargesType](
+    def rollUpTransportCharges(): ConsignmentType20 =
+      rollUp[TransportChargesType, TransportChargesType](
         consignmentLevel = _.TransportCharges,
         itemLevel = _.TransportCharges,
         updateConsignmentLevel = transportCharges => _.copy(TransportCharges = transportCharges),
         updateItemLevel = _.removeTransportCharges()
       )
 
-    def bubbleUpConsignee(): ConsignmentType20 =
-      bubbleUp[ConsigneeType05, ConsigneeType02](
+    def rollUpConsignee(): ConsignmentType20 =
+      rollUp[ConsigneeType05, ConsigneeType02](
         consignmentLevel = _.Consignee,
         itemLevel = _.Consignee,
         updateConsignmentLevel = consignee => _.copy(Consignee = consignee.map(_.asConsigneeType05)),
         updateItemLevel = _.removeConsignee()
       )
 
-    def bubbleUpUCR(): ConsignmentType20 =
-      bubbleUp[String, String](
+    def rollUpUCR(): ConsignmentType20 =
+      rollUp[String, String](
         consignmentLevel = _.referenceNumberUCR,
         itemLevel = _.referenceNumberUCR,
         updateConsignmentLevel = ucr => _.copy(referenceNumberUCR = ucr),
         updateItemLevel = _.removeUCR()
       )
 
-    def bubbleUpCountryOfDispatch(): ConsignmentType20 =
-      bubbleUp[String, String](
+    def rollUpCountryOfDispatch(): ConsignmentType20 =
+      rollUp[String, String](
         consignmentLevel = _.countryOfDispatch,
         itemLevel = _.countryOfDispatch,
         updateConsignmentLevel = countryOfDispatch => _.copy(countryOfDispatch = countryOfDispatch),
         updateItemLevel = _.removeCountryOfDispatch()
       )
 
-    def bubbleUpCountryOfDestination(): ConsignmentType20 =
-      bubbleUp[String, String](
+    def rollUpCountryOfDestination(): ConsignmentType20 =
+      rollUp[String, String](
         consignmentLevel = _.countryOfDestination,
         itemLevel = _.countryOfDestination,
         updateConsignmentLevel = countryOfDestination => _.copy(countryOfDestination = countryOfDestination),
@@ -84,7 +84,7 @@ object Consignment {
 
     def update(f: ConsignmentType20 => ConsignmentType20): ConsignmentType20 = f(value)
 
-    private def bubbleUp[A, B](
+    private def rollUp[A, B](
       consignmentLevel: ConsignmentType20 => Option[A],
       itemLevel: ConsignmentItemType09 => Option[B],
       updateConsignmentLevel: Option[B] => ConsignmentType20 => ConsignmentType20,
