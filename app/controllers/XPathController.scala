@@ -58,4 +58,9 @@ class XPathController @Inject() (
       }
   }
 
+  def handleGuaranteeErrors(lrn: String): Action[AnyContent] = authenticate().async {
+    implicit request =>
+      xPathService.handleGuaranteeErrors(lrn, request.eoriNumber).map(JsBoolean).map(Ok(_))
+  }
+
 }
