@@ -1129,45 +1129,119 @@ class ConsignmentSpec extends SpecBase {
           }
 
           "consignment transport charges defined" must {
-            "not roll up transport charges to consignment level and not remove them from each item" in {
-              val consignment = ConsignmentType20(
-                grossMass = BigDecimal(1),
-                TransportCharges = Some(
-                  TransportChargesType("B")
-                ),
-                HouseConsignment = Seq(
-                  HouseConsignmentType10(
-                    sequenceNumber = "1",
-                    grossMass = BigDecimal(1),
-                    ConsignmentItem = Seq(
-                      ConsignmentItemType09(
-                        goodsItemNumber = "1",
-                        declarationGoodsItemNumber = BigInt(1),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 1"
+            "when consignment transport charges are the same as all item transport charges" must {
+              "remove transport charges from each item" in {
+                val consignment = ConsignmentType20(
+                  grossMass = BigDecimal(1),
+                  TransportCharges = Some(
+                    TransportChargesType("A")
+                  ),
+                  HouseConsignment = Seq(
+                    HouseConsignmentType10(
+                      sequenceNumber = "1",
+                      grossMass = BigDecimal(1),
+                      ConsignmentItem = Seq(
+                        ConsignmentItemType09(
+                          goodsItemNumber = "1",
+                          declarationGoodsItemNumber = BigInt(1),
+                          Commodity = CommodityType07(
+                            descriptionOfGoods = "Item 1"
+                          ),
+                          TransportCharges = Some(
+                            TransportChargesType("A")
+                          )
                         ),
-                        TransportCharges = Some(
-                          TransportChargesType("A")
-                        )
-                      ),
-                      ConsignmentItemType09(
-                        goodsItemNumber = "2",
-                        declarationGoodsItemNumber = BigInt(2),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 2"
-                        ),
-                        TransportCharges = Some(
-                          TransportChargesType("A")
+                        ConsignmentItemType09(
+                          goodsItemNumber = "2",
+                          declarationGoodsItemNumber = BigInt(2),
+                          Commodity = CommodityType07(
+                            descriptionOfGoods = "Item 2"
+                          ),
+                          TransportCharges = Some(
+                            TransportChargesType("A")
+                          )
                         )
                       )
                     )
                   )
                 )
-              )
 
-              val result = consignment.postProcess()
+                val result = consignment.postProcess()
 
-              result shouldBe consignment
+                result shouldBe ConsignmentType20(
+                  grossMass = BigDecimal(1),
+                  TransportCharges = Some(
+                    TransportChargesType("A")
+                  ),
+                  HouseConsignment = Seq(
+                    HouseConsignmentType10(
+                      sequenceNumber = "1",
+                      grossMass = BigDecimal(1),
+                      ConsignmentItem = Seq(
+                        ConsignmentItemType09(
+                          goodsItemNumber = "1",
+                          declarationGoodsItemNumber = BigInt(1),
+                          Commodity = CommodityType07(
+                            descriptionOfGoods = "Item 1"
+                          ),
+                          TransportCharges = None
+                        ),
+                        ConsignmentItemType09(
+                          goodsItemNumber = "2",
+                          declarationGoodsItemNumber = BigInt(2),
+                          Commodity = CommodityType07(
+                            descriptionOfGoods = "Item 2"
+                          ),
+                          TransportCharges = None
+                        )
+                      )
+                    )
+                  )
+                )
+              }
+            }
+
+            "when consignment transport charges are not the same as all item transport charges" must {
+              "not remove transport charges from each item" in {
+                val consignment = ConsignmentType20(
+                  grossMass = BigDecimal(1),
+                  TransportCharges = Some(
+                    TransportChargesType("B")
+                  ),
+                  HouseConsignment = Seq(
+                    HouseConsignmentType10(
+                      sequenceNumber = "1",
+                      grossMass = BigDecimal(1),
+                      ConsignmentItem = Seq(
+                        ConsignmentItemType09(
+                          goodsItemNumber = "1",
+                          declarationGoodsItemNumber = BigInt(1),
+                          Commodity = CommodityType07(
+                            descriptionOfGoods = "Item 1"
+                          ),
+                          TransportCharges = Some(
+                            TransportChargesType("A")
+                          )
+                        ),
+                        ConsignmentItemType09(
+                          goodsItemNumber = "2",
+                          declarationGoodsItemNumber = BigInt(2),
+                          Commodity = CommodityType07(
+                            descriptionOfGoods = "Item 2"
+                          ),
+                          TransportCharges = Some(
+                            TransportChargesType("A")
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+
+                val result = consignment.postProcess()
+
+                result shouldBe consignment
+              }
             }
           }
         }

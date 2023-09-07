@@ -44,7 +44,8 @@ object Consignment {
         consignmentLevel = _.TransportCharges,
         itemLevel = _.TransportCharges,
         updateConsignmentLevel = transportCharges => _.copy(TransportCharges = transportCharges),
-        updateItemLevel = _.copy(TransportCharges = None)
+        updateItemLevel = _.copy(TransportCharges = None),
+        equal = _ == _
       )
 
     def rollUpUCR(): ConsignmentType20 =
@@ -52,7 +53,8 @@ object Consignment {
         consignmentLevel = _.referenceNumberUCR,
         itemLevel = _.referenceNumberUCR,
         updateConsignmentLevel = ucr => _.copy(referenceNumberUCR = ucr),
-        updateItemLevel = _.copy(referenceNumberUCR = None)
+        updateItemLevel = _.copy(referenceNumberUCR = None),
+        equal = _ == _
       )
 
     def rollUpCountryOfDispatch(): ConsignmentType20 =
@@ -60,7 +62,8 @@ object Consignment {
         consignmentLevel = _.countryOfDispatch,
         itemLevel = _.countryOfDispatch,
         updateConsignmentLevel = countryOfDispatch => _.copy(countryOfDispatch = countryOfDispatch),
-        updateItemLevel = _.copy(countryOfDispatch = None)
+        updateItemLevel = _.copy(countryOfDispatch = None),
+        equal = _ == _
       )
 
     def rollUpCountryOfDestination(): ConsignmentType20 =
@@ -68,7 +71,8 @@ object Consignment {
         consignmentLevel = _.countryOfDestination,
         itemLevel = _.countryOfDestination,
         updateConsignmentLevel = countryOfDestination => _.copy(countryOfDestination = countryOfDestination),
-        updateItemLevel = _.copy(countryOfDestination = None)
+        updateItemLevel = _.copy(countryOfDestination = None),
+        equal = _ == _
       )
 
     def update(f: ConsignmentType20 => ConsignmentType20): ConsignmentType20 = f(value)
@@ -77,21 +81,25 @@ object Consignment {
       consignmentLevel: ConsignmentType20 => Option[A],
       itemLevel: ConsignmentItemType09 => Option[B],
       updateConsignmentLevel: Option[B] => ConsignmentType20 => ConsignmentType20,
-      updateItemLevel: ConsignmentItemType09 => ConsignmentItemType09
-    ): ConsignmentType20 =
-      if (consignmentLevel(value).isEmpty) {
-        val values = value.HouseConsignment.flatMap(_.ConsignmentItem).map(itemLevel)
-        values match {
-          case head :: tail if tail.forall(_ == head) =>
-            value
-              .update(updateConsignmentLevel(head))
-              .update(_.copy(HouseConsignment = value.HouseConsignment.map(_.updateItems(updateItemLevel))))
-          case _ =>
-            value
-        }
-      } else {
-        value
+      updateItemLevel: ConsignmentItemType09 => ConsignmentItemType09,
+      equal: (A, B) => Boolean
+    ): ConsignmentType20 = {
+      val values = value.HouseConsignment.flatMap(_.ConsignmentItem).map(itemLevel)
+      values match {
+        case head :: tail if tail.forall(_ == head) =>
+          lazy val rollUp = value
+            .update(updateConsignmentLevel(head))
+            .update(_.copy(HouseConsignment = value.HouseConsignment.map(_.updateItems(updateItemLevel))))
+
+          (consignmentLevel(value), head) match {
+            case (None, Some(_))                                                                                     => rollUp
+            case (Some(consignmentLevelValue), Some(itemLevelValue)) if equal(consignmentLevelValue, itemLevelValue) => rollUp
+            case _                                                                                                   => value
+          }
+        case _ =>
+          value
       }
+    }
   }
 }
 
