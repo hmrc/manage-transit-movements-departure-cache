@@ -35,7 +35,12 @@ object Consignment {
 
   implicit class RichConsignmentType20(value: ConsignmentType20) {
 
-    def postProcess(): ConsignmentType20 = value.bubbleUpTransportCharges().bubbleUpConsignee()
+    def postProcess(): ConsignmentType20 = value
+      .bubbleUpTransportCharges()
+      .bubbleUpConsignee()
+      .bubbleUpUCR()
+      .bubbleUpCountryOfDispatch()
+      .bubbleUpCountryOfDestination()
 
     def bubbleUpTransportCharges(): ConsignmentType20 =
       bubbleUp[TransportChargesType, TransportChargesType](
@@ -51,6 +56,30 @@ object Consignment {
         itemLevel = _.Consignee,
         updateConsignmentLevel = consignee => _.copy(Consignee = consignee.map(_.asConsigneeType05)),
         updateItemLevel = _.removeConsignee()
+      )
+
+    def bubbleUpUCR(): ConsignmentType20 =
+      bubbleUp[String, String](
+        consignmentLevel = _.referenceNumberUCR,
+        itemLevel = _.referenceNumberUCR,
+        updateConsignmentLevel = ucr => _.copy(referenceNumberUCR = ucr),
+        updateItemLevel = _.removeUCR()
+      )
+
+    def bubbleUpCountryOfDispatch(): ConsignmentType20 =
+      bubbleUp[String, String](
+        consignmentLevel = _.countryOfDispatch,
+        itemLevel = _.countryOfDispatch,
+        updateConsignmentLevel = countryOfDispatch => _.copy(countryOfDispatch = countryOfDispatch),
+        updateItemLevel = _.removeCountryOfDispatch()
+      )
+
+    def bubbleUpCountryOfDestination(): ConsignmentType20 =
+      bubbleUp[String, String](
+        consignmentLevel = _.countryOfDestination,
+        itemLevel = _.countryOfDestination,
+        updateConsignmentLevel = countryOfDestination => _.copy(countryOfDestination = countryOfDestination),
+        updateItemLevel = _.removeCountryOfDestination()
       )
 
     def update(f: ConsignmentType20 => ConsignmentType20): ConsignmentType20 = f(value)
@@ -502,6 +531,15 @@ object consignmentItemType09 {
 
     def removeConsignee(): ConsignmentItemType09 =
       value.copy(Consignee = None)
+
+    def removeUCR(): ConsignmentItemType09 =
+      value.copy(referenceNumberUCR = None)
+
+    def removeCountryOfDispatch(): ConsignmentItemType09 =
+      value.copy(countryOfDispatch = None)
+
+    def removeCountryOfDestination(): ConsignmentItemType09 =
+      value.copy(countryOfDestination = None)
   }
 }
 
