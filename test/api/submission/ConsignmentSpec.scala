@@ -58,6 +58,19 @@ class ConsignmentSpec extends SpecBase {
             |            "name" : "Consignor Contact",
             |            "telephoneNumber" : "+44 101 157 0192"
             |          }
+            |        },
+            |        "consignee" : {
+            |          "eori" : "consignee1",
+            |          "name" : "Mr Consignee",
+            |          "country" : {
+            |            "code" : "FR",
+            |            "description" : "France"
+            |          },
+            |          "address" : {
+            |            "numberAndStreet" : "21 Test Rue",
+            |            "city" : "Paris",
+            |            "postalCode" : "PA1 1PA"
+            |          }
             |        }
             |      }
             |    },
@@ -481,13 +494,13 @@ class ConsignmentSpec extends SpecBase {
             |          "identificationNumber" : "GE00101001",
             |          "name" : "Mr. Consignee",
             |          "country" : {
-            |            "code" : "FR",
-            |            "description" : "France"
+            |            "code" : "GB",
+            |            "description" : "United Kingdom"
             |          },
             |          "address" : {
-            |            "numberAndStreet" : "21 Test Rue",
-            |            "city" : "Paris",
-            |            "postalCode" : "PA1 1PA"
+            |            "numberAndStreet" : "1 Merry Lane",
+            |            "city" : "Godrics Hollow",
+            |            "postalCode" : "CA1 9AA"
             |          }
             |        }
             |      },
@@ -541,21 +554,7 @@ class ConsignmentSpec extends SpecBase {
             |            "additionalInformation" : "ai1"
             |          }
             |        ],
-            |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371",
-            |        "consignee" : {
-            |          "addConsigneeEoriNumberYesNo" : true,
-            |          "identificationNumber" : "GE00101001",
-            |          "name" : "Mr. Consignee",
-            |          "country" : {
-            |            "code" : "FR",
-            |            "description" : "France"
-            |          },
-            |          "address" : {
-            |            "numberAndStreet" : "21 Test Rue",
-            |            "city" : "Paris",
-            |            "postalCode" : "PA1 1PA"
-            |          }
-            |        }
+            |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |      }
             |    ]
             |  },
@@ -622,8 +621,8 @@ class ConsignmentSpec extends SpecBase {
 
         converted.Consignee shouldBe Some(
           ConsigneeType05(
-            identificationNumber = Some("GE00101001"),
-            name = Some("Mr. Consignee"),
+            identificationNumber = Some("consignee1"),
+            name = Some("Mr Consignee"),
             Address = Some(
               AddressType17(
                 streetAndNumber = "21 Test Rue",
@@ -844,7 +843,20 @@ class ConsignmentSpec extends SpecBase {
               countryOfDispatch = Some("GB"),
               countryOfDestination = Some("FR"),
               referenceNumberUCR = Some("UCR 1"),
-              Consignee = None,
+              Consignee = Some(
+                ConsigneeType02(
+                  identificationNumber = Some("GE00101001"),
+                  name = Some("Mr. Consignee"),
+                  Address = Some(
+                    AddressType12(
+                      streetAndNumber = "1 Merry Lane",
+                      postcode = Some("CA1 9AA"),
+                      city = "Godrics Hollow",
+                      country = "GB"
+                    )
+                  )
+                )
+              ),
               AdditionalSupplyChainActor = Seq(
                 AdditionalSupplyChainActorType(
                   sequenceNumber = "1",
@@ -1245,341 +1257,6 @@ class ConsignmentSpec extends SpecBase {
                       ),
                       TransportCharges = Some(
                         TransportChargesType("C")
-                      )
-                    )
-                  )
-                )
-              )
-            )
-
-            val result = consignment.postProcess()
-
-            result shouldBe consignment
-          }
-        }
-      }
-
-      "rollUpConsignee" when {
-        "every item has the same consignee" when {
-          "consignment consignee undefined" must {
-            "roll up consignee to consignment level and remove them from each item" in {
-              val consignment = ConsignmentType20(
-                grossMass = BigDecimal(1),
-                HouseConsignment = Seq(
-                  HouseConsignmentType10(
-                    sequenceNumber = "1",
-                    grossMass = BigDecimal(1),
-                    ConsignmentItem = Seq(
-                      ConsignmentItemType09(
-                        goodsItemNumber = "1",
-                        declarationGoodsItemNumber = BigInt(1),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 1"
-                        ),
-                        Consignee = Some(
-                          ConsigneeType02(
-                            identificationNumber = Some("ID1"),
-                            name = Some("Joe Bloggs"),
-                            Address = Some(
-                              AddressType12(
-                                streetAndNumber = "1 Test Lane",
-                                postcode = Some("TE1 1ST"),
-                                city = "Testville",
-                                country = "England"
-                              )
-                            )
-                          )
-                        )
-                      ),
-                      ConsignmentItemType09(
-                        goodsItemNumber = "2",
-                        declarationGoodsItemNumber = BigInt(2),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 2"
-                        ),
-                        Consignee = Some(
-                          ConsigneeType02(
-                            identificationNumber = Some("ID1"),
-                            name = Some("Joe Bloggs"),
-                            Address = Some(
-                              AddressType12(
-                                streetAndNumber = "1 Test Lane",
-                                postcode = Some("TE1 1ST"),
-                                city = "Testville",
-                                country = "England"
-                              )
-                            )
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-
-              val result = consignment.postProcess()
-
-              result shouldBe ConsignmentType20(
-                grossMass = BigDecimal(1),
-                Consignee = Some(
-                  ConsigneeType05(
-                    identificationNumber = Some("ID1"),
-                    name = Some("Joe Bloggs"),
-                    Address = Some(
-                      AddressType17(
-                        streetAndNumber = "1 Test Lane",
-                        postcode = Some("TE1 1ST"),
-                        city = "Testville",
-                        country = "England"
-                      )
-                    )
-                  )
-                ),
-                HouseConsignment = Seq(
-                  HouseConsignmentType10(
-                    sequenceNumber = "1",
-                    grossMass = BigDecimal(1),
-                    ConsignmentItem = Seq(
-                      ConsignmentItemType09(
-                        goodsItemNumber = "1",
-                        declarationGoodsItemNumber = BigInt(1),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 1"
-                        ),
-                        Consignee = None
-                      ),
-                      ConsignmentItemType09(
-                        goodsItemNumber = "2",
-                        declarationGoodsItemNumber = BigInt(2),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 2"
-                        ),
-                        Consignee = None
-                      )
-                    )
-                  )
-                )
-              )
-            }
-          }
-
-          "consignment consignee defined" must {
-            "not roll up transport charges to consignment level and not remove them from each item" in {
-              val consignment = ConsignmentType20(
-                grossMass = BigDecimal(1),
-                Consignee = Some(
-                  ConsigneeType05(
-                    identificationNumber = Some("ID2"),
-                    name = Some("John Doe"),
-                    Address = Some(
-                      AddressType17(
-                        streetAndNumber = "2 Test Lane",
-                        postcode = Some("TE1 1ST"),
-                        city = "Testville",
-                        country = "England"
-                      )
-                    )
-                  )
-                ),
-                HouseConsignment = Seq(
-                  HouseConsignmentType10(
-                    sequenceNumber = "1",
-                    grossMass = BigDecimal(1),
-                    ConsignmentItem = Seq(
-                      ConsignmentItemType09(
-                        goodsItemNumber = "1",
-                        declarationGoodsItemNumber = BigInt(1),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 1"
-                        ),
-                        Consignee = Some(
-                          ConsigneeType02(
-                            identificationNumber = Some("ID1"),
-                            name = Some("Joe Bloggs"),
-                            Address = Some(
-                              AddressType12(
-                                streetAndNumber = "1 Test Lane",
-                                postcode = Some("TE1 1ST"),
-                                city = "Testville",
-                                country = "England"
-                              )
-                            )
-                          )
-                        )
-                      ),
-                      ConsignmentItemType09(
-                        goodsItemNumber = "2",
-                        declarationGoodsItemNumber = BigInt(2),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 2"
-                        ),
-                        Consignee = Some(
-                          ConsigneeType02(
-                            identificationNumber = Some("ID1"),
-                            name = Some("Joe Bloggs"),
-                            Address = Some(
-                              AddressType12(
-                                streetAndNumber = "1 Test Lane",
-                                postcode = Some("TE1 1ST"),
-                                city = "Testville",
-                                country = "England"
-                              )
-                            )
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-
-              val result = consignment.postProcess()
-
-              result shouldBe consignment
-            }
-          }
-        }
-
-        "some items have the same consignee" must {
-          "not roll up consignee to consignment level" in {
-            val consignment = ConsignmentType20(
-              grossMass = BigDecimal(1),
-              HouseConsignment = Seq(
-                HouseConsignmentType10(
-                  sequenceNumber = "1",
-                  grossMass = BigDecimal(1),
-                  ConsignmentItem = Seq(
-                    ConsignmentItemType09(
-                      goodsItemNumber = "1",
-                      declarationGoodsItemNumber = BigInt(1),
-                      Commodity = CommodityType07(
-                        descriptionOfGoods = "Item 1"
-                      ),
-                      Consignee = Some(
-                        ConsigneeType02(
-                          identificationNumber = Some("ID1"),
-                          name = Some("Joe Bloggs"),
-                          Address = Some(
-                            AddressType12(
-                              streetAndNumber = "1 Test Lane",
-                              postcode = Some("TE1 1ST"),
-                              city = "Testville",
-                              country = "England"
-                            )
-                          )
-                        )
-                      )
-                    ),
-                    ConsignmentItemType09(
-                      goodsItemNumber = "2",
-                      declarationGoodsItemNumber = BigInt(2),
-                      Commodity = CommodityType07(
-                        descriptionOfGoods = "Item 2"
-                      ),
-                      Consignee = Some(
-                        ConsigneeType02(
-                          identificationNumber = Some("ID1"),
-                          name = Some("Joe Bloggs"),
-                          Address = Some(
-                            AddressType12(
-                              streetAndNumber = "1 Test Lane",
-                              postcode = Some("TE1 1ST"),
-                              city = "Testville",
-                              country = "England"
-                            )
-                          )
-                        )
-                      )
-                    ),
-                    ConsignmentItemType09(
-                      goodsItemNumber = "3",
-                      declarationGoodsItemNumber = BigInt(3),
-                      Commodity = CommodityType07(
-                        descriptionOfGoods = "Item 3"
-                      ),
-                      Consignee = None
-                    )
-                  )
-                )
-              )
-            )
-
-            val result = consignment.postProcess()
-
-            result shouldBe consignment
-          }
-        }
-
-        "no items have the same consignee" must {
-          "not roll up consignee to consignment level" in {
-            val consignment = ConsignmentType20(
-              grossMass = BigDecimal(1),
-              HouseConsignment = Seq(
-                HouseConsignmentType10(
-                  sequenceNumber = "1",
-                  grossMass = BigDecimal(1),
-                  ConsignmentItem = Seq(
-                    ConsignmentItemType09(
-                      goodsItemNumber = "1",
-                      declarationGoodsItemNumber = BigInt(1),
-                      Commodity = CommodityType07(
-                        descriptionOfGoods = "Item 1"
-                      ),
-                      Consignee = Some(
-                        ConsigneeType02(
-                          identificationNumber = Some("ID1"),
-                          name = Some("Jane Doe"),
-                          Address = Some(
-                            AddressType12(
-                              streetAndNumber = "1 Test Lane",
-                              postcode = Some("TE1 1ST"),
-                              city = "Testville",
-                              country = "England"
-                            )
-                          )
-                        )
-                      )
-                    ),
-                    ConsignmentItemType09(
-                      goodsItemNumber = "2",
-                      declarationGoodsItemNumber = BigInt(2),
-                      Commodity = CommodityType07(
-                        descriptionOfGoods = "Item 2"
-                      ),
-                      Consignee = Some(
-                        ConsigneeType02(
-                          identificationNumber = Some("ID2"),
-                          name = Some("John Doe"),
-                          Address = Some(
-                            AddressType12(
-                              streetAndNumber = "1 Test Lane",
-                              postcode = Some("TE1 1ST"),
-                              city = "Testville",
-                              country = "England"
-                            )
-                          )
-                        )
-                      )
-                    ),
-                    ConsignmentItemType09(
-                      goodsItemNumber = "3",
-                      declarationGoodsItemNumber = BigInt(3),
-                      Commodity = CommodityType07(
-                        descriptionOfGoods = "Item 3"
-                      ),
-                      Consignee = Some(
-                        ConsigneeType02(
-                          identificationNumber = Some("ID3"),
-                          name = Some("Joe Bloggs"),
-                          Address = Some(
-                            AddressType12(
-                              streetAndNumber = "2 Test Lane",
-                              postcode = Some("TE1 1ST"),
-                              city = "Testville",
-                              country = "England"
-                            )
-                          )
-                        )
                       )
                     )
                   )

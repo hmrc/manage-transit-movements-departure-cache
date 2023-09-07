@@ -17,7 +17,6 @@
 package api.submission
 
 import api.submission.Level._
-import api.submission.consigneeType02.RichConsigneeType02
 import api.submission.documentType.RichDocumentJsValue
 import api.submission.houseConsignmentType10.RichHouseConsignmentType10
 import generated._
@@ -36,7 +35,6 @@ object Consignment {
 
     def postProcess(): ConsignmentType20 = value
       .rollUpTransportCharges()
-      .rollUpConsignee()
       .rollUpUCR()
       .rollUpCountryOfDispatch()
       .rollUpCountryOfDestination()
@@ -47,14 +45,6 @@ object Consignment {
         itemLevel = _.TransportCharges,
         updateConsignmentLevel = transportCharges => _.copy(TransportCharges = transportCharges),
         updateItemLevel = _.copy(TransportCharges = None)
-      )
-
-    def rollUpConsignee(): ConsignmentType20 =
-      rollUp[ConsigneeType05, ConsigneeType02](
-        consignmentLevel = _.Consignee,
-        itemLevel = _.Consignee,
-        updateConsignmentLevel = consignee => _.copy(Consignee = consignee.map(_.asConsigneeType05)),
-        updateItemLevel = _.copy(Consignee = None)
       )
 
     def rollUpUCR(): ConsignmentType20 =
@@ -241,22 +231,12 @@ object consigneeType05 {
 }
 
 object consigneeType02 {
-  import api.submission.addressType12.RichAddressType12
 
   implicit val reads: Reads[ConsigneeType02] = (
     (__ \ "identificationNumber").readNullable[String] and
       (__ \ "name").readNullable[String] and
       __.read[Option[AddressType12]](addressType12.optionalReads)
   )(ConsigneeType02.apply _)
-
-  implicit class RichConsigneeType02(value: ConsigneeType02) {
-
-    def asConsigneeType05: ConsigneeType05 = ConsigneeType05(
-      identificationNumber = value.identificationNumber,
-      name = value.name,
-      Address = value.Address.map(_.asAddressType17)
-    )
-  }
 }
 
 object additionalSupplyChainActorType {
