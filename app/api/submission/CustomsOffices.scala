@@ -33,9 +33,9 @@ object CustomsOffices {
     .getOrElse(throw new Exception("Json did not contain pre-task-list answers"))
     .as[CustomsOfficeOfDestinationDeclaredType01](customsOfficeOfDestinationDeclaredType01.reads)
 
-  def transformOfficeOfTransit(uA: UserAnswers): Seq[CustomsOfficeOfTransitDeclaredType03] = uA
+  def transformOfficeOfTransit(uA: UserAnswers): Seq[CustomsOfficeOfTransitDeclaredType04] = uA
     .get[JsArray](routeDetailsPath \ "transit" \ "officesOfTransit")
-    .readValuesAs[CustomsOfficeOfTransitDeclaredType03](customsOfficeOfTransitDeclaredType03.reads)
+    .readValuesAs[CustomsOfficeOfTransitDeclaredType04](customsOfficeOfTransitDeclaredType04.reads)
 
   def transformOfficeOfExit(uA: UserAnswers): Seq[CustomsOfficeOfExitForTransitDeclaredType02] = uA
     .get[JsArray](routeDetailsPath \ "exit" \ "officesOfExit")
@@ -54,13 +54,13 @@ object customsOfficeOfDestinationDeclaredType01 {
     (__ \ "officeOfDestination" \ "id").read[String].map(CustomsOfficeOfDestinationDeclaredType01)
 }
 
-object customsOfficeOfTransitDeclaredType03 {
+object customsOfficeOfTransitDeclaredType04 {
 
-  def reads(index: Int): Reads[CustomsOfficeOfTransitDeclaredType03] = (
+  def reads(index: Int): Reads[CustomsOfficeOfTransitDeclaredType04] = (
     (index.toString: Reads[String]) and
       (__ \ "officeOfTransit" \ "id").read[String] and
       (__ \ "arrivalDateTime").readNullable[String].map(stringToXMLGregorianCalendar)
-  )(CustomsOfficeOfTransitDeclaredType03.apply _)
+  )(CustomsOfficeOfTransitDeclaredType04.apply _)
 }
 
 object customsOfficeOfExitForTransitDeclaredType02 {

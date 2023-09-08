@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
+import controllers.actions.AuthenticateActionProvider
 import play.api.Logging
 import play.api.libs.json.JsBoolean
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -30,7 +30,6 @@ import scala.concurrent.ExecutionContext
 class DuplicateController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
-  authenticateAndLock: AuthenticateAndLockActionProvider,
   duplicateService: DuplicateService
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
@@ -41,9 +40,9 @@ class DuplicateController @Inject() (
       duplicateService.doesDraftOrSubmissionExistForLrn(lrn).map(JsBoolean).map(Ok(_))
   }
 
-  def doesSubmissionExistForLrn(lrn: String): Action[AnyContent] = authenticate().async {
+  def doesIE028ExistForLrn(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
-      duplicateService.doesSubmissionExistForLrn(lrn).map(JsBoolean).map(Ok(_))
+      duplicateService.doesIE028ExistForLrn(lrn).map(JsBoolean).map(Ok(_))
   }
 
 }

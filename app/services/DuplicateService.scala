@@ -16,8 +16,6 @@
 
 package services
 
-import config.AppConfig
-import connectors.ApiConnector
 import play.api.Logging
 import repositories.CacheRepository
 import uk.gov.hmrc.http.HeaderCarrier
@@ -25,25 +23,23 @@ import uk.gov.hmrc.http.HeaderCarrier
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
+// TODO can this be removed? Its a service of a service
 class DuplicateService @Inject() (
-  cacheRepository: CacheRepository,
-  apiConnector: ApiConnector,
-  config: AppConfig
+  apiService: ApiService,
+  cacheRepository: CacheRepository
 )(implicit ec: ExecutionContext)
     extends Logging {
 
-  def doesSubmissionExistForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
-    apiConnector.getDepartures(Seq("localReferenceNumber" -> lrn)) map {
-      case Some(departures) => departures.departures.nonEmpty
-      case None             => false
-    }
+  def doesIE028ExistForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
+    apiService.isIE028DefinedForDeparture(lrn)
 
   def doesDraftExistForLrn(lrn: String): Future[Boolean] =
-    cacheRepository.existsLRN(lrn)
+    cacheRepository.doesDraftExistForLrn(lrn)
 
   def doesDraftOrSubmissionExistForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
-    doesSubmissionExistForLrn(lrn) //.flatMap {
-  //case true => Future.successful(true)
-  //case false => doesDraftExistForLrn(lrn, eoriNumber) // TODO: CTCP-3469 Check if their is a duplicate LRN in draft state, then handle the draft e.g set a flag on it to change local reference number
+    doesIE028ExistForLrn(lrn).flatMap {
+      case true  => Future.successful(true)
+      case false => doesDraftExistForLrn(lrn)
+    }
 
 }

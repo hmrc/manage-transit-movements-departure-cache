@@ -21,5 +21,7 @@ import play.api.libs.json.{__, Reads}
 case class Departures(departures: Seq[Departure])
 
 object Departures {
-  implicit val reads: Reads[Departures] = (__ \ "departures").read[Seq[Departure]].map(Departures(_))
+
+  implicit val reads: Reads[Departures] = (__ \ "departures").read[Seq[Departure]].map(Departures.apply)
+
 }

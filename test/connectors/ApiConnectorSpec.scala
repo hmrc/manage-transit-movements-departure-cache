@@ -20,11 +20,8 @@ import base.AppWithDefaultMockFixtures
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
 import models.{Departure, Departures, UserAnswers}
-import org.scalacheck.Gen
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Results.{BadRequest, InternalServerError}
@@ -55,6 +52,9 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |      "procedureType" : "normal",
                                     |      "declarationType" : {
                                     |        "code" : "TIR"
+                                    |      },
+                                    |      "additionalDeclarationType" : {
+                                    |        "code" : "A"
                                     |      },
                                     |      "tirCarnetReference" : "1234567",
                                     |      "securityDetailsType" : {
@@ -375,33 +375,14 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
             .willReturn(okJson(responseJson.toString()))
         )
 
-        val expectedResult = Departures(Seq(Departure(lrn1), Departure(lrn2)))
-
-        await(connector.getDepartures()) mustBe Some(expectedResult)
-      }
-
-      "must return empty Departures when 404 is returned" in {
-
-        server.stubFor(
-          get(urlEqualTo(s"/movements/departures"))
-            .willReturn(aResponse().withStatus(404))
+        val expectedResult = Departures(
+          Seq(
+            Departure(lrn1, "movements/departures/63651574c3447b12/messages"),
+            Departure(lrn2, "movements/departures/6365135ba5e821ee/messages")
+          )
         )
 
-        connector.getDepartures().futureValue mustBe Some(Departures(Seq.empty))
-      }
-
-      "must return None when an error is returned" in {
-        val genError = Gen.chooseNum(400, 599).suchThat(_ != 404)
-
-        forAll(genError) {
-          error =>
-            server.stubFor(
-              get(urlEqualTo(s"/movements/departures"))
-                .willReturn(aResponse().withStatus(error))
-            )
-
-            await(connector.getDepartures()) mustBe None
-        }
+        await(connector.getDepartures()) mustBe expectedResult
       }
     }
 

@@ -14,24 +14,16 @@
  * limitations under the License.
  */
 
-package models
+package utils
 
-import play.api.libs.json.{Format, JsObject, Json}
+import config.AppConfig
 
-case class Metadata(
-  lrn: String,
-  eoriNumber: String,
-  data: JsObject,
-  tasks: Map[String, Status.Value]
-) {
+import java.time.temporal.ChronoUnit.DAYS
+import java.time.{Clock, Duration, Instant}
 
-  def updateTasks(tasks: Map[String, Status.Value]): Metadata =
-    this.copy(tasks = tasks)
-}
+object TTLUtils {
 
-object Metadata {
+  def expiresInDays(createdAt: Instant)(implicit clock: Clock, appConfig: AppConfig): Long =
+    Duration.between(Instant.now(clock), createdAt.plus(appConfig.mongoTtlInDays, DAYS)).toDays + 1
 
-  def apply(lrn: String, eoriNumber: String): Metadata = Metadata(lrn, eoriNumber, Json.obj(), Map())
-
-  implicit val format: Format[Metadata] = Json.format[Metadata]
 }

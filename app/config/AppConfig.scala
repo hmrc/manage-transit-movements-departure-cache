@@ -17,11 +17,12 @@
 package config
 
 import play.api.Configuration
+import uk.gov.hmrc.play.bootstrap.config.ServicesConfig
 
 import javax.inject.{Inject, Singleton}
 
 @Singleton
-class AppConfig @Inject() (config: Configuration) {
+class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig) {
 
   val appName: String      = config.get[String]("appName")
   val mongoTtlInDays: Int  = config.get[Int]("mongodb.ttlInDays")
@@ -31,6 +32,6 @@ class AppConfig @Inject() (config: Configuration) {
   val enrolmentKey: String        = config.get[String]("enrolment.key")
   val enrolmentIdentifier: String = config.get[String]("enrolment.identifier")
 
-  val apiUrl: String = config.get[Service]("microservice.services.common-transit-convention-traders").baseUrl
+  val apiUrl: String = servicesConfig.baseUrl("common-transit-convention-traders")
 
 }

@@ -16,10 +16,16 @@
 
 package models
 
+import play.api.libs.functional.syntax.toFunctionalBuilderOps
 import play.api.libs.json.{__, Reads}
 
-case class Departure(localReferenceNumber: String)
+case class Departure(localReferenceNumber: String, path: String)
 
 object Departure {
-  implicit val reads: Reads[Departure] = (__ \ "localReferenceNumber").read[String].map(Departure(_))
+
+  implicit val reads: Reads[Departure] = (
+    (__ \ "localReferenceNumber").read[String] and
+      (__ \ "_links" \ "messages" \ "href").read[String].map(_.replace("/customs/transits/", ""))
+  )(Departure.apply _)
+
 }

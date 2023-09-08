@@ -17,12 +17,14 @@
 package models
 
 import base.SpecBase
+import generators.Generators
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.{JsSuccess, JsValue, Json}
 
 import java.time.{Instant, LocalDateTime}
 import java.util.UUID
 
-class UserAnswersSpec extends SpecBase {
+class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
 
   private val userAnswers = UserAnswers(
     metadata = Metadata(
@@ -38,7 +40,8 @@ class UserAnswersSpec extends SpecBase {
     ),
     createdAt = Instant.ofEpochMilli(1662393524188L),
     lastUpdated = Instant.ofEpochMilli(1662546803472L),
-    id = UUID.fromString(uuid)
+    id = UUID.fromString(uuid),
+    status = SubmissionState.NotSubmitted
   )
 
   "User answers" when {
@@ -87,6 +90,7 @@ class UserAnswersSpec extends SpecBase {
           |    "lrn" : "$lrn",
           |    "eoriNumber" : "$eoriNumber",
           |    "data" : {},
+          |    "isSubmitted" : "notSubmitted",
           |    "tasks" : {
           |        "task1" : "completed",
           |        "task2" : "in-progress",
@@ -98,13 +102,12 @@ class UserAnswersSpec extends SpecBase {
           |            "$$numberLong" : "1662393524188"
           |        }
           |    },
+          |
           |    "lastUpdated" : {
           |        "$$date" : {
           |            "$$numberLong" : "1662546803472"
           |        }
-          |    },
-          |    "isSubmitted" : "notSubmitted"
-          |
+          |    }
           |}
           |""".stripMargin)
 

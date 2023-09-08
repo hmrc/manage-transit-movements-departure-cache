@@ -278,7 +278,7 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
     "when /CC015C/Consignment/countryOfDestination" must {
       "return RouteDetails" in {
         val xPath = XPath("/CC015C/Consignment/countryOfDestination")
-        xPath.task.value shouldBe RouteDetails
+        xPath.task.value shouldBe TransportDetails
       }
     }
 

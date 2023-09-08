@@ -33,22 +33,32 @@ object transitOperationType06 {
 
   def reads(lrn: String): Reads[TransitOperationType06] = (
     (preTaskListPath \ "declarationType" \ "code").read[String] and
+      (preTaskListPath \ "additionalDeclarationType" \ "code").read[String] and
       (preTaskListPath \ "tirCarnetReference").readNullable[String] and
       (preTaskListPath \ "securityDetailsType" \ "code").read[String] and
       reducedDatasetIndicatorReads and
+      (routeDetailsPath \ "specificCircumstanceIndicator" \ "code").readNullable[String] and
       (routeDetailsPath \ "routing" \ "bindingItinerary").readWithDefault[Boolean](false) and
       (transportDetailsPath \ "authorisationsAndLimit" \ "limit" \ "limitDate").readNullable[LocalDate]
   ).apply {
-    (declarationType, TIRCarnetNumber, security, reducedDatasetIndicator, bindingItinerary, limitDate) =>
+    (declarationType,
+     additionalDeclarationType,
+     TIRCarnetNumber,
+     security,
+     reducedDatasetIndicator,
+     specificCircumstanceIndicator,
+     bindingItinerary,
+     limitDate
+    ) =>
       TransitOperationType06(
         LRN = lrn,
         declarationType = declarationType,
-        additionalDeclarationType = "A",
+        additionalDeclarationType = additionalDeclarationType,
         TIRCarnetNumber = TIRCarnetNumber,
         presentationOfTheGoodsDateAndTime = None, // TODO - do we collect this?
         security = security,
         reducedDatasetIndicator = reducedDatasetIndicator,
-        specificCircumstanceIndicator = None, // TODO - do we collect this?
+        specificCircumstanceIndicator = specificCircumstanceIndicator,
         communicationLanguageAtDeparture = None, // TODO - do we collect this?
         bindingItinerary = bindingItinerary,
         limitDate = limitDate

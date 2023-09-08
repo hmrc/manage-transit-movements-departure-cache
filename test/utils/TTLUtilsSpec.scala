@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-package models
+package utils
 
-import play.api.libs.json.{Format, JsObject, Json}
+import base.SpecBase
+import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
+import java.time.temporal.ChronoUnit.DAYS
 
-case class Metadata(
-  lrn: String,
-  eoriNumber: String,
-  data: JsObject,
-  tasks: Map[String, Status.Value]
-) {
+import java.time.Instant
 
-  def updateTasks(tasks: Map[String, Status.Value]): Metadata =
-    this.copy(tasks = tasks)
-}
+class TTLUtilsSpec extends SpecBase {
 
-object Metadata {
+  "expiresInDays" should {
 
-  def apply(lrn: String, eoriNumber: String): Metadata = Metadata(lrn, eoriNumber, Json.obj(), Map())
+    "return correct days for a date today" in {
+      TTLUtils.expiresInDays(Instant.now()) mustBe 30L
+    }
 
-  implicit val format: Format[Metadata] = Json.format[Metadata]
+    "return correct days for a date 5 days ago" in {
+      TTLUtils.expiresInDays(Instant.now().minus(5, DAYS)) mustBe 25L
+    }
+  }
+
 }

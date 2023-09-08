@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package submission
+package api.submission
 
-import api.submission._
+import api.submission.Consignment.RichConsignmentType20
 import api.submission.consignmentType20.{activeBorderTransportMeansReads, transportEquipmentReads}
 import base.SpecBase
 import generated._
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
+
+import scala.collection.immutable.Seq
 
 class ConsignmentSpec extends SpecBase {
 
@@ -74,10 +76,6 @@ class ConsignmentSpec extends SpecBase {
             |    },
             |    "routeDetails" : {
             |      "routing" : {
-            |        "countryOfDestination" : {
-            |          "code" : "IT",
-            |          "description" : "Italy"
-            |        },
             |        "countriesOfRouting" : [
             |          {
             |            "countryOfRouting" : {
@@ -170,6 +168,10 @@ class ConsignmentSpec extends SpecBase {
             |          "code" : "FR",
             |          "description" : "France"
             |        },
+            |        "itemsDestinationCountry" : {
+            |          "code" : "IT",
+            |          "description" : "Italy"
+            |        },
             |        "containerIndicator" : true
             |      },
             |      "inlandMode" : "maritime",
@@ -238,8 +240,7 @@ class ConsignmentSpec extends SpecBase {
             |            ],
             |            "uuid" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |          }
-            |        ],
-            |        "paymentMethod" : "cash"
+            |        ]
             |      }
             |    },
             |    "documents" : {
@@ -385,6 +386,10 @@ class ConsignmentSpec extends SpecBase {
             |        "grossWeight" : 123.456,
             |        "netWeight" : 1234,
             |        "supplementaryUnits" : 12345,
+            |        "methodOfPayment" : {
+            |          "code" : "A",
+            |          "description" : "Payment in cash"
+            |        },
             |        "packages" : [
             |          {
             |            "packageType" : {
@@ -483,7 +488,21 @@ class ConsignmentSpec extends SpecBase {
             |            "additionalInformation" : "ai2"
             |          }
             |        ],
-            |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+            |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371",
+            |        "consignee" : {
+            |          "addConsigneeEoriNumberYesNo" : true,
+            |          "identificationNumber" : "GE00101001",
+            |          "name" : "Mr. Consignee",
+            |          "country" : {
+            |            "code" : "GB",
+            |            "description" : "United Kingdom"
+            |          },
+            |          "address" : {
+            |            "numberAndStreet" : "1 Merry Lane",
+            |            "city" : "Godrics Hollow",
+            |            "postalCode" : "CA1 9AA"
+            |          }
+            |        }
             |      },
             |      {
             |        "description" : "Description 2",
@@ -509,6 +528,10 @@ class ConsignmentSpec extends SpecBase {
             |          }
             |        ],
             |        "grossWeight" : 456.789,
+            |        "methodOfPayment" : {
+            |          "code" : "A",
+            |          "description" : "Payment in cash"
+            |        },
             |        "addSupplyChainActorYesNo" : false,
             |        "addDocumentsYesNo" : false,
             |        "addAdditionalReferenceYesNo" : true,
@@ -777,7 +800,7 @@ class ConsignmentSpec extends SpecBase {
         )
 
         converted.AdditionalReference shouldBe Seq(
-          AdditionalReferenceType06(
+          AdditionalReferenceType05(
             sequenceNumber = "1",
             typeValue = "ar1",
             referenceNumber = Some("arno1")
@@ -820,7 +843,20 @@ class ConsignmentSpec extends SpecBase {
               countryOfDispatch = Some("GB"),
               countryOfDestination = Some("FR"),
               referenceNumberUCR = Some("UCR 1"),
-              Consignee = None,
+              Consignee = Some(
+                ConsigneeType02(
+                  identificationNumber = Some("GE00101001"),
+                  name = Some("Mr. Consignee"),
+                  Address = Some(
+                    AddressType12(
+                      streetAndNumber = "1 Merry Lane",
+                      postcode = Some("CA1 9AA"),
+                      city = "Godrics Hollow",
+                      country = "GB"
+                    )
+                  )
+                )
+              ),
               AdditionalSupplyChainActor = Seq(
                 AdditionalSupplyChainActorType(
                   sequenceNumber = "1",
@@ -843,7 +879,7 @@ class ConsignmentSpec extends SpecBase {
                   identificationNumber = "itemSCA4"
                 )
               ),
-              Commodity = CommodityType06(
+              Commodity = CommodityType07(
                 descriptionOfGoods = "Description 1",
                 cusCode = Some("CUS code 1"),
                 CommodityCode = Some(
@@ -931,12 +967,12 @@ class ConsignmentSpec extends SpecBase {
                 )
               ),
               AdditionalReference = Seq(
-                AdditionalReferenceType05(
+                AdditionalReferenceType04(
                   sequenceNumber = "1",
                   typeValue = "ar1",
                   referenceNumber = Some("arno1")
                 ),
-                AdditionalReferenceType05(
+                AdditionalReferenceType04(
                   sequenceNumber = "2",
                   typeValue = "ar2",
                   referenceNumber = None
@@ -965,7 +1001,7 @@ class ConsignmentSpec extends SpecBase {
               referenceNumberUCR = Some("UCR 2"),
               Consignee = None,
               AdditionalSupplyChainActor = Nil,
-              Commodity = CommodityType06(
+              Commodity = CommodityType07(
                 descriptionOfGoods = "Description 2",
                 cusCode = Some("CUS code 2"),
                 CommodityCode = Some(
@@ -997,7 +1033,7 @@ class ConsignmentSpec extends SpecBase {
               SupportingDocument = Nil,
               TransportDocument = Nil,
               AdditionalReference = Seq(
-                AdditionalReferenceType05(
+                AdditionalReferenceType04(
                   sequenceNumber = "1",
                   typeValue = "ar1",
                   referenceNumber = Some("arno1")
@@ -1014,6 +1050,758 @@ class ConsignmentSpec extends SpecBase {
             )
           )
         )
+      }
+    }
+
+    "postProcess is called" when {
+
+      "rollUpTransportCharges" when {
+        "every item has the same transport charges" when {
+          "consignment transport charges undefined" must {
+            "roll up transport charges to consignment level and remove them from each item" in {
+              val consignment = ConsignmentType20(
+                grossMass = BigDecimal(1),
+                HouseConsignment = Seq(
+                  HouseConsignmentType10(
+                    sequenceNumber = "1",
+                    grossMass = BigDecimal(1),
+                    ConsignmentItem = Seq(
+                      ConsignmentItemType09(
+                        goodsItemNumber = "1",
+                        declarationGoodsItemNumber = BigInt(1),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 1"
+                        ),
+                        TransportCharges = Some(
+                          TransportChargesType("A")
+                        )
+                      ),
+                      ConsignmentItemType09(
+                        goodsItemNumber = "2",
+                        declarationGoodsItemNumber = BigInt(2),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 2"
+                        ),
+                        TransportCharges = Some(
+                          TransportChargesType("A")
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+
+              val result = consignment.postProcess()
+
+              result shouldBe ConsignmentType20(
+                grossMass = BigDecimal(1),
+                TransportCharges = Some(
+                  TransportChargesType(
+                    methodOfPayment = "A"
+                  )
+                ),
+                HouseConsignment = Seq(
+                  HouseConsignmentType10(
+                    sequenceNumber = "1",
+                    grossMass = BigDecimal(1),
+                    ConsignmentItem = Seq(
+                      ConsignmentItemType09(
+                        goodsItemNumber = "1",
+                        declarationGoodsItemNumber = BigInt(1),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 1"
+                        ),
+                        TransportCharges = None
+                      ),
+                      ConsignmentItemType09(
+                        goodsItemNumber = "2",
+                        declarationGoodsItemNumber = BigInt(2),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 2"
+                        ),
+                        TransportCharges = None
+                      )
+                    )
+                  )
+                )
+              )
+            }
+          }
+
+          "consignment transport charges defined" must {
+            "when consignment transport charges are the same as all item transport charges" must {
+              "remove transport charges from each item" in {
+                val consignment = ConsignmentType20(
+                  grossMass = BigDecimal(1),
+                  TransportCharges = Some(
+                    TransportChargesType("A")
+                  ),
+                  HouseConsignment = Seq(
+                    HouseConsignmentType10(
+                      sequenceNumber = "1",
+                      grossMass = BigDecimal(1),
+                      ConsignmentItem = Seq(
+                        ConsignmentItemType09(
+                          goodsItemNumber = "1",
+                          declarationGoodsItemNumber = BigInt(1),
+                          Commodity = CommodityType07(
+                            descriptionOfGoods = "Item 1"
+                          ),
+                          TransportCharges = Some(
+                            TransportChargesType("A")
+                          )
+                        ),
+                        ConsignmentItemType09(
+                          goodsItemNumber = "2",
+                          declarationGoodsItemNumber = BigInt(2),
+                          Commodity = CommodityType07(
+                            descriptionOfGoods = "Item 2"
+                          ),
+                          TransportCharges = Some(
+                            TransportChargesType("A")
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+
+                val result = consignment.postProcess()
+
+                result shouldBe ConsignmentType20(
+                  grossMass = BigDecimal(1),
+                  TransportCharges = Some(
+                    TransportChargesType("A")
+                  ),
+                  HouseConsignment = Seq(
+                    HouseConsignmentType10(
+                      sequenceNumber = "1",
+                      grossMass = BigDecimal(1),
+                      ConsignmentItem = Seq(
+                        ConsignmentItemType09(
+                          goodsItemNumber = "1",
+                          declarationGoodsItemNumber = BigInt(1),
+                          Commodity = CommodityType07(
+                            descriptionOfGoods = "Item 1"
+                          ),
+                          TransportCharges = None
+                        ),
+                        ConsignmentItemType09(
+                          goodsItemNumber = "2",
+                          declarationGoodsItemNumber = BigInt(2),
+                          Commodity = CommodityType07(
+                            descriptionOfGoods = "Item 2"
+                          ),
+                          TransportCharges = None
+                        )
+                      )
+                    )
+                  )
+                )
+              }
+            }
+
+            "when consignment transport charges are not the same as all item transport charges" must {
+              "not remove transport charges from each item" in {
+                val consignment = ConsignmentType20(
+                  grossMass = BigDecimal(1),
+                  TransportCharges = Some(
+                    TransportChargesType("B")
+                  ),
+                  HouseConsignment = Seq(
+                    HouseConsignmentType10(
+                      sequenceNumber = "1",
+                      grossMass = BigDecimal(1),
+                      ConsignmentItem = Seq(
+                        ConsignmentItemType09(
+                          goodsItemNumber = "1",
+                          declarationGoodsItemNumber = BigInt(1),
+                          Commodity = CommodityType07(
+                            descriptionOfGoods = "Item 1"
+                          ),
+                          TransportCharges = Some(
+                            TransportChargesType("A")
+                          )
+                        ),
+                        ConsignmentItemType09(
+                          goodsItemNumber = "2",
+                          declarationGoodsItemNumber = BigInt(2),
+                          Commodity = CommodityType07(
+                            descriptionOfGoods = "Item 2"
+                          ),
+                          TransportCharges = Some(
+                            TransportChargesType("A")
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+
+                val result = consignment.postProcess()
+
+                result shouldBe consignment
+              }
+            }
+          }
+        }
+
+        "some items have the same transport charges" must {
+          "not roll up transport charges to consignment level" in {
+            val consignment = ConsignmentType20(
+              grossMass = BigDecimal(1),
+              HouseConsignment = Seq(
+                HouseConsignmentType10(
+                  sequenceNumber = "1",
+                  grossMass = BigDecimal(1),
+                  ConsignmentItem = Seq(
+                    ConsignmentItemType09(
+                      goodsItemNumber = "1",
+                      declarationGoodsItemNumber = BigInt(1),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
+                      ),
+                      TransportCharges = Some(
+                        TransportChargesType("A")
+                      )
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "2",
+                      declarationGoodsItemNumber = BigInt(2),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
+                      ),
+                      TransportCharges = Some(
+                        TransportChargesType("A")
+                      )
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "3",
+                      declarationGoodsItemNumber = BigInt(3),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 3"
+                      ),
+                      TransportCharges = None
+                    )
+                  )
+                )
+              )
+            )
+
+            val result = consignment.postProcess()
+
+            result shouldBe consignment
+          }
+        }
+
+        "no items have the same transport charges" must {
+          "not roll up transport charges to consignment level" in {
+            val consignment = ConsignmentType20(
+              grossMass = BigDecimal(1),
+              HouseConsignment = Seq(
+                HouseConsignmentType10(
+                  sequenceNumber = "1",
+                  grossMass = BigDecimal(1),
+                  ConsignmentItem = Seq(
+                    ConsignmentItemType09(
+                      goodsItemNumber = "1",
+                      declarationGoodsItemNumber = BigInt(1),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
+                      ),
+                      TransportCharges = Some(
+                        TransportChargesType("A")
+                      )
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "2",
+                      declarationGoodsItemNumber = BigInt(2),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
+                      ),
+                      TransportCharges = Some(
+                        TransportChargesType("B")
+                      )
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "3",
+                      declarationGoodsItemNumber = BigInt(3),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 3"
+                      ),
+                      TransportCharges = Some(
+                        TransportChargesType("C")
+                      )
+                    )
+                  )
+                )
+              )
+            )
+
+            val result = consignment.postProcess()
+
+            result shouldBe consignment
+          }
+        }
+      }
+
+      "rollUpUCR" when {
+        "every item has the same UCR" must {
+          "roll up UCR to consignment level and remove them from each item" in {
+            val consignment = ConsignmentType20(
+              grossMass = BigDecimal(1),
+              HouseConsignment = Seq(
+                HouseConsignmentType10(
+                  sequenceNumber = "1",
+                  grossMass = BigDecimal(1),
+                  ConsignmentItem = Seq(
+                    ConsignmentItemType09(
+                      goodsItemNumber = "1",
+                      declarationGoodsItemNumber = BigInt(1),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
+                      ),
+                      referenceNumberUCR = Some("UCR")
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "2",
+                      declarationGoodsItemNumber = BigInt(2),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
+                      ),
+                      referenceNumberUCR = Some("UCR")
+                    )
+                  )
+                )
+              )
+            )
+
+            val result = consignment.postProcess()
+
+            result shouldBe ConsignmentType20(
+              grossMass = BigDecimal(1),
+              referenceNumberUCR = Some("UCR"),
+              HouseConsignment = Seq(
+                HouseConsignmentType10(
+                  sequenceNumber = "1",
+                  grossMass = BigDecimal(1),
+                  ConsignmentItem = Seq(
+                    ConsignmentItemType09(
+                      goodsItemNumber = "1",
+                      declarationGoodsItemNumber = BigInt(1),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
+                      ),
+                      referenceNumberUCR = None
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "2",
+                      declarationGoodsItemNumber = BigInt(2),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
+                      ),
+                      referenceNumberUCR = None
+                    )
+                  )
+                )
+              )
+            )
+          }
+        }
+
+        "some items have the same UCR" must {
+          "not roll up UCR to consignment level" in {
+            val consignment = ConsignmentType20(
+              grossMass = BigDecimal(1),
+              HouseConsignment = Seq(
+                HouseConsignmentType10(
+                  sequenceNumber = "1",
+                  grossMass = BigDecimal(1),
+                  ConsignmentItem = Seq(
+                    ConsignmentItemType09(
+                      goodsItemNumber = "1",
+                      declarationGoodsItemNumber = BigInt(1),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
+                      ),
+                      referenceNumberUCR = Some("UCR")
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "2",
+                      declarationGoodsItemNumber = BigInt(2),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
+                      ),
+                      referenceNumberUCR = Some("UCR")
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "3",
+                      declarationGoodsItemNumber = BigInt(3),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 3"
+                      ),
+                      referenceNumberUCR = None
+                    )
+                  )
+                )
+              )
+            )
+
+            val result = consignment.postProcess()
+
+            result shouldBe consignment
+          }
+        }
+
+        "no items have the same UCR" must {
+          "not roll up UCR to consignment level" in {
+            val consignment = ConsignmentType20(
+              grossMass = BigDecimal(1),
+              HouseConsignment = Seq(
+                HouseConsignmentType10(
+                  sequenceNumber = "1",
+                  grossMass = BigDecimal(1),
+                  ConsignmentItem = Seq(
+                    ConsignmentItemType09(
+                      goodsItemNumber = "1",
+                      declarationGoodsItemNumber = BigInt(1),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
+                      ),
+                      referenceNumberUCR = Some("UCR1")
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "2",
+                      declarationGoodsItemNumber = BigInt(2),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
+                      ),
+                      referenceNumberUCR = Some("UCR2")
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "3",
+                      declarationGoodsItemNumber = BigInt(3),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 3"
+                      ),
+                      referenceNumberUCR = Some("UCR3")
+                    )
+                  )
+                )
+              )
+            )
+
+            val result = consignment.postProcess()
+
+            result shouldBe consignment
+          }
+        }
+      }
+
+      "rollUpCountryOfDispatch" when {
+        "every item has the same country of dispatch" must {
+          "roll up country of dispatch to consignment level and remove them from each item" in {
+            val consignment = ConsignmentType20(
+              grossMass = BigDecimal(1),
+              HouseConsignment = Seq(
+                HouseConsignmentType10(
+                  sequenceNumber = "1",
+                  grossMass = BigDecimal(1),
+                  ConsignmentItem = Seq(
+                    ConsignmentItemType09(
+                      goodsItemNumber = "1",
+                      declarationGoodsItemNumber = BigInt(1),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
+                      ),
+                      countryOfDispatch = Some("GB")
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "2",
+                      declarationGoodsItemNumber = BigInt(2),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
+                      ),
+                      countryOfDispatch = Some("GB")
+                    )
+                  )
+                )
+              )
+            )
+
+            val result = consignment.postProcess()
+
+            result shouldBe ConsignmentType20(
+              grossMass = BigDecimal(1),
+              countryOfDispatch = Some("GB"),
+              HouseConsignment = Seq(
+                HouseConsignmentType10(
+                  sequenceNumber = "1",
+                  grossMass = BigDecimal(1),
+                  ConsignmentItem = Seq(
+                    ConsignmentItemType09(
+                      goodsItemNumber = "1",
+                      declarationGoodsItemNumber = BigInt(1),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
+                      ),
+                      countryOfDispatch = None
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "2",
+                      declarationGoodsItemNumber = BigInt(2),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
+                      ),
+                      countryOfDispatch = None
+                    )
+                  )
+                )
+              )
+            )
+          }
+        }
+
+        "some items have the same country of dispatch" must {
+          "not roll up country of dispatch to consignment level" in {
+            val consignment = ConsignmentType20(
+              grossMass = BigDecimal(1),
+              HouseConsignment = Seq(
+                HouseConsignmentType10(
+                  sequenceNumber = "1",
+                  grossMass = BigDecimal(1),
+                  ConsignmentItem = Seq(
+                    ConsignmentItemType09(
+                      goodsItemNumber = "1",
+                      declarationGoodsItemNumber = BigInt(1),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
+                      ),
+                      countryOfDispatch = Some("GB")
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "2",
+                      declarationGoodsItemNumber = BigInt(2),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
+                      ),
+                      countryOfDispatch = Some("GB")
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "3",
+                      declarationGoodsItemNumber = BigInt(3),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 3"
+                      ),
+                      countryOfDispatch = None
+                    )
+                  )
+                )
+              )
+            )
+
+            val result = consignment.postProcess()
+
+            result shouldBe consignment
+          }
+        }
+
+        "no items have the same country of dispatch" must {
+          "not roll up country of dispatch to consignment level" in {
+            val consignment = ConsignmentType20(
+              grossMass = BigDecimal(1),
+              HouseConsignment = Seq(
+                HouseConsignmentType10(
+                  sequenceNumber = "1",
+                  grossMass = BigDecimal(1),
+                  ConsignmentItem = Seq(
+                    ConsignmentItemType09(
+                      goodsItemNumber = "1",
+                      declarationGoodsItemNumber = BigInt(1),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
+                      ),
+                      countryOfDispatch = Some("GB")
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "2",
+                      declarationGoodsItemNumber = BigInt(2),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
+                      ),
+                      countryOfDispatch = Some("FR")
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "3",
+                      declarationGoodsItemNumber = BigInt(3),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 3"
+                      ),
+                      countryOfDispatch = Some("ES")
+                    )
+                  )
+                )
+              )
+            )
+
+            val result = consignment.postProcess()
+
+            result shouldBe consignment
+          }
+        }
+      }
+
+      "rollUpCountryOfDestination" when {
+        "every item has the same country of destination" must {
+          "roll up country of destination to consignment level and remove them from each item" in {
+            val consignment = ConsignmentType20(
+              grossMass = BigDecimal(1),
+              HouseConsignment = Seq(
+                HouseConsignmentType10(
+                  sequenceNumber = "1",
+                  grossMass = BigDecimal(1),
+                  ConsignmentItem = Seq(
+                    ConsignmentItemType09(
+                      goodsItemNumber = "1",
+                      declarationGoodsItemNumber = BigInt(1),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
+                      ),
+                      countryOfDestination = Some("GB")
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "2",
+                      declarationGoodsItemNumber = BigInt(2),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
+                      ),
+                      countryOfDestination = Some("GB")
+                    )
+                  )
+                )
+              )
+            )
+
+            val result = consignment.postProcess()
+
+            result shouldBe ConsignmentType20(
+              grossMass = BigDecimal(1),
+              countryOfDestination = Some("GB"),
+              HouseConsignment = Seq(
+                HouseConsignmentType10(
+                  sequenceNumber = "1",
+                  grossMass = BigDecimal(1),
+                  ConsignmentItem = Seq(
+                    ConsignmentItemType09(
+                      goodsItemNumber = "1",
+                      declarationGoodsItemNumber = BigInt(1),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
+                      ),
+                      countryOfDestination = None
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "2",
+                      declarationGoodsItemNumber = BigInt(2),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
+                      ),
+                      countryOfDestination = None
+                    )
+                  )
+                )
+              )
+            )
+          }
+        }
+
+        "some items have the same country of destination" must {
+          "not roll up country of destination to consignment level" in {
+            val consignment = ConsignmentType20(
+              grossMass = BigDecimal(1),
+              HouseConsignment = Seq(
+                HouseConsignmentType10(
+                  sequenceNumber = "1",
+                  grossMass = BigDecimal(1),
+                  ConsignmentItem = Seq(
+                    ConsignmentItemType09(
+                      goodsItemNumber = "1",
+                      declarationGoodsItemNumber = BigInt(1),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
+                      ),
+                      countryOfDestination = Some("GB")
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "2",
+                      declarationGoodsItemNumber = BigInt(2),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
+                      ),
+                      countryOfDestination = Some("GB")
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "3",
+                      declarationGoodsItemNumber = BigInt(3),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 3"
+                      ),
+                      countryOfDestination = None
+                    )
+                  )
+                )
+              )
+            )
+
+            val result = consignment.postProcess()
+
+            result shouldBe consignment
+          }
+        }
+
+        "no items have the same country of dispatch" must {
+          "not roll up country of dispatch to consignment level" in {
+            val consignment = ConsignmentType20(
+              grossMass = BigDecimal(1),
+              HouseConsignment = Seq(
+                HouseConsignmentType10(
+                  sequenceNumber = "1",
+                  grossMass = BigDecimal(1),
+                  ConsignmentItem = Seq(
+                    ConsignmentItemType09(
+                      goodsItemNumber = "1",
+                      declarationGoodsItemNumber = BigInt(1),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
+                      ),
+                      countryOfDispatch = Some("GB")
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "2",
+                      declarationGoodsItemNumber = BigInt(2),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
+                      ),
+                      countryOfDispatch = Some("FR")
+                    ),
+                    ConsignmentItemType09(
+                      goodsItemNumber = "3",
+                      declarationGoodsItemNumber = BigInt(3),
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 3"
+                      ),
+                      countryOfDispatch = Some("ES")
+                    )
+                  )
+                )
+              )
+            )
+
+            val result = consignment.postProcess()
+
+            result shouldBe consignment
+          }
+        }
       }
     }
 
@@ -1399,6 +2187,79 @@ class ConsignmentSpec extends SpecBase {
               GoodsReferenceType02("1", 1),
               GoodsReferenceType02("2", 4)
             )
+          )
+        )
+      }
+    }
+
+    "commodityType07 reads is called" when {
+      "commodity code defined" in {
+        val json = Json.parse("""
+            |{
+            |  "description" : "Description",
+            |  "commodityCode" : "commodity code",
+            |  "combinedNomenclatureCode" : "CN code"
+            |}
+            |""".stripMargin)
+
+        val result = json.as[CommodityType07](commodityType07.reads)
+
+        result.CommodityCode.value shouldBe CommodityCodeType02(
+          harmonizedSystemSubHeadingCode = "commodity code",
+          combinedNomenclatureCode = Some("CN code")
+        )
+      }
+
+      "commodity code undefined" in {
+        val json = Json.parse("""
+            |{
+            |  "description" : "Description"
+            |}
+            |""".stripMargin)
+
+        val result = json.as[CommodityType07](commodityType07.reads)
+
+        result.CommodityCode shouldBe None
+      }
+    }
+
+    "departureTransportMeansReads is called" when {
+      "there are no departure transport means" in {
+        val json = Json.parse("""
+            |{
+            |  "transportDetails" : {}
+            |}
+            |""".stripMargin)
+
+        val result = json.as[Seq[DepartureTransportMeansType03]](consignmentType20.departureTransportMeansReads)
+
+        result shouldBe Nil
+      }
+
+      "there is a departure transport means" in {
+        val json = Json.parse("""
+            |{
+            |  "transportDetails" : {
+            |    "transportMeansDeparture" : {
+            |      "identification" : "imoShipIdNumber",
+            |      "meansIdentificationNumber" : "means id number",
+            |      "vehicleCountry" : {
+            |        "code" : "FR",
+            |        "desc" : "France"
+            |      }
+            |    }
+            |  }
+            |}
+            |""".stripMargin)
+
+        val result = json.as[Seq[DepartureTransportMeansType03]](consignmentType20.departureTransportMeansReads)
+
+        result shouldBe Seq(
+          DepartureTransportMeansType03(
+            sequenceNumber = "1",
+            typeOfIdentification = Some("10"),
+            identificationNumber = Some("means id number"),
+            nationality = Some("FR")
           )
         )
       }

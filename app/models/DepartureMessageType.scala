@@ -16,22 +16,13 @@
 
 package models
 
-import play.api.libs.json.{Format, JsObject, Json}
+import play.api.libs.json.{__, Reads}
 
-case class Metadata(
-  lrn: String,
-  eoriNumber: String,
-  data: JsObject,
-  tasks: Map[String, Status.Value]
-) {
+import java.time.LocalDateTime
 
-  def updateTasks(tasks: Map[String, Status.Value]): Metadata =
-    this.copy(tasks = tasks)
-}
+case class DepartureMessageType(messageType: String)
 
-object Metadata {
+object DepartureMessageType {
 
-  def apply(lrn: String, eoriNumber: String): Metadata = Metadata(lrn, eoriNumber, Json.obj(), Map())
-
-  implicit val format: Format[Metadata] = Json.format[Metadata]
+  implicit lazy val reads: Reads[DepartureMessageType] = (__ \ "type").read[String].map(DepartureMessageType.apply)
 }

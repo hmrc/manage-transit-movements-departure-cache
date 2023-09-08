@@ -18,51 +18,45 @@ package connectors
 
 import api.submission._
 import config.AppConfig
-import connectors.CustomHttpReads.rawHttpResponseHttpReads
-import models.{Departures, UserAnswers}
+import models.{Departure, DepartureMessageTypes, Departures, UserAnswers}
 import play.api.Logging
 import play.api.http.HeaderNames
-import play.api.http.Status.{NOT_FOUND, OK}
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErrorFunctions, HttpResponse}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(implicit ec: ExecutionContext) extends HttpErrorFunctions with Logging {
 
-  private val requestHeaders = Seq(
-    HeaderNames.ACCEPT       -> "application/vnd.hmrc.2.0+json",
-    HeaderNames.CONTENT_TYPE -> "application/xml"
-  )
-
-  def getDepartures(queryParams: Seq[(String, String)] = Seq.empty)(implicit hc: HeaderCarrier): Future[Option[Departures]] = {
+  def getDepartures()(implicit hc: HeaderCarrier): Future[Departures] = {
     val url = s"${appConfig.apiUrl}/movements/departures"
 
     val headers = hc.withExtraHeaders(("Accept", "application/vnd.hmrc.2.0+json"))
 
-    httpClient
-      .GET[HttpResponse](url, queryParams)(rawHttpResponseHttpReads, headers, ec)
-      .map {
-        response =>
-          response.status match {
-            case OK        => response.json.asOpt[Departures]
-            case NOT_FOUND => Some(Departures(Seq.empty))
-            case _         => None
-          }
-      }
-      .recover {
-        case e =>
-          logger.warn(s"Failed to get departure movements with error: $e")
-          None
-      }
+    httpClient.GET[Departures](url)(implicitly, headers, ec)
+  }
+
+  def getMessageTypesByPath(
+    path: String
+  )(implicit ec: ExecutionContext, hc: HeaderCarrier, HttpReads: HttpReads[DepartureMessageTypes]): Future[DepartureMessageTypes] = {
+    val url = s"${appConfig.apiUrl}/$path"
+
+    val headers = hc.withExtraHeaders(("Accept", "application/vnd.hmrc.2.0+json"))
+
+    httpClient.GET[DepartureMessageTypes](url)(implicitly, headers, ec)
   }
 
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
 
     val declarationUrl  = s"${appConfig.apiUrl}/movements/departures"
     val payload: String = Declaration.transformToXML(userAnswers).toString
+
+    val requestHeaders = Seq(
+      HeaderNames.ACCEPT       -> "application/vnd.hmrc.2.0+json",
+      HeaderNames.CONTENT_TYPE -> "application/xml"
+    )
 
     httpClient
       .POSTString[HttpResponse](declarationUrl, payload, requestHeaders)

@@ -44,16 +44,11 @@ package object submission {
 
   lazy val documentsPath: JsPath = __ \ "documents" \ "documents"
 
-  lazy val itemsPath: JsPath = __ \ "items"
+  lazy val itemsPath: JsPath         = __ \ "items"
+  lazy val itemConsigneePath: JsPath = __ \ "consignee"
 
   lazy val reducedDatasetIndicatorReads: Reads[Boolean] =
     (consignmentPath \ "approvedOperator").readWithDefault[Boolean](false)
-
-  lazy val inlandModeReads: Reads[String] =
-    (transportDetailsPath \ "inlandMode").read[String]
-
-  lazy val borderModeOfTransportReads: Reads[Option[String]] =
-    (transportDetailsPath \ "borderModeOfTransport").readNullable[String]
 
   implicit class RichJsPath(path: JsPath) {
 

@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-package submission
+package api.submission
 
-import api.submission.TransitOperation
 import base.SpecBase
-import generated.{Number0, TransitOperationType06}
+import generated._
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 import scalaxb.XMLCalendar
@@ -50,11 +49,20 @@ class TransitOperationSpec extends SpecBase {
                |      "declarationType" : {
                |        "code" : "TIR"
                |      },
+               |      "additionalDeclarationType" : {
+               |        "code" : "A"
+               |      },
                |      "tirCarnetReference" : "1234567",
                |      "securityDetailsType" : {
                |        "code" : "0"
                |      },
                |      "detailsConfirmed" : true
+               |    },
+               |    "routeDetails" : {
+               |      "specificCircumstanceIndicator" : {
+               |        "code" : "A20",
+               |        "description" : "Express consignments in the context of exit summary declarations"
+               |      }
                |    },
                |    "transportDetails" : {
                |      "authorisationsAndLimit" : {
@@ -89,7 +97,7 @@ class TransitOperationSpec extends SpecBase {
               presentationOfTheGoodsDateAndTime = None,
               security = "0",
               reducedDatasetIndicator = Number0,
-              specificCircumstanceIndicator = None,
+              specificCircumstanceIndicator = Some("A20"),
               communicationLanguageAtDeparture = None,
               bindingItinerary = Number0,
               limitDate = Some(XMLCalendar("2022-07-15"))
@@ -122,6 +130,9 @@ class TransitOperationSpec extends SpecBase {
                |      "procedureType" : "normal",
                |      "declarationType" : {
                |        "code" : "TIR"
+               |      },
+               |      "additionalDeclarationType" : {
+               |        "code" : "D"
                |      },
                |      "tirCarnetReference" : "1234567",
                |      "securityDetailsType" : {
@@ -157,7 +168,7 @@ class TransitOperationSpec extends SpecBase {
             TransitOperationType06(
               LRN = lrn,
               declarationType = "TIR",
-              additionalDeclarationType = "A",
+              additionalDeclarationType = "D",
               TIRCarnetNumber = Some("1234567"),
               presentationOfTheGoodsDateAndTime = None,
               security = "1",
@@ -195,6 +206,9 @@ class TransitOperationSpec extends SpecBase {
                |      "procedureType" : "normal",
                |      "declarationType" : {
                |        "code" : "TIR"
+               |      },
+               |      "additionalDeclarationType" : {
+               |        "code" : "A"
                |      },
                |      "tirCarnetReference" : "1234567",
                |      "securityDetailsType" : {
@@ -269,6 +283,9 @@ class TransitOperationSpec extends SpecBase {
                |      "declarationType" : {
                |        "code" : "TIR"
                |      },
+               |      "additionalDeclarationType" : {
+               |        "code" : "A"
+               |      },
                |      "tirCarnetReference" : "1234567",
                |      "securityDetailsType" : {
                |        "code" : "3"
@@ -341,6 +358,9 @@ class TransitOperationSpec extends SpecBase {
                |      "procedureType" : "normal",
                |      "declarationType" : {
                |        "code" : "TIR"
+               |      },
+               |      "additionalDeclarationType" : {
+               |        "code" : "A"
                |      },
                |      "tirCarnetReference" : "1234567",
                |      "securityDetailsType" : {

@@ -16,11 +16,12 @@
 
 package controllers
 
+import config.AppConfig
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
-import models.Metadata
+import models.{Metadata, SubmissionState, UserAnswers}
 import play.api.Logging
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
-import play.api.mvc.{Action, AnyContent, ControllerComponents}
+import play.api.libs.json._
+import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.CacheRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -34,26 +35,14 @@ class CacheController @Inject() (
   authenticate: AuthenticateActionProvider,
   authenticateAndLock: AuthenticateAndLockActionProvider,
   cacheRepository: CacheRepository
-)(implicit ec: ExecutionContext, clock: Clock)
+)(implicit ec: ExecutionContext, clock: Clock, appConfig: AppConfig)
     extends BackendController(cc)
     with Logging {
 
   // TODO replace with getAll when param's are added
   def get(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
-      cacheRepository
-        .get(lrn, request.eoriNumber)
-        .map {
-          case Some(userAnswers) => Ok(Json.toJson(userAnswers))
-          case None =>
-            logger.warn(s"No document found for LRN '$lrn' and EORI '${request.eoriNumber}'")
-            NotFound
-        }
-        .recover {
-          case e =>
-            logger.error("Failed to read user answers from mongo", e)
-            InternalServerError
-        }
+      getUserAnswers[UserAnswers](lrn, request.eoriNumber)(identity)
   }
 
   def post(lrn: String): Action[JsValue] = authenticateAndLock(lrn).async(parse.json) {
@@ -61,7 +50,8 @@ class CacheController @Inject() (
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
           if (request.eoriNumber == data.eoriNumber) {
-            set(data)
+            val status: Option[SubmissionState] = (request.body \ "isSubmitted").validate[SubmissionState].asOpt
+            set(data, status)
           } else {
             logger.warn(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
             Future.successful(Forbidden)
@@ -82,9 +72,9 @@ class CacheController @Inject() (
       }
   }
 
-  private def set(data: Metadata): Future[Status] =
+  private def set(data: Metadata, status: Option[SubmissionState] = None): Future[Status] =
     cacheRepository
-      .set(data)
+      .set(data, status)
       .map {
         case true => Ok
         case false =>
@@ -125,4 +115,25 @@ class CacheController @Inject() (
               InternalServerError
           }
     }
+
+  def getExpiry(lrn: String): Action[AnyContent] = authenticate().async {
+    implicit request =>
+      getUserAnswers[Long](lrn, request.eoriNumber)(_.expiryInDays)
+  }
+
+  private def getUserAnswers[T](lrn: String, eoriNumber: String)(f: UserAnswers => T)(implicit writes: Writes[T]): Future[Result] =
+    cacheRepository
+      .get(lrn, eoriNumber)
+      .map {
+        case Some(userAnswers) =>
+          Ok(Json.toJson(f(userAnswers)))
+        case None =>
+          logger.warn(s"No document found for LRN '$lrn' and EORI '$eoriNumber'")
+          NotFound
+      }
+      .recover {
+        case e =>
+          logger.error("Failed to read user answers from mongo", e)
+          InternalServerError
+      }
 }
