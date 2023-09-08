@@ -43,33 +43,33 @@ class DuplicateControllerSpec extends SpecBase with Generators {
       .guiceApplicationBuilder()
       .overrides(bind[DuplicateService].toInstance(mockDuplicateService))
 
-  "doesSubmissionExistForLrn" should {
+  "doesIE028ExistForLrn" should {
 
     "return 200 with false" when {
       "lrn does not exist in the API" in {
-        when(mockDuplicateService.doesSubmissionExistForLrn(eqTo(lrn))(any())).thenReturn(Future.successful(false))
+        when(mockDuplicateService.doesIE028ExistForLrn(eqTo(lrn))(any())).thenReturn(Future.successful(false))
 
-        val request = FakeRequest(GET, routes.DuplicateController.doesSubmissionExistForLrn(lrn).url)
+        val request = FakeRequest(GET, routes.DuplicateController.doesIE028ExistForLrn(lrn).url)
 
         val result = route(app, request).value
 
         status(result) shouldBe OK
         contentAsJson(result) shouldBe JsBoolean(false)
-        verify(mockDuplicateService).doesSubmissionExistForLrn(eqTo(lrn))(any())
+        verify(mockDuplicateService).doesIE028ExistForLrn(eqTo(lrn))(any())
       }
     }
 
     "return 200 with true" when {
       "when lrn exists in the API" in {
-        when(mockDuplicateService.doesSubmissionExistForLrn(eqTo(lrn))(any())).thenReturn(Future.successful(true))
+        when(mockDuplicateService.doesIE028ExistForLrn(eqTo(lrn))(any())).thenReturn(Future.successful(true))
 
-        val request = FakeRequest(GET, routes.DuplicateController.doesSubmissionExistForLrn(lrn).url)
+        val request = FakeRequest(GET, routes.DuplicateController.doesIE028ExistForLrn(lrn).url)
 
         val result = route(app, request).value
 
         status(result) shouldBe OK
         contentAsJson(result) shouldBe JsBoolean(true)
-        verify(mockDuplicateService).doesSubmissionExistForLrn(eqTo(lrn))(any())
+        verify(mockDuplicateService).doesIE028ExistForLrn(eqTo(lrn))(any())
       }
 
     }
@@ -110,7 +110,7 @@ class DuplicateControllerSpec extends SpecBase with Generators {
 
     "return 200 with false" when {
       "lrn does not exist in the API or the cache" in {
-        when(mockDuplicateService.doesSubmissionExistForLrn(any())(any())).thenReturn(Future.successful(false))
+        when(mockDuplicateService.doesIE028ExistForLrn(any())(any())).thenReturn(Future.successful(false))
         when(mockDuplicateService.doesDraftOrSubmissionExistForLrn(any())(any())).thenReturn(Future.successful(false))
 
         val request = FakeRequest(GET, routes.DuplicateController.doesDraftOrSubmissionExistForLrn(lrn).url)
@@ -125,7 +125,7 @@ class DuplicateControllerSpec extends SpecBase with Generators {
 
     "return 200 with true" when {
       "when lrn exists in the API" in {
-        when(mockDuplicateService.doesSubmissionExistForLrn(any())(any())).thenReturn(Future.successful(true))
+        when(mockDuplicateService.doesIE028ExistForLrn(any())(any())).thenReturn(Future.successful(true))
         when(mockDuplicateService.doesDraftOrSubmissionExistForLrn(any())(any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest(GET, routes.DuplicateController.doesDraftOrSubmissionExistForLrn(lrn).url)
@@ -138,7 +138,7 @@ class DuplicateControllerSpec extends SpecBase with Generators {
       }
 
       "when lrn exists in the cache, but not the API" in {
-        when(mockDuplicateService.doesSubmissionExistForLrn(any())(any())).thenReturn(Future.successful(false))
+        when(mockDuplicateService.doesIE028ExistForLrn(any())(any())).thenReturn(Future.successful(false))
         when(mockDuplicateService.doesDraftOrSubmissionExistForLrn(any())(any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest(GET, routes.DuplicateController.doesDraftOrSubmissionExistForLrn(lrn).url)

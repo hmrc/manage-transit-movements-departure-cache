@@ -18,14 +18,17 @@ package services
 
 import base.SpecBase
 import connectors.ApiConnector
+import models.{Departure, DepartureMessageType, DepartureMessageTypes, Departures}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status.OK
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.HttpResponse
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class ApiServiceSpec extends SpecBase with ScalaFutures {
@@ -60,13 +63,43 @@ class ApiServiceSpec extends SpecBase with ScalaFutures {
     }
   }
 
-  "getDeparturesForLrn" must {
-    "call connector with expected query param" in {
-      val expectedResult = Some(Nil)
-      when(mockApiConnector.getDepartures(any())(any())).thenReturn(Future.successful(expectedResult))
-      val result = service.getDeparturesForLrn(lrn).futureValue
-      result shouldBe expectedResult
-      verify(mockApiConnector).getDepartures(eqTo(Seq("localReferenceNumber" -> lrn)))(any())
+  "isIE028DefinedForDeparture" must {
+    "must return true" when {
+      "IE028 is defined" in {
+
+        val departure      = Departures(Seq(Departure("lrn", "test/path")))
+        val departureTypes = DepartureMessageTypes(Seq(DepartureMessageType("IE028")))
+
+        when(mockApiConnector.getDepartures()(any())).thenReturn(Future.successful(departure))
+        when(mockApiConnector.getMessageTypesByPath(any())(any(), any(), any())).thenReturn(Future.successful(departureTypes))
+
+        await(service.isIE028DefinedForDeparture(lrn)) shouldBe true
+      }
+
+    }
+
+    "must return false" when {
+
+      "LRN does not match any returned movements " in {
+
+        val departure = Departures(Seq(Departure(lrn, "test/path")))
+
+        when(mockApiConnector.getDepartures()(any())).thenReturn(Future.successful(departure))
+
+        await(service.isIE028DefinedForDeparture("invalid MRN")) shouldBe false
+      }
+
+      "when returned messages do not contain IE028 " in {
+
+        val departure      = Departures(Seq(Departure("lrn", "test/path")))
+        val departureTypes = DepartureMessageTypes(Seq(DepartureMessageType("IE015")))
+
+        when(mockApiConnector.getDepartures()(any())).thenReturn(Future.successful(departure))
+        when(mockApiConnector.getMessageTypesByPath(any())(any(), any(), any())).thenReturn(Future.successful(departureTypes))
+
+        await(service.isIE028DefinedForDeparture(lrn)) shouldBe false
+      }
+
     }
   }
 }

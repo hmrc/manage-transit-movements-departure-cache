@@ -16,13 +16,14 @@
 
 package services
 
+import cats.implicits._
 import connectors.ApiConnector
 import models._
 import play.api.mvc.Result
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.Inject
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 class ApiService @Inject() (
   apiConnector: ApiConnector
@@ -31,6 +32,16 @@ class ApiService @Inject() (
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
     apiConnector.submitDeclaration(userAnswers)
 
-  def getDeparturesForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Option[Seq[Departure]]] =
-    apiConnector.getDepartures(Seq("localReferenceNumber" -> lrn))
+  def isIE028DefinedForDeparture(lrn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Boolean] =
+    apiConnector
+      .getDepartures()
+      .flatMap {
+        _.departures.find(_.localReferenceNumber == lrn).traverse {
+          departure =>
+            apiConnector.getMessageTypesByPath(departure.path).map {
+              _.messageTypes.exists(_.messageType == "IE028")
+            }
+        }
+      }
+      .map(_.getOrElse(false))
 }

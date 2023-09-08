@@ -18,5 +18,5 @@ POST       /x-paths/:lrn/handle-errors                          controllers.XPat
 GET        /x-paths/:lrn/handle-guarantee-errors                controllers.XPathController.handleGuaranteeErrors(lrn: String)
 
 GET       /does-draft-or-submission-exist-for-lrn/:lrn          controllers.DuplicateController.doesDraftOrSubmissionExistForLrn(lrn: String)
-GET       /does-submission-exist-for-lrn/:lrn                   controllers.DuplicateController.doesSubmissionExistForLrn(lrn: String)
 GET       /does-cache-exists-for-lrn/:lrn                       controllers.DuplicateController.doesDeclarationExist(lrn: String)
+GET       /does-ie028-exist-for-lrn/:lrn                        controllers.DuplicateController.doesIE028ExistForLrn(lrn: String)

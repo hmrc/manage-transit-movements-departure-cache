@@ -138,9 +138,8 @@ class CacheRepository @Inject() (
   }
 
   def doesDraftExistForLrn(lrn: String): Future[Boolean] = {
-    val lrnFilter         = Filters.eq("lrn", lrn)
-    val isSubmittedFilter = Filters.in("isSubmitted", SubmissionState.NotSubmitted.asString, SubmissionState.RejectedPendingChanges.asString)
-    val filters           = Filters.and(isSubmittedFilter, lrnFilter)
+    val lrnFilter = Filters.eq("lrn", lrn)
+    val filters   = Filters.and(lrnFilter)
     collection.find(filters).toFuture().map(_.nonEmpty)
   }
 }
