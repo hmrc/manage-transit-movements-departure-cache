@@ -441,7 +441,7 @@ object placeOfUnloadingType01 {
 object transportChargesType {
 
   val itemReads: Reads[Option[TransportChargesType]] =
-    (__ \ "methodOfPayment" \ "code").readNullable[String].map(_.map(TransportChargesType))
+    (__ \ "methodOfPayment" \ "method").readNullable[String].map(_.map(TransportChargesType))
 
   val consignmentReads: Reads[Option[TransportChargesType]] =
     (equipmentsAndChargesPath \ "paymentMethod")

@@ -387,7 +387,7 @@ class ConsignmentSpec extends SpecBase {
             |        "netWeight" : 1234,
             |        "supplementaryUnits" : 12345,
             |        "methodOfPayment" : {
-            |          "code" : "A",
+            |          "method" : "A",
             |          "description" : "Payment in cash"
             |        },
             |        "packages" : [
@@ -529,7 +529,7 @@ class ConsignmentSpec extends SpecBase {
             |        ],
             |        "grossWeight" : 456.789,
             |        "methodOfPayment" : {
-            |          "code" : "A",
+            |          "method" : "A",
             |          "description" : "Payment in cash"
             |        },
             |        "addSupplyChainActorYesNo" : false,
