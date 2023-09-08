@@ -23,22 +23,23 @@ import uk.gov.hmrc.http.HeaderCarrier
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
+// TODO can this be removed? Its a service of a service
 class DuplicateService @Inject() (
   apiService: ApiService,
   cacheRepository: CacheRepository
 )(implicit ec: ExecutionContext)
     extends Logging {
 
-  def doesSubmissionExistForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
-    apiService.getDeparturesForLrn(lrn).map {
-      case Some(departures) => departures.nonEmpty
-      case None             => false
-    }
+  def doesIE028ExistForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
+    apiService.isIE028DefinedForDeparture(lrn)
 
   def doesDraftExistForLrn(lrn: String): Future[Boolean] =
     cacheRepository.doesDraftExistForLrn(lrn)
 
   def doesDraftOrSubmissionExistForLrn(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
-    doesSubmissionExistForLrn(lrn)
+    doesIE028ExistForLrn(lrn).flatMap {
+      case true  => Future.successful(true)
+      case false => doesDraftExistForLrn(lrn)
+    }
 
 }
