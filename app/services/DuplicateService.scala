@@ -42,4 +42,7 @@ class DuplicateService @Inject() (
       case false => doesDraftExistForLrn(lrn)
     }
 
+  def doesDeclarationExist(lrn: String, eoriNumber: String): Future[Boolean] =
+    cacheRepository.get(lrn, eoriNumber).map(_.isDefined)
+
 }
