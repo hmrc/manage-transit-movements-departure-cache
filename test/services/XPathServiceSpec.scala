@@ -17,13 +17,16 @@
 package services
 
 import base.SpecBase
+import models.Status.Completed
 import models.Task._
-import models.{Status, SubmissionState, UserAnswers, XPath}
+import models.{Metadata, Status, SubmissionState, UserAnswers, XPath}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verify, verifyNoInteractions, verifyNoMoreInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
+import play.api.libs.json.JsObject
 
 import scala.concurrent.Future
+import scala.xml.MetaData
 
 class XPathServiceSpec extends SpecBase with ScalaFutures {
 
@@ -94,15 +97,32 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
       "a document exists in the cache for the given LRN and EORI " +
         "and setting the document tasks to error succeeds" in {
 
-          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+          val metaData    = Metadata(lrn, eoriNumber, JsObject.empty, tasks = Map(".preTaskList" -> Completed, ".documents" -> Completed))
+          val userAnswers = emptyUserAnswers.copy(metaData)
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
           when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState)).thenReturn(Future.successful(true))
 
           val result = service.handleErrors(lrn, eoriNumber, xPaths).futureValue
 
+          val expectedMeta = Metadata(
+            lrn,
+            eoriNumber,
+            JsObject.empty,
+            tasks = Map(
+              ".preTaskList"      -> Status.Error,
+              ".transportDetails" -> Status.Error,
+              ".traderDetails"    -> Status.Error,
+              ".documents"        -> Status.Completed
+            )
+          )
+
+          val expectedUa = emptyUserAnswers.copy(metadata = expectedMeta)
+
           result shouldBe true
 
           verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-          verify(mockCacheRepository).set(any(), eqTo(SubmissionState.RejectedPendingChanges))
+          verify(mockCacheRepository).set(eqTo(expectedUa), eqTo(SubmissionState.RejectedPendingChanges))
         }
     }
 

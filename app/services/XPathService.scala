@@ -72,7 +72,7 @@ class XPathService @Inject() (
       case tasks if tasks.nonEmpty =>
         cacheRepository.get(lrn, eoriNumber).flatMap {
           case Some(userAnswers) =>
-            val updatedTasks: Map[String, Status.Value] = (tasks.toSeq).toMap
+            val updatedTasks: Map[String, Status.Value] = (userAnswers.metadata.tasks.toSeq ++ tasks.toSeq).toMap
             cacheRepository
               .set(userAnswers.updateTasks(updatedTasks), SubmissionState.RejectedPendingChanges)
               .map {
