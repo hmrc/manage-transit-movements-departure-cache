@@ -464,7 +464,7 @@ object houseConsignmentType10 {
 
   implicit val reads: Reads[HouseConsignmentType10] = {
     for {
-      documents        <- documentsPath.read[JsArray].map(_.value.toSeq)
+      documents        <- documentsPath.readWithDefault[JsArray](JsArray()).map(_.value.toSeq)
       consignmentItems <- itemsPath.readArray[ConsignmentItemType09](consignmentItemType09.reads(_, documents))
     } yield HouseConsignmentType10(
       sequenceNumber = "1",
