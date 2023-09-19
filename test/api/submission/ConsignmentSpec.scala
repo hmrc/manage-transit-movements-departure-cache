@@ -31,7 +31,7 @@ class ConsignmentSpec extends SpecBase {
 
     "transform is called" must {
 
-      "convert to API format" in {
+      "convert to API format with documents" in {
 
         val json: JsValue = Json.parse(s"""
             |{
@@ -957,6 +957,838 @@ class ConsignmentSpec extends SpecBase {
                   referenceNumber = "transport1"
                 )
               ),
+              AdditionalReference = Seq(
+                AdditionalReferenceType04(
+                  sequenceNumber = "1",
+                  typeValue = "ar1",
+                  referenceNumber = Some("arno1")
+                ),
+                AdditionalReferenceType04(
+                  sequenceNumber = "2",
+                  typeValue = "ar2",
+                  referenceNumber = None
+                )
+              ),
+              AdditionalInformation = Seq(
+                AdditionalInformationType03(
+                  sequenceNumber = "1",
+                  code = "aiCode1",
+                  text = Some("ai1")
+                ),
+                AdditionalInformationType03(
+                  sequenceNumber = "2",
+                  code = "aiCode2",
+                  text = Some("ai2")
+                )
+              ),
+              TransportCharges = None
+            ),
+            ConsignmentItemType09(
+              goodsItemNumber = "2",
+              declarationGoodsItemNumber = 2,
+              declarationType = Some("T2"),
+              countryOfDispatch = Some("DE"),
+              countryOfDestination = Some("ES"),
+              referenceNumberUCR = Some("UCR 2"),
+              Consignee = None,
+              AdditionalSupplyChainActor = Nil,
+              Commodity = CommodityType07(
+                descriptionOfGoods = "Description 2",
+                cusCode = Some("CUS code 2"),
+                CommodityCode = Some(
+                  CommodityCodeType02(
+                    harmonizedSystemSubHeadingCode = "commodity code 2",
+                    combinedNomenclatureCode = Some("CN code 2")
+                  )
+                ),
+                DangerousGoods = Seq(
+                  DangerousGoodsType01(
+                    sequenceNumber = "1",
+                    UNNumber = "UN number 2_1"
+                  ),
+                  DangerousGoodsType01(
+                    sequenceNumber = "2",
+                    UNNumber = "UN number 2_2"
+                  )
+                ),
+                GoodsMeasure = Some(
+                  GoodsMeasureType02(
+                    grossMass = Some(BigDecimal(456.789)),
+                    netMass = None,
+                    supplementaryUnits = None
+                  )
+                )
+              ),
+              Packaging = Nil,
+              PreviousDocument = Nil,
+              SupportingDocument = Nil,
+              TransportDocument = Nil,
+              AdditionalReference = Seq(
+                AdditionalReferenceType04(
+                  sequenceNumber = "1",
+                  typeValue = "ar1",
+                  referenceNumber = Some("arno1")
+                )
+              ),
+              AdditionalInformation = Seq(
+                AdditionalInformationType03(
+                  sequenceNumber = "1",
+                  code = "aiCode1",
+                  text = Some("ai1")
+                )
+              ),
+              TransportCharges = None
+            )
+          )
+        )
+      }
+
+      "convert to API format without documents" in {
+
+        val json: JsValue = Json.parse(s"""
+             |{
+             |  "_id" : "$uuid",
+             |  "lrn" : "$lrn",
+             |  "eoriNumber" : "$eoriNumber",
+             |  "isSubmitted" : "notSubmitted",
+             |  "data" : {
+             |    "traderDetails" : {
+             |      "consignment" : {
+             |        "consignor" : {
+             |          "eori" : "consignor1",
+             |          "name" : "Mr Consignor",
+             |          "country" : {
+             |            "code" : "GB",
+             |            "description" : "United Kingdom"
+             |          },
+             |          "address" : {
+             |            "numberAndStreet" : "21 Test Lane",
+             |            "city" : "Newcastle upon Tyne",
+             |            "postalCode" : "NE1 1NE"
+             |          },
+             |          "contact" : {
+             |            "name" : "Consignor Contact",
+             |            "telephoneNumber" : "+44 101 157 0192"
+             |          }
+             |        },
+             |        "consignee" : {
+             |          "eori" : "consignee1",
+             |          "name" : "Mr Consignee",
+             |          "country" : {
+             |            "code" : "FR",
+             |            "description" : "France"
+             |          },
+             |          "address" : {
+             |            "numberAndStreet" : "21 Test Rue",
+             |            "city" : "Paris",
+             |            "postalCode" : "PA1 1PA"
+             |          }
+             |        }
+             |      }
+             |    },
+             |    "routeDetails" : {
+             |      "routing" : {
+             |        "countriesOfRouting" : [
+             |          {
+             |            "countryOfRouting" : {
+             |              "code" : "AD",
+             |              "description" : "Andorra"
+             |            }
+             |          },
+             |          {
+             |            "countryOfRouting" : {
+             |              "code" : "AR",
+             |              "description" : "Argentina"
+             |            }
+             |          }
+             |        ]
+             |      },
+             |      "locationOfGoods" : {
+             |        "typeOfLocation" : "designatedLocation",
+             |        "qualifierOfIdentification" : "postalCode",
+             |        "identifier" : {
+             |          "authorisationNumber" : "authorisation number",
+             |          "additionalIdentifier" : "additional identifier",
+             |          "unLocode" : {
+             |            "unLocodeExtendedCode" : "DEAAL",
+             |            "name" : "Aalen"
+             |          },
+             |          "customsOffice" : {
+             |            "id" : "XI000142",
+             |            "name" : "Belfast EPU",
+             |            "phoneNumber" : "+44 (0)02896 931537"
+             |          },
+             |          "coordinates" : {
+             |            "latitude" : "lat",
+             |            "longitude" : "lon"
+             |          },
+             |          "eori" : "GB12345",
+             |          "country" : {
+             |            "code" : "ES",
+             |            "description" : "Spain"
+             |          },
+             |          "address" : {
+             |            "numberAndStreet" : "21 Test Camino",
+             |            "city" : "Madrid",
+             |            "postalCode" : "ES1 1SE"
+             |          },
+             |          "postalCode" : {
+             |            "streetNumber" : "21",
+             |            "postalCode" : "DE1 1DE",
+             |            "country" : {
+             |              "code" : "DE",
+             |              "description" : "Germany"
+             |            }
+             |          }
+             |        },
+             |        "contact" : {
+             |          "name" : "Location of goods Contact",
+             |          "telephoneNumber" : "+44 202 157 0192"
+             |        }
+             |      },
+             |      "loading" : {
+             |        "unLocode" : {
+             |          "unLocodeExtendedCode" : "AEFAT",
+             |          "name" : "Fateh Terminal"
+             |        },
+             |        "additionalInformation" : {
+             |          "country" : {
+             |            "code" : "Loading country",
+             |            "description" : "United Kingdom"
+             |          },
+             |          "location" : "Loading location"
+             |        }
+             |      },
+             |      "unloading" : {
+             |        "unLocode" : {
+             |          "unLocodeExtendedCode": "ADALV",
+             |          "name": "Andorra la Vella"
+             |        },
+             |        "additionalInformation" : {
+             |          "country" : {
+             |            "code" : "Unloading country",
+             |            "description" : "United Kingdom"
+             |          },
+             |          "location" : "Unloading location"
+             |        }
+             |      }
+             |    },
+             |    "transportDetails" : {
+             |      "preRequisites" : {
+             |        "uniqueConsignmentReference" : "ucr123",
+             |        "countryOfDispatch" : {
+             |          "code" : "FR",
+             |          "description" : "France"
+             |        },
+             |        "itemsDestinationCountry" : {
+             |          "code" : "IT",
+             |          "description" : "Italy"
+             |        },
+             |        "containerIndicator" : true
+             |      },
+             |      "inlandMode" : "maritime",
+             |      "borderModeOfTransport" : "maritime",
+             |      "carrierDetails" : {
+             |        "identificationNumber" : "carrier1",
+             |        "addContactYesNo" : true,
+             |        "contact" : {
+             |          "name" : "Carrier Contact",
+             |          "telephoneNumber" : "+44 808 157 0192"
+             |        }
+             |      },
+             |      "transportMeansDeparture" : {
+             |        "identification" : "imoShipIdNumber",
+             |        "meansIdentificationNumber" : "means id number",
+             |        "vehicleCountry" : {
+             |          "code" : "FR",
+             |          "desc" : "France"
+             |        }
+             |      },
+             |      "transportMeansActiveList" : [
+             |        {
+             |          "identification" : "seaGoingVessel",
+             |          "identificationNumber" : "active id number",
+             |          "customsOfficeActiveBorder" : {
+             |            "id" : "IT018101",
+             |            "name" : "Aeroporto Bari - Palese",
+             |            "phoneNumber" : "0039 0805316196"
+             |          },
+             |          "nationality" : {
+             |            "code" : "ES",
+             |            "desc" : "Spain"
+             |          },
+             |          "conveyanceReferenceNumber" : "conveyance ref number"
+             |        }
+             |      ],
+             |      "supplyChainActors" : [
+             |        {
+             |          "supplyChainActorType" : "consolidator",
+             |          "identificationNumber" : "sca1"
+             |        },
+             |        {
+             |          "supplyChainActorType" : "freightForwarder",
+             |          "identificationNumber" : "sca2"
+             |        },
+             |        {
+             |          "supplyChainActorType" : "manufacturer",
+             |          "identificationNumber" : "sca3"
+             |        },
+             |        {
+             |          "supplyChainActorType" : "warehouseKeeper",
+             |          "identificationNumber" : "sca4"
+             |        }
+             |      ],
+             |      "equipmentsAndCharges" : {
+             |        "equipments" : [
+             |          {
+             |            "containerIdentificationNumber" : "container id 1",
+             |            "seals" : [
+             |              {
+             |                "identificationNumber" : "seal 1"
+             |              },
+             |              {
+             |                "identificationNumber" : "seal 2"
+             |              }
+             |            ],
+             |            "uuid" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+             |          }
+             |        ]
+             |      }
+             |    },
+             |    "documents" : {
+             |      "addDocumentsYesNo" : false
+             |    },
+             |    "items" : [
+             |      {
+             |        "description" : "Description 1",
+             |        "declarationType" : "T1",
+             |        "countryOfDispatch" : {
+             |          "code" : "GB",
+             |          "description" : "United Kingdom"
+             |        },
+             |        "countryOfDestination" : {
+             |          "code" : "FR",
+             |          "description" : "France"
+             |        },
+             |        "uniqueConsignmentReference" : "UCR 1",
+             |        "customsUnionAndStatisticsCode" : "CUS code 1",
+             |        "commodityCode" : "commodity code 1",
+             |        "combinedNomenclatureCode" : "CN code 1",
+             |        "dangerousGoodsList" : [
+             |          {
+             |            "unNumber" : "UN number 1_1"
+             |          },
+             |          {
+             |            "unNumber" : "UN number 1_2"
+             |          }
+             |        ],
+             |        "grossWeight" : 123.456,
+             |        "netWeight" : 1234,
+             |        "supplementaryUnits" : 12345,
+             |        "methodOfPayment" : {
+             |          "method" : "A",
+             |          "description" : "Payment in cash"
+             |        },
+             |        "packages" : [
+             |          {
+             |            "packageType" : {
+             |              "code" : "VL",
+             |              "description" : "Bulk, liquid",
+             |              "type" : "Bulk"
+             |            },
+             |            "addShippingMarkYesNo" : false
+             |          },
+             |          {
+             |            "packageType" : {
+             |              "code" : "NE",
+             |              "description" : "Unpacked or unpackaged",
+             |              "type" : "Unpacked"
+             |            },
+             |            "numberOfPackages" : 5,
+             |            "addShippingMarkYesNo" : false
+             |          },
+             |          {
+             |            "packageType" : {
+             |              "code" : "TR",
+             |              "description" : "Trunk",
+             |              "type" : "Other"
+             |            },
+             |            "shippingMark" : "mark3"
+             |          }
+             |        ],
+             |        "addSupplyChainActorYesNo" : true,
+             |        "supplyChainActors" : [
+             |          {
+             |            "supplyChainActorType" : "consolidator",
+             |            "identificationNumber" : "itemSCA1"
+             |          },
+             |          {
+             |            "supplyChainActorType" : "freightForwarder",
+             |            "identificationNumber" : "itemSCA2"
+             |          },
+             |          {
+             |            "supplyChainActorType" : "manufacturer",
+             |            "identificationNumber" : "itemSCA3"
+             |          },
+             |          {
+             |            "supplyChainActorType" : "warehouseKeeper",
+             |            "identificationNumber" : "itemSCA4"
+             |          }
+             |        ],
+             |        "addAdditionalReferenceYesNo" : true,
+             |        "additionalReferences" : [
+             |          {
+             |            "additionalReference" : {
+             |              "documentType" : "ar1",
+             |              "description" : "Additional reference 1"
+             |            },
+             |            "addAdditionalReferenceNumberYesNo" : true,
+             |            "additionalReferenceNumber" : "arno1"
+             |          },
+             |          {
+             |            "additionalReference" : {
+             |              "documentType" : "ar2",
+             |              "description" : "Additional reference 2"
+             |            },
+             |            "addAdditionalReferenceNumberYesNo" : false
+             |          }
+             |        ],
+             |        "additionalInformationList" : [
+             |          {
+             |            "additionalInformationType" : {
+             |              "code" : "aiCode1",
+             |              "description" : "aiDescription1"
+             |            },
+             |            "additionalInformation" : "ai1"
+             |          },
+             |          {
+             |            "additionalInformationType" : {
+             |              "code" : "aiCode2",
+             |              "description" : "aiDescription2"
+             |            },
+             |            "additionalInformation" : "ai2"
+             |          }
+             |        ],
+             |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371",
+             |        "consignee" : {
+             |          "addConsigneeEoriNumberYesNo" : true,
+             |          "identificationNumber" : "GE00101001",
+             |          "name" : "Mr. Consignee",
+             |          "country" : {
+             |            "code" : "GB",
+             |            "description" : "United Kingdom"
+             |          },
+             |          "address" : {
+             |            "numberAndStreet" : "1 Merry Lane",
+             |            "city" : "Godrics Hollow",
+             |            "postalCode" : "CA1 9AA"
+             |          }
+             |        }
+             |      },
+             |      {
+             |        "description" : "Description 2",
+             |        "declarationType" : "T2",
+             |        "countryOfDispatch" : {
+             |          "code" : "DE",
+             |          "description" : "Germany"
+             |        },
+             |        "countryOfDestination" : {
+             |          "code" : "ES",
+             |          "description" : "Spain"
+             |        },
+             |        "uniqueConsignmentReference" : "UCR 2",
+             |        "customsUnionAndStatisticsCode" : "CUS code 2",
+             |        "commodityCode" : "commodity code 2",
+             |        "combinedNomenclatureCode" : "CN code 2",
+             |        "dangerousGoodsList" : [
+             |          {
+             |            "unNumber" : "UN number 2_1"
+             |          },
+             |          {
+             |            "unNumber" : "UN number 2_2"
+             |          }
+             |        ],
+             |        "grossWeight" : 456.789,
+             |        "methodOfPayment" : {
+             |          "method" : "A",
+             |          "description" : "Payment in cash"
+             |        },
+             |        "addSupplyChainActorYesNo" : false,
+             |        "addDocumentsYesNo" : false,
+             |        "addAdditionalReferenceYesNo" : true,
+             |        "additionalReferences" : [
+             |          {
+             |            "additionalReference" : {
+             |              "documentType" : "ar1",
+             |              "description" : "Additional reference 1"
+             |            },
+             |            "addAdditionalReferenceNumberYesNo" : true,
+             |            "additionalReferenceNumber" : "arno1"
+             |          }
+             |        ],
+             |        "additionalInformationList" : [
+             |          {
+             |            "additionalInformationType" : {
+             |              "code" : "aiCode1",
+             |              "description" : "aiDescription1"
+             |            },
+             |            "additionalInformation" : "ai1"
+             |          }
+             |        ],
+             |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+             |      }
+             |    ]
+             |  },
+             |  "tasks" : {},
+             |  "createdAt" : {
+             |    "$$date" : {
+             |      "$$numberLong" : "1662393524188"
+             |    }
+             |  },
+             |  "lastUpdated" : {
+             |    "$$date" : {
+             |      "$$numberLong" : "1662546803472"
+             |    }
+             |  }
+             |}
+             |""".stripMargin)
+
+        val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+
+        val converted: ConsignmentType20 = Consignment.transform(uA)
+
+        converted.countryOfDispatch shouldBe Some("FR")
+        converted.countryOfDestination shouldBe Some("IT")
+        converted.containerIndicator shouldBe Some(Number1)
+        converted.inlandModeOfTransport shouldBe Some("1")
+        converted.modeOfTransportAtTheBorder shouldBe Some("1")
+        converted.grossMass shouldBe 580.245
+        converted.referenceNumberUCR shouldBe Some("ucr123")
+
+        converted.Carrier shouldBe Some(
+          CarrierType04(
+            identificationNumber = "carrier1",
+            ContactPerson = Some(
+              ContactPersonType05(
+                name = "Carrier Contact",
+                phoneNumber = "+44 808 157 0192",
+                eMailAddress = None
+              )
+            )
+          )
+        )
+
+        converted.Consignor shouldBe Some(
+          ConsignorType07(
+            identificationNumber = Some("consignor1"),
+            name = Some("Mr Consignor"),
+            Address = Some(
+              AddressType17(
+                streetAndNumber = "21 Test Lane",
+                postcode = Some("NE1 1NE"),
+                city = "Newcastle upon Tyne",
+                country = "GB"
+              )
+            ),
+            ContactPerson = Some(
+              ContactPersonType05(
+                name = "Consignor Contact",
+                phoneNumber = "+44 101 157 0192",
+                eMailAddress = None
+              )
+            )
+          )
+        )
+
+        converted.Consignee shouldBe Some(
+          ConsigneeType05(
+            identificationNumber = Some("consignee1"),
+            name = Some("Mr Consignee"),
+            Address = Some(
+              AddressType17(
+                streetAndNumber = "21 Test Rue",
+                postcode = Some("PA1 1PA"),
+                city = "Paris",
+                country = "FR"
+              )
+            )
+          )
+        )
+
+        converted.AdditionalSupplyChainActor shouldBe Seq(
+          AdditionalSupplyChainActorType(
+            sequenceNumber = "1",
+            role = "CS",
+            identificationNumber = "sca1"
+          ),
+          AdditionalSupplyChainActorType(
+            sequenceNumber = "2",
+            role = "FW",
+            identificationNumber = "sca2"
+          ),
+          AdditionalSupplyChainActorType(
+            sequenceNumber = "3",
+            role = "MF",
+            identificationNumber = "sca3"
+          ),
+          AdditionalSupplyChainActorType(
+            sequenceNumber = "4",
+            role = "WH",
+            identificationNumber = "sca4"
+          )
+        )
+
+        converted.TransportEquipment shouldBe Seq(
+          TransportEquipmentType06(
+            sequenceNumber = "1",
+            containerIdentificationNumber = Some("container id 1"),
+            numberOfSeals = 2,
+            Seal = Seq(
+              SealType05(
+                sequenceNumber = "1",
+                identifier = "seal 1"
+              ),
+              SealType05(
+                sequenceNumber = "2",
+                identifier = "seal 2"
+              )
+            ),
+            GoodsReference = Seq(
+              GoodsReferenceType02(
+                sequenceNumber = "1",
+                declarationGoodsItemNumber = 1
+              ),
+              GoodsReferenceType02(
+                sequenceNumber = "2",
+                declarationGoodsItemNumber = 2
+              )
+            )
+          )
+        )
+
+        converted.LocationOfGoods shouldBe Some(
+          LocationOfGoodsType05(
+            typeOfLocation = "A",
+            qualifierOfIdentification = "T",
+            authorisationNumber = Some("authorisation number"),
+            additionalIdentifier = Some("additional identifier"),
+            UNLocode = Some("DEAAL"),
+            CustomsOffice = Some(CustomsOfficeType02(referenceNumber = "XI000142")),
+            GNSS = Some(
+              GNSSType(
+                latitude = "lat",
+                longitude = "lon"
+              )
+            ),
+            EconomicOperator = Some(EconomicOperatorType03(identificationNumber = "GB12345")),
+            Address = Some(
+              AddressType14(
+                streetAndNumber = "21 Test Camino",
+                postcode = Some("ES1 1SE"),
+                city = "Madrid",
+                country = "ES"
+              )
+            ),
+            PostcodeAddress = Some(
+              PostcodeAddressType02(
+                houseNumber = Some("21"),
+                postcode = "DE1 1DE",
+                country = "DE"
+              )
+            ),
+            ContactPerson = Some(
+              ContactPersonType06(
+                name = "Location of goods Contact",
+                phoneNumber = "+44 202 157 0192",
+                eMailAddress = None
+              )
+            )
+          )
+        )
+
+        converted.DepartureTransportMeans shouldBe Seq(
+          DepartureTransportMeansType03(
+            sequenceNumber = "1",
+            typeOfIdentification = Some("10"),
+            identificationNumber = Some("means id number"),
+            nationality = Some("FR")
+          )
+        )
+
+        converted.CountryOfRoutingOfConsignment shouldBe Seq(
+          CountryOfRoutingOfConsignmentType01(
+            sequenceNumber = "1",
+            country = "AD"
+          ),
+          CountryOfRoutingOfConsignmentType01(
+            sequenceNumber = "2",
+            country = "AR"
+          )
+        )
+
+        converted.ActiveBorderTransportMeans shouldBe Seq(
+          ActiveBorderTransportMeansType02(
+            sequenceNumber = "1",
+            customsOfficeAtBorderReferenceNumber = Some("IT018101"),
+            typeOfIdentification = Some("11"),
+            identificationNumber = Some("active id number"),
+            nationality = Some("ES"),
+            conveyanceReferenceNumber = Some("conveyance ref number")
+          )
+        )
+
+        converted.PlaceOfLoading shouldBe Some(
+          PlaceOfLoadingType03(
+            Some("AEFAT"),
+            Some("Loading country"),
+            Some("Loading location")
+          )
+        )
+
+        converted.PlaceOfUnloading shouldBe Some(
+          PlaceOfUnloadingType01(
+            Some("ADALV"),
+            Some("Unloading country"),
+            Some("Unloading location")
+          )
+        )
+
+        converted.PreviousDocument shouldBe Seq.empty
+
+        converted.SupportingDocument shouldBe Seq.empty
+
+        converted.TransportDocument shouldBe Seq.empty
+
+        converted.AdditionalReference shouldBe Seq(
+          AdditionalReferenceType05(
+            sequenceNumber = "1",
+            typeValue = "ar1",
+            referenceNumber = Some("arno1")
+          )
+        )
+
+        converted.AdditionalInformation shouldBe Seq(
+          AdditionalInformationType03(
+            sequenceNumber = "1",
+            code = "aiCode1",
+            text = Some("ai1")
+          )
+        )
+
+        converted.TransportCharges shouldBe Some(
+          TransportChargesType("A")
+        )
+
+        converted.HouseConsignment.size shouldBe 1
+        converted.HouseConsignment.head shouldBe HouseConsignmentType10(
+          sequenceNumber = "1",
+          countryOfDispatch = None,
+          grossMass = 580.245,
+          referenceNumberUCR = None,
+          Consignor = None,
+          Consignee = None,
+          AdditionalSupplyChainActor = Nil,
+          DepartureTransportMeans = Nil,
+          PreviousDocument = Nil,
+          SupportingDocument = Nil,
+          TransportDocument = Nil,
+          AdditionalReference = Nil,
+          AdditionalInformation = Nil,
+          TransportCharges = None,
+          ConsignmentItem = Seq(
+            ConsignmentItemType09(
+              goodsItemNumber = "1",
+              declarationGoodsItemNumber = 1,
+              declarationType = Some("T1"),
+              countryOfDispatch = Some("GB"),
+              countryOfDestination = Some("FR"),
+              referenceNumberUCR = Some("UCR 1"),
+              Consignee = Some(
+                ConsigneeType02(
+                  identificationNumber = Some("GE00101001"),
+                  name = Some("Mr. Consignee"),
+                  Address = Some(
+                    AddressType12(
+                      streetAndNumber = "1 Merry Lane",
+                      postcode = Some("CA1 9AA"),
+                      city = "Godrics Hollow",
+                      country = "GB"
+                    )
+                  )
+                )
+              ),
+              AdditionalSupplyChainActor = Seq(
+                AdditionalSupplyChainActorType(
+                  sequenceNumber = "1",
+                  role = "CS",
+                  identificationNumber = "itemSCA1"
+                ),
+                AdditionalSupplyChainActorType(
+                  sequenceNumber = "2",
+                  role = "FW",
+                  identificationNumber = "itemSCA2"
+                ),
+                AdditionalSupplyChainActorType(
+                  sequenceNumber = "3",
+                  role = "MF",
+                  identificationNumber = "itemSCA3"
+                ),
+                AdditionalSupplyChainActorType(
+                  sequenceNumber = "4",
+                  role = "WH",
+                  identificationNumber = "itemSCA4"
+                )
+              ),
+              Commodity = CommodityType07(
+                descriptionOfGoods = "Description 1",
+                cusCode = Some("CUS code 1"),
+                CommodityCode = Some(
+                  CommodityCodeType02(
+                    harmonizedSystemSubHeadingCode = "commodity code 1",
+                    combinedNomenclatureCode = Some("CN code 1")
+                  )
+                ),
+                DangerousGoods = Seq(
+                  DangerousGoodsType01(
+                    sequenceNumber = "1",
+                    UNNumber = "UN number 1_1"
+                  ),
+                  DangerousGoodsType01(
+                    sequenceNumber = "2",
+                    UNNumber = "UN number 1_2"
+                  )
+                ),
+                GoodsMeasure = Some(
+                  GoodsMeasureType02(
+                    grossMass = Some(BigDecimal(123.456)),
+                    netMass = Some(BigDecimal(1234)),
+                    supplementaryUnits = Some(BigDecimal(12345))
+                  )
+                )
+              ),
+              Packaging = Seq(
+                PackagingType03(
+                  sequenceNumber = "1",
+                  typeOfPackages = "VL",
+                  numberOfPackages = None,
+                  shippingMarks = None
+                ),
+                PackagingType03(
+                  sequenceNumber = "2",
+                  typeOfPackages = "NE",
+                  numberOfPackages = Some(5),
+                  shippingMarks = None
+                ),
+                PackagingType03(
+                  sequenceNumber = "3",
+                  typeOfPackages = "TR",
+                  numberOfPackages = None,
+                  shippingMarks = Some("mark3")
+                )
+              ),
+              PreviousDocument = Seq.empty,
+              SupportingDocument = Seq.empty,
+              TransportDocument = Seq.empty,
               AdditionalReference = Seq(
                 AdditionalReferenceType04(
                   sequenceNumber = "1",
