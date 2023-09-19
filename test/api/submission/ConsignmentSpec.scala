@@ -1109,10 +1109,7 @@ class ConsignmentSpec extends SpecBase {
              |        "identifier" : {
              |          "authorisationNumber" : "authorisation number",
              |          "additionalIdentifier" : "additional identifier",
-             |          "unLocode" : {
-             |            "unLocodeExtendedCode" : "DEAAL",
-             |            "name" : "Aalen"
-             |          },
+             |          "unLocode" : "DEAAL",
              |          "customsOffice" : {
              |            "id" : "XI000142",
              |            "name" : "Belfast EPU",
@@ -1147,10 +1144,7 @@ class ConsignmentSpec extends SpecBase {
              |        }
              |      },
              |      "loading" : {
-             |        "unLocode" : {
-             |          "unLocodeExtendedCode" : "AEFAT",
-             |          "name" : "Fateh Terminal"
-             |        },
+             |      "unLocode" : "AEFAT",
              |        "additionalInformation" : {
              |          "country" : {
              |            "code" : "Loading country",
@@ -1160,10 +1154,7 @@ class ConsignmentSpec extends SpecBase {
              |        }
              |      },
              |      "unloading" : {
-             |        "unLocode" : {
-             |          "unLocodeExtendedCode": "ADALV",
-             |          "name": "Andorra la Vella"
-             |        },
+             |        "unLocode" : "ADALV",
              |        "additionalInformation" : {
              |          "country" : {
              |            "code" : "Unloading country",
@@ -1335,6 +1326,7 @@ class ConsignmentSpec extends SpecBase {
              |            "identificationNumber" : "itemSCA4"
              |          }
              |        ],
+             |        "addDocumentsYesNo" : false,
              |        "addAdditionalReferenceYesNo" : true,
              |        "additionalReferences" : [
              |          {
