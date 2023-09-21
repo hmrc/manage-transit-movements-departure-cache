@@ -16,6 +16,7 @@
 
 package services
 
+import models.Task._
 import models.{Status, SubmissionState, XPath}
 import play.api.Logging
 import repositories.CacheRepository
@@ -30,6 +31,39 @@ class XPathService @Inject() (
 
   def isDeclarationAmendable(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
     cacheRepository.get(lrn, eoriNumber).map(_.isDefined && xPaths.exists(_.isAmendable))
+
+  def handleGuaranteeErrors(lrn: String, eoriNumber: String): Future[Boolean] = {
+
+    val tasks: Map[String, Status.Value] =
+      Map(
+        PreTaskList.taskName      -> Status.Unavailable,
+        TraderDetails.taskName    -> Status.Unavailable,
+        RouteDetails.taskName     -> Status.Unavailable,
+        TransportDetails.taskName -> Status.Unavailable,
+        Documents.taskName        -> Status.Unavailable,
+        Items.taskName            -> Status.Unavailable,
+        GuaranteeDetails.taskName -> Status.Error
+      )
+
+    cacheRepository.get(lrn, eoriNumber).flatMap {
+      case Some(userAnswers) =>
+        cacheRepository
+          .set(userAnswers.updateTasks(tasks), SubmissionState.RejectedPendingChanges)
+          .map {
+            case true => true
+            case false =>
+              logger.warn("Write was not acknowledged")
+              false
+          }
+          .recover {
+            case e =>
+              logger.warn("Failed to write user answers to mongo", e)
+              false
+          }
+      case _ => Future.successful(false)
+    }
+
+  }
 
   def handleErrors(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
     xPaths.flatMap {

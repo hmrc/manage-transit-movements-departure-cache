@@ -17,6 +17,7 @@
 package services
 
 import base.AppWithDefaultMockFixtures
+import models.{Departure, Metadata, SubmissionState, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.concurrent.ScalaFutures
@@ -27,6 +28,8 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import repositories.{CacheRepository, DefaultLockRepository}
 import uk.gov.hmrc.http.HeaderCarrier
 
+import java.time.Instant
+import java.util.UUID
 import scala.concurrent.Future
 
 class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with ScalaFutures {
@@ -38,6 +41,9 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
   val mockApiService: ApiService                = mock[ApiService]
   val mockCacheRepository: CacheRepository      = mock[CacheRepository]
   val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]
+
+  val emptyMetadata: Metadata       = Metadata(lrn, eoriNumber)
+  val emptyUserAnswers: UserAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID(), SubmissionState.NotSubmitted)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -149,6 +155,34 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
       result mustBe false
 
       verify(mockApiService).isIE028DefinedForDeparture(eqTo(lrn))(any(), any())
+    }
+  }
+
+  "doesDeclarationExist" - {
+
+    "return true" - {
+      "a document exists in the cache for the given LRN and EORI " in {
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+
+        val result = service.doesDeclarationExist(lrn, eoriNumber).futureValue
+
+        result mustBe true
+
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+      }
+    }
+
+    "return false" - {
+      "a document doesn't exist in the cache for the given LRN and EORI" in {
+
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
+
+        val result = service.doesDeclarationExist(lrn, eoriNumber).futureValue
+
+        result mustBe false
+
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+      }
     }
   }
 

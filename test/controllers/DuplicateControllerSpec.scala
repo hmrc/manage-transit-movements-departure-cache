@@ -75,6 +75,37 @@ class DuplicateControllerSpec extends SpecBase with Generators {
     }
   }
 
+  "doesDeclarationExist" should {
+
+    "return 200 with false" when {
+      "does not exist" in {
+        when(mockDuplicateService.doesDeclarationExist(eqTo(lrn), any())).thenReturn(Future.successful(false))
+
+        val request = FakeRequest(GET, routes.DuplicateController.doesDeclarationExist(lrn).url)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe JsBoolean(false)
+        verify(mockDuplicateService).doesDeclarationExist(eqTo(lrn), any())
+      }
+    }
+
+    "return 200 with true" when {
+      "when lrn exists in the API" in {
+        when(mockDuplicateService.doesDeclarationExist(eqTo(lrn), any())).thenReturn(Future.successful(true))
+
+        val request = FakeRequest(GET, routes.DuplicateController.doesDeclarationExist(lrn).url)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe JsBoolean(true)
+        verify(mockDuplicateService).doesDeclarationExist(eqTo(lrn), any())
+      }
+    }
+  }
+
   "doesDraftOrSubmissionExistForLrn" should {
 
     "return 200 with false" when {

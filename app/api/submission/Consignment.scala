@@ -316,7 +316,7 @@ object locationOfGoodsType05 {
       qualifierOfIdentificationReads.map(convertQualifierOfIdentification) and
       (__ \ "identifier" \ "authorisationNumber").readNullable[String] and
       (__ \ "identifier" \ "additionalIdentifier").readNullable[String] and
-      (__ \ "identifier" \ "unLocode" \ "unLocodeExtendedCode").readNullable[String] and
+      (__ \ "identifier" \ "unLocode").readNullable[String] and
       (__ \ "identifier" \ "customsOffice").readNullable[CustomsOfficeType02](customsOfficeType02.reads) and
       (__ \ "identifier" \ "coordinates").readNullable[GNSSType](gnssType.reads) and
       (__ \ "identifier" \ "eori").readNullable[EconomicOperatorType03](economicOperatorType03.reads) and
@@ -423,7 +423,7 @@ object activeBorderTransportMeansType02 {
 object placeOfLoadingType03 {
 
   implicit val reads: Reads[PlaceOfLoadingType03] = (
-    (__ \ "unLocode" \ "unLocodeExtendedCode").readNullable[String] and
+    (__ \ "unLocode").readNullable[String] and
       (__ \ "additionalInformation" \ "country" \ "code").readNullable[String] and
       (__ \ "additionalInformation" \ "location").readNullable[String]
   )(PlaceOfLoadingType03.apply _)
@@ -432,7 +432,7 @@ object placeOfLoadingType03 {
 object placeOfUnloadingType01 {
 
   implicit val reads: Reads[PlaceOfUnloadingType01] = (
-    (__ \ "unLocode" \ "unLocodeExtendedCode").readNullable[String] and
+    (__ \ "unLocode").readNullable[String] and
       (__ \ "additionalInformation" \ "country" \ "code").readNullable[String] and
       (__ \ "additionalInformation" \ "location").readNullable[String]
   )(PlaceOfUnloadingType01.apply _)
@@ -441,7 +441,7 @@ object placeOfUnloadingType01 {
 object transportChargesType {
 
   val itemReads: Reads[Option[TransportChargesType]] =
-    (__ \ "methodOfPayment" \ "code").readNullable[String].map(_.map(TransportChargesType))
+    (__ \ "methodOfPayment" \ "method").readNullable[String].map(_.map(TransportChargesType))
 
   val consignmentReads: Reads[Option[TransportChargesType]] =
     (equipmentsAndChargesPath \ "paymentMethod")
@@ -464,7 +464,7 @@ object houseConsignmentType10 {
 
   implicit val reads: Reads[HouseConsignmentType10] = {
     for {
-      documents        <- documentsPath.read[JsArray].map(_.value.toSeq)
+      documents        <- documentsPath.readWithDefault[JsArray](JsArray()).map(_.value.toSeq)
       consignmentItems <- itemsPath.readArray[ConsignmentItemType09](consignmentItemType09.reads(_, documents))
     } yield HouseConsignmentType10(
       sequenceNumber = "1",
