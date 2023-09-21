@@ -17,7 +17,7 @@
 package api.submission
 
 import base.SpecBase
-import generated.{GuaranteeType02, _}
+import generated._
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 
