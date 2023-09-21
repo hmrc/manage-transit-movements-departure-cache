@@ -129,6 +129,17 @@ package object submission {
     }
   }
 
+  implicit class RichIterable[A](iterable: Iterable[A]) {
+
+    def groupByPreserveOrder[K](f: A => K): Seq[(K, Iterable[A])] = {
+      val keys   = iterable.map(f).toSeq.distinct
+      val groups = iterable.groupBy(f)
+      keys.map {
+        key => key -> groups(key)
+      }
+    }
+  }
+
   implicit class RichOptionalJsArray(arr: Option[JsArray]) {
 
     def readValuesAs[T](implicit reads: Int => Reads[T]): Seq[T] =
