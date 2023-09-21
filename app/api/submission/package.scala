@@ -129,11 +129,11 @@ package object submission {
     }
   }
 
-  implicit class GroupByOrderedImplicitImpl[A](val t: Iterable[A]) extends AnyVal {
+  implicit class RichIterable[A](iterable: Iterable[A]) {
 
     def groupByPreserveOrder[K](f: A => K): Seq[(K, Iterable[A])] = {
-      val keys   = t.map(f).toSeq.distinct
-      val groups = t.groupBy(f)
+      val keys   = iterable.map(f).toSeq.distinct
+      val groups = iterable.groupBy(f)
       keys.map {
         key => key -> groups(key)
       }
