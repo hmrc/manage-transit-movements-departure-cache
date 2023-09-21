@@ -368,6 +368,112 @@ class GuaranteeSpec extends SpecBase {
 
           converted shouldBe expected
         }
+
+        "multiple instances of guarantee types with no other references" in {
+
+          val json: JsValue = Json.parse(s"""
+               |{
+               |  "_id" : "$uuid",
+               |  "lrn" : "$lrn",
+               |  "eoriNumber" : "$eoriNumber",
+               |  "isSubmitted" : "notSubmitted",
+               |  "data" : {
+               |    "guaranteeDetails" : [
+               |      {
+               |        "guaranteeType" : "3",
+               |        "otherReferenceYesNo" : false
+               |      },
+               |      {
+               |        "guaranteeType" : "3",
+               |        "otherReferenceYesNo" : false
+               |      },
+               |      {
+               |        "guaranteeType" : "0",
+               |        "referenceNumber" : "0_1",
+               |        "accessCode" : "1234",
+               |        "liabilityAmount" : 1000,
+               |        "currency" : {
+               |          "currency" : "GBP",
+               |          "description" : "Sterling"
+               |        }
+               |      },
+               |      {
+               |        "guaranteeType" : "0",
+               |        "referenceNumber" : "0_2",
+               |        "accessCode" : "5678",
+               |        "liabilityAmount" : 2000,
+               |        "currency" : {
+               |          "currency" : "EUR",
+               |          "description" : "Euro"
+               |        }
+               |      }
+               |    ]
+               |  },
+               |  "tasks" : {},
+               |  "createdAt" : {
+               |    "$$date" : {
+               |      "$$numberLong" : "1662393524188"
+               |    }
+               |  },
+               |  "lastUpdated" : {
+               |    "$$date" : {
+               |      "$$numberLong" : "1662546803472"
+               |    }
+               |  }
+               |}
+               |""".stripMargin)
+
+          val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+
+          val expected = Seq(
+            GuaranteeType02(
+              sequenceNumber = "1",
+              guaranteeType = "3",
+              otherGuaranteeReference = None,
+              GuaranteeReference = Seq(
+                GuaranteeReferenceType03(
+                  sequenceNumber = "1",
+                  GRN = None,
+                  accessCode = None,
+                  amountToBeCovered = None,
+                  currency = None
+                ),
+                GuaranteeReferenceType03(
+                  sequenceNumber = "2",
+                  GRN = None,
+                  accessCode = None,
+                  amountToBeCovered = None,
+                  currency = None
+                )
+              )
+            ),
+            GuaranteeType02(
+              sequenceNumber = "2",
+              guaranteeType = "0",
+              otherGuaranteeReference = None,
+              GuaranteeReference = Seq(
+                GuaranteeReferenceType03(
+                  sequenceNumber = "1",
+                  GRN = Some("0_1"),
+                  accessCode = Some("1234"),
+                  amountToBeCovered = Some(1000),
+                  currency = Some("GBP")
+                ),
+                GuaranteeReferenceType03(
+                  sequenceNumber = "2",
+                  GRN = Some("0_2"),
+                  accessCode = Some("5678"),
+                  amountToBeCovered = Some(2000),
+                  currency = Some("EUR")
+                )
+              )
+            )
+          )
+
+          val converted: Seq[GuaranteeType02] = Guarantee.transform(uA)
+
+          converted shouldBe expected
+        }
       }
     }
   }
