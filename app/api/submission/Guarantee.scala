@@ -26,6 +26,22 @@ object Guarantee {
   def transform(uA: UserAnswers): Seq[GuaranteeType02] = uA
     .get[JsArray](guaranteesPath)
     .readValuesAs[GuaranteeType02](guaranteeType02.reads)
+    .groupByPreserveOrder {
+      x => (x.guaranteeType, x.otherGuaranteeReference)
+    }
+    .zipWithSequenceNumber
+    .map {
+      case (((guaranteeType, otherGuaranteeReference), guarantees), index) =>
+        GuaranteeType02(
+          sequenceNumber = index.toString,
+          guaranteeType = guaranteeType,
+          otherGuaranteeReference = otherGuaranteeReference,
+          GuaranteeReference = guarantees.flatMap(_.GuaranteeReference).toSeq.zipWithSequenceNumber.map {
+            case (guaranteeReference, index) =>
+              guaranteeReference.copy(sequenceNumber = index.toString)
+          }
+        )
+    }
 }
 
 object guaranteeType02 {
