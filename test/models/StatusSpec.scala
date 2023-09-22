@@ -51,6 +51,12 @@ class StatusSpec extends SpecBase {
       val result = Json.toJson(status)
       result shouldBe JsString("error")
     }
+
+    "Amended" in {
+      val status = Status.Amended
+      val result = Json.toJson(status)
+      result shouldBe JsString("amended")
+    }
   }
 
   "must deserialise from json" when {
@@ -82,6 +88,12 @@ class StatusSpec extends SpecBase {
       val json   = JsString("error")
       val result = json.as[Status.Value]
       result shouldBe Status.Error
+    }
+
+    "Amended" in {
+      val json   = JsString("amended")
+      val result = json.as[Status.Value]
+      result shouldBe Status.Amended
     }
   }
 
