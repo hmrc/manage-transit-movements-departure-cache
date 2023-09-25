@@ -46,10 +46,16 @@ class TransitOperationSpec extends SpecBase {
                |        "phoneNumber" : "+44 (0)02896 931537"
                |      },
                |      "procedureType" : "normal",
-               |      "declarationType" : "TIR",
-               |      "additionalDeclarationType" : "A",
+               |      "declarationType" : {
+               |        "code" : "TIR"
+               |      },
+               |      "additionalDeclarationType" : {
+               |        "code" : "A"
+               |      },
                |      "tirCarnetReference" : "1234567",
-               |      "securityDetailsType" : "noSecurity",
+               |      "securityDetailsType" : {
+               |        "code" : "0"
+               |      },
                |      "detailsConfirmed" : true
                |    },
                |    "routeDetails" : {
@@ -122,10 +128,16 @@ class TransitOperationSpec extends SpecBase {
                |        "phoneNumber" : "+44 (0)02896 931537"
                |      },
                |      "procedureType" : "normal",
-               |      "declarationType" : "TIR",
-               |      "additionalDeclarationType" : "D",
+               |      "declarationType" : {
+               |        "code" : "TIR"
+               |      },
+               |      "additionalDeclarationType" : {
+               |        "code" : "D"
+               |      },
                |      "tirCarnetReference" : "1234567",
-               |      "securityDetailsType" : "entrySummaryDeclaration",
+               |      "securityDetailsType" : {
+               |        "code" : "1"
+               |      },
                |      "detailsConfirmed" : true
                |    },
                |    "transportDetails" : {
@@ -192,10 +204,16 @@ class TransitOperationSpec extends SpecBase {
                |        "phoneNumber" : "+44 (0)02896 931537"
                |      },
                |      "procedureType" : "normal",
-               |      "declarationType" : "TIR",
-               |      "additionalDeclarationType" : "A",
+               |      "declarationType" : {
+               |        "code" : "TIR"
+               |      },
+               |      "additionalDeclarationType" : {
+               |        "code" : "A"
+               |      },
                |      "tirCarnetReference" : "1234567",
-               |      "securityDetailsType" : "exitSummaryDeclaration",
+               |      "securityDetailsType" : {
+               |        "code" : "2"
+               |      },
                |      "detailsConfirmed" : true
                |    },
                |    "transportDetails" : {
@@ -262,10 +280,16 @@ class TransitOperationSpec extends SpecBase {
                |        "phoneNumber" : "+44 (0)02896 931537"
                |      },
                |      "procedureType" : "normal",
-               |      "declarationType" : "TIR",
-               |      "additionalDeclarationType" : "A",
+               |      "declarationType" : {
+               |        "code" : "TIR"
+               |      },
+               |      "additionalDeclarationType" : {
+               |        "code" : "A"
+               |      },
                |      "tirCarnetReference" : "1234567",
-               |      "securityDetailsType" : "entryAndExitSummaryDeclaration",
+               |      "securityDetailsType" : {
+               |        "code" : "3"
+               |      },
                |      "detailsConfirmed" : true
                |    },
                |    "transportDetails" : {
@@ -332,10 +356,16 @@ class TransitOperationSpec extends SpecBase {
                |        "phoneNumber" : "+44 (0)02896 931537"
                |      },
                |      "procedureType" : "normal",
-               |      "declarationType" : "TIR",
-               |      "additionalDeclarationType" : "A",
+               |      "declarationType" : {
+               |        "code" : "TIR"
+               |      },
+               |      "additionalDeclarationType" : {
+               |        "code" : "A"
+               |      },
                |      "tirCarnetReference" : "1234567",
-               |      "securityDetailsType" : "entrySummaryDeclaration",
+               |      "securityDetailsType" : {
+               |        "code" : "1"
+               |      },
                |      "detailsConfirmed" : true
                |    },
                |    "transportDetails" : {}

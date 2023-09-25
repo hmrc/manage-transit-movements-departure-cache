@@ -20,11 +20,8 @@ import base.AppWithDefaultMockFixtures
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
 import models.{Departure, Departures, UserAnswers}
-import org.scalacheck.Gen
-import org.scalatest.concurrent.ScalaFutures.convertScalaFuture
 import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Results.{BadRequest, InternalServerError}
@@ -53,10 +50,16 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |        "phoneNumber" : "+44 (0)02896 931537"
                                     |      },
                                     |      "procedureType" : "normal",
-                                    |      "declarationType" : "TIR",
-                                    |      "additionalDeclarationType" : "A",
+                                    |      "declarationType" : {
+                                    |        "code" : "TIR"
+                                    |      },
+                                    |      "additionalDeclarationType" : {
+                                    |        "code" : "A"
+                                    |      },
                                     |      "tirCarnetReference" : "1234567",
-                                    |      "securityDetailsType" : "entrySummaryDeclaration",
+                                    |      "securityDetailsType" : {
+                                    |        "code" : "1"
+                                    |      },
                                     |      "detailsConfirmed" : true
                                     |    },
                                     |    "traderDetails" : {
