@@ -113,7 +113,7 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
               ".preTaskList"      -> Status.Error,
               ".transportDetails" -> Status.Error,
               ".traderDetails"    -> Status.Error,
-              ".documents"        -> Status.Completed
+              ".documents"        -> Status.Unavailable
             )
           )
 
