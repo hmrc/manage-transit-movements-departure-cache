@@ -207,19 +207,31 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |        },
                                     |        "containerIndicator" : true
                                     |      },
-                                    |      "inlandMode" : "rail",
+                                    |      "inlandMode" : {
+                                    |        "code": "2",
+                                    |        "description": "Rail Transport"
+                                    |      },
                                     |      "transportMeansDeparture" : {
-                                    |        "identification" : "trainNumber",
+                                    |        "identification" : {
+                                    |          "type": "21",
+                                    |          "description": "Train Number"
+                                    |        },
                                     |        "meansIdentificationNumber" : "1234567",
                                     |        "vehicleCountry" : {
                                     |          "code" : "GB",
                                     |          "desc" : "United Kingdom"
                                     |        }
                                     |      },
-                                    |      "borderModeOfTransport" : "air",
+                                    |      "borderModeOfTransport" : {
+                                    |        "code": "4",
+                                    |        "description": "Air transport"
+                                    |      },
                                     |      "transportMeansActiveList" : [
                                     |        {
-                                    |          "identification" : "regNumberAircraft",
+                                    |          "identification" : {
+                                    |            "code": "41",
+                                    |            "description": "Registration Number of the Aircraft"
+                                    |          },
                                     |          "identificationNumber" : "GB1234567",
                                     |          "addNationalityYesNo" : true,
                                     |          "nationality" : {
@@ -242,7 +254,10 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |        },
                                     |        "authorisations" : [
                                     |          {
-                                    |            "authorisationType" : "TRD",
+                                    |            "authorisationType" : {
+                                    |              "code": "C524",
+                                    |              "description": "TRD - Authorisation to use transit declaration with a reduced dataset (Column 9e, Annex A of Delegated Regulation (EU) 2015/2446)"
+                                    |            },
                                     |            "authorisationReferenceNumber" : "TRD123"
                                     |          }
                                     |        ]

@@ -109,8 +109,8 @@ object consignmentType20 {
     countryOfDispatch           <- (preRequisitesPath \ "countryOfDispatch" \ "code").readNullable[String]
     countryOfDestination        <- (preRequisitesPath \ "itemsDestinationCountry" \ "code").readNullable[String]
     containerIndicator          <- (preRequisitesPath \ "containerIndicator").readNullable[Boolean]
-    inlandModeOfTransport       <- (transportDetailsPath \ "inlandMode").readNullable[String].map(convertModeOfTransport)
-    modeOfTransportAtTheBorder  <- (transportDetailsPath \ "borderModeOfTransport").readNullable[String].map(convertModeOfTransport)
+    inlandModeOfTransport       <- (transportDetailsPath \ "inlandMode" \ "code").readNullable[String]
+    modeOfTransportAtTheBorder  <- (transportDetailsPath \ "borderModeOfTransport" \ "code").readNullable[String]
     referenceNumberUCR          <- (preRequisitesPath \ "uniqueConsignmentReference").readNullable[String]
     carrier                     <- (transportDetailsPath \ "carrierDetails").readNullable[CarrierType04](carrierType04.reads)
     consignor                   <- (consignmentPath \ "consignor").readNullable[ConsignorType07](consignorType07.reads)
@@ -197,18 +197,6 @@ object consignmentType20 {
   def additionalInformationReads: Reads[Seq[AdditionalInformationType03]] =
     itemsPath
       .readCommonValuesInNestedArrays[AdditionalInformationType03]("additionalInformationList")(additionalInformationType03.reads)
-
-  private lazy val convertModeOfTransport: Option[String] => Option[String] = _ map {
-    case "maritime" => "1"
-    case "rail"     => "2"
-    case "road"     => "3"
-    case "air"      => "4"
-    case "mail"     => "5"
-    case "fixed"    => "7"
-    case "waterway" => "8"
-    case "unknown"  => "9"
-    case _          => throw new Exception("Invalid mode of transport value")
-  }
 }
 
 object carrierType04 {
@@ -251,17 +239,9 @@ object additionalSupplyChainActorType {
 
   def reads(index: Int): Reads[AdditionalSupplyChainActorType] = (
     (index.toString: Reads[String]) and
-      (__ \ "supplyChainActorType").read[String].map(convertRole) and
+      (__ \ "supplyChainActorType" \ "role").read[String] and
       (__ \ "identificationNumber").read[String]
   )(AdditionalSupplyChainActorType.apply _)
-
-  private lazy val convertRole: String => String = {
-    case "consolidator"     => "CS"
-    case "freightForwarder" => "FW"
-    case "manufacturer"     => "MF"
-    case "warehouseKeeper"  => "WH"
-    case _                  => throw new Exception("Invalid supply chain actor role value")
-  }
 }
 
 object transportEquipmentType06 {
@@ -365,30 +345,11 @@ object economicOperatorType03 {
     __.read[String].map(EconomicOperatorType03)
 }
 
-object transportMeans {
-
-  lazy val convertTypeOfIdentification: Option[String] => Option[String] = _ map {
-    case "imoShipIdNumber"        => "10"
-    case "seaGoingVessel"         => "11"
-    case "wagonNumber"            => "20"
-    case "trainNumber"            => "21"
-    case "regNumberRoadVehicle"   => "30"
-    case "regNumberRoadTrailer"   => "31"
-    case "iataFlightNumber"       => "40"
-    case "regNumberAircraft"      => "41"
-    case "europeanVesselIdNumber" => "80"
-    case "inlandWaterwaysVehicle" => "81"
-    case "unknown"                => "99"
-    case _                        => throw new Exception("Invalid type of identification value")
-  }
-}
-
 object departureTransportMeansType03 {
-  import transportMeans._
 
   implicit val reads: Reads[DepartureTransportMeansType03] = (
     ("1": Reads[String]) and
-      (__ \ "identification").readNullable[String].map(convertTypeOfIdentification) and
+      (__ \ "identification" \ "type").readNullable[String] and
       (__ \ "meansIdentificationNumber").readNullable[String] and
       (__ \ "vehicleCountry" \ "code").readNullable[String]
   )(DepartureTransportMeansType03.apply _)
@@ -403,17 +364,16 @@ object countryOfRoutingOfConsignmentType01 {
 }
 
 object activeBorderTransportMeansType02 {
-  import transportMeans._
 
   private lazy val identificationReads: Reads[Option[String]] =
-    ((__ \ "identification").read[String] orElse (__ \ "inferredIdentification").read[String])
+    ((__ \ "identification" \ "code").read[String] orElse (__ \ "inferredIdentification" \ "code").read[String])
       .map(Option(_))
       .orElse(None)
 
   def reads(index: Int): Reads[ActiveBorderTransportMeansType02] = (
     (index.toString: Reads[String]) and
       (__ \ "customsOfficeActiveBorder" \ "id").readNullable[String] and
-      identificationReads.map(convertTypeOfIdentification) and
+      identificationReads and
       (__ \ "identificationNumber").readNullable[String] and
       (__ \ "nationality" \ "code").readNullable[String] and
       (__ \ "conveyanceReferenceNumber").readNullable[String]
@@ -444,20 +404,9 @@ object transportChargesType {
     (__ \ "methodOfPayment" \ "method").readNullable[String].map(_.map(TransportChargesType))
 
   val consignmentReads: Reads[Option[TransportChargesType]] =
-    (equipmentsAndChargesPath \ "paymentMethod")
+    (equipmentsAndChargesPath \ "paymentMethod" \ "method")
       .readNullable[String]
-      .map(_.map(convertMethodOfPayment).map(TransportChargesType))
-
-  private lazy val convertMethodOfPayment: String => String = {
-    case "cash"                     => "A"
-    case "creditCard"               => "B"
-    case "cheque"                   => "C"
-    case "electronicCreditTransfer" => "D"
-    case "accountHolderWithCarrier" => "H"
-    case "notPrePaid"               => "Y"
-    case "other"                    => "Z"
-    case _                          => throw new Exception("Invalid method of payment value")
-  }
+      .map(_.map(TransportChargesType))
 }
 
 object houseConsignmentType10 {
