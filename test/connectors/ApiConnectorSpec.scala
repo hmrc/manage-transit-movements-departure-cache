@@ -189,7 +189,10 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |    },
                                     |    "guaranteeDetails" : [
                                     |      {
-                                    |        "guaranteeType" : "B"
+                                    |        "guaranteeType" : {
+                                    |          "code" : "B",
+                                    |          "description": "Guarantee for goods dispatched under TIR procedure"
+                                    |        }
                                     |      }
                                     |    ],
                                     |    "transportDetails" : {
