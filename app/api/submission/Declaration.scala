@@ -16,7 +16,7 @@
 
 package api.submission
 
-import generated.{CC015CType, PhaseIDtype}
+import generated.{CC013CType, CC015CType, PhaseIDtype}
 import models.SubmissionState.{Amendment, GuaranteeAmendment}
 import models.UserAnswers
 import scalaxb.DataRecord
@@ -28,13 +28,13 @@ object Declaration {
 
   private val scope: NamespaceBinding = scalaxb.toScope(Some("ncts") -> "http://ncts.dgtaxud.ec")
 
-  def transform(uA: UserAnswers): NodeSeq = uA.status match {
-    case Amendment          => toXML(IE015(uA), "ncts:CC013C", scope)
-    case GuaranteeAmendment => toXML(IE015(uA), "ncts:CC013C", scope)
+  def transform(uA: UserAnswers, mrn: Option[String]): NodeSeq = uA.status match {
+    case Amendment          => toXML(IE013(uA, mrn, flag = false), "ncts:CC013C", scope)
+    case GuaranteeAmendment => toXML(IE013(uA, mrn, flag = true), "ncts:CC013C", scope)
     case _                  => toXML(IE015(uA), "ncts:CC015C", scope)
   }
 
-  def IE015(uA: UserAnswers): CC015CType =
+  private def IE015(uA: UserAnswers): CC015CType =
     CC015CType(
       messageSequence1 = Header.message(uA),
       TransitOperation = TransitOperation.transform(uA),
@@ -50,10 +50,10 @@ object Declaration {
       attributes = Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString("NCTS5.0", scope)))
     )
 
-  def IE013(uA: UserAnswers, flag: Boolean): CC015CType = // TODO: PUt MRN in the TransitOperationType04
-    CC015CType(
+  private def IE013(uA: UserAnswers, mrn: Option[String], flag: Boolean): CC013CType =
+    CC013CType(
       messageSequence1 = Header.message(uA),
-      TransitOperation = TransitOperation.transform(uA),
+      TransitOperation = TransitOperation.transformIE013(uA, mrn, flag),
       Authorisation = Authorisations.transform(uA),
       CustomsOfficeOfDeparture = CustomsOffices.transformOfficeOfDeparture(uA),
       CustomsOfficeOfDestinationDeclared = CustomsOffices.transformOfficeOfDestination(uA),
@@ -61,12 +61,8 @@ object Declaration {
       CustomsOfficeOfExitForTransitDeclared = CustomsOffices.transformOfficeOfExit(uA),
       HolderOfTheTransitProcedure = HolderOfTheTransitProcedure.transform(uA),
       Representative = Representative.transform(uA),
-      Guarantee = Guarantee.transform(uA),
+      Guarantee = Guarantee.transformIE013(uA),
       Consignment = Consignment.transform(uA),
       attributes = Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString("NCTS5.0", scope)))
     )
-
-//  def transformToXML(ua: UserAnswers): NodeSeq =
-//    toXML[CC015CType](transform(ua), "ncts:CC015C", scope)
-
 }

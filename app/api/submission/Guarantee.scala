@@ -16,7 +16,7 @@
 
 package api.submission
 
-import generated.{GuaranteeReferenceType03, GuaranteeType02}
+import generated.{GuaranteeReferenceType03, GuaranteeType01, GuaranteeType02}
 import models.UserAnswers
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{__, JsArray, Reads}
@@ -42,6 +42,36 @@ object Guarantee {
           }
         )
     }
+
+  def transformIE013(uA: UserAnswers): Seq[GuaranteeType01] = uA
+    .get[JsArray](guaranteesPath)
+    .readValuesAs[GuaranteeType01](guaranteeType01.reads)
+    .groupByPreserveOrder {
+      x => (x.guaranteeType, x.otherGuaranteeReference)
+    }
+    .zipWithSequenceNumber
+    .map {
+      case (((guaranteeType, otherGuaranteeReference), guarantees), index) =>
+        GuaranteeType01(
+          sequenceNumber = index.toString,
+          guaranteeType = guaranteeType,
+          otherGuaranteeReference = otherGuaranteeReference,
+          GuaranteeReference = guarantees.flatMap(_.GuaranteeReference).toSeq.zipWithSequenceNumber.map {
+            case (guaranteeReference, index) =>
+              guaranteeReference.copy(sequenceNumber = index.toString)
+          }
+        )
+    }
+}
+
+object guaranteeType01 {
+
+  def reads(index: Int): Reads[GuaranteeType01] = (
+    (index.toString: Reads[String]) and
+      (__ \ "guaranteeType").read[String].map(Some(_)) and
+      (__ \ "otherReference").readNullable[String] and
+      __.read[GuaranteeReferenceType03](guaranteeReferenceType03.reads(index)).map(Seq(_))
+  )(GuaranteeType01.apply _)
 }
 
 object guaranteeType02 {

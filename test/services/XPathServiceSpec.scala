@@ -193,7 +193,7 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
           result shouldBe true
 
           verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-          verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.RejectedPendingChanges))
+          verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.GuaranteeAmendment))
         }
     }
 
@@ -221,7 +221,7 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
           result shouldBe false
 
           verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-          verify(mockCacheRepository).set(any(), eqTo(SubmissionState.RejectedPendingChanges))
+          verify(mockCacheRepository).set(any(), eqTo(SubmissionState.GuaranteeAmendment))
         }
     }
   }

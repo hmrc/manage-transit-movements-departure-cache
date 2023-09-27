@@ -18,6 +18,7 @@ package connectors
 
 import api.submission._
 import config.AppConfig
+import models.SubmissionState.GuaranteeAmendment
 import models.{Departure, DepartureMessageTypes, Departures, UserAnswers}
 import play.api.Logging
 import play.api.http.HeaderNames
@@ -50,8 +51,16 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
 
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
 
-    val declarationUrl  = s"${appConfig.apiUrl}/movements/departures" // TODO diff endpoint for adding message IE013
-    val payload: String = Declaration.transform(userAnswers).toString
+    val declarationUrl = s"${appConfig.apiUrl}/movements/departures"
+
+//    val declarationUrl =
+//      if (userAnswers.status == GuaranteeAmendment)
+    //        s"${appConfig.apiUrl}/movements/departures/{departureId}/messages" //TODO Fetch departureId for declaration - grab it when we check for MRN?
+//      else {
+    //        s"${appConfig.apiUrl}/movements/departures"
+//      }
+
+    val payload: String = Declaration.transform(userAnswers, mrn = None).toString //TODO fetch MRN from API for declaration - if not there then None
 
     val requestHeaders = Seq(
       HeaderNames.ACCEPT       -> "application/vnd.hmrc.2.0+json",
