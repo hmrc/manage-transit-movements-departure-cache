@@ -359,7 +359,10 @@ class ConsignmentSpec extends SpecBase {
             |    "items" : [
             |      {
             |        "description" : "Description 1",
-            |        "declarationType" : "T1",
+            |        "declarationType" : {
+            |          "code": "T1",
+            |          "description": "Goods not having the customs status of Union goods, which are placed under the common transit procedure."
+            |        },
             |        "countryOfDispatch" : {
             |          "code" : "GB",
             |          "description" : "United Kingdom"
@@ -503,7 +506,10 @@ class ConsignmentSpec extends SpecBase {
             |      },
             |      {
             |        "description" : "Description 2",
-            |        "declarationType" : "T2",
+            |        "declarationType" : {
+            |          "code": "T2",
+            |          "description": "Goods having the customs status of Union goods, which are placed under the common transit procedure"
+            |        },
             |        "countryOfDispatch" : {
             |          "code" : "DE",
             |          "description" : "Germany"
@@ -1264,7 +1270,10 @@ class ConsignmentSpec extends SpecBase {
              |    "items" : [
              |      {
              |        "description" : "Description 1",
-             |        "declarationType" : "T1",
+             |        "declarationType" : {
+             |          "code": "T1",
+             |          "description": "Goods not having the customs status of Union goods, which are placed under the common transit procedure."
+             |        },
              |        "countryOfDispatch" : {
              |          "code" : "GB",
              |          "description" : "United Kingdom"
@@ -1391,7 +1400,10 @@ class ConsignmentSpec extends SpecBase {
              |      },
              |      {
              |        "description" : "Description 2",
-             |        "declarationType" : "T2",
+             |        "declarationType" : {
+             |          "code": "T2",
+             |          "description": "Goods having the customs status of Union goods, which are placed under the common transit procedure"
+             |        },
              |        "countryOfDispatch" : {
              |          "code" : "DE",
              |          "description" : "Germany"
