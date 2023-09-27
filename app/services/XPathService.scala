@@ -48,7 +48,7 @@ class XPathService @Inject() (
     cacheRepository.get(lrn, eoriNumber).flatMap {
       case Some(userAnswers) =>
         cacheRepository
-          .set(userAnswers.updateTasks(tasks), SubmissionState.RejectedPendingChanges)
+          .set(userAnswers.updateTasks(tasks), SubmissionState.GuaranteeAmendment)
           .map {
             case true => true
             case false =>
