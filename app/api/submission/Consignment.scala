@@ -443,7 +443,7 @@ object consignmentItemType09 {
         (
           (index.toString: Reads[String]) and
             (index: Reads[Int]).map(BigInt(_)) and
-            (__ \ "declarationType").readNullable[String] and
+            (__ \ "declarationType" \ "code").readNullable[String] and
             (__ \ "countryOfDispatch" \ "code").readNullable[String] and
             (__ \ "countryOfDestination" \ "code").readNullable[String] and
             (__ \ "uniqueConsignmentReference").readNullable[String] and
