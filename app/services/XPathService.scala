@@ -67,7 +67,7 @@ class XPathService @Inject() (
 
   private def setTasksUnavailable(tasks: Map[String, Status.Value]): Map[String, Status.Value] =
     tasks.map(
-      task => if (task._1 != ".preTaskList") (task._1, Status.Unavailable) else task
+      task => if (task._1 != PreTaskList.taskName) (task._1, Status.Unavailable) else task
     )
 
   def handleErrors(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
