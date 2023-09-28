@@ -20,13 +20,17 @@ import controllers.actions.AuthenticateActionProvider
 import models.SubmissionState
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
-import play.api.mvc.{Action, ControllerComponents}
+import play.api.mvc.{Action, ControllerComponents, Result}
 import repositories.CacheRepository
 import services.ApiService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import cats.data.OptionT
+import cats.implicits._
+import models.request.AuthenticatedRequest
+import uk.gov.hmrc.http.HeaderCarrier
 
 @Singleton()
 class SubmissionController @Inject() (
@@ -48,7 +52,8 @@ class SubmissionController @Inject() (
                 apiService.submitDeclaration(uA).flatMap {
                   case Right(response) =>
                     cacheRepository.set(uA, SubmissionState.Submitted).map {
-                      _ => Ok(response.body)
+                      _ =>
+                        Ok(response.body)
                     }
                   case Left(error) => Future.successful(error)
                 }
@@ -59,4 +64,61 @@ class SubmissionController @Inject() (
             Future.successful(BadRequest)
         }
     }
+
+  def postAmendment: Action[JsValue] =
+    authenticate().async(parse.json) {
+      implicit request =>
+        val res = request.body.validate[String] match {
+          case JsSuccess(lrn, _) =>
+            cacheRepository.get(lrn, request.eoriNumber).flatMap {
+              case Some(uA) =>
+                uA.metadata.departureId match {
+                  case Some(value) =>
+                    apiService.submitAmmendDeclaration(uA, value).flatMap {
+                      case Right(response) =>
+                        cacheRepository.set(uA, SubmissionState.Submitted).map {
+                          _ =>
+                            Ok(response.body)
+                        }
+                      case Left(error) => Future.successful(error)
+                    }
+                  case None => Future.successful(InternalServerError)
+                }
+              case None => Future.successful(InternalServerError)
+            }
+          case JsError(errors) =>
+            logger.warn(s"Failed to validate request body as String: $errors")
+            Future.successful(BadRequest)
+        }
+        res
+    }
+
+  def postCats: Action[JsValue] =
+    authenticate().async(parse.json) {
+      implicit request: AuthenticatedRequest[JsValue] =>
+        request.body.validate[String] match {
+          case JsSuccess(lrn, _) => successAmendment(lrn, request).value.map(_.getOrElse(InternalServerError))
+
+          case JsError(errors) =>
+            logger.warn(s"Failed to validate request body as String: $errors")
+            Future.successful(BadRequest)
+        }
+
+    }
+
+  private def successAmendment(lrn: String, request: AuthenticatedRequest[JsValue])(implicit hc: HeaderCarrier): OptionT[Future, Result] =
+    for {
+      uA                  <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
+      departureId: String <- OptionT.fromOption[Future](uA.metadata.departureId)
+      result <- OptionT(apiService.submitAmmendDeclaration(uA, departureId).flatMap {
+        case Right(response) =>
+          cacheRepository.set(uA, SubmissionState.Submitted).map {
+            _ =>
+              Option(Ok(response.body))
+          }
+        case Left(error) => Future.successful(Option(error))
+      })
+
+    } yield result
+
 }

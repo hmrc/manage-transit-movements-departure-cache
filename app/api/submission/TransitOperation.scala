@@ -17,7 +17,7 @@
 package api.submission
 
 import generated.{TransitOperationType04, TransitOperationType06}
-import models.UserAnswers
+import models.{MovementReferenceNumber, UserAnswers}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads
 
@@ -28,13 +28,13 @@ object TransitOperation {
   def transform(uA: UserAnswers): TransitOperationType06 =
     uA.metadata.data.as[TransitOperationType06](transitOperationType06.reads(uA.lrn))
 
-  def transformIE013(uA: UserAnswers, mrn: Option[String], flag: Boolean): TransitOperationType04 =
+  def transformIE013(uA: UserAnswers, mrn: Option[MovementReferenceNumber], flag: Boolean): TransitOperationType04 =
     uA.metadata.data.as[TransitOperationType04](transitOperationType04.reads(uA.lrn, mrn, flag))
 }
 
 object transitOperationType04 {
 
-  def reads(lrn: String, mrn: Option[String], flag: Boolean): Reads[TransitOperationType04] = (
+  def reads(lrn: String, mrn: Option[MovementReferenceNumber], flag: Boolean): Reads[TransitOperationType04] = (
     (preTaskListPath \ "declarationType" \ "code").read[String] and
       (preTaskListPath \ "additionalDeclarationType" \ "code").read[String] and
       (preTaskListPath \ "tirCarnetReference").readNullable[String] and
@@ -55,7 +55,7 @@ object transitOperationType04 {
     ) =>
       TransitOperationType04(
         LRN = if (mrn.isDefined) None else Some(lrn),
-        MRN = mrn,
+        MRN = mrn.map(_.value),
         declarationType = declarationType,
         additionalDeclarationType = additionalDeclarationType,
         TIRCarnetNumber = TIRCarnetNumber,
