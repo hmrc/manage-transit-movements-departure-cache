@@ -308,12 +308,17 @@ object sealType05 {
 
 object locationOfGoodsType05 {
 
+  private lazy val typeOfLocationReads: Reads[String] =
+    (__ \ "typeOfLocation" \ "type").read[String] orElse
+      (__ \ "inferredTypeOfLocation" \ "type").read[String]
+
   private lazy val qualifierOfIdentificationReads: Reads[String] =
-    (__ \ "qualifierOfIdentification").read[String] orElse (__ \ "inferredQualifierOfIdentification").read[String]
+    (__ \ "qualifierOfIdentification" \ "qualifier").read[String] orElse
+      (__ \ "inferredQualifierOfIdentification" \ "qualifier").read[String]
 
   implicit val reads: Reads[LocationOfGoodsType05] = (
-    (__ \ "typeOfLocation").read[String].map(convertTypeOfLocation) and
-      qualifierOfIdentificationReads.map(convertQualifierOfIdentification) and
+    typeOfLocationReads and
+      qualifierOfIdentificationReads and
       (__ \ "identifier" \ "authorisationNumber").readNullable[String] and
       (__ \ "identifier" \ "additionalIdentifier").readNullable[String] and
       (__ \ "identifier" \ "unLocode").readNullable[String] and
@@ -324,25 +329,6 @@ object locationOfGoodsType05 {
       (__ \ "identifier" \ "postalCode").readNullable[PostcodeAddressType02](postcodeAddressType02.reads) and
       (__ \ "contact").readNullable[ContactPersonType06](contactPersonType06.reads)
   )(LocationOfGoodsType05.apply _)
-
-  private lazy val convertTypeOfLocation: String => String = {
-    case "designatedLocation" => "A"
-    case "authorisedPlace"    => "B"
-    case "approvedPlace"      => "C"
-    case "other"              => "D"
-    case _                    => throw new Exception("Invalid type of location value")
-  }
-
-  private lazy val convertQualifierOfIdentification: String => String = {
-    case "postalCode"              => "T"
-    case "unlocode"                => "U"
-    case "customsOfficeIdentifier" => "V"
-    case "coordinates"             => "W"
-    case "eoriNumber"              => "X"
-    case "authorisationNumber"     => "Y"
-    case "address"                 => "Z"
-    case _                         => throw new Exception("Invalid qualifier of identification value")
-  }
 }
 
 object customsOfficeType02 {
@@ -494,7 +480,7 @@ object consignmentItemType09 {
         (
           (index.toString: Reads[String]) and
             (index: Reads[Int]).map(BigInt(_)) and
-            (__ \ "declarationType").readNullable[String] and
+            (__ \ "declarationType" \ "code").readNullable[String] and
             (__ \ "countryOfDispatch" \ "code").readNullable[String] and
             (__ \ "countryOfDestination" \ "code").readNullable[String] and
             (__ \ "uniqueConsignmentReference").readNullable[String] and

@@ -92,8 +92,14 @@ class ConsignmentSpec extends SpecBase {
             |        ]
             |      },
             |      "locationOfGoods" : {
-            |        "typeOfLocation" : "designatedLocation",
-            |        "qualifierOfIdentification" : "postalCode",
+            |        "typeOfLocation" : {
+            |          "type": "A",
+            |          "description": "Designated location"
+            |        },
+            |        "qualifierOfIdentification" : {
+            |          "qualifier": "T",
+            |          "description": "Postal code"
+            |        },
             |        "identifier" : {
             |          "authorisationNumber" : "authorisation number",
             |          "additionalIdentifier" : "additional identifier",
@@ -353,7 +359,10 @@ class ConsignmentSpec extends SpecBase {
             |    "items" : [
             |      {
             |        "description" : "Description 1",
-            |        "declarationType" : "T1",
+            |        "declarationType" : {
+            |          "code": "T1",
+            |          "description": "Goods not having the customs status of Union goods, which are placed under the common transit procedure."
+            |        },
             |        "countryOfDispatch" : {
             |          "code" : "GB",
             |          "description" : "United Kingdom"
@@ -497,7 +506,10 @@ class ConsignmentSpec extends SpecBase {
             |      },
             |      {
             |        "description" : "Description 2",
-            |        "declarationType" : "T2",
+            |        "declarationType" : {
+            |          "code": "T2",
+            |          "description": "Goods having the customs status of Union goods, which are placed under the common transit procedure"
+            |        },
             |        "countryOfDispatch" : {
             |          "code" : "DE",
             |          "description" : "Germany"
@@ -1104,8 +1116,14 @@ class ConsignmentSpec extends SpecBase {
              |        ]
              |      },
              |      "locationOfGoods" : {
-             |        "typeOfLocation" : "designatedLocation",
-             |        "qualifierOfIdentification" : "postalCode",
+             |        "typeOfLocation" : {
+             |          "type": "A",
+             |          "description": "Designated location"
+             |        },
+             |        "qualifierOfIdentification" : {
+             |          "qualifier": "T",
+             |          "description": "Postal code"
+             |        },
              |        "identifier" : {
              |          "authorisationNumber" : "authorisation number",
              |          "additionalIdentifier" : "additional identifier",
@@ -1252,7 +1270,10 @@ class ConsignmentSpec extends SpecBase {
              |    "items" : [
              |      {
              |        "description" : "Description 1",
-             |        "declarationType" : "T1",
+             |        "declarationType" : {
+             |          "code": "T1",
+             |          "description": "Goods not having the customs status of Union goods, which are placed under the common transit procedure."
+             |        },
              |        "countryOfDispatch" : {
              |          "code" : "GB",
              |          "description" : "United Kingdom"
@@ -1379,7 +1400,10 @@ class ConsignmentSpec extends SpecBase {
              |      },
              |      {
              |        "description" : "Description 2",
-             |        "declarationType" : "T2",
+             |        "declarationType" : {
+             |          "code": "T2",
+             |          "description": "Goods having the customs status of Union goods, which are placed under the common transit procedure"
+             |        },
              |        "countryOfDispatch" : {
              |          "code" : "DE",
              |          "description" : "Germany"
@@ -2773,11 +2797,17 @@ class ConsignmentSpec extends SpecBase {
     }
 
     "locationOfGoodsType05 reads is called" when {
-      "qualifier of identification is not inferred" in {
+      "type of location and qualifier of identification is not inferred" in {
         val json = Json.parse(s"""
              |{
-             |  "typeOfLocation" : "approvedPlace",
-             |  "qualifierOfIdentification" : "unlocode",
+             |  "typeOfLocation" : {
+             |    "type": "C",
+             |    "description": "Approved place"
+             |  },
+             |  "qualifierOfIdentification" : {
+             |    "qualifier": "U",
+             |    "description": "UN/LOCODE"
+             |  },
              |  "identifier" : {
              |    "unLocode" : "UNLOCODE",
              |    "addContact" : false
@@ -2802,11 +2832,17 @@ class ConsignmentSpec extends SpecBase {
         )
       }
 
-      "qualifier of identification is inferred" in {
+      "type of location and qualifier of identification is inferred" in {
         val json = Json.parse(s"""
              |{
-             |  "typeOfLocation" : "authorisedPlace",
-             |  "inferredQualifierOfIdentification" : "authorisationNumber",
+             |  "inferredTypeOfLocation" : {
+             |    "type": "B",
+             |    "description": "Authorised place"
+             |  },
+             |  "inferredQualifierOfIdentification" : {
+             |    "qualifier": "Y",
+             |    "description": "Authorisation number"
+             |  },
              |  "identifier" : {
              |    "authorisationNumber" : "authorisation number",
              |    "addAdditionalIdentifier" : false,
