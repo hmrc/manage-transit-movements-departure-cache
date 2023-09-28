@@ -29,7 +29,8 @@ final case class UserAnswers(
   createdAt: Instant,
   lastUpdated: Instant,
   id: UUID,
-  status: SubmissionState
+  status: SubmissionState,
+  departureId: Option[String] = None
 ) {
 
   val lrn: String        = metadata.lrn
@@ -52,21 +53,25 @@ object UserAnswers {
   implicit lazy val reads: Reads[UserAnswers]   = customReads(implicitly)
   implicit lazy val writes: Writes[UserAnswers] = customWrites(implicitly)
 
-  private def customReads(implicit instantReads: Reads[Instant]): Reads[UserAnswers] = (
-    __.read[Metadata] and
-      (__ \ "createdAt").read[Instant] and
-      (__ \ "lastUpdated").read[Instant] and
-      (__ \ "_id").read[UUID] and
-      (__ \ "isSubmitted").read[SubmissionState]
-  )(UserAnswers.apply _)
+  private def customReads(implicit instantReads: Reads[Instant]): Reads[UserAnswers] =
+    (
+      __.read[Metadata] and
+        (__ \ "createdAt").read[Instant] and
+        (__ \ "lastUpdated").read[Instant] and
+        (__ \ "_id").read[UUID] and
+        (__ \ "isSubmitted").read[SubmissionState] and
+        (__ \ "departureId").readNullable[String]
+    )(UserAnswers.apply _)
 
-  private def customWrites(implicit instantWrites: Writes[Instant]): Writes[UserAnswers] = (
-    __.write[Metadata] and
-      (__ \ "createdAt").write[Instant] and
-      (__ \ "lastUpdated").write[Instant] and
-      (__ \ "_id").write[UUID] and
-      (__ \ "isSubmitted").write[SubmissionState]
-  )(unlift(UserAnswers.unapply))
+  private def customWrites(implicit instantWrites: Writes[Instant]): Writes[UserAnswers] =
+    (
+      __.write[Metadata] and
+        (__ \ "createdAt").write[Instant] and
+        (__ \ "lastUpdated").write[Instant] and
+        (__ \ "_id").write[UUID] and
+        (__ \ "isSubmitted").write[SubmissionState] and
+        (__ \ "departureId").writeNullable[String]
+    )(unlift(UserAnswers.unapply))
 
   lazy val mongoFormat: Format[UserAnswers] = Format(
     customReads(MongoJavatimeFormats.instantReads),

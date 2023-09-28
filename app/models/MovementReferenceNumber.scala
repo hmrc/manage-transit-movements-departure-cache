@@ -16,22 +16,20 @@
 
 package models
 
-import play.api.libs.json.{Format, JsObject, Json}
+import play.api.libs.json._
 
-case class Metadata(
-  lrn: String,
-  eoriNumber: String,
-  data: JsObject,
-  tasks: Map[String, Status.Value]
-) {
-
-  def updateTasks(tasks: Map[String, Status.Value]): Metadata =
-    this.copy(tasks = tasks)
+final case class MovementReferenceNumber(value: String) {
+  override def toString: String = value
 }
 
-object Metadata {
+object MovementReferenceNumber {
 
-  def apply(lrn: String, eoriNumber: String): Metadata = Metadata(lrn, eoriNumber, Json.obj(), Map())
+  implicit val reads: Reads[MovementReferenceNumber] =
+    (__ \ "movementReferenceNumber").read[String].map(MovementReferenceNumber(_))
 
-  implicit val format: Format[Metadata] = Json.format[Metadata]
+  implicit val writes: Writes[MovementReferenceNumber] = Writes {
+    lrn =>
+      JsString(lrn.value)
+  }
+
 }
