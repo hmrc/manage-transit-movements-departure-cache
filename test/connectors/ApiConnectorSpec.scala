@@ -156,8 +156,14 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
                                     |      "countriesInSecurityAgreement" : false,
                                     |      "addLocationOfGoods" : true,
                                     |      "locationOfGoods" : {
-                                    |        "typeOfLocation" : "designatedLocation",
-                                    |        "qualifierOfIdentification" : "customsOfficeIdentifier",
+                                    |        "typeOfLocation" : {
+                                    |          "type": "A",
+                                    |          "description": "Designated location"
+                                    |        },
+                                    |        "qualifierOfIdentification" : {
+                                    |          "qualifier": "V",
+                                    |          "description": "Customs office identifier"
+                                    |        },
                                     |        "identifier" : {
                                     |          "customsOffice" : {
                                     |            "id" : "XI000142",
