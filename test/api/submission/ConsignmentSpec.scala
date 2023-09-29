@@ -171,8 +171,14 @@ class ConsignmentSpec extends SpecBase {
             |        },
             |        "containerIndicator" : true
             |      },
-            |      "inlandMode" : "maritime",
-            |      "borderModeOfTransport" : "maritime",
+            |      "inlandMode" : {
+            |        "code": "1",
+            |        "description": "Maritime Transport"
+            |      },
+            |      "borderModeOfTransport" : {
+            |        "code": "1",
+            |        "description": "Maritime Transport"
+            |      },
             |      "carrierDetails" : {
             |        "identificationNumber" : "carrier1",
             |        "addContactYesNo" : true,
@@ -182,7 +188,10 @@ class ConsignmentSpec extends SpecBase {
             |        }
             |      },
             |      "transportMeansDeparture" : {
-            |        "identification" : "imoShipIdNumber",
+            |        "identification" : {
+            |          "type": "10",
+            |          "description": "IMO Ship Identification Number"
+            |        },
             |        "meansIdentificationNumber" : "means id number",
             |        "vehicleCountry" : {
             |          "code" : "FR",
@@ -191,7 +200,10 @@ class ConsignmentSpec extends SpecBase {
             |      },
             |      "transportMeansActiveList" : [
             |        {
-            |          "identification" : "seaGoingVessel",
+            |          "identification" : {
+            |            "code": "11",
+            |            "description": "Name of the sea-going vessel"
+            |          },
             |          "identificationNumber" : "active id number",
             |          "customsOfficeActiveBorder" : {
             |            "id" : "IT018101",
@@ -207,19 +219,31 @@ class ConsignmentSpec extends SpecBase {
             |      ],
             |      "supplyChainActors" : [
             |        {
-            |          "supplyChainActorType" : "consolidator",
+            |          "supplyChainActorType" : {
+            |            "role": "CS",
+            |            "description": "Consolidator"
+            |          },
             |          "identificationNumber" : "sca1"
             |        },
             |        {
-            |          "supplyChainActorType" : "freightForwarder",
+            |          "supplyChainActorType" : {
+            |            "role": "FW",
+            |            "description": "Freight Forwarder"
+            |          },
             |          "identificationNumber" : "sca2"
             |        },
             |        {
-            |          "supplyChainActorType" : "manufacturer",
+            |          "supplyChainActorType" : {
+            |            "role": "MF",
+            |            "description": "Manufacturer"
+            |          },
             |          "identificationNumber" : "sca3"
             |        },
             |        {
-            |          "supplyChainActorType" : "warehouseKeeper",
+            |          "supplyChainActorType" : {
+            |            "role": "WH",
+            |            "description": "Warehouse Keeper"
+            |          },
             |          "identificationNumber" : "sca4"
             |        }
             |      ],
@@ -237,7 +261,11 @@ class ConsignmentSpec extends SpecBase {
             |            ],
             |            "uuid" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |          }
-            |        ]
+            |        ],
+            |        "paymentMethod" : {
+            |          "method": "A",
+            |          "description": "Payment in cash"
+            |        }
             |      }
             |    },
             |    "documents" : {
@@ -420,19 +448,31 @@ class ConsignmentSpec extends SpecBase {
             |        "addSupplyChainActorYesNo" : true,
             |        "supplyChainActors" : [
             |          {
-            |            "supplyChainActorType" : "consolidator",
+            |            "supplyChainActorType" : {
+            |              "role": "CS",
+            |              "description": "Consolidator"
+            |            },
             |            "identificationNumber" : "itemSCA1"
             |          },
             |          {
-            |            "supplyChainActorType" : "freightForwarder",
+            |            "supplyChainActorType" : {
+            |              "role": "FW",
+            |              "description": "Freight Forwarder"
+            |            },
             |            "identificationNumber" : "itemSCA2"
             |          },
             |          {
-            |            "supplyChainActorType" : "manufacturer",
+            |            "supplyChainActorType" : {
+            |              "role": "MF",
+            |              "description": "Manufacturer"
+            |            },
             |            "identificationNumber" : "itemSCA3"
             |          },
             |          {
-            |            "supplyChainActorType" : "warehouseKeeper",
+            |            "supplyChainActorType" : {
+            |              "role": "WH",
+            |              "description": "Warehouse Keeper"
+            |            },
             |            "identificationNumber" : "itemSCA4"
             |          }
             |        ],
@@ -1195,8 +1235,14 @@ class ConsignmentSpec extends SpecBase {
              |        },
              |        "containerIndicator" : true
              |      },
-             |      "inlandMode" : "maritime",
-             |      "borderModeOfTransport" : "maritime",
+             |      "inlandMode" : {
+             |        "code": "1",
+             |        "description": "Maritime Transport"
+             |      },
+             |      "borderModeOfTransport" : {
+             |        "code": "1",
+             |        "description": "Maritime Transport"
+             |      },
              |      "carrierDetails" : {
              |        "identificationNumber" : "carrier1",
              |        "addContactYesNo" : true,
@@ -1206,7 +1252,10 @@ class ConsignmentSpec extends SpecBase {
              |        }
              |      },
              |      "transportMeansDeparture" : {
-             |        "identification" : "imoShipIdNumber",
+             |        "identification" : {
+             |          "type": "10",
+             |          "description": "IMO Ship Identification Number"
+             |        },
              |        "meansIdentificationNumber" : "means id number",
              |        "vehicleCountry" : {
              |          "code" : "FR",
@@ -1215,7 +1264,10 @@ class ConsignmentSpec extends SpecBase {
              |      },
              |      "transportMeansActiveList" : [
              |        {
-             |          "identification" : "seaGoingVessel",
+             |          "identification" : {
+             |            "code": "11",
+             |            "description": "Name of the sea-going vessel"
+             |          },
              |          "identificationNumber" : "active id number",
              |          "customsOfficeActiveBorder" : {
              |            "id" : "IT018101",
@@ -1231,19 +1283,31 @@ class ConsignmentSpec extends SpecBase {
              |      ],
              |      "supplyChainActors" : [
              |        {
-             |          "supplyChainActorType" : "consolidator",
+             |          "supplyChainActorType" : {
+             |            "role": "CS",
+             |            "description": "Consolidator"
+             |          },
              |          "identificationNumber" : "sca1"
              |        },
              |        {
-             |          "supplyChainActorType" : "freightForwarder",
+             |          "supplyChainActorType" : {
+             |            "role": "FW",
+             |            "description": "Freight Forwarder"
+             |          },
              |          "identificationNumber" : "sca2"
              |        },
              |        {
-             |          "supplyChainActorType" : "manufacturer",
+             |          "supplyChainActorType" : {
+             |            "role": "MF",
+             |            "description": "Manufacturer"
+             |          },
              |          "identificationNumber" : "sca3"
              |        },
              |        {
-             |          "supplyChainActorType" : "warehouseKeeper",
+             |          "supplyChainActorType" : {
+             |            "role": "WH",
+             |            "description": "Warehouse Keeper"
+             |          },
              |          "identificationNumber" : "sca4"
              |        }
              |      ],
@@ -1261,7 +1325,11 @@ class ConsignmentSpec extends SpecBase {
              |            ],
              |            "uuid" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
              |          }
-             |        ]
+             |        ],
+             |        "paymentMethod" : {
+             |          "method": "A",
+             |          "description": "Payment in cash"
+             |        }
              |      }
              |    },
              |    "documents" : {
@@ -1331,19 +1399,31 @@ class ConsignmentSpec extends SpecBase {
              |        "addSupplyChainActorYesNo" : true,
              |        "supplyChainActors" : [
              |          {
-             |            "supplyChainActorType" : "consolidator",
+             |            "supplyChainActorType" : {
+             |              "role": "CS",
+             |              "description": "Consolidator"
+             |            },
              |            "identificationNumber" : "itemSCA1"
              |          },
              |          {
-             |            "supplyChainActorType" : "freightForwarder",
+             |            "supplyChainActorType" : {
+             |              "role": "FW",
+             |              "description": "Freight Forwarder"
+             |            },
              |            "identificationNumber" : "itemSCA2"
              |          },
              |          {
-             |            "supplyChainActorType" : "manufacturer",
+             |            "supplyChainActorType" : {
+             |              "role": "MF",
+             |              "description": "Manufacturer"
+             |            },
              |            "identificationNumber" : "itemSCA3"
              |          },
              |          {
-             |            "supplyChainActorType" : "warehouseKeeper",
+             |            "supplyChainActorType" : {
+             |              "role": "WH",
+             |              "description": "Warehouse Keeper"
+             |            },
              |            "identificationNumber" : "itemSCA4"
              |          }
              |        ],
@@ -2652,7 +2732,10 @@ class ConsignmentSpec extends SpecBase {
             |  "transportDetails" : {
             |    "transportMeansActiveList" : [
             |      {
-            |        "identification" : "imoShipIdNumber",
+            |        "identification" : {
+            |          "code": "10",
+            |          "description": "IMO Ship Identification Number"
+            |        },
             |        "identificationNumber" : "active id number",
             |        "customsOfficeActiveBorder" : {
             |          "id" : "IT018101",
@@ -2666,7 +2749,10 @@ class ConsignmentSpec extends SpecBase {
             |        "conveyanceReferenceNumber" : "conveyance ref number"
             |      },
             |      {
-            |        "identification" : "europeanVesselIdNumber"
+            |        "identification" : {
+            |          "code": "80",
+            |          "description": "European Vessel Identification Number (ENI Code)"
+            |        }
             |      }
             |    ]
             |  }
@@ -2702,7 +2788,10 @@ class ConsignmentSpec extends SpecBase {
             |  "transportDetails" : {
             |    "transportMeansActiveList" : [
             |      {
-            |        "inferredIdentification" : "trainNumber",
+            |        "inferredIdentification" : {
+            |          "code": "21",
+            |          "description": "Train Number"
+            |        },
             |        "identificationNumber" : "active id number",
             |        "customsOfficeActiveBorder" : {
             |          "id" : "IT018101",
@@ -2716,7 +2805,10 @@ class ConsignmentSpec extends SpecBase {
             |        "conveyanceReferenceNumber" : "conveyance ref number"
             |      },
             |      {
-            |        "identification" : "europeanVesselIdNumber"
+            |        "identification" : {
+            |          "code": "80",
+            |          "description": "European Vessel Identification Number (ENI Code)"
+            |        }
             |      }
             |    ]
             |  }
@@ -2765,7 +2857,10 @@ class ConsignmentSpec extends SpecBase {
             |        "conveyanceReferenceNumber" : "conveyance ref number"
             |      },
             |      {
-            |        "identification" : "europeanVesselIdNumber"
+            |        "identification" : {
+            |          "code": "80",
+            |          "description": "European Vessel Identification Number (ENI Code)"
+            |        }
             |      }
             |    ]
             |  }
@@ -3089,7 +3184,10 @@ class ConsignmentSpec extends SpecBase {
             |{
             |  "transportDetails" : {
             |    "transportMeansDeparture" : {
-            |      "identification" : "imoShipIdNumber",
+            |      "identification" : {
+            |        "type": "10",
+            |        "description": "IMO Ship Identification Number"
+            |      },
             |      "meansIdentificationNumber" : "means id number",
             |      "vehicleCountry" : {
             |        "code" : "FR",
