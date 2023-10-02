@@ -53,6 +53,7 @@ class SubmissionController @Inject() (
                   case Right(response) =>
                     cacheRepository.set(uA, SubmissionState.Submitted).map {
                       _ =>
+                        println("lookherejoe", response.body)
                         Ok(response.body)
                     }
                   case Left(error) => Future.successful(error)
@@ -65,7 +66,7 @@ class SubmissionController @Inject() (
         }
     }
 
-  def postAmendment: Action[JsValue] =
+  def postAmendment(): Action[JsValue] =
     authenticate().async(parse.json) {
       implicit request =>
         val res = request.body.validate[String] match {

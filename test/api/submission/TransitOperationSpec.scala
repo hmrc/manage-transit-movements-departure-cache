@@ -18,7 +18,7 @@ package api.submission
 
 import base.SpecBase
 import generated.Number0
-import models.UserAnswers
+import models.{MovementReferenceNumber, UserAnswers}
 import play.api.libs.json.{JsValue, Json}
 import scalaxb.XMLCalendar
 
@@ -492,7 +492,7 @@ class TransitOperationSpec extends SpecBase {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = Some(mrn), flag = false)
+          val converted = TransitOperation.transformIE013(uA, mrn = Some(MovementReferenceNumber(mrn)), flag = false)
 
           converted shouldBe expected
         }
@@ -656,7 +656,7 @@ class TransitOperationSpec extends SpecBase {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = Some(mrn), flag = true)
+          val converted = TransitOperation.transformIE013(uA, mrn = Some(MovementReferenceNumber(mrn)), flag = true)
 
           converted shouldBe expected
         }
@@ -739,7 +739,7 @@ class TransitOperationSpec extends SpecBase {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = Some(mrn), flag = false)
+          val converted = TransitOperation.transformIE013(uA, mrn = Some(MovementReferenceNumber(mrn)), flag = false)
 
           converted shouldBe expected
         }
