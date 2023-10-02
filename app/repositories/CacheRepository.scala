@@ -78,7 +78,8 @@ class CacheRepository @Inject() (
       Updates.setOnInsert("createdAt", now),
       Updates.set("lastUpdated", now),
       Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID())),
-      statusUpdate
+      statusUpdate,
+      Updates.setOnInsert("departureId", data.departureId.orNull)
     )
     val options = UpdateOptions().upsert(true)
 

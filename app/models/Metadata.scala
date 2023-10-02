@@ -22,7 +22,8 @@ case class Metadata(
   lrn: String,
   eoriNumber: String,
   data: JsObject,
-  tasks: Map[String, Status.Value]
+  tasks: Map[String, Status.Value],
+  departureId: Option[String] = None
 ) {
 
   def updateTasks(tasks: Map[String, Status.Value]): Metadata =

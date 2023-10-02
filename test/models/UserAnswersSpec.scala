@@ -87,7 +87,7 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
              |}
              |""".stripMargin)
         val result        = json.as[UserAnswers]
-        result shouldBe userAnswers.copy(departureId = Some(depId1))
+        result shouldBe userAnswers.copy(metadata = userAnswers.metadata.copy(departureId = Some(depId1)))
       }
 
       "read correctly with departureId" in {
@@ -120,7 +120,7 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
              |    "departureId": "$depId1"
              |}
              |""".stripMargin)
-        val result        = Json.toJson(userAnswers.copy(departureId = Some(depId1)))
+        val result        = Json.toJson(userAnswers.copy(metadata = userAnswers.metadata.copy(departureId = Some(depId1))))
         result shouldBe json
       }
 
@@ -194,7 +194,7 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
              |}
              |""".stripMargin)
         val result        = json.as[UserAnswers](UserAnswers.mongoFormat)
-        result shouldBe userAnswers.copy(departureId = Some(depId1))
+        result shouldBe userAnswers.copy(metadata = userAnswers.metadata.copy(departureId = Some(depId1)))
       }
 
       "write correctly" in {
@@ -231,7 +231,7 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
              |    "departureId": "$depId1"
              |}
              |""".stripMargin)
-        val result        = Json.toJson(userAnswers.copy(departureId = Some(depId1)))(UserAnswers.mongoFormat)
+        val result        = Json.toJson(userAnswers.copy(metadata = userAnswers.metadata.copy(departureId = Some(depId1))))
         result shouldBe json
       }
     }

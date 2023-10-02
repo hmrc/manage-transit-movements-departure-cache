@@ -73,7 +73,7 @@ class SubmissionController @Inject() (
           case JsSuccess(lrn, _) =>
             cacheRepository.get(lrn, request.eoriNumber).flatMap {
               case Some(uA) =>
-                uA.departureId match {
+                uA.metadata.departureId match {
                   case Some(value) =>
                     apiService.submitAmmendDeclaration(uA, value).flatMap {
                       case Right(response) =>
@@ -110,7 +110,7 @@ class SubmissionController @Inject() (
   private def successAmendment(lrn: String, request: AuthenticatedRequest[JsValue])(implicit hc: HeaderCarrier): OptionT[Future, Result] =
     for {
       uA                  <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
-      departureId: String <- OptionT.fromOption[Future](uA.departureId)
+      departureId: String <- OptionT.fromOption[Future](uA.metadata.departureId)
       result <- OptionT(apiService.submitAmmendDeclaration(uA, departureId).flatMap {
         case Right(response) =>
           cacheRepository.set(uA, SubmissionState.Submitted).map {
