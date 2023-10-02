@@ -40,15 +40,24 @@ class AuthorisationsSpec extends SpecBase with ScalaCheckPropertyChecks {
             |      "authorisationsAndLimit" : {
             |        "authorisations" : [
             |          {
-            |            "inferredAuthorisationType" : "TRD",
+            |            "inferredAuthorisationType" : {
+            |              "code": "C524",
+            |              "description": "TRD - Authorisation to use transit declaration with a reduced dataset (Column 9e, Annex A of Delegated Regulation (EU) 2015/2446)"
+            |            },
             |            "authorisationReferenceNumber" : "TRD1"
             |          },
             |          {
-            |            "authorisationType" : "SSE",
+            |            "authorisationType" : {
+            |              "code": "C523",
+            |              "description": "SSE - Authorisation for the use of seals of a special type (Column 9d, Annex A of Delegated Regulation (EU) 2015/2446)"
+            |            },
             |            "authorisationReferenceNumber" : "SSE1"
             |          },
             |          {
-            |            "authorisationType" : "ACR",
+            |            "authorisationType" : {
+            |              "code": "C521",
+            |              "description": "ACR - Authorisation for the status of authorised consignor for Union transit (Column 9b, Annex A of Delegated Regulation (EU) 2015/2446)"
+            |            },
             |            "authorisationReferenceNumber" : "ACR1"
             |          }
             |        ]
