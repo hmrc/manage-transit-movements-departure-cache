@@ -34,19 +34,12 @@ object authorisationType03 {
 
   def reads(index: Int): Reads[AuthorisationType03] = {
     lazy val authorisationTypeReads: Reads[String] =
-      (__ \ "authorisationType").read[String] orElse (__ \ "inferredAuthorisationType").read[String]
+      (__ \ "authorisationType" \ "code").read[String] orElse (__ \ "inferredAuthorisationType" \ "code").read[String]
 
     (
       (index.toString: Reads[String]) and
-        authorisationTypeReads.map(convertTypeValue) and
+        authorisationTypeReads and
         (__ \ "authorisationReferenceNumber").read[String]
     )(AuthorisationType03.apply _)
-  }
-
-  private lazy val convertTypeValue: String => String = {
-    case "ACR" => "C521"
-    case "SSE" => "C523"
-    case "TRD" => "C524"
-    case _     => throw new Exception("Invalid authorisation type value")
   }
 }
