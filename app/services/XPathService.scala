@@ -65,6 +65,11 @@ class XPathService @Inject() (
 
   }
 
+  private def setTasksUnavailable(tasks: Map[String, Status.Value]): Map[String, Status.Value] =
+    tasks.map(
+      task => if (task._1 != PreTaskList.taskName) (task._1, Status.Unavailable) else task
+    )
+
   def handleErrors(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
     xPaths.flatMap {
       _.taskError
@@ -72,7 +77,7 @@ class XPathService @Inject() (
       case tasks if tasks.nonEmpty =>
         cacheRepository.get(lrn, eoriNumber).flatMap {
           case Some(userAnswers) =>
-            val updatedTasks: Map[String, Status.Value] = (userAnswers.metadata.tasks.toSeq ++ tasks.toSeq).toMap
+            val updatedTasks: Map[String, Status.Value] = setTasksUnavailable(userAnswers.metadata.tasks) ++ tasks
             cacheRepository
               .set(userAnswers.updateTasks(updatedTasks), SubmissionState.RejectedPendingChanges)
               .map {
