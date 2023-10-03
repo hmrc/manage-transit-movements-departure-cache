@@ -78,7 +78,7 @@ object guaranteeType02 {
 
   def reads(index: Int): Reads[GuaranteeType02] = (
     (index.toString: Reads[String]) and
-      (__ \ "guaranteeType").read[String] and
+      (__ \ "guaranteeType" \ "code").read[String] and
       (__ \ "otherReference").readNullable[String] and
       __.read[GuaranteeReferenceType03](guaranteeReferenceType03.reads(index)).map(Seq(_))
   )(GuaranteeType02.apply _)

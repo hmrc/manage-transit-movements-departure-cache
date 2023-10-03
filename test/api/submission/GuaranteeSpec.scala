@@ -40,7 +40,9 @@ class GuaranteeSpec extends SpecBase {
                |  "data" : {
                |    "guaranteeDetails" : [
                |      {
-               |        "guaranteeType" : "1",
+               |        "guaranteeType" : {
+               |          "code": "1"
+               |        },
                |        "otherReference" : "otherRefNo1",
                |        "referenceNumber" : "refNo1",
                |        "accessCode" : "1234",
@@ -51,7 +53,9 @@ class GuaranteeSpec extends SpecBase {
                |        }
                |      },
                |      {
-               |        "guaranteeType" : "A",
+               |        "guaranteeType" : {
+               |          "code": "A"
+               |        },
                |        "otherReference" : "otherRefNo2",
                |        "referenceNumber" : "refNo2",
                |        "accessCode" : "5678",
@@ -126,7 +130,9 @@ class GuaranteeSpec extends SpecBase {
                |  "data" : {
                |    "guaranteeDetails" : [
                |      {
-               |        "guaranteeType" : "3",
+               |        "guaranteeType" : {
+               |          "code": "3"
+               |        },
                |        "otherReferenceYesNo" : true,
                |        "otherReference" : "3_1",
                |        "accessCode" : "1234",
@@ -137,7 +143,9 @@ class GuaranteeSpec extends SpecBase {
                |        }
                |      },
                |      {
-               |        "guaranteeType" : "3",
+               |        "guaranteeType" : {
+               |          "code": "3"
+               |        },
                |        "otherReferenceYesNo" : true,
                |        "otherReference" : "3_2",
                |        "accessCode" : "5678",
@@ -148,7 +156,9 @@ class GuaranteeSpec extends SpecBase {
                |        }
                |      },
                |      {
-               |        "guaranteeType" : "8",
+               |        "guaranteeType" : {
+               |          "code": "8"
+               |        },
                |        "otherReference" : "8_1",
                |        "accessCode" : "1234",
                |        "liabilityAmount" : 1000,
@@ -158,7 +168,9 @@ class GuaranteeSpec extends SpecBase {
                |        }
                |      },
                |      {
-               |        "guaranteeType" : "8",
+               |        "guaranteeType" : {
+               |          "code": "8"
+               |        },
                |        "otherReference" : "8_2",
                |        "accessCode" : "5678",
                |        "liabilityAmount" : 2000,
@@ -260,7 +272,9 @@ class GuaranteeSpec extends SpecBase {
                |  "data" : {
                |    "guaranteeDetails" : [
                |      {
-               |        "guaranteeType" : "3",
+               |        "guaranteeType" : {
+               |          "code": "3"
+               |        },
                |        "otherReferenceYesNo" : true,
                |        "otherReference" : "3",
                |        "accessCode" : "1234",
@@ -271,7 +285,9 @@ class GuaranteeSpec extends SpecBase {
                |        }
                |      },
                |      {
-               |        "guaranteeType" : "3",
+               |        "guaranteeType" : {
+               |          "code": "3"
+               |        },
                |        "otherReferenceYesNo" : true,
                |        "otherReference" : "3",
                |        "accessCode" : "5678",
@@ -282,7 +298,9 @@ class GuaranteeSpec extends SpecBase {
                |        }
                |      },
                |      {
-               |        "guaranteeType" : "8",
+               |        "guaranteeType" : {
+               |          "code": "8"
+               |        },
                |        "otherReference" : "8",
                |        "accessCode" : "1234",
                |        "liabilityAmount" : 1000,
@@ -292,7 +310,9 @@ class GuaranteeSpec extends SpecBase {
                |        }
                |      },
                |      {
-               |        "guaranteeType" : "8",
+               |        "guaranteeType" : {
+               |          "code": "8"
+               |        },
                |        "otherReference" : "8",
                |        "accessCode" : "5678",
                |        "liabilityAmount" : 2000,
@@ -380,15 +400,21 @@ class GuaranteeSpec extends SpecBase {
                |  "data" : {
                |    "guaranteeDetails" : [
                |      {
-               |        "guaranteeType" : "3",
+               |        "guaranteeType" : {
+               |          "code": "3"
+               |        },
                |        "otherReferenceYesNo" : false
                |      },
                |      {
-               |        "guaranteeType" : "3",
+               |        "guaranteeType" : {
+               |          "code": "3"
+               |        },
                |        "otherReferenceYesNo" : false
                |      },
                |      {
-               |        "guaranteeType" : "0",
+               |        "guaranteeType" : {
+               |          "code": "0"
+               |        },
                |        "referenceNumber" : "0_1",
                |        "accessCode" : "1234",
                |        "liabilityAmount" : 1000,
@@ -398,7 +424,9 @@ class GuaranteeSpec extends SpecBase {
                |        }
                |      },
                |      {
-               |        "guaranteeType" : "0",
+               |        "guaranteeType" : {
+               |          "code": "0"
+               |        },
                |        "referenceNumber" : "0_2",
                |        "accessCode" : "5678",
                |        "liabilityAmount" : 2000,
