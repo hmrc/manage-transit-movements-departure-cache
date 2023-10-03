@@ -77,6 +77,7 @@ class SubmissionController @Inject() (
                   case Some(value) =>
                     apiService.submitAmmendDeclaration(uA, value).flatMap {
                       case Right(response) =>
+                        println("lookherejoe6", response)
                         cacheRepository.set(uA, SubmissionState.Submitted).map {
                           _ =>
                             Ok(response.body)

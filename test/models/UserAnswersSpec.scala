@@ -231,7 +231,7 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
              |    "departureId": "$depId1"
              |}
              |""".stripMargin)
-        val result        = Json.toJson(userAnswers.copy(metadata = userAnswers.metadata.copy(departureId = Some(depId1))))
+        val result        = Json.toJson(userAnswers.copy(metadata = userAnswers.metadata.copy(departureId = Some(depId1))))((UserAnswers.mongoFormat))
         result shouldBe json
       }
     }
