@@ -16,7 +16,7 @@
 
 package api.submission
 
-import generated.{CC013CType, CC015CType, PhaseIDtype}
+import generated.{CC013C, CC013CType, CC015C, CC015CType, PhaseIDtype}
 import models.SubmissionState.{Amendment, GuaranteeAmendment}
 import models.{MovementReferenceNumber, UserAnswers}
 import scalaxb.DataRecord
@@ -36,7 +36,7 @@ object Declaration {
 
   private def IE015(uA: UserAnswers): CC015CType =
     CC015CType(
-      messageSequence1 = Header.message(uA),
+      messageSequence1 = Header.message(uA, CC015C),
       TransitOperation = TransitOperation.transform(uA),
       Authorisation = Authorisations.transform(uA),
       CustomsOfficeOfDeparture = CustomsOffices.transformOfficeOfDeparture(uA),
@@ -52,7 +52,7 @@ object Declaration {
 
   private def IE013(uA: UserAnswers, mrn: Option[MovementReferenceNumber], flag: Boolean): CC013CType =
     CC013CType(
-      messageSequence1 = Header.message(uA),
+      messageSequence1 = Header.message(uA, CC013C),
       TransitOperation = TransitOperation.transformIE013(uA, mrn, flag),
       Authorisation = Authorisations.transform(uA),
       CustomsOfficeOfDeparture = CustomsOffices.transformOfficeOfDeparture(uA),

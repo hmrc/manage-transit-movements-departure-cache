@@ -16,7 +16,7 @@
 
 package api.submission
 
-import generated.{CC015C, CORRELATION_IDENTIFIERSequence, MESSAGESequence, MESSAGE_1Sequence, MESSAGE_TYPESequence}
+import generated.{CC013C, CC015C, CORRELATION_IDENTIFIERSequence, MESSAGESequence, MESSAGE_1Sequence, MESSAGE_TYPESequence, MessageTypes}
 import models.UserAnswers
 import play.api.libs.json.JsSuccess
 
@@ -24,7 +24,7 @@ import java.time.LocalDateTime
 
 object Header extends {
 
-  def message(uA: UserAnswers): MESSAGESequence =
+  def message(uA: UserAnswers, messageType: MessageTypes): MESSAGESequence =
     uA.metadata.data.validate((preTaskListPath \ "officeOfDeparture" \ "id").read[String].map(_.take(2))) match {
       case JsSuccess(officeOfDepartureCountryCode, _) =>
         MESSAGESequence(
@@ -32,9 +32,9 @@ object Header extends {
           messagE_1Sequence2 = MESSAGE_1Sequence(
             messageRecipient = s"NTA.$officeOfDepartureCountryCode",
             preparationDateAndTime = LocalDateTime.now(),
-            messageIdentification = "CC015C" // TODO - check this with API team? What should this be set to?
+            messageIdentification = messageType.toString
           ),
-          messagE_TYPESequence3 = MESSAGE_TYPESequence(CC015C),
+          messagE_TYPESequence3 = MESSAGE_TYPESequence(messageType),
           correlatioN_IDENTIFIERSequence4 = CORRELATION_IDENTIFIERSequence(
             correlationIdentifier = None // TODO - What should this be?
           )
