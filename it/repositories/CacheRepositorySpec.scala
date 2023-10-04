@@ -31,12 +31,24 @@ import java.time.temporal.ChronoUnit._
 
 class CacheRepositorySpec extends CacheRepositorySpecBase {
 
-  private lazy val userAnswers1 = emptyUserAnswers.copy(metadata = Metadata("ABCD1111111111111", "EoriNumber1"))
-  private lazy val userAnswers2 = emptyUserAnswers.copy(metadata = Metadata("ABCD2222222222222", "EoriNumber2"))
-  private lazy val userAnswers3 = emptyUserAnswers.copy(metadata = Metadata("ABCD3333333333333", "EoriNumber3"))
-  private lazy val userAnswers4 = emptyUserAnswers.copy(metadata = Metadata("ABCD1111111111111", "EoriNumber4"), createdAt = Instant.now())
-  private lazy val userAnswers5 = emptyUserAnswers.copy(metadata = Metadata("ABCD2222222222222", "EoriNumber4"), createdAt = Instant.now().minus(1, HOURS))
-  private lazy val userAnswers6 = emptyUserAnswers.copy(metadata = Metadata("EFGH3333333333333", "EoriNumber4"))
+  private val lrn1 = "ABCD1111111111111"
+  private val lrn2 = "ABCD2222222222222"
+  private val lrn3 = "ABCD3333333333333"
+  private val lrn4 = "EFGH3333333333333"
+
+  private val eori1 = "EoriNumber1"
+  private val eori2 = "EoriNumber2"
+  private val eori3 = "EoriNumber3"
+  private val eori4 = "EoriNumber4"
+
+  private val userAnswers1 = emptyUserAnswers.copy(metadata = Metadata(lrn1, eori1))
+  private val userAnswers2 = emptyUserAnswers.copy(metadata = Metadata(lrn2, eori2))
+  private val userAnswers3 = emptyUserAnswers.copy(metadata = Metadata(lrn3, eori3))
+  private val userAnswers4 = emptyUserAnswers.copy(metadata = Metadata(lrn1, eori4), createdAt = Instant.now())
+  private val userAnswers5 = emptyUserAnswers.copy(metadata = Metadata(lrn2, eori4), createdAt = Instant.now().minus(1, HOURS))
+  private val userAnswers6 = emptyUserAnswers.copy(metadata = Metadata(lrn4, eori4))
+  private val userAnswers7 = emptyUserAnswers.copy(metadata = Metadata(lrn1, eori1), status = SubmissionState.Submitted)
+  private val userAnswers8 = emptyUserAnswers.copy(metadata = Metadata(lrn1, eori1), status = SubmissionState.RejectedPendingChanges)
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -230,6 +242,22 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         val result = repository.getAll(userAnswers3.eoriNumber).futureValue
 
         result.userAnswers shouldBe Seq.empty
+      }
+
+      "return UserAnswersSummary with only un-submitted declarations" in {
+
+        insert(userAnswers7).futureValue
+        insert(userAnswers8).futureValue
+
+        val result = repository.getAll(eori1, status = Some(SubmissionState.NotSubmitted)).futureValue
+
+        result match {
+          case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
+            eoriNumber shouldBe eori1
+            totalMovements shouldBe 3
+            totalMatchingMovements shouldBe 1
+            userAnswers.length shouldBe 1
+        }
       }
     }
 

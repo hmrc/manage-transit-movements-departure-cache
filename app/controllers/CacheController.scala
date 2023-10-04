@@ -101,14 +101,19 @@ class CacheController @Inject() (
         }
   }
 
-  def getAll(lrn: Option[String] = None, limit: Option[Int] = None, skip: Option[Int] = None, sortBy: Option[String] = None): Action[AnyContent] =
+  def getAll(
+    lrn: Option[String] = None,
+    status: Option[SubmissionState],
+    limit: Option[Int] = None,
+    skip: Option[Int] = None,
+    sortBy: Option[String] = None
+  ): Action[AnyContent] =
     authenticate().async {
       implicit request =>
         cacheRepository
-          .getAll(request.eoriNumber, lrn, limit, skip, sortBy)
-          .map(
-            result => Ok(result.toHateoas())
-          )
+          .getAll(request.eoriNumber, lrn, status, limit, skip, sortBy)
+          .map(_.toHateoas())
+          .map(Ok(_))
           .recover {
             case e =>
               logger.error("Failed to read user answers summary from mongo", e)

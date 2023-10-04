@@ -42,5 +42,41 @@ class SubmissionStateSpec extends AnyFreeSpec with Generators with Matchers with
           Json.toJson(state) mustEqual JsString(state.asString)
       }
     }
+
+    "query string binder" - {
+      "must bind" - {
+        "when not submitted" in {
+          val result = SubmissionState.queryStringBindable.bind("state", Map("state" -> Seq("notSubmitted")))
+          result mustBe Some(Right(SubmissionState.NotSubmitted))
+        }
+
+        "when submitted" in {
+          val result = SubmissionState.queryStringBindable.bind("state", Map("state" -> Seq("submitted")))
+          result mustBe Some(Right(SubmissionState.Submitted))
+        }
+
+        "when rejected (pending changes)" in {
+          val result = SubmissionState.queryStringBindable.bind("state", Map("state" -> Seq("rejectedPendingChanges")))
+          result mustBe Some(Right(SubmissionState.RejectedPendingChanges))
+        }
+      }
+
+      "must unbind" - {
+        "when not submitted" in {
+          val result = SubmissionState.queryStringBindable.unbind("state", SubmissionState.NotSubmitted)
+          result mustBe "notSubmitted"
+        }
+
+        "when submitted" in {
+          val result = SubmissionState.queryStringBindable.unbind("state", SubmissionState.Submitted)
+          result mustBe "submitted"
+        }
+
+        "when rejected (pending changes)" in {
+          val result = SubmissionState.queryStringBindable.unbind("state", SubmissionState.RejectedPendingChanges)
+          result mustBe "rejectedPendingChanges"
+        }
+      }
+    }
   }
 }
