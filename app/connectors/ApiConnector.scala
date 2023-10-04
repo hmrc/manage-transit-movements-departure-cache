@@ -63,7 +63,7 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
     getMRN(departureId).flatMap {
       maybeReferenceNumber =>
         val payload: String =
-          Declaration.transform(userAnswers, maybeReferenceNumber).toString 
+          Declaration.transform(userAnswers, maybeReferenceNumber).toString
 
         httpClient
           .POSTString[HttpResponse](declarationUrl, payload, requestHeaders)
@@ -87,13 +87,6 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
 
     val declarationUrl = s"${appConfig.apiUrl}/movements/departures"
-
-//    val declarationUrl =
-//      if (userAnswers.status == GuaranteeAmendment)
-//            s"${appConfig.apiUrl}/movements/departures/{departureId}/messages" //TODO Fetch departureId for declaration - grab it when we check for MRN?
-//      else {
-//            s"${appConfig.apiUrl}/movements/departures"
-//      }
 
     val payload: String = Declaration.transform(userAnswers, mrn = None).toString //TODO fetch MRN from API for declaration - if not there then None
 
