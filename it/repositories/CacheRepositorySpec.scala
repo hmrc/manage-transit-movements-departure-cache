@@ -249,7 +249,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         insert(userAnswers7).futureValue
         insert(userAnswers8).futureValue
 
-        val result = repository.getAll(eori1, status = Some(SubmissionState.NotSubmitted)).futureValue
+        val result = repository.getAll(eori1, state = Some(SubmissionState.NotSubmitted)).futureValue
 
         result match {
           case UserAnswersSummary(eoriNumber, userAnswers, totalMovements, totalMatchingMovements) =>
