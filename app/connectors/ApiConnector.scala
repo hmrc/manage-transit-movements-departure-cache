@@ -63,7 +63,7 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
     getMRN(departureId).flatMap {
       maybeReferenceNumber =>
         val payload: String =
-          Declaration.transform(userAnswers, maybeReferenceNumber).toString //TODO fetch MRN from API for declaration - if not there then None
+          Declaration.transform(userAnswers, maybeReferenceNumber).toString 
 
         httpClient
           .POSTString[HttpResponse](declarationUrl, payload, requestHeaders)

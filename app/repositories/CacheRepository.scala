@@ -70,7 +70,7 @@ class CacheRepository @Inject() (
       Filters.eq("eoriNumber", data.eoriNumber)
     )
 
-    val update: Seq[Bson] = Seq(
+    val updates: Seq[Bson] = Seq(
       Updates.setOnInsert("lrn", data.lrn),
       Updates.setOnInsert("eoriNumber", data.eoriNumber),
       Updates.set("data", Codecs.toBson(data.data)),
@@ -80,7 +80,7 @@ class CacheRepository @Inject() (
       Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID())),
       statusUpdate
     ) ++ data.departureId.map(Updates.set("departureId", _))
-    val combineUpdates: Bson = Updates.combine(update: _*)
+    val combineUpdates: Bson = Updates.combine(updates: _*)
     val options              = UpdateOptions().upsert(true)
 
     collection

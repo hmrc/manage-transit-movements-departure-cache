@@ -53,7 +53,6 @@ class SubmissionController @Inject() (
                   case Right(response) =>
                     cacheRepository.set(uA, SubmissionState.Submitted).map {
                       _ =>
-                        println("lookherejoe0", response.body)
                         Ok(response.body)
                     }
                   case Left(error) => Future.successful(error)

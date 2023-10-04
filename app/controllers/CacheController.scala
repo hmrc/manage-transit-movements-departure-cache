@@ -47,10 +47,8 @@ class CacheController @Inject() (
 
   def post(lrn: String): Action[JsValue] = authenticateAndLock(lrn).async(parse.json) {
     implicit request =>
-      println("\n\n\nlookherejoe3", request.body)
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
-          println("\n\n\nlookherejoe4", data)
           if (request.eoriNumber == data.eoriNumber) {
             val status: Option[SubmissionState] = (request.body \ "isSubmitted").validate[SubmissionState].asOpt
             set(data, status)
