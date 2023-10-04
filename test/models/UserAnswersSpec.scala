@@ -67,6 +67,11 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
           |""".stripMargin)
 
       "read correctly" in {
+        val result = json.as[UserAnswers]
+        result shouldBe userAnswers
+      }
+
+      "read correctly with departureId" in {
         val depId1        = "32r43refwd"
         val json: JsValue = Json.parse(s"""
              |{
@@ -88,11 +93,6 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
              |""".stripMargin)
         val result        = json.as[UserAnswers]
         result shouldBe userAnswers.copy(metadata = userAnswers.metadata.copy(departureId = Some(depId1)))
-      }
-
-      "read correctly with departureId" in {
-        val result = json.as[UserAnswers]
-        result shouldBe userAnswers
       }
 
       "write correctly" in {
@@ -164,36 +164,8 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
         result shouldBe userAnswers
       }
 
-      "read correctly with departureId" in {
-        val depId1        = "dsfafsdaf"
-        val json: JsValue = Json.parse(s"""
-             |{
-             |    "_id" : "$uuid",
-             |    "lrn" : "$lrn",
-             |    "eoriNumber" : "$eoriNumber",
-             |    "data" : {},
-             |    "isSubmitted" : "notSubmitted",
-             |    "tasks" : {
-             |        "task1" : "completed",
-             |        "task2" : "in-progress",
-             |        "task3" : "not-started",
-             |        "task4" : "cannot-start-yet"
-             |    },
-             |    "createdAt" : {
-             |        "$$date" : {
-             |            "$$numberLong" : "1662393524188"
-             |        }
-             |    },
-             |
-             |    "lastUpdated" : {
-             |        "$$date" : {
-             |            "$$numberLong" : "1662546803472"
-             |        }
-             |    },
-             |    "departureId": "$depId1"
-             |}
-             |""".stripMargin)
-        val result        = json.as[UserAnswers](UserAnswers.mongoFormat)
+      "read correctly with departureId" in new DepartureIdJsonScope {
+        val result = json.as[UserAnswers](UserAnswers.mongoFormat)
         result shouldBe userAnswers.copy(metadata = userAnswers.metadata.copy(departureId = Some(depId1)))
       }
 
@@ -202,39 +174,46 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
         result shouldBe json
       }
 
-      "write correctly with departureId" in {
-        val depId1        = "1d234567fg"
-        val json: JsValue = Json.parse(s"""
-             |{
-             |    "_id" : "$uuid",
-             |    "lrn" : "$lrn",
-             |    "eoriNumber" : "$eoriNumber",
-             |    "data" : {},
-             |    "isSubmitted" : "notSubmitted",
-             |    "tasks" : {
-             |        "task1" : "completed",
-             |        "task2" : "in-progress",
-             |        "task3" : "not-started",
-             |        "task4" : "cannot-start-yet"
-             |    },
-             |    "createdAt" : {
-             |        "$$date" : {
-             |            "$$numberLong" : "1662393524188"
-             |        }
-             |    },
-             |
-             |    "lastUpdated" : {
-             |        "$$date" : {
-             |            "$$numberLong" : "1662546803472"
-             |        }
-             |    },
-             |    "departureId": "$depId1"
-             |}
-             |""".stripMargin)
-        val result        = Json.toJson(userAnswers.copy(metadata = userAnswers.metadata.copy(departureId = Some(depId1))))((UserAnswers.mongoFormat))
+      "write correctly with departureId" in new DepartureIdJsonScope {
+        val result = Json.toJson(userAnswers.copy(metadata = userAnswers.metadata.copy(departureId = Some(depId1))))((UserAnswers.mongoFormat))
         result shouldBe json
       }
     }
   }
 
+}
+
+trait DepartureIdJsonScope {
+
+  val lrn           = "lrn"
+  val eoriNumber    = "eori"
+  val uuid          = "2e8ede47-dbfb-44ea-a1e3-6c57b1fe6fe2"
+  val depId1        = "1d234567fg"
+  val json: JsValue = Json.parse(s"""
+       |{
+       |    "_id" : "$uuid",
+       |    "lrn" : "$lrn",
+       |    "eoriNumber" : "$eoriNumber",
+       |    "data" : {},
+       |    "isSubmitted" : "notSubmitted",
+       |    "tasks" : {
+       |        "task1" : "completed",
+       |        "task2" : "in-progress",
+       |        "task3" : "not-started",
+       |        "task4" : "cannot-start-yet"
+       |    },
+       |    "createdAt" : {
+       |        "$$date" : {
+       |            "$$numberLong" : "1662393524188"
+       |        }
+       |    },
+       |
+       |    "lastUpdated" : {
+       |        "$$date" : {
+       |            "$$numberLong" : "1662546803472"
+       |        }
+       |    },
+       |    "departureId": "$depId1"
+       |}
+       |""".stripMargin)
 }

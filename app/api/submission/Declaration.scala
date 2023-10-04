@@ -29,9 +29,9 @@ object Declaration {
   private val scope: NamespaceBinding = scalaxb.toScope(Some("ncts") -> "http://ncts.dgtaxud.ec")
 
   def transform(uA: UserAnswers, mrn: Option[MovementReferenceNumber]): NodeSeq = uA.status match {
-    case Amendment          => toXML(IE013(uA, mrn, flag = false), "ncts:CC013C", scope)
-    case GuaranteeAmendment => toXML(IE013(uA, mrn, flag = true), "ncts:CC013C", scope)
-    case _                  => toXML(IE015(uA), "ncts:CC015C", scope)
+    case Amendment          => toXML(IE013(uA, mrn, flag = false), s"ncts:${CC013C.toString}", scope)
+    case GuaranteeAmendment => toXML(IE013(uA, mrn, flag = true), s"ncts:${CC013C.toString}", scope)
+    case _                  => toXML(IE015(uA), s"ncts:${CC015C.toString}", scope)
   }
 
   private def IE015(uA: UserAnswers): CC015CType =
