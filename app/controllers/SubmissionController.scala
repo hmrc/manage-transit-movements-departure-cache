@@ -56,7 +56,7 @@ class SubmissionController @Inject() (
     for {
       uA <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
       result <- OptionT(apiService.submitDeclaration(uA).flatMap {
-        result(uA, _)
+        responseToResult(uA, _)
       })
 
     } yield result
@@ -77,11 +77,11 @@ class SubmissionController @Inject() (
     for {
       uA          <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
       departureId <- OptionT.fromOption[Future](uA.metadata.departureId)
-      result      <- OptionT(apiService.submitAmmendDeclaration(uA, departureId).flatMap(result(uA, _)))
+      result      <- OptionT(apiService.submitAmmendDeclaration(uA, departureId).flatMap(responseToResult(uA, _)))
 
     } yield result
 
-  private def result(uA: UserAnswers, resultOrResponse: Either[Result, HttpResponse]): Future[Option[Result]] =
+  private def responseToResult(uA: UserAnswers, resultOrResponse: Either[Result, HttpResponse]): Future[Option[Result]] =
     resultOrResponse match {
       case Right(response) =>
         cacheRepository
