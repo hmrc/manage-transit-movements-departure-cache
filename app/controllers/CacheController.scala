@@ -103,7 +103,7 @@ class CacheController @Inject() (
 
   def getAll(
     lrn: Option[String] = None,
-    status: Option[SubmissionState],
+    state: Option[SubmissionState],
     limit: Option[Int] = None,
     skip: Option[Int] = None,
     sortBy: Option[String] = None
@@ -111,7 +111,7 @@ class CacheController @Inject() (
     authenticate().async {
       implicit request =>
         cacheRepository
-          .getAll(request.eoriNumber, lrn, status, limit, skip, sortBy)
+          .getAll(request.eoriNumber, lrn, state, limit, skip, sortBy)
           .map(_.toHateoas())
           .map(Ok(_))
           .recover {
