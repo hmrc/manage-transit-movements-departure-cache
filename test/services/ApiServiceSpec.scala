@@ -63,6 +63,20 @@ class ApiServiceSpec extends SpecBase with ScalaFutures {
     }
   }
 
+  "submitAmmend" must {
+    "call connector" in {
+      val departureId = "departureId123"
+      val userAnswers = emptyUserAnswersWithDepartureId
+      println("sa", userAnswers)
+      val expectedResult = Right(HttpResponse(OK, ""))
+      println("sa", expectedResult)
+      when(mockApiConnector.submitAmmend(any(), any())(any())).thenReturn(Future.successful(expectedResult))
+      val result = service.submitAmmendDeclaration(userAnswers, departureId).futureValue
+      result shouldBe expectedResult
+      verify(mockApiConnector).submitAmmend(eqTo(userAnswers), eqTo(departureId))(any())
+    }
+  }
+
   "isIE028DefinedForDeparture" must {
     "must return true" when {
       "IE028 is defined" in {

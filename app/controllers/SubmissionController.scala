@@ -52,15 +52,6 @@ class SubmissionController @Inject() (
       }
   }
 
-  private def successPost(lrn: String, request: AuthenticatedRequest[JsValue])(implicit hc: HeaderCarrier): OptionT[Future, Result] =
-    for {
-      uA <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
-      result <- OptionT(apiService.submitDeclaration(uA).flatMap {
-        responseToResult(uA, _)
-      })
-
-    } yield result
-
   def postAmendment(): Action[JsValue] =
     authenticate().async(parse.json) {
       implicit request: AuthenticatedRequest[JsValue] =>
@@ -72,6 +63,15 @@ class SubmissionController @Inject() (
         }
 
     }
+
+  private def successPost(lrn: String, request: AuthenticatedRequest[JsValue])(implicit hc: HeaderCarrier): OptionT[Future, Result] =
+    for {
+      uA <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
+      result <- OptionT(apiService.submitDeclaration(uA).flatMap {
+        responseToResult(uA, _)
+      })
+
+    } yield result
 
   private def successPostAmendment(lrn: String, request: AuthenticatedRequest[JsValue])(implicit hc: HeaderCarrier): OptionT[Future, Result] =
     for {

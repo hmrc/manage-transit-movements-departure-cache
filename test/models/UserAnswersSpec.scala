@@ -28,9 +28,9 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
 
   private val userAnswers = UserAnswers(
     metadata = Metadata(
-      lrn        = lrn,
+      lrn = lrn,
       eoriNumber = eoriNumber,
-      data       = Json.obj(),
+      data = Json.obj(),
       tasks = Map(
         "task1" -> Status.Completed,
         "task2" -> Status.InProgress,
@@ -38,11 +38,13 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
         "task4" -> Status.CannotStartYet
       )
     ),
-    createdAt   = Instant.ofEpochMilli(1662393524188L),
+    createdAt = Instant.ofEpochMilli(1662393524188L),
     lastUpdated = Instant.ofEpochMilli(1662546803472L),
-    id          = UUID.fromString(uuid),
-    status      = SubmissionState.NotSubmitted
+    id = UUID.fromString(uuid),
+    status = SubmissionState.NotSubmitted
   )
+
+  private val userAnswersWithDepartureId = userAnswers.copy(metadata = userAnswers.metadata.copy(departureId = Some(departureId)))
 
   "User answers" when {
 
@@ -66,14 +68,33 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
           |}
           |""".stripMargin)
 
+      val jsonWithDepartureId: JsValue = Json.parse(s"""
+           |{
+           |    "_id" : "$uuid",
+           |    "lrn" : "$lrn",
+           |    "eoriNumber" : "$eoriNumber",
+           |    "data" : {},
+           |    "tasks" : {
+           |        "task1" : "completed",
+           |        "task2" : "in-progress",
+           |        "task3" : "not-started",
+           |        "task4" : "cannot-start-yet"
+           |    },
+           |    "createdAt" : "2022-09-05T15:58:44.188Z",
+           |    "lastUpdated" : "2022-09-07T10:33:23.472Z",
+           |    "isSubmitted" : "notSubmitted",
+           |    "departureId": "$departureId"
+           |}
+           |""".stripMargin)
+
       "read correctly" in {
         val result = json.as[UserAnswers]
         result shouldBe userAnswers
       }
 
-      "read correctly with departureId" in new DepartureIdScope {
-        val result = json.as[UserAnswers]
-        result shouldBe userAnswers.copy(metadata = userAnswers.metadata.copy(departureId = Some(depId1)))
+      "read correctly with departureId" in {
+        val result = jsonWithDepartureId.as[UserAnswers]
+        result shouldBe userAnswersWithDepartureId
       }
 
       "write correctly" in {
@@ -81,9 +102,9 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
         result shouldBe json
       }
 
-      "write correctly with departureId" in new DepartureIdScope {
-        val result = Json.toJson(userAnswers.copy(metadata = userAnswers.metadata.copy(departureId = Some(depId1))))
-        result shouldBe json
+      "write correctly with departureId" in {
+        val result = Json.toJson(userAnswersWithDepartureId)
+        result shouldBe jsonWithDepartureId
       }
 
       "be readable as a LocalDateTime for backwards compatibility" in {
@@ -121,14 +142,42 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
           |}
           |""".stripMargin)
 
+      val jsonWithDepartureId: JsValue = Json.parse(s"""
+           |{
+           |    "_id" : "$uuid",
+           |    "lrn" : "$lrn",
+           |    "eoriNumber" : "$eoriNumber",
+           |    "data" : {},
+           |    "isSubmitted" : "notSubmitted",
+           |    "tasks" : {
+           |        "task1" : "completed",
+           |        "task2" : "in-progress",
+           |        "task3" : "not-started",
+           |        "task4" : "cannot-start-yet"
+           |    },
+           |    "createdAt" : {
+           |        "$$date" : {
+           |            "$$numberLong" : "1662393524188"
+           |        }
+           |    },
+           |
+           |    "lastUpdated" : {
+           |        "$$date" : {
+           |            "$$numberLong" : "1662546803472"
+           |        }
+           |    },
+           |    "departureId": "$departureId"
+           |}
+           |""".stripMargin)
+
       "read correctly" in {
         val result = json.as[UserAnswers](UserAnswers.mongoFormat)
         result shouldBe userAnswers
       }
 
-      "read correctly with departureId" in new DepartureIdScope {
-        val result = json.as[UserAnswers](UserAnswers.mongoFormat)
-        result shouldBe userAnswers.copy(metadata = userAnswers.metadata.copy(departureId = Some(depId1)))
+      "read correctly with departureId" in {
+        val result = jsonWithDepartureId.as[UserAnswers](UserAnswers.mongoFormat)
+        result shouldBe userAnswersWithDepartureId
       }
 
       "write correctly" in {
@@ -136,46 +185,11 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
         result shouldBe json
       }
 
-      "write correctly with departureId" in new DepartureIdScope {
-        val result = Json.toJson(userAnswers.copy(metadata = userAnswers.metadata.copy(departureId = Some(depId1))))((UserAnswers.mongoFormat))
-        result shouldBe json
+      "write correctly with departureId" in {
+        val result = Json.toJson(userAnswersWithDepartureId)((UserAnswers.mongoFormat))
+        result shouldBe jsonWithDepartureId
       }
     }
   }
 
-}
-
-trait DepartureIdScope {
-
-  val lrn           = "lrn"
-  val eoriNumber    = "eori"
-  val uuid          = "2e8ede47-dbfb-44ea-a1e3-6c57b1fe6fe2"
-  val depId1        = "1d234567fg"
-  val json: JsValue = Json.parse(s"""
-       |{
-       |    "_id" : "$uuid",
-       |    "lrn" : "$lrn",
-       |    "eoriNumber" : "$eoriNumber",
-       |    "data" : {},
-       |    "isSubmitted" : "notSubmitted",
-       |    "tasks" : {
-       |        "task1" : "completed",
-       |        "task2" : "in-progress",
-       |        "task3" : "not-started",
-       |        "task4" : "cannot-start-yet"
-       |    },
-       |    "createdAt" : {
-       |        "$$date" : {
-       |            "$$numberLong" : "1662393524188"
-       |        }
-       |    },
-       |
-       |    "lastUpdated" : {
-       |        "$$date" : {
-       |            "$$numberLong" : "1662546803472"
-       |        }
-       |    },
-       |    "departureId": "$depId1"
-       |}
-       |""".stripMargin)
 }
