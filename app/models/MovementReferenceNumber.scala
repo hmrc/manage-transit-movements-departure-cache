@@ -28,8 +28,8 @@ object MovementReferenceNumber {
     (__ \ "movementReferenceNumber").read[String].map(MovementReferenceNumber(_))
 
   implicit val writes: Writes[MovementReferenceNumber] = Writes {
-    lrn =>
-      JsString(lrn.value)
+    mrn =>
+      JsString(mrn.value)
   }
 
 }

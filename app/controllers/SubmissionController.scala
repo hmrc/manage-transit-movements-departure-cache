@@ -75,9 +75,9 @@ class SubmissionController @Inject() (
 
   private def successPostAmendment(lrn: String, request: AuthenticatedRequest[JsValue])(implicit hc: HeaderCarrier): OptionT[Future, Result] =
     for {
-      userAnswers          <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
+      userAnswers <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
       departureId <- OptionT.fromOption[Future](userAnswers.metadata.departureId)
-      result      <- OptionT(apiService.submitAmmendDeclaration(userAnswers, departureId).flatMap(responseToResult(userAnswers, _)))
+      result      <- OptionT(apiService.submitAmendDeclaration(userAnswers, departureId).flatMap(responseToResult(userAnswers, _)))
 
     } yield result
 

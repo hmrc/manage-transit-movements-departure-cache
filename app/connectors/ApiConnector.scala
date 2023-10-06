@@ -18,7 +18,7 @@ package connectors
 
 import api.submission._
 import config.AppConfig
-import models.{ DepartureMessageTypes, Departures, MovementReferenceNumber, UserAnswers}
+import models.{DepartureMessageTypes, Departures, MovementReferenceNumber, UserAnswers}
 import play.api.Logging
 import play.api.http.HeaderNames
 import play.api.mvc.Result
@@ -52,7 +52,7 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
     httpClient.GET[DepartureMessageTypes](url)(implicitly, headers, ec)
   }
 
-  def submitAmmend(userAnswers: UserAnswers, departureId: String)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
+  def submitAmend(userAnswers: UserAnswers, departureId: String)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
 
     val declarationUrl = s"${appConfig.apiUrl}/movements/departures/$departureId/messages"
     val requestHeaders = Seq(
@@ -63,7 +63,7 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
     for {
       mrn <- getMRN(departureId)
       payload = Declaration.transform(userAnswers, mrn).toString
-      result <- getHttpResponse(declarationUrl, requestHeaders, payload, HttpMethodName(nameOf(submitAmmend _)))
+      result <- getHttpResponse(declarationUrl, requestHeaders, payload, HttpMethodName(nameOf(submitAmend _)))
     } yield result
 
   }

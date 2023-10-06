@@ -131,7 +131,7 @@ class SubmissionControllerSpec extends SpecBase {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswersWithDepartureId)))
 
         val body = Json.toJson("foo")
-        when(mockApiService.submitAmmendDeclaration(any(), any())(any()))
+        when(mockApiService.submitAmendDeclaration(any(), any())(any()))
           .thenReturn(Future.successful(Right(HttpResponse(OK, Json.stringify(body)))))
 
         val request = FakeRequest(POST, routes.SubmissionController.postAmendment().url)
@@ -144,7 +144,7 @@ class SubmissionControllerSpec extends SpecBase {
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockCacheRepository).set(eqTo(emptyUserAnswersWithDepartureId), eqTo(SubmissionState.Submitted))
-        verify(mockApiService).submitAmmendDeclaration(eqTo(emptyUserAnswersWithDepartureId), eqTo(departureId))(any())
+        verify(mockApiService).submitAmendDeclaration(eqTo(emptyUserAnswersWithDepartureId), eqTo(departureId))(any())
       }
     }
 
@@ -152,7 +152,7 @@ class SubmissionControllerSpec extends SpecBase {
       "submission is unsuccessful" in {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswersWithDepartureId)))
 
-        when(mockApiService.submitAmmendDeclaration(any(), any())(any()))
+        when(mockApiService.submitAmendDeclaration(any(), any())(any()))
           .thenReturn(Future.successful(Left(BadRequest)))
 
         val request = FakeRequest(POST, routes.SubmissionController.postAmendment().url)
@@ -163,7 +163,7 @@ class SubmissionControllerSpec extends SpecBase {
         status(result) shouldBe BAD_REQUEST
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockApiService).submitAmmendDeclaration(eqTo(emptyUserAnswersWithDepartureId), eqTo(departureId))(any())
+        verify(mockApiService).submitAmendDeclaration(eqTo(emptyUserAnswersWithDepartureId), eqTo(departureId))(any())
       }
 
       "document not found in cache" in {
@@ -177,7 +177,7 @@ class SubmissionControllerSpec extends SpecBase {
         status(result) shouldBe INTERNAL_SERVER_ERROR
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockApiService, never()).submitAmmendDeclaration(any(), any())(any())
+        verify(mockApiService, never()).submitAmendDeclaration(any(), any())(any())
       }
 
       "request body can't be validated as a string" in {
@@ -191,7 +191,7 @@ class SubmissionControllerSpec extends SpecBase {
         status(result) shouldBe BAD_REQUEST
 
         verify(mockCacheRepository, never()).get(any(), any())
-        verify(mockApiService, never()).submitAmmendDeclaration(any(), any())(any())
+        verify(mockApiService, never()).submitAmendDeclaration(any(), any())(any())
       }
     }
   }
