@@ -16,10 +16,17 @@
 
 package generators
 
-import models.{SubmissionState, XPath}
+import models.{MovementReferenceNumber, SubmissionState, XPath}
+import org.scalacheck.Gen.{choose, listOfN}
 import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
+
+  def stringsWithMaxLength(maxLength: Int, charGen: Gen[Char] = Gen.alphaNumChar): Gen[String] =
+    for {
+      length <- choose(1, maxLength)
+      chars  <- listOfN(length, charGen)
+    } yield chars.mkString
 
   implicit lazy val arbitrarySubmissionState: Arbitrary[SubmissionState] = Arbitrary {
     val values = Seq(
@@ -29,6 +36,13 @@ trait ModelGenerators {
     )
     Gen.oneOf(values)
   }
+
+  implicit lazy val arbitraryMovementReferenceNumber: Arbitrary[MovementReferenceNumber] =
+    Arbitrary {
+      for {
+        mrn <- stringsWithMaxLength(22: Int, Gen.alphaNumChar)
+      } yield new MovementReferenceNumber(mrn)
+    }
 
   implicit lazy val arbitraryXPath: Arbitrary[XPath] = Arbitrary {
     val validXPaths = Seq(
