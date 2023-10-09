@@ -57,13 +57,13 @@ class CacheRepository @Inject() (
       .toFutureOption()
   }
 
-  def set(data: Metadata, status: Option[SubmissionState]): Future[Boolean] =
-    set(data, Updates.setOnInsert("isSubmitted", status.getOrElse(SubmissionState.NotSubmitted).asString))
+  def set(data: Metadata, status: Option[SubmissionState], departureId: Option[String]): Future[Boolean] =
+    set(data, Updates.setOnInsert("isSubmitted", status.getOrElse(SubmissionState.NotSubmitted).asString), departureId)
 
-  def set(userAnswers: UserAnswers, status: SubmissionState): Future[Boolean] =
-    set(userAnswers.metadata, Updates.set("isSubmitted", status.asString))
+  def set(userAnswers: UserAnswers, status: SubmissionState, departureId: Option[String]): Future[Boolean] =
+    set(userAnswers.metadata, Updates.set("isSubmitted", status.asString), departureId)
 
-  private def set(data: Metadata, statusUpdate: Bson): Future[Boolean] = {
+  private def set(data: Metadata, statusUpdate: Bson, departureId: Option[String]): Future[Boolean] = {
     val now = Instant.now(clock)
     val filter = Filters.and(
       Filters.eq("lrn", data.lrn),
@@ -79,7 +79,7 @@ class CacheRepository @Inject() (
       Updates.set("lastUpdated", now),
       Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID())),
       statusUpdate
-    ) ++ data.departureId.map(Updates.set("departureId", _))
+    ) ++ departureId.map(Updates.set("departureId", _))
     val combineUpdates: Bson = Updates.combine(updates: _*)
     val options              = UpdateOptions().upsert(true)
 

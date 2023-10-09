@@ -46,7 +46,7 @@ class SubmissionControllerSpec extends SpecBase {
     super.beforeEach()
     reset(mockCacheRepository)
     reset(mockApiService)
-    when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState)).thenReturn(Future.successful(true))
+    when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState, any(): Option[String])).thenReturn(Future.successful(true))
   }
 
   "post" should {
@@ -69,7 +69,7 @@ class SubmissionControllerSpec extends SpecBase {
         contentAsJson(result) shouldBe body
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.Submitted))
+        verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.Submitted), eqTo(None))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers))(any())
       }
     }
@@ -143,7 +143,7 @@ class SubmissionControllerSpec extends SpecBase {
         contentAsJson(result) shouldBe body
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockCacheRepository).set(eqTo(emptyUserAnswersWithDepartureId), eqTo(SubmissionState.Submitted))
+        verify(mockCacheRepository).set(eqTo(emptyUserAnswersWithDepartureId), eqTo(SubmissionState.Submitted), eqTo(Some("departureId123")))
         verify(mockApiService).submitAmendDeclaration(eqTo(emptyUserAnswersWithDepartureId), eqTo(departureId))(any())
       }
     }

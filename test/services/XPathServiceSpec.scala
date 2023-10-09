@@ -101,7 +101,7 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
           val userAnswers = emptyUserAnswers.copy(metaData)
 
           when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
-          when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState)).thenReturn(Future.successful(true))
+          when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState, any(): Option[String])).thenReturn(Future.successful(true))
 
           val result = service.handleErrors(lrn, eoriNumber, xPaths).futureValue
 
@@ -122,7 +122,7 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
           result shouldBe true
 
           verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-          verify(mockCacheRepository).set(eqTo(expectedUa), eqTo(SubmissionState.RejectedPendingChanges))
+          verify(mockCacheRepository).set(eqTo(expectedUa), eqTo(SubmissionState.RejectedPendingChanges), eqTo(None))
         }
     }
 
@@ -143,14 +143,14 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
         "and setting the document tasks to error fails" in {
 
           when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
-          when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState)).thenReturn(Future.successful(false))
+          when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState, eqTo(None))).thenReturn(Future.successful(false))
 
           val result = service.handleErrors(lrn, eoriNumber, xPaths).futureValue
 
           result shouldBe false
 
           verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-          verify(mockCacheRepository).set(any(), eqTo(SubmissionState.RejectedPendingChanges))
+          verify(mockCacheRepository).set(any(), eqTo(SubmissionState.RejectedPendingChanges), eqTo(None))
         }
 
       "there are no tasks to update" in {
@@ -186,14 +186,14 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
           val userAnswers = emptyUserAnswers.updateTasks(tasks)
 
           when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
-          when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState)).thenReturn(Future.successful(true))
+          when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState, any(): Option[String])).thenReturn(Future.successful(true))
 
           val result = service.handleGuaranteeErrors(lrn, eoriNumber).futureValue
 
           result shouldBe true
 
           verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-          verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.GuaranteeAmendment))
+          verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.GuaranteeAmendment), eqTo(None))
         }
     }
 
@@ -214,14 +214,14 @@ class XPathServiceSpec extends SpecBase with ScalaFutures {
         "and setting the document tasks to error fails" in {
 
           when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
-          when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState)).thenReturn(Future.successful(false))
+          when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState, any(): Option[String])).thenReturn(Future.successful(false))
 
           val result = service.handleGuaranteeErrors(lrn, eoriNumber).futureValue
 
           result shouldBe false
 
           verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-          verify(mockCacheRepository).set(any(), eqTo(SubmissionState.GuaranteeAmendment))
+          verify(mockCacheRepository).set(any(), eqTo(SubmissionState.GuaranteeAmendment), eqTo(None))
         }
     }
   }

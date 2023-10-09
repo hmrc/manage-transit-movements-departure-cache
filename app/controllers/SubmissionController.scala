@@ -68,7 +68,7 @@ class SubmissionController @Inject() (
     for {
       userAnswers <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
       result <- OptionT(apiService.submitDeclaration(userAnswers).flatMap {
-        responseToResult(userAnswers, _)
+        responseToResult(userAnswers, _, None)
       })
 
     } yield result
@@ -76,16 +76,16 @@ class SubmissionController @Inject() (
   private def successPostAmendment(lrn: String, request: AuthenticatedRequest[JsValue])(implicit hc: HeaderCarrier): OptionT[Future, Result] =
     for {
       userAnswers <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
-      departureId <- OptionT.fromOption[Future](userAnswers.metadata.departureId)
-      result      <- OptionT(apiService.submitAmendDeclaration(userAnswers, departureId).flatMap(responseToResult(userAnswers, _)))
+      departureId <- OptionT.fromOption[Future](userAnswers.departureId)
+      result      <- OptionT(apiService.submitAmendDeclaration(userAnswers, departureId).flatMap(responseToResult(userAnswers, _, userAnswers.departureId)))
 
     } yield result
 
-  private def responseToResult(userAnswers: UserAnswers, resultOrResponse: Either[Result, HttpResponse]): Future[Option[Result]] =
+  private def responseToResult(userAnswers: UserAnswers, resultOrResponse: Either[Result, HttpResponse], departureId: Option[String]): Future[Option[Result]] =
     resultOrResponse match {
       case Right(response) =>
         cacheRepository
-          .set(userAnswers, SubmissionState.Submitted)
+          .set(userAnswers, SubmissionState.Submitted, departureId)
           .map(
             _ => Option(Ok(response.body))
           )

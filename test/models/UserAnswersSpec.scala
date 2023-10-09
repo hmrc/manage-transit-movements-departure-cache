@@ -44,7 +44,7 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
     status = SubmissionState.NotSubmitted
   )
 
-  private val userAnswersWithDepartureId = userAnswers.copy(metadata = userAnswers.metadata.copy(departureId = Some(departureId)))
+  private val userAnswersWithDepartureId = userAnswers.copy(departureId = Some(departureId))
 
   "User answers" when {
 

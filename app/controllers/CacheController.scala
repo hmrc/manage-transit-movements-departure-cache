@@ -51,7 +51,8 @@ class CacheController @Inject() (
         case JsSuccess(data, _) =>
           if (request.eoriNumber == data.eoriNumber) {
             val status: Option[SubmissionState] = (request.body \ "isSubmitted").validate[SubmissionState].asOpt
-            set(data, status)
+            val departureId: Option[String]     = (request.body \ "departureId").validate[String].asOpt
+            set(data, status, departureId)
           } else {
             logger.warn(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
             Future.successful(Forbidden)
@@ -72,9 +73,9 @@ class CacheController @Inject() (
       }
   }
 
-  private def set(data: Metadata, status: Option[SubmissionState] = None): Future[Status] =
+  private def set(data: Metadata, status: Option[SubmissionState] = None, departureId: Option[String] = None): Future[Status] =
     cacheRepository
-      .set(data, status)
+      .set(data, status, departureId)
       .map {
         case true => Ok
         case false =>

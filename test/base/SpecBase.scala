@@ -44,7 +44,7 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
   val emptyMetadata: Metadata         = Metadata(lrn, eoriNumber)
   val emptyUserAnswers: UserAnswers   = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID(), SubmissionState.NotSubmitted)
   val departureId                     = "departureId123"
-  val emptyUserAnswersWithDepartureId = emptyUserAnswers.copy(metadata = emptyUserAnswers.metadata.copy(departureId = Some(departureId)))
+  val emptyUserAnswersWithDepartureId = emptyUserAnswers.copy(departureId = Some(departureId))
 
   val mockCacheRepository: CacheRepository      = mock[CacheRepository]
   val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]
