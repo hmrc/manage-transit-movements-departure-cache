@@ -18,10 +18,7 @@ package api.submission
 
 import generated.{TransitOperationType04, TransitOperationType06}
 import models.{MovementReferenceNumber, UserAnswers}
-import play.api.libs.functional.syntax._
 import play.api.libs.json.Reads
-
-import java.time.LocalDate
 
 object TransitOperation {
 
@@ -34,76 +31,45 @@ object TransitOperation {
 
 object transitOperationType04 {
 
-  def reads(lrn: String, mrn: Option[MovementReferenceNumber], flag: Boolean): Reads[TransitOperationType04] = (
-    (preTaskListPath \ "declarationType" \ "code").read[String] and
-      (preTaskListPath \ "additionalDeclarationType" \ "code").read[String] and
-      (preTaskListPath \ "tirCarnetReference").readNullable[String] and
-      (preTaskListPath \ "securityDetailsType" \ "code").read[String] and
-      reducedDatasetIndicatorReads and
-      (routeDetailsPath \ "specificCircumstanceIndicator" \ "code").readNullable[String] and
-      (routeDetailsPath \ "routing" \ "bindingItinerary").readWithDefault[Boolean](false) and
-      (transportDetailsPath \ "authorisationsAndLimit" \ "limit" \ "limitDate").readNullable[LocalDate]
-  ).apply {
-    (declarationType,
-     additionalDeclarationType,
-     TIRCarnetNumber,
-     security,
-     reducedDatasetIndicator,
-     specificCircumstanceIndicator,
-     bindingItinerary,
-     limitDate
-    ) =>
-      TransitOperationType04(
-        LRN = if (mrn.isDefined) None else Some(lrn),
-        MRN = mrn.map(_.value),
-        declarationType = declarationType,
-        additionalDeclarationType = additionalDeclarationType,
-        TIRCarnetNumber = TIRCarnetNumber,
-        presentationOfTheGoodsDateAndTime = None, // TODO - do we collect this?
-        security = security,
-        reducedDatasetIndicator = reducedDatasetIndicator,
-        specificCircumstanceIndicator = specificCircumstanceIndicator,
-        communicationLanguageAtDeparture = None, // TODO - do we collect this?
-        bindingItinerary = bindingItinerary,
-        amendmentTypeFlag = flag,
-        limitDate = limitDate
+  def reads(lrn: String, mrn: Option[MovementReferenceNumber], flag: Boolean): Reads[TransitOperationType04] =
+    CommonTransitOperation.reads.map(
+      readsData =>
+        TransitOperationType04(
+          LRN                               = if (mrn.isDefined) None else Some(lrn),
+          MRN                               = mrn.map(_.value),
+          declarationType                   = readsData.declarationType,
+          additionalDeclarationType         = readsData.additionalDeclarationType,
+          TIRCarnetNumber                   = readsData.TIRCarnetNumber,
+          presentationOfTheGoodsDateAndTime = None, // TODO - do we collect this?
+          security                          = readsData.security,
+          reducedDatasetIndicator           = readsData.reducedDatasetIndicator,
+          specificCircumstanceIndicator     = readsData.specificCircumstanceIndicator,
+          communicationLanguageAtDeparture  = None, // TODO - do we collect this?
+          bindingItinerary                  = readsData.bindingItinerary,
+          amendmentTypeFlag                 = flag,
+          limitDate                         = readsData.limitDate
       )
-  }
+    )
 }
 
 object transitOperationType06 {
 
-  def reads(lrn: String): Reads[TransitOperationType06] = (
-    (preTaskListPath \ "declarationType" \ "code").read[String] and
-      (preTaskListPath \ "additionalDeclarationType" \ "code").read[String] and
-      (preTaskListPath \ "tirCarnetReference").readNullable[String] and
-      (preTaskListPath \ "securityDetailsType" \ "code").read[String] and
-      reducedDatasetIndicatorReads and
-      (routeDetailsPath \ "specificCircumstanceIndicator" \ "code").readNullable[String] and
-      (routeDetailsPath \ "routing" \ "bindingItinerary").readWithDefault[Boolean](false) and
-      (transportDetailsPath \ "authorisationsAndLimit" \ "limit" \ "limitDate").readNullable[LocalDate]
-  ).apply {
-    (declarationType,
-     additionalDeclarationType,
-     TIRCarnetNumber,
-     security,
-     reducedDatasetIndicator,
-     specificCircumstanceIndicator,
-     bindingItinerary,
-     limitDate
-    ) =>
-      TransitOperationType06(
-        LRN = lrn,
-        declarationType = declarationType,
-        additionalDeclarationType = additionalDeclarationType,
-        TIRCarnetNumber = TIRCarnetNumber,
-        presentationOfTheGoodsDateAndTime = None, // TODO - do we collect this?
-        security = security,
-        reducedDatasetIndicator = reducedDatasetIndicator,
-        specificCircumstanceIndicator = specificCircumstanceIndicator,
-        communicationLanguageAtDeparture = None, // TODO - do we collect this?
-        bindingItinerary = bindingItinerary,
-        limitDate = limitDate
+  def reads(lrn: String): Reads[TransitOperationType06] =
+    CommonTransitOperation.reads.map(
+      readsData =>
+        TransitOperationType06(
+          LRN                               = lrn,
+          declarationType                   = readsData.declarationType,
+          additionalDeclarationType         = readsData.additionalDeclarationType,
+          TIRCarnetNumber                   = readsData.TIRCarnetNumber,
+          presentationOfTheGoodsDateAndTime = None, // TODO - do we collect this?
+          security                          = readsData.security,
+          reducedDatasetIndicator           = readsData.reducedDatasetIndicator,
+          specificCircumstanceIndicator     = readsData.specificCircumstanceIndicator,
+          communicationLanguageAtDeparture  = None, // TODO - do we collect this?
+          bindingItinerary                  = readsData.bindingItinerary,
+          limitDate                         = readsData.limitDate
       )
-  }
+    )
 }
+
