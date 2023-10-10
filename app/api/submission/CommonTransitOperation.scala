@@ -16,6 +16,7 @@ case class CommonTransitOperation(
 )
 
 object CommonTransitOperation {
+
   val reads: Reads[CommonTransitOperation] = (
     (preTaskListPath \ "declarationType" \ "code").read[String] and
       (preTaskListPath \ "additionalDeclarationType" \ "code").read[String] and
