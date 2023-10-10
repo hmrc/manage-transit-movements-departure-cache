@@ -26,7 +26,7 @@ object Guarantee {
   private case class GuaranteeType(
     sequenceNumber: String,
     guaranteeType: String,
-    otherGuaranteeReference: Option[String]                     = None,
+    otherGuaranteeReference: Option[String] = None,
     GuaranteeReference: Seq[generated.GuaranteeReferenceType03] = Nil
   ) {
 
@@ -65,10 +65,10 @@ object Guarantee {
       .map {
         case (((guaranteeType, otherGuaranteeReference), guarantees), index) =>
           GuaranteeType(
-            sequenceNumber          = index.toString,
-            guaranteeType           = guaranteeType,
+            sequenceNumber = index.toString,
+            guaranteeType = guaranteeType,
             otherGuaranteeReference = otherGuaranteeReference,
-            GuaranteeReference      = guaranteeReference(guarantees)
+            GuaranteeReference = guaranteeReference(guarantees)
           )
       }
       .map(f)
