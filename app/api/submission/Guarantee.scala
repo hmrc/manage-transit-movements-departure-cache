@@ -56,11 +56,14 @@ object Guarantee {
           sequenceNumber = index.toString,
           guaranteeType = guaranteeType,
           otherGuaranteeReference = otherGuaranteeReference,
-          GuaranteeReference = guarantees.flatMap(_.GuaranteeReference).toSeq.zipWithSequenceNumber.map {
-            case (guaranteeReference, index) =>
-              guaranteeReference.copy(sequenceNumber = index.toString)
-          }
+          GuaranteeReference = guaranteeReference(guarantees)
         )
+    }
+
+  private def guaranteeReference(guarantees: Iterable[GuaranteeType01]): Seq[GuaranteeReferenceType03] =
+    guarantees.flatMap(_.GuaranteeReference).toSeq.zipWithSequenceNumber.map {
+      case (guaranteeReference, index) =>
+        guaranteeReference.copy(sequenceNumber = index.toString)
     }
 }
 
