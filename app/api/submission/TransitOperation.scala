@@ -35,20 +35,20 @@ object transitOperationType04 {
     CommonTransitOperation.reads.map(
       readsData =>
         TransitOperationType04(
-          LRN                               = if (mrn.isDefined) None else Some(lrn),
-          MRN                               = mrn.map(_.value),
-          declarationType                   = readsData.declarationType,
-          additionalDeclarationType         = readsData.additionalDeclarationType,
-          TIRCarnetNumber                   = readsData.TIRCarnetNumber,
+          LRN = if (mrn.isDefined) None else Some(lrn),
+          MRN = mrn.map(_.value),
+          declarationType = readsData.declarationType,
+          additionalDeclarationType = readsData.additionalDeclarationType,
+          TIRCarnetNumber = readsData.TIRCarnetNumber,
           presentationOfTheGoodsDateAndTime = None, // TODO - do we collect this?
-          security                          = readsData.security,
-          reducedDatasetIndicator           = readsData.reducedDatasetIndicator,
-          specificCircumstanceIndicator     = readsData.specificCircumstanceIndicator,
-          communicationLanguageAtDeparture  = None, // TODO - do we collect this?
-          bindingItinerary                  = readsData.bindingItinerary,
-          amendmentTypeFlag                 = flag,
-          limitDate                         = readsData.limitDate
-      )
+          security = readsData.security,
+          reducedDatasetIndicator = readsData.reducedDatasetIndicator,
+          specificCircumstanceIndicator = readsData.specificCircumstanceIndicator,
+          communicationLanguageAtDeparture = None, // TODO - do we collect this?
+          bindingItinerary = readsData.bindingItinerary,
+          amendmentTypeFlag = flag,
+          limitDate = readsData.limitDate
+        )
     )
 }
 
@@ -58,17 +58,17 @@ object transitOperationType06 {
     CommonTransitOperation.reads.map(
       readsData =>
         TransitOperationType06(
-          LRN                               = lrn,
-          declarationType                   = readsData.declarationType,
-          additionalDeclarationType         = readsData.additionalDeclarationType,
-          TIRCarnetNumber                   = readsData.TIRCarnetNumber,
+          LRN = lrn,
+          declarationType = readsData.declarationType,
+          additionalDeclarationType = readsData.additionalDeclarationType,
+          TIRCarnetNumber = readsData.TIRCarnetNumber,
           presentationOfTheGoodsDateAndTime = None, // TODO - do we collect this?
-          security                          = readsData.security,
-          reducedDatasetIndicator           = readsData.reducedDatasetIndicator,
-          specificCircumstanceIndicator     = readsData.specificCircumstanceIndicator,
-          communicationLanguageAtDeparture  = None, // TODO - do we collect this?
-          bindingItinerary                  = readsData.bindingItinerary,
-          limitDate                         = readsData.limitDate
-      )
+          security = readsData.security,
+          reducedDatasetIndicator = readsData.reducedDatasetIndicator,
+          specificCircumstanceIndicator = readsData.specificCircumstanceIndicator,
+          communicationLanguageAtDeparture = None, // TODO - do we collect this?
+          bindingItinerary = readsData.bindingItinerary,
+          limitDate = readsData.limitDate
+        )
     )
 }
