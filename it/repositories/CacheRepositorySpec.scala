@@ -98,6 +98,24 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       getResult.status shouldBe SubmissionState.NotSubmitted
     }
 
+    "create new document when given valid UserAnswers with departureId" in {
+
+      findOne(userAnswers3.lrn, userAnswers3.eoriNumber) should not be defined
+      val depId = "departureId123"
+
+      val setResult = repository.set(userAnswers3.metadata, None, Some(depId)).futureValue
+
+      setResult shouldBe true
+
+      val getResult = findOne(userAnswers3.lrn, userAnswers3.eoriNumber).get
+
+      getResult.lrn shouldBe userAnswers3.lrn
+      getResult.eoriNumber shouldBe userAnswers3.eoriNumber
+      getResult.metadata shouldBe userAnswers3.metadata
+      getResult.status shouldBe SubmissionState.NotSubmitted
+      getResult.departureId.get shouldBe depId
+    }
+
     "create new document when given valid UserAnswers and stats" in {
 
       findOne(userAnswers3.lrn, userAnswers3.eoriNumber) should not be defined
@@ -119,8 +137,8 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       val firstGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
 
       val metadata = userAnswers1.metadata.copy(
-        data  = Json.obj("foo" -> "bar"),
-        tasks = Map(".task"    -> Status.InProgress)
+        data = Json.obj("foo" -> "bar"),
+        tasks = Map(".task" -> Status.InProgress)
       )
       val setResult = repository.set(metadata, None, None).futureValue
 
@@ -161,7 +179,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
   "doesDraftExistForLrn" should {
     "return true if LRN is found" in {
 
-      val metaData    = Metadata(lrn                   = "ABCD123123123123", eoriNumber = "EoriNumber1")
+      val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1")
       val userAnswers = emptyUserAnswers.copy(metadata = metaData)
 
       insert(userAnswers).futureValue
