@@ -126,7 +126,7 @@ class CacheControllerSpec extends SpecBase {
 
     "return 403" when {
       "the EORI in the enrolment and the EORI in user answers do not match" in {
-        val metadata    = emptyMetadata.copy(eoriNumber = "different eori")
+        val metadata    = emptyMetadata.copy(eoriNumber  = "different eori")
         val userAnswers = emptyUserAnswers.copy(metadata = metadata)
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
