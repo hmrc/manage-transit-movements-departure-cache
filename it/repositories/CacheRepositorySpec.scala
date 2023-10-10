@@ -86,7 +86,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       findOne(userAnswers3.lrn, userAnswers3.eoriNumber) should not be defined
 
-      val setResult = repository.set(userAnswers3.metadata, None).futureValue
+      val setResult = repository.set(userAnswers3.metadata, None, None).futureValue
 
       setResult shouldBe true
 
@@ -102,7 +102,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       findOne(userAnswers3.lrn, userAnswers3.eoriNumber) should not be defined
 
-      val setResult = repository.set(userAnswers3.metadata, Some(SubmissionState.RejectedPendingChanges)).futureValue
+      val setResult = repository.set(userAnswers3.metadata, Some(SubmissionState.RejectedPendingChanges), None).futureValue
 
       setResult shouldBe true
 
@@ -119,10 +119,10 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       val firstGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
 
       val metadata = userAnswers1.metadata.copy(
-        data = Json.obj("foo" -> "bar"),
-        tasks = Map(".task" -> Status.InProgress)
+        data  = Json.obj("foo" -> "bar"),
+        tasks = Map(".task"    -> Status.InProgress)
       )
-      val setResult = repository.set(metadata, None).futureValue
+      val setResult = repository.set(metadata, None, None).futureValue
 
       setResult shouldBe true
 
@@ -141,7 +141,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       val firstGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
 
-      val setResult = repository.set(userAnswers1, SubmissionState.RejectedPendingChanges).futureValue
+      val setResult = repository.set(userAnswers1, SubmissionState.RejectedPendingChanges, None).futureValue
 
       setResult shouldBe true
 
@@ -161,7 +161,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
   "doesDraftExistForLrn" should {
     "return true if LRN is found" in {
 
-      val metaData    = Metadata(lrn = "ABCD123123123123", eoriNumber = "EoriNumber1")
+      val metaData    = Metadata(lrn                   = "ABCD123123123123", eoriNumber = "EoriNumber1")
       val userAnswers = emptyUserAnswers.copy(metadata = metaData)
 
       insert(userAnswers).futureValue
