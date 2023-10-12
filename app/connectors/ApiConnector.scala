@@ -23,8 +23,9 @@ import play.api.Logging
 import play.api.http.HeaderNames
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse, UpstreamErrorResponse}
 import com.github.dwickern.macros.NameOf._
+import uk.gov.hmrc.http.HttpReads.Implicits._
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -39,9 +40,10 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
     httpClient.GET[Departures](url)(implicitly, headers, ec)
   }
 
-  def getMRN(departureId: String)(implicit hc: HeaderCarrier): Future[Option[MovementReferenceNumber]] = {
+  def getMRN(departureId: String)(implicit hc: HeaderCarrier): Future[MovementReferenceNumber] = {
     val url = s"${appConfig.apiUrl}/movements/departures/$departureId"
-    httpClient.GET[Option[MovementReferenceNumber]](url)(HttpReads[Option[MovementReferenceNumber]], headers, ec)
+    httpClient
+      .GET[MovementReferenceNumber](url)(HttpReads[MovementReferenceNumber], headers, ec)
   }
 
   def getMessageTypesByPath(
@@ -62,7 +64,7 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
 
     for {
       mrn <- getMRN(departureId)
-      payload = Declaration.transform(userAnswers, mrn).toString
+      payload = Declaration.transform(userAnswers, Option(mrn)).toString
       result <- getHttpResponse(declarationUrl, requestHeaders, payload, HttpMethodName(nameOf(submitAmend _)))
     } yield result
 

@@ -36,7 +36,7 @@ object transitOperationType04 {
       readsData =>
         TransitOperationType04(
           LRN = if (mrn.isDefined) None else Some(lrn),
-          MRN = mrn.map(_.value),
+          MRN = mrn.flatMap(_.value),
           declarationType = readsData.declarationType,
           additionalDeclarationType = readsData.additionalDeclarationType,
           TIRCarnetNumber = readsData.TIRCarnetNumber,
