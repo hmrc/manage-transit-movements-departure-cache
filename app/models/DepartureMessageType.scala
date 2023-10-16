@@ -18,8 +18,6 @@ package models
 
 import play.api.libs.json.{__, Reads}
 
-import java.time.LocalDateTime
-
 case class DepartureMessageType(messageType: String)
 
 object DepartureMessageType {

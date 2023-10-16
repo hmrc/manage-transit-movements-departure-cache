@@ -16,7 +16,7 @@
 
 package api.submission
 
-import generated.{CC013C, CC015C, CORRELATION_IDENTIFIERSequence, MESSAGESequence, MESSAGE_1Sequence, MESSAGE_TYPESequence, MessageTypes}
+import generated.{CORRELATION_IDENTIFIERSequence, MESSAGESequence, MESSAGE_1Sequence, MESSAGE_TYPESequence, MessageTypes}
 import models.UserAnswers
 import play.api.libs.json.JsSuccess
 

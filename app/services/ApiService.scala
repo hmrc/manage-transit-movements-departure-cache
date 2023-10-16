@@ -21,6 +21,7 @@ import connectors.ApiConnector
 import models._
 import play.api.mvc.Result
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HttpReads.Implicits
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -41,7 +42,7 @@ class ApiService @Inject() (
       .flatMap {
         _.departures.find(_.localReferenceNumber == lrn).traverse {
           departure =>
-            apiConnector.getMessageTypesByPath(departure.path).map {
+            apiConnector.getMessageTypesByPath(departure.path)(ec, hc, Implicits.readFromJson).map {
               _.messageTypes.exists(_.messageType == "IE028")
             }
         }

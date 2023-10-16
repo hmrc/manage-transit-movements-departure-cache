@@ -17,7 +17,7 @@
 package services
 
 import base.AppWithDefaultMockFixtures
-import models.{Departure, Metadata, SubmissionState, UserAnswers}
+import models.{Metadata, SubmissionState, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify, when}
 import org.scalatest.concurrent.ScalaFutures
