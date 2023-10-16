@@ -17,6 +17,7 @@
 package models
 
 import play.api.libs.json._
+import play.api.mvc.QueryStringBindable
 
 sealed trait SubmissionState {
   val asString: String
@@ -56,5 +57,19 @@ object SubmissionState {
   implicit val writes: Writes[SubmissionState] = Writes {
     state => JsString(state.asString)
   }
+
+  implicit def queryStringBindable(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[SubmissionState] =
+    new QueryStringBindable[SubmissionState] {
+
+      override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, SubmissionState]] =
+        stringBinder.bind(key, params).map {
+          case Right(NotSubmitted.asString)           => Right(NotSubmitted)
+          case Right(Submitted.asString)              => Right(Submitted)
+          case Right(RejectedPendingChanges.asString) => Right(RejectedPendingChanges)
+          case x                                      => Left(s"Unable to bind $x")
+        }
+
+      override def unbind(key: String, value: SubmissionState): String = value.asString
+    }
 
 }

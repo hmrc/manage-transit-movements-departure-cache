@@ -278,7 +278,7 @@ class CacheControllerSpec extends SpecBase {
         val userAnswer2 = emptyUserAnswers.copy(metadata = Metadata("CD123", eoriNumber))
         val userAnswers = Seq(userAnswer1, userAnswer2)
 
-        when(mockCacheRepository.getAll(any(), any(), any(), any(), any()))
+        when(mockCacheRepository.getAll(any(), any(), any(), any(), any(), any()))
           .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, userAnswers, 2, 2)))
 
         val request = FakeRequest(GET, routes.CacheController.getAll().url)
@@ -286,19 +286,19 @@ class CacheControllerSpec extends SpecBase {
 
         status(result) shouldBe OK
         contentAsJson(result) shouldBe UserAnswersSummary(eoriNumber, userAnswers, 2, 2).toHateoas()
-        verify(mockCacheRepository).getAll(eqTo(eoriNumber), any(), any(), any(), any())
+        verify(mockCacheRepository).getAll(eqTo(eoriNumber), any(), any(), any(), any(), any())
       }
     }
 
     "return 500" when {
       "read from mongo fails" in {
-        when(mockCacheRepository.getAll(any(), any(), any(), any(), any())).thenReturn(Future.failed(new Throwable()))
+        when(mockCacheRepository.getAll(any(), any(), any(), any(), any(), any())).thenReturn(Future.failed(new Throwable()))
 
         val request = FakeRequest(GET, routes.CacheController.getAll().url)
         val result  = route(app, request).value
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
-        verify(mockCacheRepository).getAll(eqTo(eoriNumber), any(), any(), any(), any())
+        verify(mockCacheRepository).getAll(eqTo(eoriNumber), any(), any(), any(), any(), any())
       }
     }
   }

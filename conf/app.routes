@@ -1,6 +1,6 @@
 # microservice specific routes
 
-GET        /user-answers                                        controllers.CacheController.getAll(lrn: Option[String] ?= None, limit: Option[Int] ?= None, skip: Option[Int] ?= None, sortBy: Option[String] ?= None)
+GET        /user-answers                                        controllers.CacheController.getAll(lrn: Option[String] ?= None, state: Option[SubmissionState] ?= None, limit: Option[Int] ?= None, skip: Option[Int] ?= None, sortBy: Option[String] ?= None)
 GET        /user-answers/:lrn                                   controllers.CacheController.get(lrn: String)
 POST       /user-answers/:lrn                                   controllers.CacheController.post(lrn: String)
 PUT        /user-answers                                        controllers.CacheController.put()

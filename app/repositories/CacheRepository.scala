@@ -104,6 +104,7 @@ class CacheRepository @Inject() (
   def getAll(
     eoriNumber: String,
     lrn: Option[String] = None,
+    state: Option[SubmissionState] = None,
     limit: Option[Int] = None,
     skip: Option[Int] = None,
     sortBy: Option[String] = None
@@ -112,12 +113,14 @@ class CacheRepository @Inject() (
     val skipIndex: Int   = skip.getOrElse(0)
     val returnLimit: Int = limit.getOrElse(appConfig.maxRowsReturned)
     val skipLimit: Int   = skipIndex * returnLimit
-    val lrnRegex         = lrn.map(_.replace(" ", "")).getOrElse("")
 
-    val eoriFilter: Bson = mEq("eoriNumber", eoriNumber)
-    val lrnFilter: Bson  = regex("lrn", lrnRegex)
+    val eoriFilter: Bson          = mEq("eoriNumber", eoriNumber)
+    val lrnFilter: Option[Bson]   = lrn.map(_.replace(" ", "")).map(regex("lrn", _))
+    val stateFilter: Option[Bson] = state.map(_.asString).map(mEq("isSubmitted", _))
 
-    val primaryFilter = Aggregates.filter(mAnd(eoriFilter, lrnFilter))
+    val filters = Seq(Some(eoriFilter), lrnFilter, stateFilter).flatten
+
+    val primaryFilter = Aggregates.filter(mAnd(filters: _*))
 
     val aggregates: Seq[Bson] = Seq(
       primaryFilter,
