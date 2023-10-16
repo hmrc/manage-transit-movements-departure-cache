@@ -18,24 +18,30 @@ package connectors
 
 import api.submission._
 import config.AppConfig
-import models.{Departure, DepartureMessageTypes, Departures, UserAnswers}
+import models.{DepartureMessageTypes, Departures, MovementReferenceNumber, UserAnswers}
 import play.api.Logging
 import play.api.http.HeaderNames
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError}
 import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
+import com.github.dwickern.macros.NameOf._
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(implicit ec: ExecutionContext) extends HttpErrorFunctions with Logging {
 
+  private def headers(implicit hc: HeaderCarrier): HeaderCarrier = hc.withExtraHeaders(("Accept", "application/vnd.hmrc.2.0+json"))
+
   def getDepartures()(implicit hc: HeaderCarrier): Future[Departures] = {
     val url = s"${appConfig.apiUrl}/movements/departures"
 
-    val headers = hc.withExtraHeaders(("Accept", "application/vnd.hmrc.2.0+json"))
-
     httpClient.GET[Departures](url)(implicitly, headers, ec)
+  }
+
+  def getMRN(departureId: String)(implicit hc: HeaderCarrier): Future[Option[MovementReferenceNumber]] = {
+    val url = s"${appConfig.apiUrl}/movements/departures/$departureId"
+    httpClient.GET[Option[MovementReferenceNumber]](url)(HttpReads[Option[MovementReferenceNumber]], headers, ec)
   }
 
   def getMessageTypesByPath(
@@ -43,35 +49,57 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
   )(implicit ec: ExecutionContext, hc: HeaderCarrier, HttpReads: HttpReads[DepartureMessageTypes]): Future[DepartureMessageTypes] = {
     val url = s"${appConfig.apiUrl}/$path"
 
-    val headers = hc.withExtraHeaders(("Accept", "application/vnd.hmrc.2.0+json"))
-
     httpClient.GET[DepartureMessageTypes](url)(implicitly, headers, ec)
+  }
+
+  def submitAmend(userAnswers: UserAnswers, departureId: String)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
+
+    val declarationUrl = s"${appConfig.apiUrl}/movements/departures/$departureId/messages"
+    val requestHeaders = Seq(
+      HeaderNames.ACCEPT       -> "application/vnd.hmrc.2.0+json",
+      HeaderNames.CONTENT_TYPE -> "application/xml"
+    )
+
+    for {
+      mrn <- getMRN(departureId)
+      payload = Declaration.transform(userAnswers, mrn).toString
+      result <- getHttpResponse(declarationUrl, requestHeaders, payload, HttpMethodName(nameOf(submitAmend _)))
+    } yield result
+
   }
 
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
 
-    val declarationUrl  = s"${appConfig.apiUrl}/movements/departures"
-    val payload: String = Declaration.transformToXML(userAnswers).toString
+    val declarationUrl = s"${appConfig.apiUrl}/movements/departures"
+
+    val payload: String = Declaration.transform(userAnswers, mrn = None).toString
 
     val requestHeaders = Seq(
       HeaderNames.ACCEPT       -> "application/vnd.hmrc.2.0+json",
       HeaderNames.CONTENT_TYPE -> "application/xml"
     )
 
+    getHttpResponse(declarationUrl, requestHeaders, payload, HttpMethodName(nameOf(submitDeclaration _)))
+  }
+
+  private def getHttpResponse(declarationUrl: String, requestHeaders: Seq[(String, String)], payload: String, httpMethod: HttpMethodName)(implicit
+    hc: HeaderCarrier
+  ) =
     httpClient
       .POSTString[HttpResponse](declarationUrl, payload, requestHeaders)
       .map {
         response =>
-          logger.debug(s"ApiConnector:submitDeclaration: success: ${response.status}-${response.body}")
+          logger.debug(s"ApiConnector:${httpMethod.name}: success: ${response.status}-${response.body}")
           Right(response)
       }
       .recover {
         case httpEx: BadRequestException =>
-          logger.info(s"ApiConnector:submitDeclaration: bad request: ${httpEx.responseCode}-${httpEx.getMessage}")
-          Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
+          logger.info(s"ApiConnector:${httpMethod.name}: bad request: ${httpEx.responseCode}-${httpEx.getMessage}")
+          Left(BadRequest(s"ApiConnector:${httpMethod.name}: bad request"))
         case e: Exception =>
-          logger.error(s"ApiConnector:submitDeclaration: something went wrong: ${e.getMessage}")
-          Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
+          logger.error(s"ApiConnector:${httpMethod.name}: something went wrong: ${e.getMessage}")
+          Left(InternalServerError(s"ApiConnector:${httpMethod.name}: something went wrong"))
       }
-  }
+
+  private case class HttpMethodName(name: String)
 }

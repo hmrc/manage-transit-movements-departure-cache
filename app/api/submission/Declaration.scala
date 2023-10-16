@@ -16,8 +16,9 @@
 
 package api.submission
 
-import generated.{CC015CType, PhaseIDtype}
-import models.UserAnswers
+import generated.{CC013C, CC013CType, CC015C, CC015CType, PhaseIDtype}
+import models.SubmissionState.{Amendment, GuaranteeAmendment}
+import models.{MovementReferenceNumber, UserAnswers}
 import scalaxb.DataRecord
 import scalaxb.`package`.toXML
 
@@ -27,9 +28,15 @@ object Declaration {
 
   private val scope: NamespaceBinding = scalaxb.toScope(Some("ncts") -> "http://ncts.dgtaxud.ec")
 
-  def transform(uA: UserAnswers): CC015CType =
+  def transform(uA: UserAnswers, mrn: Option[MovementReferenceNumber]): NodeSeq = uA.status match {
+    case Amendment          => toXML(IE013(uA, mrn, flag = false), s"ncts:${CC013C.toString}", scope)
+    case GuaranteeAmendment => toXML(IE013(uA, mrn, flag = true), s"ncts:${CC013C.toString}", scope)
+    case _                  => toXML(IE015(uA), s"ncts:${CC015C.toString}", scope)
+  }
+
+  private def IE015(uA: UserAnswers): CC015CType =
     CC015CType(
-      messageSequence1 = Header.message(uA),
+      messageSequence1 = Header.message(uA, CC015C),
       TransitOperation = TransitOperation.transform(uA),
       Authorisation = Authorisations.transform(uA),
       CustomsOfficeOfDeparture = CustomsOffices.transformOfficeOfDeparture(uA),
@@ -43,7 +50,19 @@ object Declaration {
       attributes = Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString("NCTS5.0", scope)))
     )
 
-  def transformToXML(ua: UserAnswers): NodeSeq =
-    toXML[CC015CType](transform(ua), "ncts:CC015C", scope)
-
+  private def IE013(uA: UserAnswers, mrn: Option[MovementReferenceNumber], flag: Boolean): CC013CType =
+    CC013CType(
+      messageSequence1 = Header.message(uA, CC013C),
+      TransitOperation = TransitOperation.transformIE013(uA, mrn, flag),
+      Authorisation = Authorisations.transform(uA),
+      CustomsOfficeOfDeparture = CustomsOffices.transformOfficeOfDeparture(uA),
+      CustomsOfficeOfDestinationDeclared = CustomsOffices.transformOfficeOfDestination(uA),
+      CustomsOfficeOfTransitDeclared = CustomsOffices.transformOfficeOfTransit(uA),
+      CustomsOfficeOfExitForTransitDeclared = CustomsOffices.transformOfficeOfExit(uA),
+      HolderOfTheTransitProcedure = HolderOfTheTransitProcedure.transform(uA),
+      Representative = Representative.transform(uA),
+      Guarantee = Guarantee.transformIE013(uA),
+      Consignment = Consignment.transform(uA),
+      attributes = Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString("NCTS5.0", scope)))
+    )
 }

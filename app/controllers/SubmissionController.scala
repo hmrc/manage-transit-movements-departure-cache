@@ -17,16 +17,20 @@
 package controllers
 
 import controllers.actions.AuthenticateActionProvider
-import models.SubmissionState
+import models.{SubmissionState, UserAnswers}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
-import play.api.mvc.{Action, ControllerComponents}
+import play.api.mvc.{Action, ControllerComponents, Result}
 import repositories.CacheRepository
 import services.ApiService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import cats.data.OptionT
+import cats.implicits._
+import models.request.AuthenticatedRequest
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 @Singleton()
 class SubmissionController @Inject() (
@@ -38,25 +42,53 @@ class SubmissionController @Inject() (
     extends BackendController(cc)
     with Logging {
 
-  def post(): Action[JsValue] =
+  def post(): Action[JsValue] = authenticate().async(parse.json) {
+    implicit request =>
+      request.body.validate[String] match {
+        case JsSuccess(lrn, _) => successPost(lrn, request).value.map(_.getOrElse(InternalServerError))
+        case JsError(errors) =>
+          logger.warn(s"Failed to validate request body as String: $errors")
+          Future.successful(BadRequest)
+      }
+  }
+
+  def postAmendment(): Action[JsValue] =
     authenticate().async(parse.json) {
-      implicit request =>
+      implicit request: AuthenticatedRequest[JsValue] =>
         request.body.validate[String] match {
-          case JsSuccess(lrn, _) =>
-            cacheRepository.get(lrn, request.eoriNumber).flatMap {
-              case Some(uA) =>
-                apiService.submitDeclaration(uA).flatMap {
-                  case Right(response) =>
-                    cacheRepository.set(uA, SubmissionState.Submitted).map {
-                      _ => Ok(response.body)
-                    }
-                  case Left(error) => Future.successful(error)
-                }
-              case None => Future.successful(InternalServerError)
-            }
+          case JsSuccess(lrn, _) => successPostAmendment(lrn, request).value.map(_.getOrElse(InternalServerError))
           case JsError(errors) =>
             logger.warn(s"Failed to validate request body as String: $errors")
             Future.successful(BadRequest)
         }
+
+    }
+
+  private def successPost(lrn: String, request: AuthenticatedRequest[JsValue])(implicit hc: HeaderCarrier): OptionT[Future, Result] =
+    for {
+      userAnswers <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
+      result <- OptionT(apiService.submitDeclaration(userAnswers).flatMap {
+        responseToResult(userAnswers, _, None)
+      })
+
+    } yield result
+
+  private def successPostAmendment(lrn: String, request: AuthenticatedRequest[JsValue])(implicit hc: HeaderCarrier): OptionT[Future, Result] =
+    for {
+      userAnswers <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
+      departureId <- OptionT.fromOption[Future](userAnswers.departureId)
+      result      <- OptionT(apiService.submitAmendDeclaration(userAnswers, departureId).flatMap(responseToResult(userAnswers, _, userAnswers.departureId)))
+
+    } yield result
+
+  private def responseToResult(userAnswers: UserAnswers, resultOrResponse: Either[Result, HttpResponse], departureId: Option[String]): Future[Option[Result]] =
+    resultOrResponse match {
+      case Right(response) =>
+        cacheRepository
+          .set(userAnswers, SubmissionState.Submitted, departureId)
+          .map(
+            _ => Option(Ok(response.body))
+          )
+      case Left(error) => Future.successful(Option(error))
     }
 }

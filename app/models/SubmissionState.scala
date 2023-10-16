@@ -37,10 +37,20 @@ object SubmissionState {
     override val asString: String = "rejectedPendingChanges"
   }
 
+  case object Amendment extends SubmissionState {
+    override val asString: String = "amendment"
+  }
+
+  case object GuaranteeAmendment extends SubmissionState {
+    override val asString: String = "guaranteeAmendment"
+  }
+
   implicit val reads: Reads[SubmissionState] = Reads {
     case JsString(NotSubmitted.asString)           => JsSuccess(NotSubmitted)
     case JsString(Submitted.asString)              => JsSuccess(Submitted)
     case JsString(RejectedPendingChanges.asString) => JsSuccess(RejectedPendingChanges)
+    case JsString(Amendment.asString)              => JsSuccess(Amendment)
+    case JsString(GuaranteeAmendment.asString)     => JsSuccess(GuaranteeAmendment)
     case x                                         => JsError(s"Could not read $x as SubmissionState")
   }
 

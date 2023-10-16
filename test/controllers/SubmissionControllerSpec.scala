@@ -46,7 +46,7 @@ class SubmissionControllerSpec extends SpecBase {
     super.beforeEach()
     reset(mockCacheRepository)
     reset(mockApiService)
-    when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState)).thenReturn(Future.successful(true))
+    when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState, any(): Option[String])).thenReturn(Future.successful(true))
   }
 
   "post" should {
@@ -69,7 +69,7 @@ class SubmissionControllerSpec extends SpecBase {
         contentAsJson(result) shouldBe body
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.Submitted))
+        verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.Submitted), eqTo(None))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers))(any())
       }
     }
@@ -119,6 +119,79 @@ class SubmissionControllerSpec extends SpecBase {
 
         verify(mockCacheRepository, never()).get(any(), any())
         verify(mockApiService, never()).submitDeclaration(any())(any())
+      }
+    }
+  }
+
+  "postAmendment" should {
+
+    "return 200" when {
+      "submission is successful" in {
+
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswersWithDepartureId)))
+
+        val body = Json.toJson("foo")
+        when(mockApiService.submitAmendDeclaration(any(), any())(any()))
+          .thenReturn(Future.successful(Right(HttpResponse(OK, Json.stringify(body)))))
+
+        val request = FakeRequest(POST, routes.SubmissionController.postAmendment().url)
+          .withBody(Json.toJson(lrn))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe body
+
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        verify(mockCacheRepository).set(eqTo(emptyUserAnswersWithDepartureId), eqTo(SubmissionState.Submitted), eqTo(Some("departureId123")))
+        verify(mockApiService).submitAmendDeclaration(eqTo(emptyUserAnswersWithDepartureId), eqTo(departureId))(any())
+      }
+    }
+
+    "return error" when {
+      "submission is unsuccessful" in {
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswersWithDepartureId)))
+
+        when(mockApiService.submitAmendDeclaration(any(), any())(any()))
+          .thenReturn(Future.successful(Left(BadRequest)))
+
+        val request = FakeRequest(POST, routes.SubmissionController.postAmendment().url)
+          .withBody(Json.toJson(lrn))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe BAD_REQUEST
+
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        verify(mockApiService).submitAmendDeclaration(eqTo(emptyUserAnswersWithDepartureId), eqTo(departureId))(any())
+      }
+
+      "document not found in cache" in {
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
+
+        val request = FakeRequest(POST, routes.SubmissionController.postAmendment().url)
+          .withBody(Json.toJson(lrn))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe INTERNAL_SERVER_ERROR
+
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        verify(mockApiService, never()).submitAmendDeclaration(any(), any())(any())
+      }
+
+      "request body can't be validated as a string" in {
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
+
+        val request = FakeRequest(POST, routes.SubmissionController.postAmendment().url)
+          .withBody(Json.toJson("foo" -> "bar"))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe BAD_REQUEST
+
+        verify(mockCacheRepository, never()).get(any(), any())
+        verify(mockApiService, never()).submitAmendDeclaration(any(), any())(any())
       }
     }
   }

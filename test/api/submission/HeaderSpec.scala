@@ -60,12 +60,23 @@ class HeaderSpec extends SpecBase {
 
       "will convert to API format" in {
 
-        val result = Header.message(uA)
+        val result = Header.message(uA, CC015C)
 
         result.messageSender shouldBe uA.eoriNumber
         result.messagE_1Sequence2.messageRecipient shouldBe "NTA.GB"
-        result.messagE_1Sequence2.messageIdentification shouldBe "CC015C"
+        result.messagE_1Sequence2.messageIdentification shouldBe CC015C.toString
         result.messagE_TYPESequence3.messageType shouldBe CC015C
+        result.correlatioN_IDENTIFIERSequence4.correlationIdentifier shouldBe None
+      }
+
+      "will convert to API format for CC013C" in {
+
+        val result = Header.message(uA, CC013C)
+
+        result.messageSender shouldBe uA.eoriNumber
+        result.messagE_1Sequence2.messageRecipient shouldBe "NTA.GB"
+        result.messagE_1Sequence2.messageIdentification shouldBe CC013C.toString
+        result.messagE_TYPESequence3.messageType shouldBe CC013C
         result.correlatioN_IDENTIFIERSequence4.correlationIdentifier shouldBe None
       }
     }

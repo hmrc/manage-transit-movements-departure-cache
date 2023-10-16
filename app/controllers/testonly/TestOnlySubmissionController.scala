@@ -34,7 +34,7 @@ class TestOnlySubmissionController @Inject() (
     request =>
       request.body.validate[UserAnswers](UserAnswers.reads orElse UserAnswers.mongoFormat) match {
         case JsSuccess(userAnswers, _) =>
-          Ok(Declaration.transformToXML(userAnswers))
+          Ok(Declaration.transform(userAnswers, mrn = None))
         case JsError(errors) =>
           logger.info(s"Failed to validate request body as UserAnswers: ${errors.mkString}")
           BadRequest
