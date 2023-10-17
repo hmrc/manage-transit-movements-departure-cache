@@ -20,6 +20,7 @@ import cats.implicits._
 import connectors.ApiConnector
 import models._
 import play.api.mvc.Result
+import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.Inject

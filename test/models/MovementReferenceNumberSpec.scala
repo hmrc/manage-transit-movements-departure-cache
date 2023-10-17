@@ -23,7 +23,6 @@ import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.libs.json.{JsString, JsValue, Json}
-import play.api.mvc.PathBindable
 
 class MovementReferenceNumberSpec extends AnyFreeSpec with Generators with Matchers with EitherValues {
 
