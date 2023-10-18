@@ -18,14 +18,14 @@ package api.submission
 
 import api.submission.Consignment.RichConsignmentType20
 import api.submission.consignmentType20.{activeBorderTransportMeansReads, transportEquipmentReads}
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import generated._
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 
 import scala.collection.immutable.Seq
 
-class ConsignmentSpec extends SpecBase {
+class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "Consignment" when {
 

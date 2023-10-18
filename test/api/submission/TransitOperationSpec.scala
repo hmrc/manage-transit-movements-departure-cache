@@ -16,13 +16,13 @@
 
 package api.submission
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import generated.Number0
 import models.{MovementReferenceNumber, UserAnswers}
 import play.api.libs.json.{JsValue, Json}
 import scalaxb.XMLCalendar
 
-class TransitOperationSpec extends SpecBase {
+class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "TransitOperation" when {
 

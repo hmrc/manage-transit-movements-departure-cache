@@ -16,7 +16,7 @@
 
 package models
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import generators.Generators
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.{JsSuccess, JsValue, Json}
@@ -24,7 +24,7 @@ import play.api.libs.json.{JsSuccess, JsValue, Json}
 import java.time.{Instant, LocalDateTime}
 import java.util.UUID
 
-class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
+class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaCheckPropertyChecks with Generators {
 
   private val userAnswers = UserAnswers(
     metadata = Metadata(
@@ -186,7 +186,7 @@ class UserAnswersSpec extends SpecBase with ScalaCheckPropertyChecks with Genera
       }
 
       "write correctly with departureId" in {
-        val result = Json.toJson(userAnswersWithDepartureId)((UserAnswers.mongoFormat))
+        val result = Json.toJson(userAnswersWithDepartureId)(UserAnswers.mongoFormat)
         result shouldBe jsonWithDepartureId
       }
     }

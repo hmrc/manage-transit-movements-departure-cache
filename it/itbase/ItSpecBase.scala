@@ -53,6 +53,7 @@ trait ItSpecBase extends AnyWordSpec with Matchers with ScalaFutures with Option
   override def fakeApplication(): Application =
     GuiceApplicationBuilder()
       .configure("metrics.enabled" -> false)
+      .configure("encryption.enabled" -> false)
       .overrides(bind[MongoComponent].toInstance(mongoComponent))
       .overrides(bind[AuthenticateActionProvider].toInstance(new FakeAuthenticateActionProvider))
       .overrides(bind[AuthenticateAndLockActionProvider].toInstance(new FakeAuthenticateAndLockActionProvider))
