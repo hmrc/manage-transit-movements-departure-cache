@@ -16,10 +16,8 @@
 
 package models
 
-import models.SensitiveFormats.RichJsObject
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
-import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 
 case class Metadata(
   lrn: String,
@@ -38,44 +36,19 @@ object Metadata {
 
   implicit val nonSensitiveWrites: Writes[Metadata] = Json.writes[Metadata]
 
-  def sensitiveReads(implicit sensitiveFormats: SensitiveFormats): Reads[Metadata] = {
-    import sensitiveFormats._
+  def sensitiveReads(implicit sensitiveFormats: SensitiveFormats): Reads[Metadata] =
+    (
+      (__ \ "lrn").read[String] and
+        (__ \ "eoriNumber").read[String] and
+        (__ \ "data").read[JsObject](sensitiveFormats.jsObjectReads) and
+        (__ \ "tasks").read[Map[String, Status.Value]]
+    )(Metadata.apply _)
 
-    if (sensitiveFormats.isEncryptionEnabled) {
-      (
-        (__ \ "lrn").read[String] and
-          (__ \ "eoriNumber").read[String] and
-          (__ \ "data").read[SensitiveString] and
-          (__ \ "tasks").read[Map[String, Status.Value]]
-      ).apply {
-        (lrn, eoriNumber, data, tasks) =>
-          Metadata(lrn, eoriNumber, Json.parse(data.decryptedValue).as[JsObject], tasks)
-      }
-    } else {
-      nonSensitiveReads
-    }
-  }
-
-  def sensitiveWrites(implicit sensitiveFormats: SensitiveFormats): Writes[Metadata] = {
-    import sensitiveFormats._
-
-    if (sensitiveFormats.isEncryptionEnabled) {
-      (
-        (__ \ "lrn").write[String] and
-          (__ \ "eoriNumber").write[String] and
-          (__ \ "data").write[SensitiveString] and
-          (__ \ "tasks").write[Map[String, Status.Value]]
-      ).apply {
-        metadata =>
-          (
-            metadata.lrn,
-            metadata.eoriNumber,
-            metadata.data.encrypt,
-            metadata.tasks
-          )
-      }
-    } else {
-      nonSensitiveWrites
-    }
-  }
+  def sensitiveWrites(implicit sensitiveFormats: SensitiveFormats): Writes[Metadata] =
+    (
+      (__ \ "lrn").write[String] and
+        (__ \ "eoriNumber").write[String] and
+        (__ \ "data").write[JsObject](sensitiveFormats.jsObjectWrites) and
+        (__ \ "tasks").write[Map[String, Status.Value]]
+    )(unlift(Metadata.unapply))
 }

@@ -26,26 +26,38 @@ import uk.gov.hmrc.mongo.play.json.Codecs
 
 class SensitiveFormats(encryptionEnabled: Boolean)(implicit crypto: Encrypter with Decrypter) {
 
-  def isEncryptionEnabled: Boolean = encryptionEnabled
-
-  implicit val reads: Reads[SensitiveString] = {
+  implicit val sensitiveStringReads: Reads[SensitiveString] = {
     if (encryptionEnabled) {
       JsonEncryption.sensitiveDecrypter(SensitiveString.apply)
     } else {
-      SensitiveFormats.nonSensitiveReads
+      implicitly[Reads[String]].map(SensitiveString.apply)
     }
   }
 
-  implicit val writes: Writes[SensitiveString] = {
+  implicit val sensitiveStringWrites: Writes[SensitiveString] = {
     if (encryptionEnabled) {
       JsonEncryption.sensitiveEncrypter[String, SensitiveString]
     } else {
-      SensitiveFormats.nonSensitiveWrites
+      implicitly[Writes[String]].contramap(_.decryptedValue)
     }
   }
 
-  implicit val format: Format[SensitiveString] =
-    Format(reads, writes)
+  implicit val sensitiveStringFormat: Format[SensitiveString] =
+    Format(sensitiveStringReads, sensitiveStringWrites)
+
+  val jsObjectReads: Reads[JsObject] =
+    if (encryptionEnabled) {
+      __.read[SensitiveString].map(_.decryptedValue).map(Json.parse(_).as[JsObject])
+    } else {
+      __.read[JsObject]
+    }
+
+  val jsObjectWrites: Writes[JsObject] =
+    if (encryptionEnabled) {
+      __.write[SensitiveString].contramap(_.encrypt)
+    } else {
+      __.write[JsObject]
+    }
 
   def bsonData(data: JsObject): BsonValue =
     if (encryptionEnabled) {
@@ -56,15 +68,6 @@ class SensitiveFormats(encryptionEnabled: Boolean)(implicit crypto: Encrypter wi
 }
 
 object SensitiveFormats {
-
-  implicit val nonSensitiveReads: Reads[SensitiveString] =
-    implicitly[Reads[String]].map(SensitiveString.apply)
-
-  implicit val nonSensitiveWrites: Writes[SensitiveString] =
-    implicitly[Writes[String]].contramap(_.decryptedValue)
-
-  implicit val nonSensitiveFormat: Format[SensitiveString] =
-    Format(nonSensitiveReads, nonSensitiveWrites)
 
   implicit class RichJsObject(jsObject: JsObject) {
     def encrypt: SensitiveString = SensitiveString(Json.stringify(jsObject))
