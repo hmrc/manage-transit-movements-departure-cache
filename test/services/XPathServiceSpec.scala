@@ -16,18 +16,17 @@
 
 package services
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.Status.Completed
 import models.Task._
 import models._
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verify, verifyNoInteractions, verifyNoMoreInteractions, when}
-import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json.JsObject
 
 import scala.concurrent.Future
 
-class XPathServiceSpec extends SpecBase with ScalaFutures {
+class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   private val service = app.injector.instanceOf[XPathService]
 

@@ -16,7 +16,7 @@
 
 package controllers
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import generators.Generators
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify, when}
@@ -29,7 +29,7 @@ import services.DuplicateService
 
 import scala.concurrent.Future
 
-class DuplicateControllerSpec extends SpecBase with Generators {
+class DuplicateControllerSpec extends SpecBase with AppWithDefaultMockFixtures with Generators {
 
   private lazy val mockDuplicateService = mock[DuplicateService]
 

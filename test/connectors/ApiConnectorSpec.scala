@@ -28,7 +28,7 @@ import uk.gov.hmrc.http.HttpResponse
 
 class ApiConnectorSpec extends SpecBase with AppWithDefaultMockFixtures with WireMockServerHandler {
 
-  val json: JsValue = Json.parse(s"""
+  private val json: JsValue = Json.parse(s"""
     |{
     |  "_id" : "$uuid",
     |  "lrn" : "$lrn",
@@ -302,7 +302,7 @@ class ApiConnectorSpec extends SpecBase with AppWithDefaultMockFixtures with Wir
     |}
     |""".stripMargin)
 
-  val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+  private lazy val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
@@ -311,7 +311,7 @@ class ApiConnectorSpec extends SpecBase with AppWithDefaultMockFixtures with Wir
 
   private lazy val connector: ApiConnector = app.injector.instanceOf[ApiConnector]
 
-  val expected: String = Json
+  private val expected: String = Json
     .obj(
       "_links" -> Json.obj(
         "self" -> Json.obj(
@@ -325,7 +325,7 @@ class ApiConnectorSpec extends SpecBase with AppWithDefaultMockFixtures with Wir
     .toString()
     .stripMargin
 
-  val uri = "/movements/departures"
+  private val uri = "/movements/departures"
 
   "ApiConnector" when {
 
@@ -334,56 +334,53 @@ class ApiConnectorSpec extends SpecBase with AppWithDefaultMockFixtures with Wir
       val lrn1 = "3CnsTh79I7vtOy6"
       val lrn2 = "DEF456"
 
-      val responseJson: JsValue = Json.parse(
-        s"""
-          {
-            "_links": {
-              "self": {
-                "href": "/customs/transits/movements/departures"
-              }
-            },
-            "departures": [
-              {
-                "_links": {
-                  "self": {
-                    "href": "/customs/transits/movements/departures/63651574c3447b12"
-                  },
-                  "messages": {
-                    "href": "/customs/transits/movements/departures/63651574c3447b12/messages"
-                  }
-                },
-                "id": "63651574c3447b12",
-                "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
-                "localReferenceNumber": "$lrn1",
-                "created": "2022-11-04T13:36:52.332Z",
-                "updated": "2022-11-04T13:36:52.332Z",
-                "enrollmentEORINumber": "9999912345",
-                "movementEORINumber": "GB1234567890"
-              },
-              {
-                "_links": {
-                  "self": {
-                    "href": "/customs/transits/movements/departures/6365135ba5e821ee"
-                  },
-                  "messages": {
-                    "href": "/customs/transits/movements/departures/6365135ba5e821ee/messages"
-                  }
-                },
-                "id": "6365135ba5e821ee",
-                "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
-                "localReferenceNumber": "$lrn2",
-                "created": "2022-11-04T13:27:55.522Z",
-                "updated": "2022-11-04T13:27:55.522Z",
-                "enrollmentEORINumber": "9999912345",
-                "movementEORINumber": "GB1234567890"
-              }
-            ]
-          }
-          """
-      )
+      val responseJson: JsValue = Json.parse(s"""
+           |{
+           |  "_links": {
+           |    "self": {
+           |      "href": "/customs/transits/movements/departures"
+           |    }
+           |  },
+           |  "departures": [
+           |    {
+           |      "_links": {
+           |        "self": {
+           |          "href": "/customs/transits/movements/departures/63651574c3447b12"
+           |        },
+           |        "messages": {
+           |          "href": "/customs/transits/movements/departures/63651574c3447b12/messages"
+           |        }
+           |      },
+           |      "id": "63651574c3447b12",
+           |      "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
+           |      "localReferenceNumber": "$lrn1",
+           |      "created": "2022-11-04T13:36:52.332Z",
+           |      "updated": "2022-11-04T13:36:52.332Z",
+           |      "enrollmentEORINumber": "9999912345",
+           |      "movementEORINumber": "GB1234567890"
+           |    },
+           |    {
+           |      "_links": {
+           |        "self": {
+           |          "href": "/customs/transits/movements/departures/6365135ba5e821ee"
+           |        },
+           |        "messages": {
+           |          "href": "/customs/transits/movements/departures/6365135ba5e821ee/messages"
+           |        }
+           |      },
+           |      "id": "6365135ba5e821ee",
+           |      "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
+           |      "localReferenceNumber": "$lrn2",
+           |      "created": "2022-11-04T13:27:55.522Z",
+           |      "updated": "2022-11-04T13:27:55.522Z",
+           |      "enrollmentEORINumber": "9999912345",
+           |      "movementEORINumber": "GB1234567890"
+           |    }
+           |  ]
+           |}
+           |""".stripMargin)
 
       "return Departures" in {
-
         server.stubFor(
           get(urlEqualTo(s"/movements/departures"))
             .willReturn(okJson(responseJson.toString()))
@@ -403,34 +400,25 @@ class ApiConnectorSpec extends SpecBase with AppWithDefaultMockFixtures with Wir
     "submitDeclaration is called" when {
 
       "success" in {
-
         server.stubFor(post(urlEqualTo(uri)).willReturn(okJson(expected)))
 
         val res = await(connector.submitDeclaration(uA))
         res.toString shouldBe Right(HttpResponse(OK, expected)).toString
-
       }
 
       "bad request" in {
-
         server.stubFor(post(urlEqualTo(uri)).willReturn(badRequest()))
 
         val res = await(connector.submitDeclaration(uA))
         res shouldBe Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
-
       }
 
       "internal server error" in {
-
         server.stubFor(post(urlEqualTo(uri)).willReturn(serverError()))
 
         val res = await(connector.submitDeclaration(uA))
         res shouldBe Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
-
       }
-
     }
-
   }
-
 }

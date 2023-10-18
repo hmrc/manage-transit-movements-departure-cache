@@ -16,7 +16,7 @@
 
 package controllers
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.{Metadata, SubmissionState, UserAnswersSummary}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -27,9 +27,7 @@ import play.api.test.Helpers._
 
 import scala.concurrent.Future
 
-class CacheControllerSpec extends SpecBase {
-
-  import sensitiveFormats._
+class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "get" should {
 
