@@ -73,12 +73,10 @@ object UserAnswers {
         (__ \ "departureId").writeNullable[String]
     )(unlift(UserAnswers.unapply))
 
-  def mongoFormat(implicit sensitiveFormats: SensitiveFormats): Format[UserAnswers] = {
-    import sensitiveFormats._
+  def mongoFormat(implicit sensitiveFormats: SensitiveFormats): Format[UserAnswers] =
     Format(
-      customReads(MongoJavatimeFormats.instantReads, Metadata.mongoReads),
-      customWrites(MongoJavatimeFormats.instantWrites, Metadata.mongoWrites)
+      customReads(MongoJavatimeFormats.instantReads, Metadata.sensitiveReads),
+      customWrites(MongoJavatimeFormats.instantWrites, Metadata.sensitiveWrites)
     )
-  }
 
 }

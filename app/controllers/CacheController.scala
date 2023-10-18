@@ -133,8 +133,6 @@ class CacheController @Inject() (
       .get(lrn, eoriNumber)
       .map {
         case Some(userAnswers) =>
-          println("*****")
-          println(Json.toJson(f(userAnswers)))
           Ok(Json.toJson(f(userAnswers)))
         case None =>
           logger.warn(s"No document found for LRN '$lrn' and EORI '$eoriNumber'")
