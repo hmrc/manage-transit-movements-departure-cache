@@ -29,6 +29,8 @@ import scala.concurrent.Future
 
 class CacheControllerSpec extends SpecBase {
 
+  import sensitiveFormats._
+
   "get" should {
 
     "return 200" when {

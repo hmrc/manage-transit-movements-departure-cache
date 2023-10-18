@@ -17,7 +17,7 @@
 package base
 
 import config.AppConfig
-import models.{Metadata, SubmissionState, UserAnswers}
+import models.{Metadata, SensitiveFormats, SubmissionState, UserAnswers}
 import org.mockito.Mockito.reset
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
@@ -48,6 +48,8 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
 
   val mockCacheRepository: CacheRepository      = mock[CacheRepository]
   val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]
+
+  implicit lazy val sensitiveFormats: SensitiveFormats = app.injector.instanceOf[SensitiveFormats]
 
   override def beforeEach(): Unit = {
     super.beforeEach()

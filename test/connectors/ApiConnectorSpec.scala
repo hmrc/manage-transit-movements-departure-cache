@@ -16,299 +16,291 @@
 
 package connectors
 
-import base.AppWithDefaultMockFixtures
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
 import models.{Departure, Departures, UserAnswers}
-import org.scalatest.freespec.AnyFreeSpec
-import org.scalatest.matchers.must.Matchers
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Results.{BadRequest, InternalServerError}
 import play.api.test.Helpers._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
+import uk.gov.hmrc.http.HttpResponse
 
-class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with WireMockServerHandler with Matchers {
-
-  val lrn        = "lrn"
-  val eoriNumber = "eori"
-  val uuid       = "2e8ede47-dbfb-44ea-a1e3-6c57b1fe6fe2"
-
-  implicit val hc: HeaderCarrier = HeaderCarrier()
+class ApiConnectorSpec extends SpecBase with AppWithDefaultMockFixtures with WireMockServerHandler {
 
   val json: JsValue = Json.parse(s"""
-                                    |{
-                                    |  "_id" : "$uuid",
-                                    |  "lrn" : "$lrn",
-                                    |  "eoriNumber" : "$eoriNumber",
-                                    |  "isSubmitted": "notSubmitted",
-                                    |  "data" : {
-                                    |    "preTaskList" : {
-                                    |      "officeOfDeparture" : {
-                                    |        "id" : "XI000142",
-                                    |        "name" : "Belfast EPU",
-                                    |        "phoneNumber" : "+44 (0)02896 931537"
-                                    |      },
-                                    |      "procedureType" : "normal",
-                                    |      "declarationType" : {
-                                    |        "code" : "TIR"
-                                    |      },
-                                    |      "additionalDeclarationType" : {
-                                    |        "code" : "A"
-                                    |      },
-                                    |      "tirCarnetReference" : "1234567",
-                                    |      "securityDetailsType" : {
-                                    |        "code" : "1"
-                                    |      },
-                                    |      "detailsConfirmed" : true
-                                    |    },
-                                    |    "traderDetails" : {
-                                    |      "holderOfTransit" : {
-                                    |        "tirIdentificationYesNo" : true,
-                                    |        "tirIdentification" : "ABC/123/12345",
-                                    |        "name" : "Joe Blog",
-                                    |        "country" : {
-                                    |          "code" : "GB",
-                                    |          "description" : "United Kingdom"
-                                    |        },
-                                    |        "address" : {
-                                    |          "numberAndStreet" : "1 Church lane",
-                                    |          "city" : "Godrics Hollow",
-                                    |          "postalCode" : "BA1 0AA"
-                                    |        },
-                                    |        "addContact" : true,
-                                    |        "contact" : {
-                                    |          "name" : "John contact",
-                                    |          "telephoneNumber" : "+2112212112"
-                                    |        }
-                                    |      },
-                                    |      "actingAsRepresentative" : true,
-                                    |      "representative" : {
-                                    |        "eori" : "FR123123132",
-                                    |        "name" : "Marie Rep",
-                                    |        "capacity" : "indirect",
-                                    |        "telephoneNumber" : "+11 1111 1111"
-                                    |      },
-                                    |      "consignment" : {
-                                    |        "consignor" : {
-                                    |          "eoriYesNo" : true,
-                                    |          "eori" : "IT12312313",
-                                    |          "name" : "Pip Consignor",
-                                    |          "country" : {
-                                    |            "code" : "GB",
-                                    |            "description" : "United Kingdom"
-                                    |          },
-                                    |          "address" : {
-                                    |            "numberAndStreet" : "1 Merry Lane",
-                                    |            "city" : "Godrics Hollow",
-                                    |            "postalCode" : "CA1 9AA"
-                                    |          },
-                                    |          "addContact" : true,
-                                    |          "contact" : {
-                                    |            "name" : "Pip Contact",
-                                    |            "telephoneNumber" : "+123123123213"
-                                    |          }
-                                    |        },
-                                    |        "moreThanOneConsignee" : false,
-                                    |        "consignee" : {
-                                    |          "eoriYesNo" : true,
-                                    |          "eori" : "GE00101001",
-                                    |          "name" : "Simpson Blog Consignee",
-                                    |          "country" : {
-                                    |            "code" : "GB",
-                                    |            "description" : "United Kingdom"
-                                    |          },
-                                    |          "address" : {
-                                    |            "numberAndStreet" : "1 Merry Lane",
-                                    |            "city" : "Godrics Hollow",
-                                    |            "postalCode" : "CA1 9AA"
-                                    |          }
-                                    |        }
-                                    |      }
-                                    |    },
-                                    |    "routeDetails" : {
-                                    |      "routing" : {
-                                    |        "countryOfDestination" : {
-                                    |          "code" : "IT",
-                                    |          "description" : "Italy"
-                                    |        },
-                                    |        "officeOfDestination" : {
-                                    |          "id" : "IT018101",
-                                    |          "name" : "Aeroporto Bari - Palese",
-                                    |          "phoneNumber" : "0039 0805316196"
-                                    |        },
-                                    |        "bindingItinerary" : false,
-                                    |        "countriesOfRouting" : [
-                                    |          {
-                                    |            "countryOfRouting" : {
-                                    |              "code" : "AD",
-                                    |              "description" : "Andorra"
-                                    |            }
-                                    |          },
-                                    |          {
-                                    |            "countryOfRouting" : {
-                                    |              "code" : "AR",
-                                    |              "description" : "Argentina"
-                                    |            }
-                                    |          }
-                                    |        ]
-                                    |      },
-                                    |      "countriesInSecurityAgreement" : false,
-                                    |      "addLocationOfGoods" : true,
-                                    |      "locationOfGoods" : {
-                                    |        "typeOfLocation" : {
-                                    |          "type": "A",
-                                    |          "description": "Designated location"
-                                    |        },
-                                    |        "qualifierOfIdentification" : {
-                                    |          "qualifier": "V",
-                                    |          "description": "Customs office identifier"
-                                    |        },
-                                    |        "identifier" : {
-                                    |          "customsOffice" : {
-                                    |            "id" : "XI000142",
-                                    |            "name" : "Belfast EPU",
-                                    |            "phoneNumber" : "+44 (0)02896 931537"
-                                    |          }
-                                    |        }
-                                    |      },
-                                    |      "loading" : {
-                                    |        "addUnLocodeYesNo" : false,
-                                    |        "additionalInformation" : {
-                                    |          "country" : {
-                                    |            "code" : "GB",
-                                    |            "description" : "United Kingdom"
-                                    |          },
-                                    |          "location" : "London"
-                                    |        }
-                                    |      },
-                                    |      "unloading" : {
-                                    |        "addUnLocodeYesNo" : false,
-                                    |        "additionalInformation" : {
-                                    |          "country" : {
-                                    |            "code" : "GB",
-                                    |            "description" : "United Kingdom"
-                                    |          },
-                                    |          "location" : "London"
-                                    |        }
-                                    |      }
-                                    |    },
-                                    |    "guaranteeDetails" : [
-                                    |      {
-                                    |        "guaranteeType" : {
-                                    |          "code" : "B",
-                                    |          "description": "Guarantee for goods dispatched under TIR procedure"
-                                    |        }
-                                    |      }
-                                    |    ],
-                                    |    "transportDetails" : {
-                                    |      "preRequisites" : {
-                                    |        "sameUcrYesNo" : true,
-                                    |        "uniqueConsignmentReference" : "GB123456123456",
-                                    |        "countryOfDispatch" : {
-                                    |          "code" : "GB",
-                                    |          "description" : "United Kingdom"
-                                    |        },
-                                    |        "transportedToSameCountryYesNo" : true,
-                                    |        "itemsDestinationCountry" : {
-                                    |          "code" : "GB",
-                                    |          "description" : "United Kingdom"
-                                    |        },
-                                    |        "containerIndicator" : true
-                                    |      },
-                                    |      "inlandMode" : {
-                                    |        "code": "2",
-                                    |        "description": "Rail Transport"
-                                    |      },
-                                    |      "transportMeansDeparture" : {
-                                    |        "identification" : {
-                                    |          "type": "21",
-                                    |          "description": "Train Number"
-                                    |        },
-                                    |        "meansIdentificationNumber" : "1234567",
-                                    |        "vehicleCountry" : {
-                                    |          "code" : "GB",
-                                    |          "desc" : "United Kingdom"
-                                    |        }
-                                    |      },
-                                    |      "borderModeOfTransport" : {
-                                    |        "code": "4",
-                                    |        "description": "Air transport"
-                                    |      },
-                                    |      "transportMeansActiveList" : [
-                                    |        {
-                                    |          "identification" : {
-                                    |            "code": "41",
-                                    |            "description": "Registration Number of the Aircraft"
-                                    |          },
-                                    |          "identificationNumber" : "GB1234567",
-                                    |          "addNationalityYesNo" : true,
-                                    |          "nationality" : {
-                                    |            "code" : "GB",
-                                    |            "desc" : "United Kingdom"
-                                    |          },
-                                    |          "customsOfficeActiveBorder" : {
-                                    |            "id" : "IT018101",
-                                    |            "name" : "Aeroporto Bari - Palese",
-                                    |            "phoneNumber" : "0039 0805316196"
-                                    |          },
-                                    |          "conveyanceReferenceNumber" : "GB123456123456"
-                                    |        }
-                                    |      ],
-                                    |      "supplyChainActorYesNo" : false,
-                                    |      "addAuthorisationsYesNo" : true,
-                                    |      "authorisationsAndLimit" : {
-                                    |        "limit": {
-                                    |          "limitDate": "2023-01-01"
-                                    |        },
-                                    |        "authorisations" : [
-                                    |          {
-                                    |            "authorisationType" : {
-                                    |              "code": "C524",
-                                    |              "description": "TRD - Authorisation to use transit declaration with a reduced dataset (Column 9e, Annex A of Delegated Regulation (EU) 2015/2446)"
-                                    |            },
-                                    |            "authorisationReferenceNumber" : "TRD123"
-                                    |          }
-                                    |        ]
-                                    |      },
-                                    |      "carrierDetails" : {
-                                    |        "identificationNumber" : "GB123456123456",
-                                    |        "addContactYesNo" : true,
-                                    |        "contact" : {
-                                    |          "name" : "Carry",
-                                    |          "telephoneNumber" : "+88 888 888"
-                                    |        }
-                                    |      }
-                                    |    },
-                                    |    "documents" : {
-                                    |      "documents" : [
-                                    |        {
-                                    |          "type" : {
-                                    |            "type" : "Transport",
-                                    |            "code" : "235",
-                                    |            "description" : "Container list"
-                                    |          },
-                                    |          "details" : {
-                                    |            "documentReferenceNumber" : "transport1"
-                                    |          }
-                                    |        }
-                                    |      ]
-                                    |    },
-                                    |    "items" : []
-                                    |  },
-                                    |  "tasks" : {},
-                                    |  "createdAt" : {
-                                    |    "$$date" : {
-                                    |      "$$numberLong" : "1662393524188"
-                                    |    }
-                                    |  },
-                                    |  "lastUpdated" : {
-                                    |    "$$date" : {
-                                    |      "$$numberLong" : "1662546803472"
-                                    |    }
-                                    |  }
-                                    |}
-                                    |""".stripMargin)
+    |{
+    |  "_id" : "$uuid",
+    |  "lrn" : "$lrn",
+    |  "eoriNumber" : "$eoriNumber",
+    |  "isSubmitted": "notSubmitted",
+    |  "data" : {
+    |    "preTaskList" : {
+    |      "officeOfDeparture" : {
+    |        "id" : "XI000142",
+    |        "name" : "Belfast EPU",
+    |        "phoneNumber" : "+44 (0)02896 931537"
+    |      },
+    |      "procedureType" : "normal",
+    |      "declarationType" : {
+    |        "code" : "TIR"
+    |      },
+    |      "additionalDeclarationType" : {
+    |        "code" : "A"
+    |      },
+    |      "tirCarnetReference" : "1234567",
+    |      "securityDetailsType" : {
+    |        "code" : "1"
+    |      },
+    |      "detailsConfirmed" : true
+    |    },
+    |    "traderDetails" : {
+    |      "holderOfTransit" : {
+    |        "tirIdentificationYesNo" : true,
+    |        "tirIdentification" : "ABC/123/12345",
+    |        "name" : "Joe Blog",
+    |        "country" : {
+    |          "code" : "GB",
+    |          "description" : "United Kingdom"
+    |        },
+    |        "address" : {
+    |          "numberAndStreet" : "1 Church lane",
+    |          "city" : "Godrics Hollow",
+    |          "postalCode" : "BA1 0AA"
+    |        },
+    |        "addContact" : true,
+    |        "contact" : {
+    |          "name" : "John contact",
+    |          "telephoneNumber" : "+2112212112"
+    |        }
+    |      },
+    |      "actingAsRepresentative" : true,
+    |      "representative" : {
+    |        "eori" : "FR123123132",
+    |        "name" : "Marie Rep",
+    |        "capacity" : "indirect",
+    |        "telephoneNumber" : "+11 1111 1111"
+    |      },
+    |      "consignment" : {
+    |        "consignor" : {
+    |          "eoriYesNo" : true,
+    |          "eori" : "IT12312313",
+    |          "name" : "Pip Consignor",
+    |          "country" : {
+    |            "code" : "GB",
+    |            "description" : "United Kingdom"
+    |          },
+    |          "address" : {
+    |            "numberAndStreet" : "1 Merry Lane",
+    |            "city" : "Godrics Hollow",
+    |            "postalCode" : "CA1 9AA"
+    |          },
+    |          "addContact" : true,
+    |          "contact" : {
+    |            "name" : "Pip Contact",
+    |            "telephoneNumber" : "+123123123213"
+    |          }
+    |        },
+    |        "moreThanOneConsignee" : false,
+    |        "consignee" : {
+    |          "eoriYesNo" : true,
+    |          "eori" : "GE00101001",
+    |          "name" : "Simpson Blog Consignee",
+    |          "country" : {
+    |            "code" : "GB",
+    |            "description" : "United Kingdom"
+    |          },
+    |          "address" : {
+    |            "numberAndStreet" : "1 Merry Lane",
+    |            "city" : "Godrics Hollow",
+    |            "postalCode" : "CA1 9AA"
+    |          }
+    |        }
+    |      }
+    |    },
+    |    "routeDetails" : {
+    |      "routing" : {
+    |        "countryOfDestination" : {
+    |          "code" : "IT",
+    |          "description" : "Italy"
+    |        },
+    |        "officeOfDestination" : {
+    |          "id" : "IT018101",
+    |          "name" : "Aeroporto Bari - Palese",
+    |          "phoneNumber" : "0039 0805316196"
+    |        },
+    |        "bindingItinerary" : false,
+    |        "countriesOfRouting" : [
+    |          {
+    |            "countryOfRouting" : {
+    |              "code" : "AD",
+    |              "description" : "Andorra"
+    |            }
+    |          },
+    |          {
+    |            "countryOfRouting" : {
+    |              "code" : "AR",
+    |              "description" : "Argentina"
+    |            }
+    |          }
+    |        ]
+    |      },
+    |      "countriesInSecurityAgreement" : false,
+    |      "addLocationOfGoods" : true,
+    |      "locationOfGoods" : {
+    |        "typeOfLocation" : {
+    |          "type": "A",
+    |          "description": "Designated location"
+    |        },
+    |        "qualifierOfIdentification" : {
+    |          "qualifier": "V",
+    |          "description": "Customs office identifier"
+    |        },
+    |        "identifier" : {
+    |          "customsOffice" : {
+    |            "id" : "XI000142",
+    |            "name" : "Belfast EPU",
+    |            "phoneNumber" : "+44 (0)02896 931537"
+    |          }
+    |        }
+    |      },
+    |      "loading" : {
+    |        "addUnLocodeYesNo" : false,
+    |        "additionalInformation" : {
+    |          "country" : {
+    |            "code" : "GB",
+    |            "description" : "United Kingdom"
+    |          },
+    |          "location" : "London"
+    |        }
+    |      },
+    |      "unloading" : {
+    |        "addUnLocodeYesNo" : false,
+    |        "additionalInformation" : {
+    |          "country" : {
+    |            "code" : "GB",
+    |            "description" : "United Kingdom"
+    |          },
+    |          "location" : "London"
+    |        }
+    |      }
+    |    },
+    |    "guaranteeDetails" : [
+    |      {
+    |        "guaranteeType" : {
+    |          "code" : "B",
+    |          "description": "Guarantee for goods dispatched under TIR procedure"
+    |        }
+    |      }
+    |    ],
+    |    "transportDetails" : {
+    |      "preRequisites" : {
+    |        "sameUcrYesNo" : true,
+    |        "uniqueConsignmentReference" : "GB123456123456",
+    |        "countryOfDispatch" : {
+    |          "code" : "GB",
+    |          "description" : "United Kingdom"
+    |        },
+    |        "transportedToSameCountryYesNo" : true,
+    |        "itemsDestinationCountry" : {
+    |          "code" : "GB",
+    |          "description" : "United Kingdom"
+    |        },
+    |        "containerIndicator" : true
+    |      },
+    |      "inlandMode" : {
+    |        "code": "2",
+    |        "description": "Rail Transport"
+    |      },
+    |      "transportMeansDeparture" : {
+    |        "identification" : {
+    |          "type": "21",
+    |          "description": "Train Number"
+    |        },
+    |        "meansIdentificationNumber" : "1234567",
+    |        "vehicleCountry" : {
+    |          "code" : "GB",
+    |          "desc" : "United Kingdom"
+    |        }
+    |      },
+    |      "borderModeOfTransport" : {
+    |        "code": "4",
+    |        "description": "Air transport"
+    |      },
+    |      "transportMeansActiveList" : [
+    |        {
+    |          "identification" : {
+    |            "code": "41",
+    |            "description": "Registration Number of the Aircraft"
+    |          },
+    |          "identificationNumber" : "GB1234567",
+    |          "addNationalityYesNo" : true,
+    |          "nationality" : {
+    |            "code" : "GB",
+    |            "desc" : "United Kingdom"
+    |          },
+    |          "customsOfficeActiveBorder" : {
+    |            "id" : "IT018101",
+    |            "name" : "Aeroporto Bari - Palese",
+    |            "phoneNumber" : "0039 0805316196"
+    |          },
+    |          "conveyanceReferenceNumber" : "GB123456123456"
+    |        }
+    |      ],
+    |      "supplyChainActorYesNo" : false,
+    |      "addAuthorisationsYesNo" : true,
+    |      "authorisationsAndLimit" : {
+    |        "limit": {
+    |          "limitDate": "2023-01-01"
+    |        },
+    |        "authorisations" : [
+    |          {
+    |            "authorisationType" : {
+    |              "code": "C524",
+    |              "description": "TRD - Authorisation to use transit declaration with a reduced dataset (Column 9e, Annex A of Delegated Regulation (EU) 2015/2446)"
+    |            },
+    |            "authorisationReferenceNumber" : "TRD123"
+    |          }
+    |        ]
+    |      },
+    |      "carrierDetails" : {
+    |        "identificationNumber" : "GB123456123456",
+    |        "addContactYesNo" : true,
+    |        "contact" : {
+    |          "name" : "Carry",
+    |          "telephoneNumber" : "+88 888 888"
+    |        }
+    |      }
+    |    },
+    |    "documents" : {
+    |      "documents" : [
+    |        {
+    |          "type" : {
+    |            "type" : "Transport",
+    |            "code" : "235",
+    |            "description" : "Container list"
+    |          },
+    |          "details" : {
+    |            "documentReferenceNumber" : "transport1"
+    |          }
+    |        }
+    |      ]
+    |    },
+    |    "items" : []
+    |  },
+    |  "tasks" : {},
+    |  "createdAt" : {
+    |    "$$date" : {
+    |      "$$numberLong" : "1662393524188"
+    |    }
+    |  },
+    |  "lastUpdated" : {
+    |    "$$date" : {
+    |      "$$numberLong" : "1662546803472"
+    |    }
+    |  }
+    |}
+    |""".stripMargin)
 
   val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
 
@@ -318,8 +310,6 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
       .configure(conf = "microservice.services.common-transit-convention-traders.port" -> server.port())
 
   private lazy val connector: ApiConnector = app.injector.instanceOf[ApiConnector]
-
-  val departureId: String = "someid"
 
   val expected: String = Json
     .obj(
@@ -337,9 +327,9 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
 
   val uri = "/movements/departures"
 
-  "ApiConnector" - {
+  "ApiConnector" when {
 
-    "getDepartures" - {
+    "getDepartures" must {
 
       val lrn1 = "3CnsTh79I7vtOy6"
       val lrn2 = "DEF456"
@@ -392,7 +382,7 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
           """
       )
 
-      "must return Departures" in {
+      "return Departures" in {
 
         server.stubFor(
           get(urlEqualTo(s"/movements/departures"))
@@ -406,36 +396,36 @@ class ApiConnectorSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with 
           )
         )
 
-        await(connector.getDepartures()) mustBe expectedResult
+        await(connector.getDepartures()) shouldBe expectedResult
       }
     }
 
-    "submitDeclaration is called" - {
+    "submitDeclaration is called" when {
 
-      "for success" in {
+      "success" in {
 
         server.stubFor(post(urlEqualTo(uri)).willReturn(okJson(expected)))
 
         val res = await(connector.submitDeclaration(uA))
-        res.toString mustBe Right(HttpResponse(OK, expected)).toString
+        res.toString shouldBe Right(HttpResponse(OK, expected)).toString
 
       }
 
-      "for bad request" in {
+      "bad request" in {
 
         server.stubFor(post(urlEqualTo(uri)).willReturn(badRequest()))
 
         val res = await(connector.submitDeclaration(uA))
-        res mustBe Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
+        res shouldBe Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
 
       }
 
-      "for internal server error" in {
+      "internal server error" in {
 
         server.stubFor(post(urlEqualTo(uri)).willReturn(serverError()))
 
         val res = await(connector.submitDeclaration(uA))
-        res mustBe Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
+        res shouldBe Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
 
       }
 

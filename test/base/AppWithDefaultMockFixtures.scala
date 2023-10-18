@@ -22,6 +22,7 @@ import controllers.actions.{
   FakeAuthenticateActionProvider,
   FakeAuthenticateAndLockActionProvider
 }
+import models.{FakeSensitiveFormats, SensitiveFormats}
 import org.scalatest.{BeforeAndAfterEach, TestSuite}
 import org.scalatestplus.mockito.MockitoSugar
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
@@ -41,6 +42,7 @@ trait AppWithDefaultMockFixtures extends GuiceOneAppPerSuite with BeforeAndAfter
     new GuiceApplicationBuilder()
       .overrides(
         bind[AuthenticateActionProvider].to[FakeAuthenticateActionProvider],
-        bind[AuthenticateAndLockActionProvider].to[FakeAuthenticateAndLockActionProvider]
+        bind[AuthenticateAndLockActionProvider].to[FakeAuthenticateAndLockActionProvider],
+        bind[SensitiveFormats].to[FakeSensitiveFormats]
       )
 }

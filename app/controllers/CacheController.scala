@@ -42,7 +42,7 @@ class CacheController @Inject() (
   // TODO replace with getAll when param's are added
   def get(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
-      getUserAnswers[UserAnswers](lrn, request.eoriNumber)(identity)
+      getUserAnswers[UserAnswers](lrn, request.eoriNumber)(identity)(UserAnswers.writes)
   }
 
   def post(lrn: String): Action[JsValue] = authenticateAndLock(lrn).async(parse.json) {
@@ -66,7 +66,8 @@ class CacheController @Inject() (
   def put(): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
-        case JsSuccess(lrn, _) => set(Metadata(lrn, request.eoriNumber))
+        case JsSuccess(lrn, _) =>
+          set(Metadata(lrn, request.eoriNumber))
         case JsError(errors) =>
           logger.warn(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)
@@ -132,6 +133,8 @@ class CacheController @Inject() (
       .get(lrn, eoriNumber)
       .map {
         case Some(userAnswers) =>
+          println("*****")
+          println(Json.toJson(f(userAnswers)))
           Ok(Json.toJson(f(userAnswers)))
         case None =>
           logger.warn(s"No document found for LRN '$lrn' and EORI '$eoriNumber'")

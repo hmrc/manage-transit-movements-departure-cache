@@ -17,7 +17,7 @@
 package controllers.testonly
 
 import api.submission.Declaration
-import models.UserAnswers
+import models.{SensitiveFormats, UserAnswers}
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
@@ -27,7 +27,8 @@ import javax.inject.Inject
 
 class TestOnlySubmissionController @Inject() (
   cc: ControllerComponents
-) extends BackendController(cc)
+)(implicit sensitiveFormats: SensitiveFormats)
+    extends BackendController(cc)
     with Logging {
 
   def submit(): Action[JsValue] = Action(parse.json) {

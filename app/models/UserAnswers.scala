@@ -50,10 +50,10 @@ object UserAnswers {
 
   import play.api.libs.functional.syntax._
 
-  implicit lazy val reads: Reads[UserAnswers]   = customReads(implicitly)
-  implicit lazy val writes: Writes[UserAnswers] = customWrites(implicitly)
+  implicit def reads: Reads[UserAnswers]   = customReads(implicitly, implicitly)
+  implicit def writes: Writes[UserAnswers] = customWrites(implicitly, implicitly)
 
-  private def customReads(implicit instantReads: Reads[Instant]): Reads[UserAnswers] =
+  private def customReads(implicit instantReads: Reads[Instant], metaDataReads: Reads[Metadata]): Reads[UserAnswers] =
     (
       __.read[Metadata] and
         (__ \ "createdAt").read[Instant] and
@@ -63,7 +63,7 @@ object UserAnswers {
         (__ \ "departureId").readNullable[String]
     )(UserAnswers.apply _)
 
-  private def customWrites(implicit instantWrites: Writes[Instant]): Writes[UserAnswers] =
+  private def customWrites(implicit instantWrites: Writes[Instant], metaDataWrites: Writes[Metadata]): Writes[UserAnswers] =
     (
       __.write[Metadata] and
         (__ \ "createdAt").write[Instant] and
@@ -73,9 +73,12 @@ object UserAnswers {
         (__ \ "departureId").writeNullable[String]
     )(unlift(UserAnswers.unapply))
 
-  lazy val mongoFormat: Format[UserAnswers] = Format(
-    customReads(MongoJavatimeFormats.instantReads),
-    customWrites(MongoJavatimeFormats.instantWrites)
-  )
+  def mongoFormat(implicit sensitiveFormats: SensitiveFormats): Format[UserAnswers] = {
+    import sensitiveFormats._
+    Format(
+      customReads(MongoJavatimeFormats.instantReads, Metadata.mongoReads),
+      customWrites(MongoJavatimeFormats.instantWrites, Metadata.mongoWrites)
+    )
+  }
 
 }

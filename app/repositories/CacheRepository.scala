@@ -36,12 +36,15 @@ class CacheRepository @Inject() (
   mongoComponent: MongoComponent,
   appConfig: AppConfig,
   clock: Clock
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, sensitiveFormats: SensitiveFormats)
     extends PlayMongoRepository[UserAnswers](
       mongoComponent = mongoComponent,
       collectionName = CacheRepository.collectionName,
       domainFormat = UserAnswers.mongoFormat,
-      indexes = CacheRepository.indexes(appConfig)
+      indexes = CacheRepository.indexes(appConfig),
+      extraCodecs = Seq(
+        Codecs.playFormatCodec(sensitiveFormats.format)
+      )
     ) {
 
   def get(lrn: String, eoriNumber: String): Future[Option[UserAnswers]] = {
@@ -73,7 +76,7 @@ class CacheRepository @Inject() (
     val updates: Seq[Bson] = Seq(
       Updates.setOnInsert("lrn", data.lrn),
       Updates.setOnInsert("eoriNumber", data.eoriNumber),
-      Updates.set("data", Codecs.toBson(data.data)),
+      Updates.set("data", data.encryptedData),
       Updates.set("tasks", Codecs.toBson(data.tasks)),
       Updates.setOnInsert("createdAt", now),
       Updates.set("lastUpdated", now),
