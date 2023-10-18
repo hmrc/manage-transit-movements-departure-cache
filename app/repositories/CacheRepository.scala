@@ -76,7 +76,7 @@ class CacheRepository @Inject() (
     val updates: Seq[Bson] = Seq(
       Some(Updates.setOnInsert("lrn", data.lrn)),
       Some(Updates.setOnInsert("eoriNumber", data.eoriNumber)),
-      Some(Updates.set("data", sensitiveFormats.bsonData(data.data))),
+      Some(Updates.set("data", Codecs.toBson(data.data)(sensitiveFormats.jsObjectWrites))),
       Some(Updates.set("tasks", Codecs.toBson(data.tasks))),
       Some(Updates.setOnInsert("createdAt", now)),
       Some(Updates.set("lastUpdated", now)),

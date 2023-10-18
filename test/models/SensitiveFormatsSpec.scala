@@ -122,7 +122,7 @@ class SensitiveFormatsSpec extends SpecBase with AppWithDefaultMockFixtures {
       }
     }
 
-    "writes" ignore {
+    "writes" when {
       "encryption enabled" must {
         "write and encrypt the value" in {
           val app = guiceApplicationBuilder()

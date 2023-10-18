@@ -61,20 +61,12 @@ class HolderOfTheTransitProcedureSpec extends SpecBase with AppWithDefaultMockFi
               |    }
               |  },
               |  "tasks" : {},
-              |  "createdAt" : {
-              |    "$$date" : {
-              |      "$$numberLong" : "1662393524188"
-              |    }
-              |  },
-              |  "lastUpdated" : {
-              |    "$$date" : {
-              |      "$$numberLong" : "1662546803472"
-              |    }
-              |  }
+              |  "createdAt" : "2022-09-05T15:58:44.188Z",
+              |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
               |}
               |""".stripMargin)
 
-          val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+          val uA: UserAnswers = json.as[UserAnswers]
 
           val expected = HolderOfTheTransitProcedureType14(
             identificationNumber = Some("GB123456789000"),
@@ -125,20 +117,12 @@ class HolderOfTheTransitProcedureSpec extends SpecBase with AppWithDefaultMockFi
               |    }
               |  },
               |  "tasks" : {},
-              |  "createdAt" : {
-              |    "$$date" : {
-              |      "$$numberLong" : "1662393524188"
-              |    }
-              |  },
-              |  "lastUpdated" : {
-              |    "$$date" : {
-              |      "$$numberLong" : "1662546803472"
-              |    }
-              |  }
+              |  "createdAt" : "2022-09-05T15:58:44.188Z",
+              |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
               |}
               |""".stripMargin)
 
-          val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+          val uA: UserAnswers = json.as[UserAnswers]
 
           val expected = HolderOfTheTransitProcedureType14(
             identificationNumber = None,
@@ -168,20 +152,12 @@ class HolderOfTheTransitProcedureSpec extends SpecBase with AppWithDefaultMockFi
               |    "traderDetails" : {}
               |  },
               |  "tasks" : {},
-              |  "createdAt" : {
-              |    "$$date" : {
-              |      "$$numberLong" : "1662393524188"
-              |    }
-              |  },
-              |  "lastUpdated" : {
-              |    "$$date" : {
-              |      "$$numberLong" : "1662546803472"
-              |    }
-              |  }
+              |  "createdAt" : "2022-09-05T15:58:44.188Z",
+              |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
               |}
               |""".stripMargin)
 
-          val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+          val uA: UserAnswers = json.as[UserAnswers]
 
           a[Exception] must be thrownBy HolderOfTheTransitProcedure.transform(uA)
         }

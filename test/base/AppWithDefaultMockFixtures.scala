@@ -48,7 +48,6 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach {
   // Override to provide custom binding
   def guiceApplicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
-      .configure("encryption.enabled" -> false)
       .overrides(
         bind[AuthenticateActionProvider].to[FakeAuthenticateActionProvider],
         bind[AuthenticateAndLockActionProvider].to[FakeAuthenticateAndLockActionProvider],

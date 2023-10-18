@@ -17,12 +17,10 @@
 package models
 
 import models.SensitiveFormats.RichJsObject
-import org.mongodb.scala.bson.BsonValue
 import play.api.libs.json._
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.crypto.json.JsonEncryption
 import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
-import uk.gov.hmrc.mongo.play.json.Codecs
 
 class SensitiveFormats(encryptionEnabled: Boolean)(implicit crypto: Encrypter with Decrypter) {
 
@@ -47,23 +45,16 @@ class SensitiveFormats(encryptionEnabled: Boolean)(implicit crypto: Encrypter wi
 
   val jsObjectReads: Reads[JsObject] =
     if (encryptionEnabled) {
-      __.read[SensitiveString].map(_.decryptedValue).map(Json.parse(_).as[JsObject])
+      implicitly[Reads[SensitiveString]].map(_.decryptedValue).map(Json.parse(_).as[JsObject])
     } else {
-      __.read[JsObject]
+      implicitly[Reads[JsObject]]
     }
 
   val jsObjectWrites: Writes[JsObject] =
     if (encryptionEnabled) {
-      __.write[SensitiveString].contramap(_.encrypt)
+      implicitly[Writes[SensitiveString]].contramap(_.encrypt)
     } else {
-      __.write[JsObject]
-    }
-
-  def bsonData(data: JsObject): BsonValue =
-    if (encryptionEnabled) {
-      Codecs.toBson(data.encrypt)
-    } else {
-      Codecs.toBson(data)
+      implicitly[Writes[JsObject]]
     }
 }
 

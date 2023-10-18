@@ -19,7 +19,8 @@ package models
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import generators.Generators
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import play.api.libs.json.{JsSuccess, JsValue, Json}
+import play.api.libs.json.{Format, JsSuccess, JsValue, Json}
+import play.api.test.Helpers.running
 
 import java.time.{Instant, LocalDateTime}
 import java.util.UUID
@@ -41,10 +42,9 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
     createdAt = Instant.ofEpochMilli(1662393524188L),
     lastUpdated = Instant.ofEpochMilli(1662546803472L),
     id = UUID.fromString(uuid),
-    status = SubmissionState.NotSubmitted
+    status = SubmissionState.NotSubmitted,
+    departureId = Some(departureId)
   )
-
-  private val userAnswersWithDepartureId = userAnswers.copy(departureId = Some(departureId))
 
   "User answers" when {
 
@@ -52,59 +52,31 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
 
       val json: JsValue = Json.parse(s"""
           |{
-          |    "_id" : "$uuid",
-          |    "lrn" : "$lrn",
-          |    "eoriNumber" : "$eoriNumber",
-          |    "data" : {},
-          |    "tasks" : {
-          |        "task1" : "completed",
-          |        "task2" : "in-progress",
-          |        "task3" : "not-started",
-          |        "task4" : "cannot-start-yet"
-          |    },
-          |    "createdAt" : "2022-09-05T15:58:44.188Z",
-          |    "lastUpdated" : "2022-09-07T10:33:23.472Z",
-          |    "isSubmitted" : "notSubmitted"
+          |  "_id" : "$uuid",
+          |  "lrn" : "$lrn",
+          |  "eoriNumber" : "$eoriNumber",
+          |  "data" : {},
+          |  "tasks" : {
+          |    "task1" : "completed",
+          |    "task2" : "in-progress",
+          |    "task3" : "not-started",
+          |    "task4" : "cannot-start-yet"
+          |  },
+          |  "createdAt" : "2022-09-05T15:58:44.188Z",
+          |  "lastUpdated" : "2022-09-07T10:33:23.472Z",
+          |  "isSubmitted" : "notSubmitted",
+          |  "departureId": "$departureId"
           |}
           |""".stripMargin)
-
-      val jsonWithDepartureId: JsValue = Json.parse(s"""
-           |{
-           |    "_id" : "$uuid",
-           |    "lrn" : "$lrn",
-           |    "eoriNumber" : "$eoriNumber",
-           |    "data" : {},
-           |    "tasks" : {
-           |        "task1" : "completed",
-           |        "task2" : "in-progress",
-           |        "task3" : "not-started",
-           |        "task4" : "cannot-start-yet"
-           |    },
-           |    "createdAt" : "2022-09-05T15:58:44.188Z",
-           |    "lastUpdated" : "2022-09-07T10:33:23.472Z",
-           |    "isSubmitted" : "notSubmitted",
-           |    "departureId": "$departureId"
-           |}
-           |""".stripMargin)
 
       "read correctly" in {
         val result = json.as[UserAnswers]
         result shouldBe userAnswers
       }
 
-      "read correctly with departureId" in {
-        val result = jsonWithDepartureId.as[UserAnswers]
-        result shouldBe userAnswersWithDepartureId
-      }
-
       "write correctly" in {
         val result = Json.toJson(userAnswers)
         result shouldBe json
-      }
-
-      "write correctly with departureId" in {
-        val result = Json.toJson(userAnswersWithDepartureId)
-        result shouldBe jsonWithDepartureId
       }
 
       "be readable as a LocalDateTime for backwards compatibility" in {
@@ -113,83 +85,103 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
       }
     }
 
-    "being passed between backend and mongo" should {
+    "being passed between backend and mongo" when {
 
-      val json: JsValue = Json.parse(s"""
-          |{
-          |    "_id" : "$uuid",
-          |    "lrn" : "$lrn",
-          |    "eoriNumber" : "$eoriNumber",
-          |    "data" : {},
-          |    "isSubmitted" : "notSubmitted",
-          |    "tasks" : {
-          |        "task1" : "completed",
-          |        "task2" : "in-progress",
-          |        "task3" : "not-started",
-          |        "task4" : "cannot-start-yet"
-          |    },
-          |    "createdAt" : {
-          |        "$$date" : {
-          |            "$$numberLong" : "1662393524188"
-          |        }
-          |    },
-          |
-          |    "lastUpdated" : {
-          |        "$$date" : {
-          |            "$$numberLong" : "1662546803472"
-          |        }
-          |    }
-          |}
-          |""".stripMargin)
+      "encryption enabled" must {
+        val app = guiceApplicationBuilder()
+          .configure("encryption.enabled" -> true)
+          .build()
 
-      val jsonWithDepartureId: JsValue = Json.parse(s"""
-           |{
-           |    "_id" : "$uuid",
-           |    "lrn" : "$lrn",
-           |    "eoriNumber" : "$eoriNumber",
-           |    "data" : {},
-           |    "isSubmitted" : "notSubmitted",
-           |    "tasks" : {
-           |        "task1" : "completed",
-           |        "task2" : "in-progress",
-           |        "task3" : "not-started",
-           |        "task4" : "cannot-start-yet"
-           |    },
-           |    "createdAt" : {
-           |        "$$date" : {
-           |            "$$numberLong" : "1662393524188"
-           |        }
-           |    },
-           |
-           |    "lastUpdated" : {
-           |        "$$date" : {
-           |            "$$numberLong" : "1662546803472"
-           |        }
-           |    },
-           |    "departureId": "$departureId"
-           |}
-           |""".stripMargin)
+        running(app) {
+          val sensitiveFormats                     = app.injector.instanceOf[SensitiveFormats]
+          implicit val format: Format[UserAnswers] = UserAnswers.mongoFormat(sensitiveFormats)
 
-      "read correctly" in {
-        val result = json.as[UserAnswers](UserAnswers.mongoFormat)
-        result shouldBe userAnswers
+          val json: JsValue = Json.parse(s"""
+               |{
+               |  "_id" : "$uuid",
+               |  "lrn" : "$lrn",
+               |  "eoriNumber" : "$eoriNumber",
+               |  "data" : "T+FWrvLPJMKyRZ1aoW8rdZmETyL89CdpWxaog0joG6B/hxCF",
+               |  "isSubmitted" : "notSubmitted",
+               |  "tasks" : {
+               |    "task1" : "completed",
+               |    "task2" : "in-progress",
+               |    "task3" : "not-started",
+               |    "task4" : "cannot-start-yet"
+               |  },
+               |  "createdAt" : {
+               |    "$$date" : {
+               |      "$$numberLong" : "1662393524188"
+               |    }
+               |  },
+               |  "lastUpdated" : {
+               |    "$$date" : {
+               |      "$$numberLong" : "1662546803472"
+               |    }
+               |  },
+               |  "departureId": "$departureId"
+               |}
+               |""".stripMargin)
+
+          "read correctly" in {
+            val result = json.as[UserAnswers]
+            result shouldBe userAnswers
+          }
+
+          "write and read correctly" in {
+            val result = Json.toJson(userAnswers).as[UserAnswers]
+            result shouldBe userAnswers
+          }
+        }
       }
 
-      "read correctly with departureId" in {
-        val result = jsonWithDepartureId.as[UserAnswers](UserAnswers.mongoFormat)
-        result shouldBe userAnswersWithDepartureId
-      }
+      "encryption disabled" must {
+        val app = guiceApplicationBuilder()
+          .configure("encryption.enabled" -> false)
+          .build()
 
-      "write correctly" in {
-        val result = Json.toJson(userAnswers)(UserAnswers.mongoFormat)
-        result shouldBe json
-      }
+        running(app) {
+          val sensitiveFormats                     = app.injector.instanceOf[SensitiveFormats]
+          implicit val format: Format[UserAnswers] = UserAnswers.mongoFormat(sensitiveFormats)
 
-      "write correctly with departureId" in {
-        val result = Json.toJson(userAnswersWithDepartureId)(UserAnswers.mongoFormat)
-        result shouldBe jsonWithDepartureId
+          val json: JsValue = Json.parse(s"""
+               |{
+               |  "_id" : "$uuid",
+               |  "lrn" : "$lrn",
+               |  "eoriNumber" : "$eoriNumber",
+               |  "data" : {},
+               |  "isSubmitted" : "notSubmitted",
+               |  "tasks" : {
+               |    "task1" : "completed",
+               |    "task2" : "in-progress",
+               |    "task3" : "not-started",
+               |    "task4" : "cannot-start-yet"
+               |  },
+               |  "createdAt" : {
+               |    "$$date" : {
+               |      "$$numberLong" : "1662393524188"
+               |    }
+               |  },
+               |  "lastUpdated" : {
+               |    "$$date" : {
+               |      "$$numberLong" : "1662546803472"
+               |    }
+               |  },
+               |  "departureId": "$departureId"
+               |}
+               |""".stripMargin)
+
+          "read correctly" in {
+            val result = json.as[UserAnswers]
+            result shouldBe userAnswers
+          }
+
+          "write correctly" in {
+            val result = Json.toJson(userAnswers)
+            result shouldBe json
+          }
+        }
       }
     }
   }
-
 }
