@@ -28,9 +28,9 @@ object Declaration {
 
   private val scope: NamespaceBinding = scalaxb.toScope(Some("ncts") -> "http://ncts.dgtaxud.ec")
 
-  def transform(uA: UserAnswers, mrn: Option[MovementReferenceNumber]): NodeSeq = uA.status match {
-    case Amendment          => toXML(IE013(uA, mrn, flag = false), s"ncts:${CC013C.toString}", scope)
-    case GuaranteeAmendment => toXML(IE013(uA, mrn, flag = true), s"ncts:${CC013C.toString}", scope)
+  def transform(uA: UserAnswers, mrn: MovementReferenceNumber): NodeSeq = uA.status match {
+    case Amendment          => toXML(IE013(uA, mrn.value, flag = false), s"ncts:${CC013C.toString}", scope)
+    case GuaranteeAmendment => toXML(IE013(uA, mrn.value, flag = true), s"ncts:${CC013C.toString}", scope)
     case _                  => toXML(IE015(uA), s"ncts:${CC015C.toString}", scope)
   }
 
@@ -50,7 +50,7 @@ object Declaration {
       attributes = Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString("NCTS5.0", scope)))
     )
 
-  private def IE013(uA: UserAnswers, mrn: Option[MovementReferenceNumber], flag: Boolean): CC013CType =
+  private def IE013(uA: UserAnswers, mrn: Option[String], flag: Boolean): CC013CType =
     CC013CType(
       messageSequence1 = Header.message(uA, CC013C),
       TransitOperation = TransitOperation.transformIE013(uA, mrn, flag),

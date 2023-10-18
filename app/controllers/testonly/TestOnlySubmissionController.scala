@@ -17,7 +17,7 @@
 package controllers.testonly
 
 import api.submission.Declaration
-import models.UserAnswers
+import models.{MovementReferenceNumber, UserAnswers}
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
@@ -34,7 +34,7 @@ class TestOnlySubmissionController @Inject() (
     request =>
       request.body.validate[UserAnswers](UserAnswers.reads orElse UserAnswers.mongoFormat) match {
         case JsSuccess(userAnswers, _) =>
-          Ok(Declaration.transform(userAnswers, mrn = None))
+          Ok(Declaration.transform(userAnswers, mrn = MovementReferenceNumber.Empty))
         case JsError(errors) =>
           logger.info(s"Failed to validate request body as UserAnswers: ${errors.mkString}")
           BadRequest

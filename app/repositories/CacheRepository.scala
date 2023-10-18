@@ -58,7 +58,7 @@ class CacheRepository @Inject() (
   }
 
   def set(data: Metadata, status: Option[SubmissionState], departureId: Option[String]): Future[Boolean] =
-    set(data, Updates.setOnInsert("isSubmitted", status.getOrElse(SubmissionState.NotSubmitted).asString), departureId)
+    set(data, Updates.set("isSubmitted", status.getOrElse(SubmissionState.NotSubmitted).asString), departureId)
 
   def set(userAnswers: UserAnswers, status: SubmissionState, departureId: Option[String]): Future[Boolean] =
     set(userAnswers.metadata, Updates.set("isSubmitted", status.asString), departureId)

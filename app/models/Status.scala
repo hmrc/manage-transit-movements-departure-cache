@@ -30,6 +30,7 @@ object Status extends Enumeration {
   val CannotStartYet: Status = Value("cannot-start-yet")
   val Error: Status          = Value("error")
   val Unavailable: Status    = Value("unavailable")
+  val Amended: Status        = Value("amended")
 
   implicit val format: Format[Status] = Json.formatEnum(this)
 }
