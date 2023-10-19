@@ -40,7 +40,7 @@ class CacheRepository @Inject() (
     extends PlayMongoRepository[UserAnswers](
       mongoComponent = mongoComponent,
       collectionName = CacheRepository.collectionName,
-      domainFormat = UserAnswers.mongoFormat,
+      domainFormat = UserAnswers.sensitiveFormat,
       indexes = CacheRepository.indexes(appConfig),
       extraCodecs = Seq(
         Codecs.playFormatCodec(sensitiveFormats.sensitiveStringFormat)

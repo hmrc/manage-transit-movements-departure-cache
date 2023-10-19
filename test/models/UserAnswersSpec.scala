@@ -94,7 +94,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
 
         running(app) {
           val sensitiveFormats                     = app.injector.instanceOf[SensitiveFormats]
-          implicit val format: Format[UserAnswers] = UserAnswers.mongoFormat(sensitiveFormats)
+          implicit val format: Format[UserAnswers] = UserAnswers.sensitiveFormat(sensitiveFormats)
 
           val json: JsValue = Json.parse(s"""
                |{
@@ -142,7 +142,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
 
         running(app) {
           val sensitiveFormats                     = app.injector.instanceOf[SensitiveFormats]
-          implicit val format: Format[UserAnswers] = UserAnswers.mongoFormat(sensitiveFormats)
+          implicit val format: Format[UserAnswers] = UserAnswers.sensitiveFormat(sensitiveFormats)
 
           val json: JsValue = Json.parse(s"""
                |{

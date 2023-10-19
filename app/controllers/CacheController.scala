@@ -42,7 +42,7 @@ class CacheController @Inject() (
   // TODO replace with getAll when param's are added
   def get(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
-      getUserAnswers[UserAnswers](lrn, request.eoriNumber)(identity)(UserAnswers.writes)
+      getUserAnswers[UserAnswers](lrn, request.eoriNumber)(identity)
   }
 
   def post(lrn: String): Action[JsValue] = authenticateAndLock(lrn).async(parse.json) {
@@ -66,8 +66,7 @@ class CacheController @Inject() (
   def put(): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
-        case JsSuccess(lrn, _) =>
-          set(Metadata(lrn, request.eoriNumber))
+        case JsSuccess(lrn, _) => set(Metadata(lrn, request.eoriNumber))
         case JsError(errors) =>
           logger.warn(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)
