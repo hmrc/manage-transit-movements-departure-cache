@@ -16,7 +16,7 @@
 
 package models
 
-import models.SensitiveFormats.RichJsObject
+import models.SensitiveFormats._
 import play.api.libs.json._
 import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 import uk.gov.hmrc.crypto.json.JsonEncryption
@@ -24,35 +24,13 @@ import uk.gov.hmrc.crypto.{Decrypter, Encrypter}
 
 class SensitiveFormats(encryptionEnabled: Boolean)(implicit crypto: Encrypter with Decrypter) {
 
-  implicit val sensitiveStringReads: Reads[SensitiveString] = {
-    if (encryptionEnabled) {
-      JsonEncryption.sensitiveDecrypter(SensitiveString.apply)
-    } else {
-      implicitly[Reads[String]].map(SensitiveString.apply)
-    }
-  }
-
-  implicit val sensitiveStringWrites: Writes[SensitiveString] = {
-    if (encryptionEnabled) {
-      JsonEncryption.sensitiveEncrypter[String, SensitiveString]
-    } else {
-      implicitly[Writes[String]].contramap(_.decryptedValue)
-    }
-  }
-
-  implicit val sensitiveStringFormat: Format[SensitiveString] =
-    Format(sensitiveStringReads, sensitiveStringWrites)
-
   val jsObjectReads: Reads[JsObject] =
-    if (encryptionEnabled) {
-      implicitly[Reads[SensitiveString]].map(_.decryptedValue).map(Json.parse(_).as[JsObject])
-    } else {
+    JsonEncryption.sensitiveDecrypter(SensitiveString.apply).map(_.decrypt) orElse
       implicitly[Reads[JsObject]]
-    }
 
   val jsObjectWrites: Writes[JsObject] =
     if (encryptionEnabled) {
-      implicitly[Writes[SensitiveString]].contramap(_.encrypt)
+      JsonEncryption.sensitiveEncrypter[String, SensitiveString].contramap(_.encrypt)
     } else {
       implicitly[Writes[JsObject]]
     }
@@ -62,5 +40,9 @@ object SensitiveFormats {
 
   implicit class RichJsObject(jsObject: JsObject) {
     def encrypt: SensitiveString = SensitiveString(Json.stringify(jsObject))
+  }
+
+  implicit class RichSensitiveString(sensitiveString: SensitiveString) {
+    def decrypt: JsObject = Json.parse(sensitiveString.decryptedValue).as[JsObject]
   }
 }

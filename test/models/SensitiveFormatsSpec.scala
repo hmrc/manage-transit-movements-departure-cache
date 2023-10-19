@@ -17,76 +17,10 @@
 package models
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.libs.json.{JsObject, Json}
 import play.api.test.Helpers.running
-import uk.gov.hmrc.crypto.Sensitive.SensitiveString
 
 class SensitiveFormatsSpec extends SpecBase with AppWithDefaultMockFixtures {
-
-  "SensitiveString" when {
-    val encryptedValue = "4CocWZm74h6iozJ1bq7K3WatZr4Tk7kWV0pj6W+n0ObUAPY1jw=="
-    val decryptedValue = SensitiveString("ABC")
-
-    "reads" when {
-      "encryption enabled" must {
-        "read and decrypt the value" in {
-          val app = guiceApplicationBuilder()
-            .configure("encryption.enabled" -> true)
-            .build()
-
-          running(app) {
-            val sensitiveFormats = app.injector.instanceOf[SensitiveFormats]
-            val result           = Json.toJson(encryptedValue).as[SensitiveString](sensitiveFormats.sensitiveStringReads)
-            result shouldBe decryptedValue
-          }
-        }
-      }
-
-      "encryption disabled" must {
-        "read and not decrypt the value" in {
-          val app = guiceApplicationBuilder()
-            .configure("encryption.enabled" -> false)
-            .build()
-
-          running(app) {
-            val sensitiveFormats = app.injector.instanceOf[SensitiveFormats]
-            val result           = Json.toJson(decryptedValue.decryptedValue).as[SensitiveString](sensitiveFormats.sensitiveStringReads)
-            result shouldBe decryptedValue
-          }
-        }
-      }
-    }
-
-    "writes" when {
-      "encryption enabled" must {
-        "write and encrypt the value" in {
-          val app = guiceApplicationBuilder()
-            .configure("encryption.enabled" -> true)
-            .build()
-
-          running(app) {
-            val sensitiveFormats = app.injector.instanceOf[SensitiveFormats]
-            val result           = Json.toJson(decryptedValue)(sensitiveFormats.sensitiveStringWrites)
-            result.as[JsString].value should not be decryptedValue.decryptedValue
-          }
-        }
-      }
-
-      "encryption disabled" must {
-        "write and not encrypt the value" in {
-          val app = guiceApplicationBuilder()
-            .configure("encryption.enabled" -> false)
-            .build()
-
-          running(app) {
-            val sensitiveFormats = app.injector.instanceOf[SensitiveFormats]
-            val result           = Json.toJson(decryptedValue)(sensitiveFormats.sensitiveStringWrites)
-            result shouldBe JsString(decryptedValue.decryptedValue)
-          }
-        }
-      }
-    }
-  }
 
   "JsObject" when {
     val encryptedValue = "WFYrOuMf6WHDjHooyzED80QIGXMTPSHEjc3Kl8jPFRJFtHWV"
@@ -94,7 +28,7 @@ class SensitiveFormatsSpec extends SpecBase with AppWithDefaultMockFixtures {
 
     "reads" when {
       "encryption enabled" must {
-        "read and decrypt the value" in {
+        "read an encrypted value" in {
           val app = guiceApplicationBuilder()
             .configure("encryption.enabled" -> true)
             .build()
@@ -105,10 +39,34 @@ class SensitiveFormatsSpec extends SpecBase with AppWithDefaultMockFixtures {
             result shouldBe decryptedValue
           }
         }
+
+        "read a decrypted value" in {
+          val app = guiceApplicationBuilder()
+            .configure("encryption.enabled" -> true)
+            .build()
+
+          running(app) {
+            val sensitiveFormats = app.injector.instanceOf[SensitiveFormats]
+            val result           = Json.toJson(decryptedValue).as[JsObject](sensitiveFormats.jsObjectReads)
+            result shouldBe decryptedValue
+          }
+        }
       }
 
       "encryption disabled" must {
-        "read and not decrypt the value" in {
+        "read an encrypted value" in {
+          val app = guiceApplicationBuilder()
+            .configure("encryption.enabled" -> false)
+            .build()
+
+          running(app) {
+            val sensitiveFormats = app.injector.instanceOf[SensitiveFormats]
+            val result           = Json.toJson(encryptedValue).as[JsObject](sensitiveFormats.jsObjectReads)
+            result shouldBe decryptedValue
+          }
+        }
+
+        "read a decrypted value" in {
           val app = guiceApplicationBuilder()
             .configure("encryption.enabled" -> false)
             .build()
