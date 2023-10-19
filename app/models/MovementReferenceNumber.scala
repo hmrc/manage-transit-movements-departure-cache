@@ -17,11 +17,8 @@
 package models
 
 import play.api.libs.json._
-import play.api.libs.functional.syntax._
 
-final case class MovementReferenceNumber(value: Option[String]) {
-//  override def toString: String = value
-}
+final case class MovementReferenceNumber(value: Option[String])
 
 object MovementReferenceNumber {
 
