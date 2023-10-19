@@ -19,14 +19,13 @@ package services
 import base.SpecBase
 import models.Status.Completed
 import models.Task._
-import models.{Metadata, Status, SubmissionState, UserAnswers, XPath}
+import models._
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{verify, verifyNoInteractions, verifyNoMoreInteractions, when}
 import org.scalatest.concurrent.ScalaFutures
 import play.api.libs.json.JsObject
 
 import scala.concurrent.Future
-import scala.xml.MetaData
 
 class XPathServiceSpec extends SpecBase with ScalaFutures {
 

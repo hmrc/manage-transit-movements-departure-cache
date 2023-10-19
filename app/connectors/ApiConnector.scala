@@ -17,14 +17,16 @@
 package connectors
 
 import api.submission._
+import com.github.dwickern.macros.NameOf._
 import config.AppConfig
 import models.{DepartureMessageTypes, Departures, MovementReferenceNumber, UserAnswers}
 import play.api.Logging
 import play.api.http.HeaderNames
+import play.api.http.Status._
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError}
-import uk.gov.hmrc.http.{BadRequestException, HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
-import com.github.dwickern.macros.NameOf._
+import uk.gov.hmrc.http.HttpReads.Implicits._
+import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
 
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
@@ -89,17 +91,17 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
       .POSTString[HttpResponse](declarationUrl, payload, requestHeaders)
       .map {
         response =>
-          logger.debug(s"ApiConnector:${httpMethod.name}: success: ${response.status}-${response.body}")
-          Right(response)
+          response.status match {
+            case x if is2xx(x) =>
+              logger.debug(s"ApiConnector:${httpMethod.name}: success: ${response.status}-${response.body}")
+              Right(response)
+            case BAD_REQUEST =>
+              logger.info(s"ApiConnector:${httpMethod.name}: bad request: ${response.body}")
+              Left(BadRequest(s"ApiConnector:${httpMethod.name}: bad request"))
+            case _ =>
+              logger.error(s"ApiConnector:${httpMethod.name}: something went wrong: ${response.body}")
+              Left(InternalServerError(s"ApiConnector:${httpMethod.name}: something went wrong"))
+          }
       }
-      .recover {
-        case httpEx: BadRequestException =>
-          logger.info(s"ApiConnector:${httpMethod.name}: bad request: ${httpEx.responseCode}-${httpEx.getMessage}")
-          Left(BadRequest(s"ApiConnector:${httpMethod.name}: bad request"))
-        case e: Exception =>
-          logger.error(s"ApiConnector:${httpMethod.name}: something went wrong: ${e.getMessage}")
-          Left(InternalServerError(s"ApiConnector:${httpMethod.name}: something went wrong"))
-      }
-
   private case class HttpMethodName(name: String)
 }

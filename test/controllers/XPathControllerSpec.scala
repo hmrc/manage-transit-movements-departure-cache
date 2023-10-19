@@ -18,8 +18,7 @@ package controllers
 
 import base.SpecBase
 import generators.Generators
-import models.Task._
-import models.{Status, XPath}
+import models.XPath
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
 import org.scalacheck.Arbitrary.arbitrary
