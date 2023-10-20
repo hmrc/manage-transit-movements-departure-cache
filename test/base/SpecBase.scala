@@ -17,23 +17,21 @@
 package base
 
 import config.AppConfig
-import models.{Metadata, SubmissionState, UserAnswers}
-import org.mockito.Mockito.reset
+import models.{Metadata, SensitiveFormats, SubmissionState, UserAnswers}
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
-import org.scalatest.{BeforeAndAfterEach, EitherValues, OptionValues}
+import org.scalatest.{EitherValues, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc.AnyContentAsEmpty
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
+import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
-import repositories.{CacheRepository, DefaultLockRepository}
 import uk.gov.hmrc.http.HeaderCarrier
 
 import java.time.{Clock, Instant}
 import java.util.UUID
 
-trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAndAfterEach with OptionValues with EitherValues with AppWithDefaultMockFixtures {
+trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with GuiceOneAppPerSuite with OptionValues with EitherValues with ScalaFutures {
 
   val lrn        = "lrn"
   val eoriNumber = "eori"
@@ -46,26 +44,10 @@ trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with BeforeAn
   val departureId                     = "departureId123"
   val emptyUserAnswersWithDepartureId = emptyUserAnswers.copy(departureId = Some(departureId))
 
-  val mockCacheRepository: CacheRepository      = mock[CacheRepository]
-  val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]
+  def fakeRequest: FakeRequest[AnyContent] = FakeRequest("", "")
 
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    reset(mockCacheRepository)
-    reset(mockLockRepository)
-  }
-
-  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
-    super
-      .guiceApplicationBuilder()
-      .overrides(
-        bind[CacheRepository].toInstance(mockCacheRepository),
-        bind[DefaultLockRepository].toInstance(mockLockRepository)
-      )
-
-  def fakeRequest: FakeRequest[AnyContentAsEmpty.type] = FakeRequest("", "")
-
-  implicit val appConfig: AppConfig = app.injector.instanceOf[AppConfig]
-  implicit val clock: Clock         = app.injector.instanceOf[Clock]
+  implicit lazy val appConfig: AppConfig               = app.injector.instanceOf[AppConfig]
+  implicit lazy val clock: Clock                       = app.injector.instanceOf[Clock]
+  implicit lazy val sensitiveFormats: SensitiveFormats = app.injector.instanceOf[SensitiveFormats]
 
 }

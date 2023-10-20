@@ -34,4 +34,7 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
 
   val apiUrl: String = servicesConfig.baseUrl("common-transit-convention-traders")
 
+  val encryptionKey: String      = config.get[String]("encryption.key")
+  val encryptionEnabled: Boolean = config.get[Boolean]("encryption.enabled")
+
 }

@@ -22,15 +22,24 @@ import controllers.actions.{
   FakeAuthenticateActionProvider,
   FakeAuthenticateAndLockActionProvider
 }
+import org.mockito.Mockito.reset
 import org.scalatest.{BeforeAndAfterEach, TestSuite}
-import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
+import repositories.{CacheRepository, DefaultLockRepository}
 
-trait AppWithDefaultMockFixtures extends GuiceOneAppPerSuite with BeforeAndAfterEach with MockitoSugar {
-  self: TestSuite =>
+trait AppWithDefaultMockFixtures extends BeforeAndAfterEach {
+  self: TestSuite with SpecBase =>
+
+  lazy val mockCacheRepository: CacheRepository      = mock[CacheRepository]
+  lazy val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockCacheRepository)
+    reset(mockLockRepository)
+  }
 
   override def fakeApplication(): Application =
     guiceApplicationBuilder()
@@ -41,6 +50,8 @@ trait AppWithDefaultMockFixtures extends GuiceOneAppPerSuite with BeforeAndAfter
     new GuiceApplicationBuilder()
       .overrides(
         bind[AuthenticateActionProvider].to[FakeAuthenticateActionProvider],
-        bind[AuthenticateAndLockActionProvider].to[FakeAuthenticateAndLockActionProvider]
+        bind[AuthenticateAndLockActionProvider].to[FakeAuthenticateAndLockActionProvider],
+        bind[CacheRepository].toInstance(mockCacheRepository),
+        bind[DefaultLockRepository].toInstance(mockLockRepository)
       )
 }

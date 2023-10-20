@@ -18,14 +18,14 @@ package api.submission
 
 import api.submission.Consignment.RichConsignmentType20
 import api.submission.consignmentType20.{activeBorderTransportMeansReads, transportEquipmentReads}
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import generated._
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 
 import scala.collection.immutable.Seq
 
-class ConsignmentSpec extends SpecBase {
+class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "Consignment" when {
 
@@ -602,20 +602,12 @@ class ConsignmentSpec extends SpecBase {
             |    ]
             |  },
             |  "tasks" : {},
-            |  "createdAt" : {
-            |    "$$date" : {
-            |      "$$numberLong" : "1662393524188"
-            |    }
-            |  },
-            |  "lastUpdated" : {
-            |    "$$date" : {
-            |      "$$numberLong" : "1662546803472"
-            |    }
-            |  }
+            |  "createdAt" : "2022-09-05T15:58:44.188Z",
+            |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
             |}
             |""".stripMargin)
 
-        val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+        val uA: UserAnswers = json.as[UserAnswers]
 
         val converted: ConsignmentType20 = Consignment.transform(uA)
 
@@ -1536,20 +1528,12 @@ class ConsignmentSpec extends SpecBase {
              |    ]
              |  },
              |  "tasks" : {},
-             |  "createdAt" : {
-             |    "$$date" : {
-             |      "$$numberLong" : "1662393524188"
-             |    }
-             |  },
-             |  "lastUpdated" : {
-             |    "$$date" : {
-             |      "$$numberLong" : "1662546803472"
-             |    }
-             |  }
+             |  "createdAt" : "2022-09-05T15:58:44.188Z",
+             |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
              |}
              |""".stripMargin)
 
-        val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+        val uA: UserAnswers = json.as[UserAnswers]
 
         val converted: ConsignmentType20 = Consignment.transform(uA)
 

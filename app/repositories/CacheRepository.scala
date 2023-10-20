@@ -36,11 +36,11 @@ class CacheRepository @Inject() (
   mongoComponent: MongoComponent,
   appConfig: AppConfig,
   clock: Clock
-)(implicit ec: ExecutionContext)
+)(implicit ec: ExecutionContext, sensitiveFormats: SensitiveFormats)
     extends PlayMongoRepository[UserAnswers](
       mongoComponent = mongoComponent,
       collectionName = CacheRepository.collectionName,
-      domainFormat = UserAnswers.mongoFormat,
+      domainFormat = UserAnswers.sensitiveFormat,
       indexes = CacheRepository.indexes(appConfig)
     ) {
 
@@ -71,15 +71,17 @@ class CacheRepository @Inject() (
     )
 
     val updates: Seq[Bson] = Seq(
-      Updates.setOnInsert("lrn", data.lrn),
-      Updates.setOnInsert("eoriNumber", data.eoriNumber),
-      Updates.set("data", Codecs.toBson(data.data)),
-      Updates.set("tasks", Codecs.toBson(data.tasks)),
-      Updates.setOnInsert("createdAt", now),
-      Updates.set("lastUpdated", now),
-      Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID())),
-      statusUpdate
-    ) ++ departureId.map(Updates.set("departureId", _))
+      Some(Updates.setOnInsert("lrn", data.lrn)),
+      Some(Updates.setOnInsert("eoriNumber", data.eoriNumber)),
+      Some(Updates.set("data", Codecs.toBson(data.data)(sensitiveFormats.jsObjectWrites))),
+      Some(Updates.set("tasks", Codecs.toBson(data.tasks))),
+      Some(Updates.setOnInsert("createdAt", now)),
+      Some(Updates.set("lastUpdated", now)),
+      Some(Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID()))),
+      Some(statusUpdate),
+      departureId.map(Updates.set("departureId", _))
+    ).flatten
+
     val combineUpdates: Bson = Updates.combine(updates: _*)
     val options              = UpdateOptions().upsert(true)
 
