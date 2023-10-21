@@ -17,7 +17,7 @@
 package controllers.testonly
 
 import api.submission.Declaration
-import models.{MovementReferenceNumber, UserAnswers, SensitiveFormats}
+import models.{MovementReferenceNumber, SensitiveFormats, UserAnswers}
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents}
