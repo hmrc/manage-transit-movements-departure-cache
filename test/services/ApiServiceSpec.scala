@@ -16,12 +16,11 @@
 
 package services
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import connectors.ApiConnector
 import models.{Departure, DepartureMessageType, DepartureMessageTypes, Departures}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
-import org.scalatest.concurrent.ScalaFutures
 import play.api.http.Status.OK
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -31,7 +30,7 @@ import uk.gov.hmrc.http.HttpResponse
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class ApiServiceSpec extends SpecBase with ScalaFutures {
+class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   private lazy val mockApiConnector = mock[ApiConnector]
   private lazy val mockXPathService = mock[XPathService]

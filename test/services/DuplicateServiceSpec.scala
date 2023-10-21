@@ -16,57 +16,37 @@
 
 package services
 
-import base.AppWithDefaultMockFixtures
-import models.{Metadata, SubmissionState, UserAnswers}
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify, when}
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.freespec.AnyFreeSpec
 import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import repositories.{CacheRepository, DefaultLockRepository}
-import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.Instant
-import java.util.UUID
 import scala.concurrent.Future
 
-class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures with ScalaFutures {
+class DuplicateServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
-  val lrn                        = "lrn"
-  val eoriNumber                 = "eoriNumber"
-  implicit val hc: HeaderCarrier = HeaderCarrier()
-
-  val mockApiService: ApiService                = mock[ApiService]
-  val mockCacheRepository: CacheRepository      = mock[CacheRepository]
-  val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]
-
-  val emptyMetadata: Metadata       = Metadata(lrn, eoriNumber)
-  val emptyUserAnswers: UserAnswers = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID(), SubmissionState.NotSubmitted)
+  private lazy val mockApiService: ApiService = mock[ApiService]
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockApiService)
-    reset(mockCacheRepository)
-    reset(mockLockRepository)
   }
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
       .guiceApplicationBuilder()
       .overrides(
-        bind[CacheRepository].toInstance(mockCacheRepository),
-        bind[DefaultLockRepository].toInstance(mockLockRepository),
         bind[ApiService].toInstance(mockApiService)
       )
 
   private val service = app.injector.instanceOf[DuplicateService]
 
-  "doesIE028ExistForLrn" - {
+  "doesIE028ExistForLrn" should {
 
-    "must return true" - {
-      "when true is returned from isIE028DefinedForDeparture" in {
+    "return true" when {
+      "true is returned from isIE028DefinedForDeparture" in {
 
         when(mockApiService.isIE028DefinedForDeparture(any())(any(), any())).thenReturn(Future.successful(true))
 
@@ -76,8 +56,8 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
       }
     }
 
-    "must return false" - {
-      "when false is returned from isIE028DefinedForDeparture" in {
+    "return false" when {
+      "false is returned from isIE028DefinedForDeparture" in {
 
         when(mockApiService.isIE028DefinedForDeparture(any())(any(), any())).thenReturn(Future.successful(false))
 
@@ -88,10 +68,10 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
     }
   }
 
-  "doesDraftExistForLrn" - {
+  "doesDraftExistForLrn" should {
 
-    "must return true" - {
-      "when there is a document in cache with the given lrn" in {
+    "return true" when {
+      "there is a document in cache with the given lrn" in {
 
         when(mockCacheRepository.doesDraftExistForLrn(eqTo(lrn))).thenReturn(Future.successful(true))
 
@@ -103,8 +83,8 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
       }
     }
 
-    "must return false" - {
-      "when there is not a document in the cache with the given lrn" in {
+    "return false" when {
+      "there is not a document in the cache with the given lrn" in {
 
         when(mockCacheRepository.doesDraftExistForLrn(eqTo(lrn))).thenReturn(Future.successful(false))
 
@@ -117,9 +97,9 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
     }
   }
 
-  "doesDraftOrSubmissionExistForLrn" - {
-    "must return true" - {
-      "when doesIE028ExistForLrn returns departures" in {
+  "doesDraftOrSubmissionExistForLrn" should {
+    "return true" when {
+      "doesIE028ExistForLrn returns departures" in {
         when(mockApiService.isIE028DefinedForDeparture(any())(any(), any()))
           .thenReturn(Future.successful(true))
 
@@ -129,7 +109,8 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
 
         verify(mockApiService).isIE028DefinedForDeparture(eqTo(lrn))(any(), any())
       }
-      "when doesIE028ExistForLrn returns false, but doesDraftExistForLrn returns true" in {
+
+      "doesIE028ExistForLrn returns false, but doesDraftExistForLrn returns true" in {
         when(mockApiService.isIE028DefinedForDeparture(any())(any(), any()))
           .thenReturn(Future.successful(false))
         when(mockCacheRepository.doesDraftExistForLrn(any()))
@@ -144,7 +125,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
       }
     }
 
-    "must return false when both doesIE028ExistForLrn and doesDraftExistForLrn return false" in {
+    "return false when both doesIE028ExistForLrn and doesDraftExistForLrn return false" in {
       when(mockApiService.isIE028DefinedForDeparture(any())(any(), any()))
         .thenReturn(Future.successful(false))
       when(mockCacheRepository.doesDraftExistForLrn(any()))
@@ -158,9 +139,9 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
     }
   }
 
-  "doesDeclarationExist" - {
+  "doesDeclarationExist" should {
 
-    "return true" - {
+    "return true" when {
       "a document exists in the cache for the given LRN and EORI " in {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
 
@@ -172,7 +153,7 @@ class DuplicateServiceSpec extends AnyFreeSpec with AppWithDefaultMockFixtures w
       }
     }
 
-    "return false" - {
+    "return false" when {
       "a document doesn't exist in the cache for the given LRN and EORI" in {
 
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))

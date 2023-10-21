@@ -16,7 +16,7 @@
 
 package controllers
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.Lock
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.when
@@ -27,7 +27,7 @@ import uk.gov.hmrc.http.HeaderNames
 import java.time.Instant
 import scala.concurrent.Future
 
-class LockControllerSpec extends SpecBase {
+class LockControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "checkLock" should {
 

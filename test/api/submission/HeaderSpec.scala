@@ -16,12 +16,12 @@
 
 package api.submission
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import generated._
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 
-class HeaderSpec extends SpecBase {
+class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "Conversions" when {
 
@@ -43,20 +43,12 @@ class HeaderSpec extends SpecBase {
           |    }
           |  },
           |  "tasks" : {},
-          |  "createdAt" : {
-          |    "$$date" : {
-          |      "$$numberLong" : "1662393524188"
-          |    }
-          |  },
-          |  "lastUpdated" : {
-          |    "$$date" : {
-          |      "$$numberLong" : "1662546803472"
-          |    }
-          |  }
+          |  "createdAt" : "2022-09-05T15:58:44.188Z",
+          |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
           |}
           |""".stripMargin)
 
-      val uA: UserAnswers = json.as[UserAnswers](UserAnswers.mongoFormat)
+      val uA: UserAnswers = json.as[UserAnswers]
 
       "will convert to API format" in {
 

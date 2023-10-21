@@ -16,7 +16,7 @@
 
 package controllers
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.{SubmissionState, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
@@ -31,7 +31,7 @@ import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
 
-class SubmissionControllerSpec extends SpecBase {
+class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   private lazy val mockApiService = mock[ApiService]
 

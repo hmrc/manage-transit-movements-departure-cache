@@ -16,7 +16,7 @@
 
 package controllers
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import generators.Generators
 import models.XPath
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -31,7 +31,7 @@ import services.XPathService
 
 import scala.concurrent.Future
 
-class XPathControllerSpec extends SpecBase with Generators {
+class XPathControllerSpec extends SpecBase with AppWithDefaultMockFixtures with Generators {
 
   private lazy val mockXPathService = mock[XPathService]
 
