@@ -25,18 +25,18 @@ object TransitOperation {
   def transform(uA: UserAnswers): TransitOperationType06 =
     uA.metadata.data.as[TransitOperationType06](transitOperationType06.reads(uA.lrn))
 
-  def transformIE013(uA: UserAnswers, mrn: Option[MovementReferenceNumber], flag: Boolean): TransitOperationType04 =
+  def transformIE013(uA: UserAnswers, mrn: Option[String], flag: Boolean): TransitOperationType04 =
     uA.metadata.data.as[TransitOperationType04](transitOperationType04.reads(uA.lrn, mrn, flag))
 }
 
 object transitOperationType04 {
 
-  def reads(lrn: String, mrn: Option[MovementReferenceNumber], flag: Boolean): Reads[TransitOperationType04] =
+  def reads(lrn: String, mrn: Option[String], flag: Boolean): Reads[TransitOperationType04] =
     CommonTransitOperation.reads.map(
       readsData =>
         TransitOperationType04(
           LRN = if (mrn.isDefined) None else Some(lrn),
-          MRN = mrn.map(_.value),
+          MRN = mrn,
           declarationType = readsData.declarationType,
           additionalDeclarationType = readsData.additionalDeclarationType,
           TIRCarnetNumber = readsData.TIRCarnetNumber,

@@ -143,7 +143,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         contentAsJson(result) shouldBe body
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockCacheRepository).set(eqTo(emptyUserAnswersWithDepartureId), eqTo(SubmissionState.Submitted), eqTo(Some("departureId123")))
+        verify(mockCacheRepository).set(eqTo(emptyUserAnswersWithDepartureId), eqTo(SubmissionState.Amendment), eqTo(Some("departureId123")))
         verify(mockApiService).submitAmendDeclaration(eqTo(emptyUserAnswersWithDepartureId), eqTo(departureId))(any())
       }
     }

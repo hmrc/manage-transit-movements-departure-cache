@@ -41,7 +41,7 @@ trait ModelGenerators {
     Arbitrary {
       for {
         mrn <- stringsWithMaxLength(22: Int, Gen.alphaNumChar)
-      } yield new MovementReferenceNumber(mrn)
+      } yield new MovementReferenceNumber(Some(mrn))
     }
 
   implicit lazy val arbitraryXPath: Arbitrary[XPath] = Arbitrary {

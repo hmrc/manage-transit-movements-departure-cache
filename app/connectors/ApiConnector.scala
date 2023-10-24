@@ -41,9 +41,9 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
     httpClient.GET[Departures](url)(implicitly, headers, ec)
   }
 
-  def getMRN(departureId: String)(implicit hc: HeaderCarrier): Future[Option[MovementReferenceNumber]] = {
+  def getMRN(departureId: String)(implicit hc: HeaderCarrier): Future[MovementReferenceNumber] = {
     val url = s"${appConfig.apiUrl}/movements/departures/$departureId"
-    httpClient.GET[Option[MovementReferenceNumber]](url)(implicitly, headers, ec)
+    httpClient.GET[MovementReferenceNumber](url)(HttpReads[MovementReferenceNumber], headers, ec)
   }
 
   def getMessageTypesByPath(
@@ -74,7 +74,7 @@ class ApiConnector @Inject() (httpClient: HttpClient, appConfig: AppConfig)(impl
 
     val declarationUrl = s"${appConfig.apiUrl}/movements/departures"
 
-    val payload: String = Declaration.transform(userAnswers, mrn = None).toString
+    val payload: String = Declaration.transform(userAnswers, mrn = MovementReferenceNumber.Empty).toString
 
     val requestHeaders = Seq(
       HeaderNames.ACCEPT       -> "application/vnd.hmrc.2.0+json",

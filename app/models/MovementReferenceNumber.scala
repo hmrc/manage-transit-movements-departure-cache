@@ -18,18 +18,20 @@ package models
 
 import play.api.libs.json._
 
-final case class MovementReferenceNumber(value: String) {
-  override def toString: String = value
-}
+final case class MovementReferenceNumber(value: Option[String])
 
 object MovementReferenceNumber {
 
-  implicit val reads: Reads[MovementReferenceNumber] =
-    (__ \ "movementReferenceNumber").read[String].map(MovementReferenceNumber(_))
+  val Empty = MovementReferenceNumber(None)
 
-  implicit val writes: Writes[MovementReferenceNumber] = Writes {
-    mrn =>
-      JsString(mrn.value)
-  }
+  implicit val reads: Reads[MovementReferenceNumber] = (__ \ "movementReferenceNumber").readNullable[String].map(MovementReferenceNumber(_))
+
+  implicit val writes: Writes[MovementReferenceNumber] = (
+    (JsPath \ "movementReferenceNumber")
+      .writeNullable[String]
+    )
+    .contramap(
+      mrn => mrn.value
+    )
 
 }
