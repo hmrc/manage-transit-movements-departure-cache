@@ -17,7 +17,7 @@
 package services
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import models.Status.Completed
+import models.Status.{Amended, Completed}
 import models.Task._
 import models._
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -111,7 +111,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
               ".preTaskList"      -> Status.Error,
               ".transportDetails" -> Status.Error,
               ".traderDetails"    -> Status.Error,
-              ".documents"        -> Status.Unavailable
+              ".documents"        -> Status.Completed
             )
           )
 
