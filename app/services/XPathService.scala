@@ -65,10 +65,30 @@ class XPathService @Inject() (
 
   }
 
-  private def setTasksUnavailable(tasks: Map[String, Status.Value]): Map[String, Status.Value] =
-    tasks.map(
-      task => if (task._1 != PreTaskList.taskName) (task._1, Status.Unavailable) else task
-    )
+  def handleAmendmentErrors(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
+    cacheRepository.get(lrn, eoriNumber).flatMap {
+      case Some(userAnswers) =>
+        val tasks: Map[String, Status.Value] = if (xPaths.nonEmpty) {
+          userAnswers.metadata.tasks ++ xPaths.flatMap(_.taskError).toMap
+        } else {
+          userAnswers.metadata.tasks
+        }
+
+        cacheRepository
+          .set(userAnswers.updateTasks(tasks), SubmissionState.Amendment, userAnswers.departureId)
+          .map {
+            case true => true
+            case false =>
+              logger.warn("Write was not acknowledged")
+              false
+          }
+          .recover {
+            case e =>
+              logger.warn("Failed to write user answers to mongo", e)
+              false
+          }
+      case _ => Future.successful(false)
+    }
 
   def handleErrors(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
     xPaths.flatMap {

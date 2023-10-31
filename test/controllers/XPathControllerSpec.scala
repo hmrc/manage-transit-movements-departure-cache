@@ -214,4 +214,52 @@ class XPathControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
     }
   }
 
+  "handleAmendmentErrors" should {
+
+    "return 200 with true" when {
+      "errors set successfully" in {
+        when(mockXPathService.handleAmendmentErrors(any(), any(), any())).thenReturn(Future.successful(true))
+
+        val request = FakeRequest(POST, routes.XPathController.handleAmendmentErrors(lrn).url)
+          .withBody(JsArray(xPaths.map(_.value).map(JsString)))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe JsBoolean(true)
+        verify(mockXPathService).handleAmendmentErrors(eqTo(lrn), eqTo(eoriNumber), eqTo(xPaths))
+      }
+    }
+
+    "return 200 with true" when {
+      "when no xPaths passed" in {
+        when(mockXPathService.handleAmendmentErrors(any(), any(), any())).thenReturn(Future.successful(true))
+
+        val request = FakeRequest(POST, routes.XPathController.handleAmendmentErrors(lrn).url)
+          .withBody(JsArray(Seq.empty.map(JsString)))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe JsBoolean(true)
+        verify(mockXPathService).handleAmendmentErrors(eqTo(lrn), eqTo(eoriNumber), eqTo(Seq.empty))
+      }
+    }
+
+    "return 200 with false" when {
+      "errors not set" in {
+        when(mockXPathService.handleAmendmentErrors(any(), any(), any())).thenReturn(Future.successful(false))
+
+        val request = FakeRequest(POST, routes.XPathController.handleAmendmentErrors(lrn).url)
+          .withBody(JsArray(xPaths.map(_.value).map(JsString)))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe JsBoolean(false)
+        verify(mockXPathService).handleAmendmentErrors(eqTo(lrn), eqTo(eoriNumber), eqTo(xPaths))
+      }
+    }
+  }
+
 }

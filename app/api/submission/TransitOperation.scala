@@ -17,7 +17,7 @@
 package api.submission
 
 import generated.{TransitOperationType04, TransitOperationType06}
-import models.{MovementReferenceNumber, UserAnswers}
+import models.UserAnswers
 import play.api.libs.json.Reads
 
 object TransitOperation {
