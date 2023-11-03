@@ -18,7 +18,7 @@ package api.submission
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import generated.Number0
-import models.{MovementReferenceNumber, UserAnswers}
+import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 import scalaxb.XMLCalendar
 
@@ -444,7 +444,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = (Some(mrn)), flag = false)
+          val converted = TransitOperation.transformIE013(uA, mrn = Some(mrn), flag = false)
 
           converted shouldBe expected
         }

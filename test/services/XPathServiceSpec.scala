@@ -111,7 +111,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
               ".preTaskList"      -> Status.Error,
               ".transportDetails" -> Status.Error,
               ".traderDetails"    -> Status.Error,
-              ".documents"        -> Status.Unavailable
+              ".documents"        -> Status.Completed
             )
           )
 
@@ -161,6 +161,105 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         verifyNoInteractions(mockCacheRepository)
       }
+    }
+  }
+
+  "handleAmendmentErrors" must {
+    val xPaths = Seq(
+      XPath("/CC015C/Authorisation/referenceNumber"),
+      XPath("/CC015C/CustomsOfficeOfDeparture/customsOffice"),
+      XPath("/CC015C/Representative/firstName")
+    )
+
+    "when there is xPaths return true" when {
+      "a document exists in the cache for the given LRN and EORI " +
+        "and setting the document tasks to error succeeds" in {
+
+          val metaData    = Metadata(lrn, eoriNumber, JsObject.empty, tasks = Map(".preTaskList" -> Completed, ".documents" -> Completed))
+          val userAnswers = emptyUserAnswers.copy(metaData)
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
+          when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState, any(): Option[String])).thenReturn(Future.successful(true))
+
+          val result = service.handleAmendmentErrors(lrn, eoriNumber, xPaths).futureValue
+
+          val expectedMeta = Metadata(
+            lrn,
+            eoriNumber,
+            JsObject.empty,
+            tasks = Map(
+              ".preTaskList"      -> Status.Error,
+              ".transportDetails" -> Status.Error,
+              ".traderDetails"    -> Status.Error,
+              ".documents"        -> Status.Completed
+            )
+          )
+
+          val expectedUa = emptyUserAnswers.copy(metadata = expectedMeta)
+
+          result shouldBe true
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+          verify(mockCacheRepository).set(eqTo(expectedUa), eqTo(SubmissionState.Amendment), eqTo(None))
+        }
+    }
+
+    "when there is no xPaths return true" when {
+      "a document exists in the cache for the given LRN and EORI " in {
+
+        val metaData    = Metadata(lrn, eoriNumber, JsObject.empty, tasks = Map(".preTaskList" -> Completed, ".documents" -> Completed))
+        val userAnswers = emptyUserAnswers.copy(metaData)
+
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
+        when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState, any(): Option[String])).thenReturn(Future.successful(true))
+
+        val result = service.handleAmendmentErrors(lrn, eoriNumber, Seq.empty).futureValue
+
+        val expectedMeta = Metadata(
+          lrn,
+          eoriNumber,
+          JsObject.empty,
+          tasks = Map(
+            ".preTaskList" -> Status.Completed,
+            ".documents"   -> Status.Completed
+          )
+        )
+
+        val expectedUa = emptyUserAnswers.copy(metadata = expectedMeta)
+
+        result shouldBe true
+
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        verify(mockCacheRepository).set(eqTo(expectedUa), eqTo(SubmissionState.Amendment), eqTo(None))
+      }
+    }
+
+    "return false" when {
+      "a document doesn't exist in the cache for the given LRN and EORI" in {
+
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
+
+        val result = service.handleErrors(lrn, eoriNumber, xPaths).futureValue
+
+        result shouldBe false
+
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        verifyNoMoreInteractions(mockCacheRepository)
+      }
+
+      "a document exists in the cache for the given LRN and EORI " +
+        "and setting the document tasks to error fails" in {
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+          when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState, eqTo(None))).thenReturn(Future.successful(false))
+
+          val result = service.handleErrors(lrn, eoriNumber, xPaths).futureValue
+
+          result shouldBe false
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+          verify(mockCacheRepository).set(any(), eqTo(SubmissionState.RejectedPendingChanges), eqTo(None))
+        }
     }
   }
 
