@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import com.kenshoo.play.metrics.Metrics
+import com.codahale.metrics.MetricRegistry
 import config.AppConfig
 import models.request.AuthenticatedRequest
 import play.api.Logging
@@ -32,7 +32,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AuthenticateAction @Inject() (
   override val authConnector: AuthConnector,
-  val metrics: Metrics,
+  val metrics: MetricRegistry,
   appConfig: AppConfig
 )(implicit val executionContext: ExecutionContext)
     extends ActionRefiner[Request, AuthenticatedRequest]
