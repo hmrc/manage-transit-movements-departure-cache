@@ -1003,11 +1003,6 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               ),
               AdditionalReference = Seq(
                 AdditionalReferenceType04(
-                  sequenceNumber = "1",
-                  typeValue = "ar1",
-                  referenceNumber = Some("arno1")
-                ),
-                AdditionalReferenceType04(
                   sequenceNumber = "2",
                   typeValue = "ar2",
                   referenceNumber = None
@@ -1062,13 +1057,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               PreviousDocument = Nil,
               SupportingDocument = Nil,
               TransportDocument = Nil,
-              AdditionalReference = Seq(
-                AdditionalReferenceType04(
-                  sequenceNumber = "1",
-                  typeValue = "ar1",
-                  referenceNumber = Some("arno1")
-                )
-              ),
+              AdditionalReference = Nil,
               AdditionalInformation = Nil,
               TransportCharges = None
             )
@@ -1860,11 +1849,6 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               TransportDocument = Seq.empty,
               AdditionalReference = Seq(
                 AdditionalReferenceType04(
-                  sequenceNumber = "1",
-                  typeValue = "ar1",
-                  referenceNumber = Some("arno1")
-                ),
-                AdditionalReferenceType04(
                   sequenceNumber = "2",
                   typeValue = "ar2",
                   referenceNumber = None
@@ -1919,13 +1903,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               PreviousDocument = Nil,
               SupportingDocument = Nil,
               TransportDocument = Nil,
-              AdditionalReference = Seq(
-                AdditionalReferenceType04(
-                  sequenceNumber = "1",
-                  typeValue = "ar1",
-                  referenceNumber = Some("arno1")
-                )
-              ),
+              AdditionalReference = Nil,
               AdditionalInformation = Nil,
               TransportCharges = None
             )

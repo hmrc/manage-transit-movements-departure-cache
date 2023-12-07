@@ -17,6 +17,7 @@
 package api.submission
 
 import api.submission.Level._
+import api.submission.additionalReferenceType04.RichAdditionalReferenceType04
 import api.submission.documentType.RichDocumentJsValue
 import api.submission.houseConsignmentType10.RichHouseConsignmentType10
 import generated._
@@ -39,6 +40,7 @@ object Consignment {
       .rollUpCountryOfDispatch()
       .rollUpCountryOfDestination()
       .rollUpAdditionalInformation()
+      .rollUpAdditionalReferences()
 
     def rollUpTransportCharges(): ConsignmentType20 =
       rollUp[Option[TransportChargesType], Option[TransportChargesType]](
@@ -125,6 +127,23 @@ object Consignment {
         }
       )
 
+    def rollUpAdditionalReferences(): ConsignmentType20 =
+      rollUp[Seq[AdditionalReferenceType05], Seq[AdditionalReferenceType04]](
+        consignmentLevel = _.AdditionalReference,
+        itemLevel = _.AdditionalReference,
+        updateConsignmentLevel = additionalReference => _.copy(AdditionalReference = additionalReference.map(_.asAdditionalReferenceType05)),
+        updateItemLevel = commonValues => item => item.copy(AdditionalReference = item.AdditionalReference.diff(commonValues)),
+        shouldRollUp = {
+          case (Nil, _)                                => true
+          case (consignmentLevelValue, itemLevelValue) => consignmentLevelValue.toSet == itemLevelValue.toSet
+          case _                                       => false
+        },
+        getCommonValueAtItemLevel = _.reduceLeft(_ intersect _) match {
+          case Nil          => None
+          case commonValues => Some(commonValues)
+        }
+      )
+
     def update(f: ConsignmentType20 => ConsignmentType20): ConsignmentType20 = f(value)
 
     private def rollUp[A, B](
@@ -173,7 +192,6 @@ object consignmentType20 {
     previousDocuments           <- previousDocumentsReads
     supportingDocuments         <- supportingDocumentsReads
     transportDocuments          <- transportDocumentsReads
-    additionalReferences        <- itemsPath.readCommonValuesInNestedArrays[AdditionalReferenceType05]("additionalReferences")(additionalReferenceType05.reads)
     transportCharges            <- __.read[Option[TransportChargesType]](transportChargesType.consignmentReads)
     houseConsignments           <- __.read[HouseConsignmentType10](houseConsignmentType10.reads).map(Seq(_))
   } yield ConsignmentType20(
@@ -198,7 +216,7 @@ object consignmentType20 {
     PreviousDocument = previousDocuments,
     SupportingDocument = supportingDocuments,
     TransportDocument = transportDocuments,
-    AdditionalReference = additionalReferences,
+    AdditionalReference = Nil,
     AdditionalInformation = Nil,
     TransportCharges = transportCharges,
     HouseConsignment = houseConsignments
@@ -639,6 +657,16 @@ object additionalReferenceType04 {
 
   def reads(index: Int): Reads[AdditionalReferenceType04] =
     additionalReference.reads(index)(AdditionalReferenceType04)
+
+  implicit class RichAdditionalReferenceType04(value: AdditionalReferenceType04) {
+
+    def asAdditionalReferenceType05: AdditionalReferenceType05 =
+      AdditionalReferenceType05(
+        sequenceNumber = value.sequenceNumber,
+        typeValue = value.typeValue,
+        referenceNumber = value.referenceNumber
+      )
+  }
 }
 
 object additionalReferenceType05 {
