@@ -1015,11 +1015,6 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               ),
               AdditionalInformation = Seq(
                 AdditionalInformationType03(
-                  sequenceNumber = "1",
-                  code = "aiCode1",
-                  text = Some("ai1")
-                ),
-                AdditionalInformationType03(
                   sequenceNumber = "2",
                   code = "aiCode2",
                   text = Some("ai2")
@@ -1074,13 +1069,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                   referenceNumber = Some("arno1")
                 )
               ),
-              AdditionalInformation = Seq(
-                AdditionalInformationType03(
-                  sequenceNumber = "1",
-                  code = "aiCode1",
-                  text = Some("ai1")
-                )
-              ),
+              AdditionalInformation = Nil,
               TransportCharges = None
             )
           )
@@ -1883,11 +1872,6 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               ),
               AdditionalInformation = Seq(
                 AdditionalInformationType03(
-                  sequenceNumber = "1",
-                  code = "aiCode1",
-                  text = Some("ai1")
-                ),
-                AdditionalInformationType03(
                   sequenceNumber = "2",
                   code = "aiCode2",
                   text = Some("ai2")
@@ -1942,13 +1926,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                   referenceNumber = Some("arno1")
                 )
               ),
-              AdditionalInformation = Seq(
-                AdditionalInformationType03(
-                  sequenceNumber = "1",
-                  code = "aiCode1",
-                  text = Some("ai1")
-                )
-              ),
+              AdditionalInformation = Nil,
               TransportCharges = None
             )
           )
@@ -2945,24 +2923,6 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
           PostcodeAddress = None,
           ContactPerson = None
         )
-      }
-    }
-
-    "additionalInformationReads is called" when {
-      "there is no additional information" in {
-        val json = Json.parse(s"""
-             |{
-             |  "items" : [
-             |    {
-             |      "addAdditionalInformationYesNo" : false
-             |    }
-             |  ]
-             |}
-             |""".stripMargin)
-
-        val result = json.as[Seq[AdditionalInformationType03]](consignmentType20.additionalInformationReads)
-
-        result shouldBe Nil
       }
     }
 

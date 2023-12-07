@@ -37,4 +37,6 @@ class AppConfig @Inject() (config: Configuration, servicesConfig: ServicesConfig
   val encryptionKey: String      = config.get[String]("encryption.key")
   val encryptionEnabled: Boolean = config.get[Boolean]("encryption.enabled")
 
+  val isTransition: Boolean = config.get[Boolean]("isTransition")
+
 }
