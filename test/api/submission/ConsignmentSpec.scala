@@ -24,6 +24,7 @@ import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 
 import scala.collection.immutable.Seq
+import org.scalacheck.Arbitrary.arbitrary
 
 class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
 
@@ -1915,6 +1916,8 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
     "postProcess is called" when {
 
       "rollUpTransportCharges" when {
+        val isTransition = arbitrary[Boolean].sample.value
+
         "every item has the same transport charges" when {
           "consignment transport charges undefined" must {
             "roll up transport charges to consignment level and remove them from each item" in {
@@ -1950,7 +1953,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                 )
               )
 
-              val result = consignment.postProcess()
+              val result = consignment.postProcess(isTransition)
 
               result shouldBe ConsignmentType20(
                 grossMass = BigDecimal(1),
@@ -2025,7 +2028,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                   )
                 )
 
-                val result = consignment.postProcess()
+                val result = consignment.postProcess(isTransition)
 
                 result shouldBe ConsignmentType20(
                   grossMass = BigDecimal(1),
@@ -2097,7 +2100,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                   )
                 )
 
-                val result = consignment.postProcess()
+                val result = consignment.postProcess(isTransition)
 
                 result shouldBe consignment
               }
@@ -2147,7 +2150,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess()
+            val result = consignment.postProcess(isTransition)
 
             result shouldBe consignment
           }
@@ -2197,7 +2200,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess()
+            val result = consignment.postProcess(isTransition)
 
             result shouldBe consignment
           }
@@ -2205,6 +2208,8 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
       }
 
       "rollUpUCR" when {
+        val isTransition = arbitrary[Boolean].sample.value
+
         "every item has the same UCR" must {
           "roll up UCR to consignment level and remove them from each item" in {
             val consignment = ConsignmentType20(
@@ -2235,7 +2240,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess()
+            val result = consignment.postProcess(isTransition)
 
             result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
@@ -2306,7 +2311,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess()
+            val result = consignment.postProcess(isTransition)
 
             result shouldBe consignment
           }
@@ -2350,7 +2355,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess()
+            val result = consignment.postProcess(isTransition)
 
             result shouldBe consignment
           }
@@ -2358,6 +2363,8 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
       }
 
       "rollUpCountryOfDispatch" when {
+        val isTransition = arbitrary[Boolean].sample.value
+
         "every item has the same country of dispatch" must {
           "roll up country of dispatch to consignment level and remove them from each item" in {
             val consignment = ConsignmentType20(
@@ -2388,7 +2395,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess()
+            val result = consignment.postProcess(isTransition)
 
             result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
@@ -2459,7 +2466,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess()
+            val result = consignment.postProcess(isTransition)
 
             result shouldBe consignment
           }
@@ -2503,7 +2510,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess()
+            val result = consignment.postProcess(isTransition)
 
             result shouldBe consignment
           }
@@ -2511,6 +2518,8 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
       }
 
       "rollUpCountryOfDestination" when {
+        val isTransition = arbitrary[Boolean].sample.value
+
         "every item has the same country of destination" must {
           "roll up country of destination to consignment level and remove them from each item" in {
             val consignment = ConsignmentType20(
@@ -2541,7 +2550,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess()
+            val result = consignment.postProcess(isTransition)
 
             result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
@@ -2612,7 +2621,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess()
+            val result = consignment.postProcess(isTransition)
 
             result shouldBe consignment
           }
@@ -2656,9 +2665,591 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess()
+            val result = consignment.postProcess(isTransition)
 
             result shouldBe consignment
+          }
+        }
+      }
+
+      "rollUpAdditionalInformation" when {
+
+        "during post-transition" when {
+
+          "every item has a common additional information" must {
+            "roll up each common additional information to consignment level and remove them from each item" in {
+              val consignment = ConsignmentType20(
+                grossMass = BigDecimal(1),
+                HouseConsignment = Seq(
+                  HouseConsignmentType10(
+                    sequenceNumber = "1",
+                    grossMass = BigDecimal(1),
+                    ConsignmentItem = Seq(
+                      ConsignmentItemType09(
+                        goodsItemNumber = "1",
+                        declarationGoodsItemNumber = BigInt(1),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 1"
+                        ),
+                        AdditionalInformation = Seq(
+                          AdditionalInformationType03(
+                            sequenceNumber = "1",
+                            code = "adi1",
+                            text = Some("ADI 1")
+                          ),
+                          AdditionalInformationType03(
+                            sequenceNumber = "2",
+                            code = "adi2",
+                            text = Some("ADI 2")
+                          )
+                        )
+                      ),
+                      ConsignmentItemType09(
+                        goodsItemNumber = "2",
+                        declarationGoodsItemNumber = BigInt(2),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 2"
+                        ),
+                        AdditionalInformation = Seq(
+                          AdditionalInformationType03(
+                            sequenceNumber = "1",
+                            code = "adi1",
+                            text = Some("ADI 1")
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+
+              val result = consignment.postProcess(false)
+
+              result shouldBe ConsignmentType20(
+                grossMass = BigDecimal(1),
+                AdditionalInformation = Seq(
+                  AdditionalInformationType03(
+                    sequenceNumber = "1",
+                    code = "adi1",
+                    text = Some("ADI 1")
+                  )
+                ),
+                HouseConsignment = Seq(
+                  HouseConsignmentType10(
+                    sequenceNumber = "1",
+                    grossMass = BigDecimal(1),
+                    ConsignmentItem = Seq(
+                      ConsignmentItemType09(
+                        goodsItemNumber = "1",
+                        declarationGoodsItemNumber = BigInt(1),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 1"
+                        ),
+                        AdditionalInformation = Seq(
+                          AdditionalInformationType03(
+                            sequenceNumber = "2",
+                            code = "adi2",
+                            text = Some("ADI 2")
+                          )
+                        )
+                      ),
+                      ConsignmentItemType09(
+                        goodsItemNumber = "2",
+                        declarationGoodsItemNumber = BigInt(2),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 2"
+                        ),
+                        AdditionalInformation = Nil
+                      )
+                    )
+                  )
+                )
+              )
+            }
+          }
+
+          "some items have common additional information" must {
+            "not roll up additional information to consignment level" in {
+              val consignment = ConsignmentType20(
+                grossMass = BigDecimal(1),
+                HouseConsignment = Seq(
+                  HouseConsignmentType10(
+                    sequenceNumber = "1",
+                    grossMass = BigDecimal(1),
+                    ConsignmentItem = Seq(
+                      ConsignmentItemType09(
+                        goodsItemNumber = "1",
+                        declarationGoodsItemNumber = BigInt(1),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 1"
+                        ),
+                        AdditionalInformation = Seq(
+                          AdditionalInformationType03(
+                            sequenceNumber = "1",
+                            code = "adi1",
+                            text = Some("ADI 1")
+                          )
+                        )
+                      ),
+                      ConsignmentItemType09(
+                        goodsItemNumber = "2",
+                        declarationGoodsItemNumber = BigInt(2),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 2"
+                        ),
+                        AdditionalInformation = Seq(
+                          AdditionalInformationType03(
+                            sequenceNumber = "1",
+                            code = "adi1",
+                            text = Some("ADI 1")
+                          )
+                        )
+                      ),
+                      ConsignmentItemType09(
+                        goodsItemNumber = "3",
+                        declarationGoodsItemNumber = BigInt(3),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 3"
+                        ),
+                        AdditionalInformation = Nil
+                      )
+                    )
+                  )
+                )
+              )
+
+              val result = consignment.postProcess(false)
+
+              result shouldBe consignment
+            }
+          }
+
+          "no items have common additional information" must {
+            "not roll up additional information to consignment level" in {
+              val consignment = ConsignmentType20(
+                grossMass = BigDecimal(1),
+                HouseConsignment = Seq(
+                  HouseConsignmentType10(
+                    sequenceNumber = "1",
+                    grossMass = BigDecimal(1),
+                    ConsignmentItem = Seq(
+                      ConsignmentItemType09(
+                        goodsItemNumber = "1",
+                        declarationGoodsItemNumber = BigInt(1),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 1"
+                        ),
+                        AdditionalInformation = Seq(
+                          AdditionalInformationType03(
+                            sequenceNumber = "1",
+                            code = "adi1",
+                            text = Some("ADI 1")
+                          )
+                        )
+                      ),
+                      ConsignmentItemType09(
+                        goodsItemNumber = "2",
+                        declarationGoodsItemNumber = BigInt(2),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 2"
+                        ),
+                        AdditionalInformation = Seq(
+                          AdditionalInformationType03(
+                            sequenceNumber = "1",
+                            code = "adi2",
+                            text = Some("ADI 2")
+                          )
+                        )
+                      ),
+                      ConsignmentItemType09(
+                        goodsItemNumber = "3",
+                        declarationGoodsItemNumber = BigInt(3),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 3"
+                        ),
+                        AdditionalInformation = Seq(
+                          AdditionalInformationType03(
+                            sequenceNumber = "1",
+                            code = "adi3",
+                            text = Some("ADI 3")
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+
+              val result = consignment.postProcess(false)
+
+              result shouldBe consignment
+            }
+          }
+
+          // This should never happen, but need to be wary of empty.reduceLeft Exception
+          "no items" must {
+            "not roll up additional information to consignment level" in {
+              val consignment = ConsignmentType20(
+                grossMass = BigDecimal(1),
+                HouseConsignment = Seq(
+                  HouseConsignmentType10(
+                    sequenceNumber = "1",
+                    grossMass = BigDecimal(1),
+                    ConsignmentItem = Nil
+                  )
+                )
+              )
+
+              val result = consignment.postProcess(false)
+
+              result shouldBe consignment
+            }
+          }
+        }
+
+        "during transition" when {
+          "every item has a common additional information" must {
+            "not roll up additional information to consignment level" in {
+              val consignment = ConsignmentType20(
+                grossMass = BigDecimal(1),
+                HouseConsignment = Seq(
+                  HouseConsignmentType10(
+                    sequenceNumber = "1",
+                    grossMass = BigDecimal(1),
+                    ConsignmentItem = Seq(
+                      ConsignmentItemType09(
+                        goodsItemNumber = "1",
+                        declarationGoodsItemNumber = BigInt(1),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 1"
+                        ),
+                        AdditionalInformation = Seq(
+                          AdditionalInformationType03(
+                            sequenceNumber = "1",
+                            code = "adi1",
+                            text = Some("ADI 1")
+                          ),
+                          AdditionalInformationType03(
+                            sequenceNumber = "2",
+                            code = "adi2",
+                            text = Some("ADI 2")
+                          )
+                        )
+                      ),
+                      ConsignmentItemType09(
+                        goodsItemNumber = "2",
+                        declarationGoodsItemNumber = BigInt(2),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 2"
+                        ),
+                        AdditionalInformation = Seq(
+                          AdditionalInformationType03(
+                            sequenceNumber = "1",
+                            code = "adi1",
+                            text = Some("ADI 1")
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+
+              val result = consignment.postProcess(true)
+
+              result shouldBe consignment
+            }
+          }
+        }
+      }
+
+      "rollUpAdditionalReference" when {
+
+        "during post-transition" when {
+
+          "every item has a common additional reference" must {
+            "roll up each common additional reference to consignment level and remove them from each item" in {
+              val consignment = ConsignmentType20(
+                grossMass = BigDecimal(1),
+                HouseConsignment = Seq(
+                  HouseConsignmentType10(
+                    sequenceNumber = "1",
+                    grossMass = BigDecimal(1),
+                    ConsignmentItem = Seq(
+                      ConsignmentItemType09(
+                        goodsItemNumber = "1",
+                        declarationGoodsItemNumber = BigInt(1),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 1"
+                        ),
+                        AdditionalReference = Seq(
+                          AdditionalReferenceType04(
+                            sequenceNumber = "1",
+                            typeValue = "adi1",
+                            referenceNumber = Some("ADI 1")
+                          ),
+                          AdditionalReferenceType04(
+                            sequenceNumber = "2",
+                            typeValue = "adi2",
+                            referenceNumber = Some("ADI 2")
+                          )
+                        )
+                      ),
+                      ConsignmentItemType09(
+                        goodsItemNumber = "2",
+                        declarationGoodsItemNumber = BigInt(2),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 2"
+                        ),
+                        AdditionalReference = Seq(
+                          AdditionalReferenceType04(
+                            sequenceNumber = "1",
+                            typeValue = "adi1",
+                            referenceNumber = Some("ADI 1")
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+
+              val result = consignment.postProcess(false)
+
+              result shouldBe ConsignmentType20(
+                grossMass = BigDecimal(1),
+                AdditionalReference = Seq(
+                  AdditionalReferenceType05(
+                    sequenceNumber = "1",
+                    typeValue = "adi1",
+                    referenceNumber = Some("ADI 1")
+                  )
+                ),
+                HouseConsignment = Seq(
+                  HouseConsignmentType10(
+                    sequenceNumber = "1",
+                    grossMass = BigDecimal(1),
+                    ConsignmentItem = Seq(
+                      ConsignmentItemType09(
+                        goodsItemNumber = "1",
+                        declarationGoodsItemNumber = BigInt(1),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 1"
+                        ),
+                        AdditionalReference = Seq(
+                          AdditionalReferenceType04(
+                            sequenceNumber = "2",
+                            typeValue = "adi2",
+                            referenceNumber = Some("ADI 2")
+                          )
+                        )
+                      ),
+                      ConsignmentItemType09(
+                        goodsItemNumber = "2",
+                        declarationGoodsItemNumber = BigInt(2),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 2"
+                        ),
+                        AdditionalReference = Nil
+                      )
+                    )
+                  )
+                )
+              )
+            }
+          }
+
+          "some items have common additional reference" must {
+            "not roll up additional reference to consignment level" in {
+              val consignment = ConsignmentType20(
+                grossMass = BigDecimal(1),
+                HouseConsignment = Seq(
+                  HouseConsignmentType10(
+                    sequenceNumber = "1",
+                    grossMass = BigDecimal(1),
+                    ConsignmentItem = Seq(
+                      ConsignmentItemType09(
+                        goodsItemNumber = "1",
+                        declarationGoodsItemNumber = BigInt(1),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 1"
+                        ),
+                        AdditionalReference = Seq(
+                          AdditionalReferenceType04(
+                            sequenceNumber = "1",
+                            typeValue = "adi1",
+                            referenceNumber = Some("ADI 1")
+                          )
+                        )
+                      ),
+                      ConsignmentItemType09(
+                        goodsItemNumber = "2",
+                        declarationGoodsItemNumber = BigInt(2),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 2"
+                        ),
+                        AdditionalReference = Seq(
+                          AdditionalReferenceType04(
+                            sequenceNumber = "1",
+                            typeValue = "adi1",
+                            referenceNumber = Some("ADI 1")
+                          )
+                        )
+                      ),
+                      ConsignmentItemType09(
+                        goodsItemNumber = "3",
+                        declarationGoodsItemNumber = BigInt(3),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 3"
+                        ),
+                        AdditionalReference = Nil
+                      )
+                    )
+                  )
+                )
+              )
+
+              val result = consignment.postProcess(false)
+
+              result shouldBe consignment
+            }
+          }
+
+          "no items have common additional reference" must {
+            "not roll up additional reference to consignment level" in {
+              val consignment = ConsignmentType20(
+                grossMass = BigDecimal(1),
+                HouseConsignment = Seq(
+                  HouseConsignmentType10(
+                    sequenceNumber = "1",
+                    grossMass = BigDecimal(1),
+                    ConsignmentItem = Seq(
+                      ConsignmentItemType09(
+                        goodsItemNumber = "1",
+                        declarationGoodsItemNumber = BigInt(1),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 1"
+                        ),
+                        AdditionalReference = Seq(
+                          AdditionalReferenceType04(
+                            sequenceNumber = "1",
+                            typeValue = "adi1",
+                            referenceNumber = Some("ADI 1")
+                          )
+                        )
+                      ),
+                      ConsignmentItemType09(
+                        goodsItemNumber = "2",
+                        declarationGoodsItemNumber = BigInt(2),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 2"
+                        ),
+                        AdditionalReference = Seq(
+                          AdditionalReferenceType04(
+                            sequenceNumber = "1",
+                            typeValue = "adi2",
+                            referenceNumber = Some("ADI 2")
+                          )
+                        )
+                      ),
+                      ConsignmentItemType09(
+                        goodsItemNumber = "3",
+                        declarationGoodsItemNumber = BigInt(3),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 3"
+                        ),
+                        AdditionalReference = Seq(
+                          AdditionalReferenceType04(
+                            sequenceNumber = "1",
+                            typeValue = "adi3",
+                            referenceNumber = Some("ADI 3")
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+
+              val result = consignment.postProcess(false)
+
+              result shouldBe consignment
+            }
+          }
+
+          // This should never happen, but need to be wary of empty.reduceLeft Exception
+          "no items" must {
+            "not roll up additional reference to consignment level" in {
+              val consignment = ConsignmentType20(
+                grossMass = BigDecimal(1),
+                HouseConsignment = Seq(
+                  HouseConsignmentType10(
+                    sequenceNumber = "1",
+                    grossMass = BigDecimal(1),
+                    ConsignmentItem = Nil
+                  )
+                )
+              )
+
+              val result = consignment.postProcess(false)
+
+              result shouldBe consignment
+            }
+          }
+        }
+
+        "during transition" when {
+          "every item has a common additional reference" must {
+            "not roll up additional reference to consignment level" in {
+              val consignment = ConsignmentType20(
+                grossMass = BigDecimal(1),
+                HouseConsignment = Seq(
+                  HouseConsignmentType10(
+                    sequenceNumber = "1",
+                    grossMass = BigDecimal(1),
+                    ConsignmentItem = Seq(
+                      ConsignmentItemType09(
+                        goodsItemNumber = "1",
+                        declarationGoodsItemNumber = BigInt(1),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 1"
+                        ),
+                        AdditionalReference = Seq(
+                          AdditionalReferenceType04(
+                            sequenceNumber = "1",
+                            typeValue = "adi1",
+                            referenceNumber = Some("ADI 1")
+                          ),
+                          AdditionalReferenceType04(
+                            sequenceNumber = "2",
+                            typeValue = "adi2",
+                            referenceNumber = Some("ADI 2")
+                          )
+                        )
+                      ),
+                      ConsignmentItemType09(
+                        goodsItemNumber = "2",
+                        declarationGoodsItemNumber = BigInt(2),
+                        Commodity = CommodityType07(
+                          descriptionOfGoods = "Item 2"
+                        ),
+                        AdditionalReference = Seq(
+                          AdditionalReferenceType04(
+                            sequenceNumber = "1",
+                            typeValue = "adi1",
+                            referenceNumber = Some("ADI 1")
+                          )
+                        )
+                      )
+                    )
+                  )
+                )
+              )
+
+              val result = consignment.postProcess(true)
+
+              result shouldBe consignment
+            }
           }
         }
       }

@@ -54,4 +54,7 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach {
         bind[CacheRepository].toInstance(mockCacheRepository),
         bind[DefaultLockRepository].toInstance(mockLockRepository)
       )
+      .configure(
+        "isTransitionEnabled" -> false
+      )
 }

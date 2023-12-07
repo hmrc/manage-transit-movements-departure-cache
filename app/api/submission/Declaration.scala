@@ -51,7 +51,7 @@ object Declaration {
       attributes = Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString("NCTS5.0", scope)))
     )
 
-  private def IE013(uA: UserAnswers, mrn: Option[String], flag: Boolean): CC013CType =
+  private def IE013(uA: UserAnswers, mrn: Option[String], flag: Boolean)(implicit config: AppConfig): CC013CType =
     CC013CType(
       messageSequence1 = Header.message(uA, CC013C),
       TransitOperation = TransitOperation.transformIE013(uA, mrn, flag),
