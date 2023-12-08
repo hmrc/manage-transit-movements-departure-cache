@@ -45,7 +45,7 @@ class SubmissionController @Inject() (
   def post(): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
-        case JsSuccess(lrn, _) => successPost(lrn, request).value.map(_.getOrElse(InternalServerError))
+        case JsSuccess(lrn, _) => successPost(lrn, request.eoriNumber).value.map(_.getOrElse(InternalServerError))
         case JsError(errors) =>
           logger.warn(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)
@@ -56,7 +56,7 @@ class SubmissionController @Inject() (
     authenticate().async(parse.json) {
       implicit request: AuthenticatedRequest[JsValue] =>
         request.body.validate[String] match {
-          case JsSuccess(lrn, _) => successPostAmendment(lrn, request).value.map(_.getOrElse(InternalServerError))
+          case JsSuccess(lrn, _) => successPostAmendment(lrn, request.eoriNumber).value.map(_.getOrElse(InternalServerError))
           case JsError(errors) =>
             logger.warn(s"Failed to validate request body as String: $errors")
             Future.successful(BadRequest)
@@ -64,18 +64,18 @@ class SubmissionController @Inject() (
 
     }
 
-  private def successPost(lrn: String, request: AuthenticatedRequest[JsValue])(implicit hc: HeaderCarrier): OptionT[Future, Result] =
+  private def successPost(lrn: String, eoriNumber: String)(implicit hc: HeaderCarrier): OptionT[Future, Result] =
     for {
-      userAnswers <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
+      userAnswers <- OptionT(cacheRepository.get(lrn, eoriNumber))
       result <- OptionT(apiService.submitDeclaration(userAnswers).flatMap {
         responseToResult(userAnswers, _, None, SubmissionState.Submitted)
       })
 
     } yield result
 
-  private def successPostAmendment(lrn: String, request: AuthenticatedRequest[JsValue])(implicit hc: HeaderCarrier): OptionT[Future, Result] =
+  private def successPostAmendment(lrn: String, eoriNumber: String)(implicit hc: HeaderCarrier): OptionT[Future, Result] =
     for {
-      userAnswers <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
+      userAnswers <- OptionT(cacheRepository.get(lrn, eoriNumber))
       departureId <- OptionT.fromOption[Future](userAnswers.departureId)
       result <- OptionT(
         apiService

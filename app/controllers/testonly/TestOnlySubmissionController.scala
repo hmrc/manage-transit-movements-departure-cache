@@ -17,6 +17,7 @@
 package controllers.testonly
 
 import api.submission.Declaration
+import config.AppConfig
 import models.{MovementReferenceNumber, SensitiveFormats, UserAnswers}
 import play.api.Logging
 import play.api.libs.json._
@@ -27,7 +28,7 @@ import javax.inject.Inject
 
 class TestOnlySubmissionController @Inject() (
   cc: ControllerComponents
-)(implicit sensitiveFormats: SensitiveFormats)
+)(implicit sensitiveFormats: SensitiveFormats, config: AppConfig)
     extends BackendController(cc)
     with Logging {
 

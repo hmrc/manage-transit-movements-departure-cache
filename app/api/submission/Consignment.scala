@@ -17,8 +17,10 @@
 package api.submission
 
 import api.submission.Level._
+import api.submission.additionalReferenceType04.RichAdditionalReferenceType04
 import api.submission.documentType.RichDocumentJsValue
 import api.submission.houseConsignmentType10.RichHouseConsignmentType10
+import config.AppConfig
 import generated._
 import models.UserAnswers
 import play.api.libs.functional.syntax._
@@ -28,78 +30,154 @@ import java.util.UUID
 
 object Consignment {
 
-  def transform(uA: UserAnswers): ConsignmentType20 =
-    uA.metadata.data.as[ConsignmentType20](consignmentType20.reads).postProcess()
+  def transform(uA: UserAnswers)(implicit config: AppConfig): ConsignmentType20 =
+    uA.metadata.data.as[ConsignmentType20](consignmentType20.reads).postProcess(config.isTransitionEnabled)
 
   implicit class RichConsignmentType20(value: ConsignmentType20) {
 
-    def postProcess(): ConsignmentType20 = value
+    def postProcess(isTransitionEnabled: Boolean): ConsignmentType20 = value
       .rollUpTransportCharges()
       .rollUpUCR()
       .rollUpCountryOfDispatch()
       .rollUpCountryOfDestination()
+      .rollUpAdditionalInformation(isTransitionEnabled)
+      .rollUpAdditionalReferences(isTransitionEnabled)
 
     def rollUpTransportCharges(): ConsignmentType20 =
-      rollUp[TransportChargesType, TransportChargesType](
+      rollUp[Option[TransportChargesType], Option[TransportChargesType]](
         consignmentLevel = _.TransportCharges,
         itemLevel = _.TransportCharges,
         updateConsignmentLevel = transportCharges => _.copy(TransportCharges = transportCharges),
-        updateItemLevel = _.copy(TransportCharges = None),
-        equal = _ == _
+        updateItemLevel = _ => _.copy(TransportCharges = None),
+        shouldRollUp = {
+          case (None, Some(_))                                     => true
+          case (Some(consignmentLevelValue), Some(itemLevelValue)) => consignmentLevelValue == itemLevelValue
+          case _                                                   => false
+        },
+        getCommonValueAtItemLevel = {
+          case head :: tail if tail.forall(_ == head) => Some(head)
+          case _                                      => None
+        }
       )
 
     def rollUpUCR(): ConsignmentType20 =
-      rollUp[String, String](
+      rollUp[Option[String], Option[String]](
         consignmentLevel = _.referenceNumberUCR,
         itemLevel = _.referenceNumberUCR,
         updateConsignmentLevel = ucr => _.copy(referenceNumberUCR = ucr),
-        updateItemLevel = _.copy(referenceNumberUCR = None),
-        equal = _ == _
+        updateItemLevel = _ => _.copy(referenceNumberUCR = None),
+        shouldRollUp = {
+          case (None, Some(_))                                     => true
+          case (Some(consignmentLevelValue), Some(itemLevelValue)) => consignmentLevelValue == itemLevelValue
+          case _                                                   => false
+        },
+        getCommonValueAtItemLevel = {
+          case head :: tail if tail.forall(_ == head) => Some(head)
+          case _                                      => None
+        }
       )
 
     def rollUpCountryOfDispatch(): ConsignmentType20 =
-      rollUp[String, String](
+      rollUp[Option[String], Option[String]](
         consignmentLevel = _.countryOfDispatch,
         itemLevel = _.countryOfDispatch,
         updateConsignmentLevel = countryOfDispatch => _.copy(countryOfDispatch = countryOfDispatch),
-        updateItemLevel = _.copy(countryOfDispatch = None),
-        equal = _ == _
+        updateItemLevel = _ => _.copy(countryOfDispatch = None),
+        shouldRollUp = {
+          case (None, Some(_))                                     => true
+          case (Some(consignmentLevelValue), Some(itemLevelValue)) => consignmentLevelValue == itemLevelValue
+          case _                                                   => false
+        },
+        getCommonValueAtItemLevel = {
+          case head :: tail if tail.forall(_ == head) => Some(head)
+          case _                                      => None
+        }
       )
 
     def rollUpCountryOfDestination(): ConsignmentType20 =
-      rollUp[String, String](
+      rollUp[Option[String], Option[String]](
         consignmentLevel = _.countryOfDestination,
         itemLevel = _.countryOfDestination,
         updateConsignmentLevel = countryOfDestination => _.copy(countryOfDestination = countryOfDestination),
-        updateItemLevel = _.copy(countryOfDestination = None),
-        equal = _ == _
+        updateItemLevel = _ => _.copy(countryOfDestination = None),
+        shouldRollUp = {
+          case (None, Some(_))                                     => true
+          case (Some(consignmentLevelValue), Some(itemLevelValue)) => consignmentLevelValue == itemLevelValue
+          case _                                                   => false
+        },
+        getCommonValueAtItemLevel = {
+          case head :: tail if tail.forall(_ == head) => Some(head)
+          case _                                      => None
+        }
       )
+
+    def rollUpAdditionalInformation(isTransitionEnabled: Boolean): ConsignmentType20 =
+      if (isTransitionEnabled) {
+        value
+      } else {
+        rollUp[Seq[AdditionalInformationType03], Seq[AdditionalInformationType03]](
+          consignmentLevel = _.AdditionalInformation,
+          itemLevel = _.AdditionalInformation,
+          updateConsignmentLevel = additionalInformation => _.copy(AdditionalInformation = additionalInformation),
+          updateItemLevel = commonValues => item => item.copy(AdditionalInformation = item.AdditionalInformation.diff(commonValues)),
+          shouldRollUp = {
+            case (Nil, _)                                => true
+            case (consignmentLevelValue, itemLevelValue) => consignmentLevelValue.toSet == itemLevelValue.toSet
+            case _                                       => false
+          },
+          getCommonValueAtItemLevel = _.reduceLeft(_ intersect _) match {
+            case Nil          => None
+            case commonValues => Some(commonValues)
+          }
+        )
+      }
+
+    def rollUpAdditionalReferences(isTransitionEnabled: Boolean): ConsignmentType20 =
+      if (isTransitionEnabled) {
+        value
+      } else {
+        rollUp[Seq[AdditionalReferenceType05], Seq[AdditionalReferenceType04]](
+          consignmentLevel = _.AdditionalReference,
+          itemLevel = _.AdditionalReference,
+          updateConsignmentLevel = additionalReference => _.copy(AdditionalReference = additionalReference.map(_.asAdditionalReferenceType05)),
+          updateItemLevel = commonValues => item => item.copy(AdditionalReference = item.AdditionalReference.diff(commonValues)),
+          shouldRollUp = {
+            case (Nil, _)                                => true
+            case (consignmentLevelValue, itemLevelValue) => consignmentLevelValue.toSet == itemLevelValue.toSet
+            case _                                       => false
+          },
+          getCommonValueAtItemLevel = _.reduceLeft(_ intersect _) match {
+            case Nil          => None
+            case commonValues => Some(commonValues)
+          }
+        )
+      }
 
     def update(f: ConsignmentType20 => ConsignmentType20): ConsignmentType20 = f(value)
 
     private def rollUp[A, B](
-      consignmentLevel: ConsignmentType20 => Option[A],
-      itemLevel: ConsignmentItemType09 => Option[B],
-      updateConsignmentLevel: Option[B] => ConsignmentType20 => ConsignmentType20,
-      updateItemLevel: ConsignmentItemType09 => ConsignmentItemType09,
-      equal: (A, B) => Boolean
-    ): ConsignmentType20 = {
-      val values = value.HouseConsignment.flatMap(_.ConsignmentItem).map(itemLevel)
-      values match {
-        case head :: tail if tail.forall(_ == head) =>
-          lazy val rollUp = value
-            .update(updateConsignmentLevel(head))
-            .update(_.copy(HouseConsignment = value.HouseConsignment.map(_.updateItems(updateItemLevel))))
+      consignmentLevel: ConsignmentType20 => A,
+      itemLevel: ConsignmentItemType09 => B,
+      updateConsignmentLevel: B => ConsignmentType20 => ConsignmentType20,
+      updateItemLevel: B => ConsignmentItemType09 => ConsignmentItemType09,
+      shouldRollUp: (A, B) => Boolean,
+      getCommonValueAtItemLevel: Seq[B] => Option[B]
+    ): ConsignmentType20 =
+      value.HouseConsignment.flatMap(_.ConsignmentItem).map(itemLevel) match {
+        case itemLevelValues if itemLevelValues.nonEmpty =>
+          getCommonValueAtItemLevel(itemLevelValues) match {
+            case Some(commonValueAtItemLevel) =>
+              lazy val rollUp = value
+                .update(updateConsignmentLevel(commonValueAtItemLevel))
+                .update(_.copy(HouseConsignment = value.HouseConsignment.map(_.updateItems(updateItemLevel(commonValueAtItemLevel)))))
 
-          (consignmentLevel(value), head) match {
-            case (None, Some(_))                                                                                     => rollUp
-            case (Some(consignmentLevelValue), Some(itemLevelValue)) if equal(consignmentLevelValue, itemLevelValue) => rollUp
-            case _                                                                                                   => value
+              if (shouldRollUp(consignmentLevel(value), commonValueAtItemLevel)) rollUp else value
+            case None =>
+              value
           }
         case _ =>
           value
       }
-    }
   }
 }
 
@@ -126,8 +204,6 @@ object consignmentType20 {
     previousDocuments           <- previousDocumentsReads
     supportingDocuments         <- supportingDocumentsReads
     transportDocuments          <- transportDocumentsReads
-    additionalReferences        <- itemsPath.readCommonValuesInNestedArrays[AdditionalReferenceType05]("additionalReferences")(additionalReferenceType05.reads)
-    additionalInformation       <- additionalInformationReads
     transportCharges            <- __.read[Option[TransportChargesType]](transportChargesType.consignmentReads)
     houseConsignments           <- __.read[HouseConsignmentType10](houseConsignmentType10.reads).map(Seq(_))
   } yield ConsignmentType20(
@@ -152,8 +228,8 @@ object consignmentType20 {
     PreviousDocument = previousDocuments,
     SupportingDocument = supportingDocuments,
     TransportDocument = transportDocuments,
-    AdditionalReference = additionalReferences,
-    AdditionalInformation = additionalInformation,
+    AdditionalReference = Nil,
+    AdditionalInformation = Nil,
     TransportCharges = transportCharges,
     HouseConsignment = houseConsignments
   )
@@ -193,10 +269,6 @@ object consignmentType20 {
     documentsPath.readFilteredArray[TransportDocumentType04](
       _.hasCorrectTypeAndLevel("Transport", ConsignmentLevel)
     )(transportDocumentType04.reads)
-
-  def additionalInformationReads: Reads[Seq[AdditionalInformationType03]] =
-    itemsPath
-      .readCommonValuesInNestedArrays[AdditionalInformationType03]("additionalInformationList")(additionalInformationType03.reads)
 }
 
 object carrierType04 {
@@ -597,12 +669,16 @@ object additionalReferenceType04 {
 
   def reads(index: Int): Reads[AdditionalReferenceType04] =
     additionalReference.reads(index)(AdditionalReferenceType04)
-}
 
-object additionalReferenceType05 {
+  implicit class RichAdditionalReferenceType04(value: AdditionalReferenceType04) {
 
-  def reads(index: Int): Reads[AdditionalReferenceType05] =
-    additionalReference.reads(index)(AdditionalReferenceType05)
+    def asAdditionalReferenceType05: AdditionalReferenceType05 =
+      AdditionalReferenceType05(
+        sequenceNumber = value.sequenceNumber,
+        typeValue = value.typeValue,
+        referenceNumber = value.referenceNumber
+      )
+  }
 }
 
 object additionalInformationType03 {

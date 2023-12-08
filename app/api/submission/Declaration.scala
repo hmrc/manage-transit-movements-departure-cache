@@ -16,6 +16,7 @@
 
 package api.submission
 
+import config.AppConfig
 import generated.{CC013C, CC013CType, CC015C, CC015CType, PhaseIDtype}
 import models.SubmissionState.{Amendment, GuaranteeAmendment}
 import models.{MovementReferenceNumber, UserAnswers}
@@ -28,13 +29,13 @@ object Declaration {
 
   private val scope: NamespaceBinding = scalaxb.toScope(Some("ncts") -> "http://ncts.dgtaxud.ec")
 
-  def transform(uA: UserAnswers, mrn: MovementReferenceNumber): NodeSeq = uA.status match {
+  def transform(uA: UserAnswers, mrn: MovementReferenceNumber)(implicit config: AppConfig): NodeSeq = uA.status match {
     case Amendment          => toXML(IE013(uA, mrn.value, flag = false), s"ncts:${CC013C.toString}", scope)
     case GuaranteeAmendment => toXML(IE013(uA, mrn.value, flag = true), s"ncts:${CC013C.toString}", scope)
     case _                  => toXML(IE015(uA), s"ncts:${CC015C.toString}", scope)
   }
 
-  private def IE015(uA: UserAnswers): CC015CType =
+  private def IE015(uA: UserAnswers)(implicit config: AppConfig): CC015CType =
     CC015CType(
       messageSequence1 = Header.message(uA, CC015C),
       TransitOperation = TransitOperation.transform(uA),
@@ -50,7 +51,7 @@ object Declaration {
       attributes = Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString("NCTS5.0", scope)))
     )
 
-  private def IE013(uA: UserAnswers, mrn: Option[String], flag: Boolean): CC013CType =
+  private def IE013(uA: UserAnswers, mrn: Option[String], flag: Boolean)(implicit config: AppConfig): CC013CType =
     CC013CType(
       messageSequence1 = Header.message(uA, CC013C),
       TransitOperation = TransitOperation.transformIE013(uA, mrn, flag),
