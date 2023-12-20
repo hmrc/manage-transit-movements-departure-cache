@@ -17,6 +17,7 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import models.AuditType.DeclarationData
 import models.{SubmissionState, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
@@ -26,7 +27,7 @@ import play.api.libs.json.Json
 import play.api.mvc.Results.BadRequest
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.ApiService
+import services.{ApiService, AuditService}
 import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
@@ -35,17 +36,22 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
   private lazy val mockApiService = mock[ApiService]
 
+  private lazy val mockAuditService = mock[AuditService]
+
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
       .guiceApplicationBuilder()
       .overrides(
-        bind[ApiService].toInstance(mockApiService)
+        bind[ApiService].toInstance(mockApiService),
+        bind[AuditService].toInstance(mockAuditService)
       )
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockCacheRepository)
     reset(mockApiService)
+    reset(mockAuditService)
+
     when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState, any(): Option[String])).thenReturn(Future.successful(true))
   }
 
@@ -71,6 +77,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.Submitted), eqTo(None))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers))(any())
+        verify(mockAuditService).audit(eqTo(DeclarationData), eqTo(userAnswers))(any())
       }
     }
 
@@ -131,7 +138,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswersWithDepartureId)))
 
         val body = Json.toJson("foo")
-        when(mockApiService.submitAmendDeclaration(any(), any())(any()))
+        when(mockApiService.submitAmendment(any(), any())(any()))
           .thenReturn(Future.successful(Right(HttpResponse(OK, Json.stringify(body)))))
 
         val request = FakeRequest(POST, routes.SubmissionController.postAmendment().url)
@@ -144,7 +151,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockCacheRepository).set(eqTo(emptyUserAnswersWithDepartureId), eqTo(SubmissionState.Amendment), eqTo(Some("departureId123")))
-        verify(mockApiService).submitAmendDeclaration(eqTo(emptyUserAnswersWithDepartureId), eqTo(departureId))(any())
+        verify(mockApiService).submitAmendment(eqTo(emptyUserAnswersWithDepartureId), eqTo(departureId))(any())
       }
     }
 
@@ -152,7 +159,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
       "submission is unsuccessful" in {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswersWithDepartureId)))
 
-        when(mockApiService.submitAmendDeclaration(any(), any())(any()))
+        when(mockApiService.submitAmendment(any(), any())(any()))
           .thenReturn(Future.successful(Left(BadRequest)))
 
         val request = FakeRequest(POST, routes.SubmissionController.postAmendment().url)
@@ -163,7 +170,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         status(result) shouldBe BAD_REQUEST
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockApiService).submitAmendDeclaration(eqTo(emptyUserAnswersWithDepartureId), eqTo(departureId))(any())
+        verify(mockApiService).submitAmendment(eqTo(emptyUserAnswersWithDepartureId), eqTo(departureId))(any())
       }
 
       "document not found in cache" in {
@@ -177,7 +184,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         status(result) shouldBe INTERNAL_SERVER_ERROR
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockApiService, never()).submitAmendDeclaration(any(), any())(any())
+        verify(mockApiService, never()).submitAmendment(any(), any())(any())
       }
 
       "request body can't be validated as a string" in {
@@ -191,7 +198,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         status(result) shouldBe BAD_REQUEST
 
         verify(mockCacheRepository, never()).get(any(), any())
-        verify(mockApiService, never()).submitAmendDeclaration(any(), any())(any())
+        verify(mockApiService, never()).submitAmendment(any(), any())(any())
       }
     }
   }

@@ -67,10 +67,10 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
       val departureId    = "departureId123"
       val userAnswers    = emptyUserAnswersWithDepartureId
       val expectedResult = Right(HttpResponse(OK, ""))
-      when(mockApiConnector.submitAmend(any(), any())(any())).thenReturn(Future.successful(expectedResult))
-      val result = service.submitAmendDeclaration(userAnswers, departureId).futureValue
+      when(mockApiConnector.submitAmendment(any(), any())(any())).thenReturn(Future.successful(expectedResult))
+      val result = service.submitAmendment(userAnswers, departureId).futureValue
       result shouldBe expectedResult
-      verify(mockApiConnector).submitAmend(eqTo(userAnswers), eqTo(departureId))(any())
+      verify(mockApiConnector).submitAmendment(eqTo(userAnswers), eqTo(departureId))(any())
     }
   }
 
