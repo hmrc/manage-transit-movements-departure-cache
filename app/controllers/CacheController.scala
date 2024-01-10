@@ -18,11 +18,13 @@ package controllers
 
 import config.AppConfig
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
+import models.AuditType.DepartureJourneyStarted
 import models.{Metadata, SubmissionState, UserAnswers}
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.CacheRepository
+import services.AuditService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import java.time.Clock
@@ -34,7 +36,8 @@ class CacheController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
   authenticateAndLock: AuthenticateAndLockActionProvider,
-  cacheRepository: CacheRepository
+  cacheRepository: CacheRepository,
+  auditService: AuditService
 )(implicit ec: ExecutionContext, clock: Clock, appConfig: AppConfig)
     extends BackendController(cc)
     with Logging {
@@ -66,7 +69,9 @@ class CacheController @Inject() (
   def put(): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
-        case JsSuccess(lrn, _) => set(Metadata(lrn, request.eoriNumber))
+        case JsSuccess(lrn, _) =>
+          auditService.audit(DepartureJourneyStarted, lrn, request.eoriNumber)
+          set(Metadata(lrn, request.eoriNumber))
         case JsError(errors) =>
           logger.warn(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)

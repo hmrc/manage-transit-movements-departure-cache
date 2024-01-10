@@ -54,7 +54,7 @@ class ApiConnector @Inject() (httpClient: HttpClient)(implicit ec: ExecutionCont
     httpClient.GET[DepartureMessageTypes](url)(implicitly, headers, ec)
   }
 
-  def submitAmend(userAnswers: UserAnswers, departureId: String)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
+  def submitAmendment(userAnswers: UserAnswers, departureId: String)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
 
     val declarationUrl = s"${appConfig.apiUrl}/movements/departures/$departureId/messages"
     val requestHeaders = Seq(
@@ -65,7 +65,7 @@ class ApiConnector @Inject() (httpClient: HttpClient)(implicit ec: ExecutionCont
     for {
       mrn <- getMRN(departureId)
       payload = Declaration.transform(userAnswers, mrn).toString
-      result <- getHttpResponse(declarationUrl, requestHeaders, payload, HttpMethodName(nameOf(submitAmend _)))
+      result <- getHttpResponse(declarationUrl, requestHeaders, payload, HttpMethodName(nameOf(submitAmendment _)))
     } yield result
 
   }

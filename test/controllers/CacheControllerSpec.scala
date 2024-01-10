@@ -17,17 +17,35 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import models.AuditType.DepartureJourneyStarted
 import models.{Metadata, SubmissionState, UserAnswersSummary}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito.{verify, verifyNoInteractions, when}
+import org.mockito.Mockito.{reset, verify, verifyNoInteractions, when}
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
+import services.AuditService
 
 import scala.concurrent.Future
 
 class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+
+  private lazy val mockAuditService = mock[AuditService]
+
+  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
+    super
+      .guiceApplicationBuilder()
+      .overrides(
+        bind[AuditService].toInstance(mockAuditService)
+      )
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockAuditService)
+  }
 
   "get" should {
 
@@ -186,6 +204,8 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         status(result) shouldBe OK
         verify(mockCacheRepository).set(metadataCaptor.capture(), eqTo(None), eqTo(None))
         metadataCaptor.getValue.lrn shouldBe lrn
+
+        verify(mockAuditService).audit(eqTo(DepartureJourneyStarted), eqTo(lrn), eqTo(eoriNumber))(any())
       }
     }
 

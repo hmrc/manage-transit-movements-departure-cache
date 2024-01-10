@@ -33,8 +33,8 @@ class ApiService @Inject() (
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
     apiConnector.submitDeclaration(userAnswers)
 
-  def submitAmendDeclaration(userAnswers: UserAnswers, departureId: String)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
-    apiConnector.submitAmend(userAnswers, departureId)
+  def submitAmendment(userAnswers: UserAnswers, departureId: String)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
+    apiConnector.submitAmendment(userAnswers, departureId)
 
   def isIE028DefinedForDeparture(lrn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Boolean] =
     apiConnector
