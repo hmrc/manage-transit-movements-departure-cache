@@ -17,7 +17,7 @@
 package services
 
 import models.{AuditType, UserAnswers}
-import play.api.libs.json.{JsValue, Json}
+import play.api.libs.json.{JsValue, Json, Writes}
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.audit.http.connector.AuditConnector
 
@@ -26,11 +26,19 @@ import scala.concurrent.ExecutionContext
 
 class AuditService @Inject() (auditConnector: AuditConnector)(implicit ec: ExecutionContext) {
 
-  def audit(auditType: AuditType, userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Unit =
-    auditConnector.sendExplicitAudit(auditType.name, details(userAnswers))
+  def audit(auditType: AuditType, lrn: String, eoriNumber: String)(implicit hc: HeaderCarrier): Unit = {
+    val json = Json.obj(
+      "lrn"        -> lrn,
+      "eoriNumber" -> eoriNumber
+    )
+    auditConnector.sendExplicitAudit(auditType.name, toJson(json))
+  }
 
-  private def details(userAnswers: UserAnswers): JsValue = Json.obj(
-    "channel"     -> "web",
-    "userAnswers" -> Json.toJson(userAnswers)
+  def audit(auditType: AuditType, userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Unit =
+    auditConnector.sendExplicitAudit(auditType.name, toJson(userAnswers))
+
+  private def toJson[T](details: T)(implicit writes: Writes[T]): JsValue = Json.obj(
+    "channel" -> "web",
+    "detail"  -> Json.toJson(details)
   )
 }

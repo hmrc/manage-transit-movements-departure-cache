@@ -20,6 +20,7 @@ sealed abstract class AuditType(val name: String)
 
 object AuditType {
 
+  case object DepartureJourneyStarted extends AuditType("DepartureJourneyStarted")
   case object DeclarationData extends AuditType("DeclarationData")
   case object DeclarationAmendment extends AuditType("DeclarationAmendment")
 }

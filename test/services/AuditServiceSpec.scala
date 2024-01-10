@@ -17,7 +17,7 @@
 package services
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import models.AuditType.DeclarationData
+import models.AuditType.{DeclarationData, DepartureJourneyStarted}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{reset, verify}
 import play.api.inject.bind
@@ -52,11 +52,31 @@ class AuditServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
         val expectedDetail = Json.parse(s"""
             |{
             |  "channel" : "web",
-            |  "userAnswers" : ${Json.toJson(userAnswers)}
+            |  "detail" : ${Json.toJson(userAnswers)}
             |}
             |""".stripMargin)
 
         verify(mockAuditConnector).sendExplicitAudit(eqTo(DeclarationData.name), eqTo(expectedDetail))(any(), any(), any())
+      }
+
+      "DepartureJourneyStarted" in {
+        val service = app.injector.instanceOf[AuditService]
+
+        val lrn        = "12345"
+        val eoriNumber = "67890"
+        service.audit(DepartureJourneyStarted, lrn, eoriNumber)
+
+        val expectedDetail = Json.parse(s"""
+             |{
+             |  "channel" : "web",
+             |  "detail" : {
+             |    "lrn" : "$lrn",
+             |    "eoriNumber" : "$eoriNumber"
+             |  }
+             |}
+             |""".stripMargin)
+
+        verify(mockAuditConnector).sendExplicitAudit(eqTo(DepartureJourneyStarted.name), eqTo(expectedDetail))(any(), any(), any())
       }
     }
   }
