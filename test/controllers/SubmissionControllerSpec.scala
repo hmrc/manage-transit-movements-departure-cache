@@ -17,7 +17,7 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import models.AuditType.DeclarationData
+import models.AuditType.{DeclarationAmendment, DeclarationData}
 import models.{SubmissionState, UserAnswers}
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
@@ -98,6 +98,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers))(any())
+        verify(mockAuditService).audit(eqTo(DeclarationData), eqTo(userAnswers))(any())
       }
 
       "document not found in cache" in {
@@ -134,8 +135,8 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
     "return 200" when {
       "submission is successful" in {
-
-        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswersWithDepartureId)))
+        val userAnswers = emptyUserAnswersWithDepartureId
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
         val body = Json.toJson("foo")
         when(mockApiService.submitAmendment(any(), any())(any()))
@@ -150,14 +151,16 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         contentAsJson(result) shouldBe body
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockCacheRepository).set(eqTo(emptyUserAnswersWithDepartureId), eqTo(SubmissionState.Amendment), eqTo(Some("departureId123")))
-        verify(mockApiService).submitAmendment(eqTo(emptyUserAnswersWithDepartureId), eqTo(departureId))(any())
+        verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.Amendment), eqTo(Some("departureId123")))
+        verify(mockApiService).submitAmendment(eqTo(userAnswers), eqTo(departureId))(any())
+        verify(mockAuditService).audit(eqTo(DeclarationAmendment), eqTo(userAnswers))(any())
       }
     }
 
     "return error" when {
       "submission is unsuccessful" in {
-        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswersWithDepartureId)))
+        val userAnswers = emptyUserAnswersWithDepartureId
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
         when(mockApiService.submitAmendment(any(), any())(any()))
           .thenReturn(Future.successful(Left(BadRequest)))
@@ -170,7 +173,8 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         status(result) shouldBe BAD_REQUEST
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockApiService).submitAmendment(eqTo(emptyUserAnswersWithDepartureId), eqTo(departureId))(any())
+        verify(mockApiService).submitAmendment(eqTo(userAnswers), eqTo(departureId))(any())
+        verify(mockAuditService).audit(eqTo(DeclarationAmendment), eqTo(userAnswers))(any())
       }
 
       "document not found in cache" in {

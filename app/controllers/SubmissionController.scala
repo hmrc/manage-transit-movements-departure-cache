@@ -19,7 +19,7 @@ package controllers
 import cats.data.OptionT
 import cats.implicits._
 import controllers.actions.AuthenticateActionProvider
-import models.AuditType.DeclarationData
+import models.AuditType._
 import models.SubmissionState._
 import models.request.AuthenticatedRequest
 import models.{SubmissionState, UserAnswers}
@@ -74,6 +74,7 @@ class SubmissionController @Inject() (
             val result = for {
               userAnswers <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
               departureId <- OptionT.fromOption[Future](userAnswers.departureId)
+              _ = auditService.audit(DeclarationAmendment, userAnswers)
               result <- OptionT {
                 apiService
                   .submitAmendment(userAnswers, departureId)
