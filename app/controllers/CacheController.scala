@@ -18,7 +18,7 @@ package controllers
 
 import config.AppConfig
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
-import models.AuditType.DepartureJourneyStarted
+import models.AuditType._
 import models.{Metadata, SubmissionState, UserAnswers}
 import play.api.Logging
 import play.api.libs.json._
@@ -70,7 +70,7 @@ class CacheController @Inject() (
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(lrn, _) =>
-          auditService.audit(DepartureJourneyStarted, lrn, request.eoriNumber)
+          auditService.audit(DepartureDraftStarted, lrn, request.eoriNumber)
           set(Metadata(lrn, request.eoriNumber))
         case JsError(errors) =>
           logger.warn(s"Failed to validate request body as String: $errors")
@@ -98,7 +98,9 @@ class CacheController @Inject() (
       cacheRepository
         .remove(lrn, request.eoriNumber)
         .map {
-          _ => Ok
+          _ =>
+            auditService.audit(DepartureDraftDeleted, lrn, request.eoriNumber)
+            Ok
         }
         .recover {
           case e =>
