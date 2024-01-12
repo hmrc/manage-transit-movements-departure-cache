@@ -77,7 +77,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.Submitted), eqTo(None))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers))(any())
-        verify(mockAuditService).audit(eqTo(DeclarationData), eqTo(userAnswers))(any())
+        verify(mockAuditService).audit(eqTo(DeclarationData), eqTo(userAnswers.copy(status = SubmissionState.Submitted)))(any())
       }
     }
 
@@ -98,7 +98,6 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers))(any())
-        verify(mockAuditService).audit(eqTo(DeclarationData), eqTo(userAnswers))(any())
       }
 
       "document not found in cache" in {
@@ -153,7 +152,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.Amendment), eqTo(Some("departureId123")))
         verify(mockApiService).submitAmendment(eqTo(userAnswers), eqTo(departureId))(any())
-        verify(mockAuditService).audit(eqTo(DeclarationAmendment), eqTo(userAnswers))(any())
+        verify(mockAuditService).audit(eqTo(DeclarationAmendment), eqTo(userAnswers.copy(status = SubmissionState.Amendment)))(any())
       }
     }
 
@@ -174,7 +173,6 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockApiService).submitAmendment(eqTo(userAnswers), eqTo(departureId))(any())
-        verify(mockAuditService).audit(eqTo(DeclarationAmendment), eqTo(userAnswers))(any())
       }
 
       "document not found in cache" in {

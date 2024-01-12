@@ -22,13 +22,13 @@ import controllers.actions.AuthenticateActionProvider
 import models.AuditType._
 import models.SubmissionState._
 import models.request.AuthenticatedRequest
-import models.{SubmissionState, UserAnswers}
+import models.{AuditType, SubmissionState, UserAnswers}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{Action, ControllerComponents, Result}
 import repositories.CacheRepository
 import services.{ApiService, AuditService}
-import uk.gov.hmrc.http.HttpResponse
+import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -51,11 +51,10 @@ class SubmissionController @Inject() (
         case JsSuccess(lrn, _) =>
           val result = for {
             userAnswers <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
-            _ = auditService.audit(DeclarationData, userAnswers)
             result <- OptionT {
               apiService
                 .submitDeclaration(userAnswers)
-                .flatMap(responseToResult(userAnswers, _, None, Submitted))
+                .flatMap(responseToResult(userAnswers, _, None, Submitted, DeclarationData))
             }
           } yield result
 
@@ -74,11 +73,10 @@ class SubmissionController @Inject() (
             val result = for {
               userAnswers <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
               departureId <- OptionT.fromOption[Future](userAnswers.departureId)
-              _ = auditService.audit(DeclarationAmendment, userAnswers)
               result <- OptionT {
                 apiService
                   .submitAmendment(userAnswers, departureId)
-                  .flatMap(responseToResult(userAnswers, _, Some(departureId), Amendment))
+                  .flatMap(responseToResult(userAnswers, _, Some(departureId), Amendment, DeclarationAmendment))
               }
             } yield result
 
@@ -93,15 +91,18 @@ class SubmissionController @Inject() (
     userAnswers: UserAnswers,
     resultOrResponse: Either[Result, HttpResponse],
     departureId: Option[String],
-    submissionState: SubmissionState
-  ): Future[Option[Result]] =
+    submissionState: SubmissionState,
+    auditType: AuditType
+  )(implicit hc: HeaderCarrier): Future[Option[Result]] =
     resultOrResponse match {
       case Right(response) =>
         cacheRepository
           .set(userAnswers, submissionState, departureId)
-          .map(
-            _ => Option(Ok(response.body))
-          )
+          .map {
+            _ =>
+              auditService.audit(auditType, userAnswers.copy(status = submissionState))
+              Option(Ok(response.body))
+          }
       case Left(error) => Future.successful(Option(error))
     }
 }

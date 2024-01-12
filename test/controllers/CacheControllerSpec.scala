@@ -17,7 +17,7 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import models.AuditType.DepartureJourneyStarted
+import models.AuditType._
 import models.{Metadata, SubmissionState, UserAnswersSummary}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
@@ -205,7 +205,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         verify(mockCacheRepository).set(metadataCaptor.capture(), eqTo(None), eqTo(None))
         metadataCaptor.getValue.lrn shouldBe lrn
 
-        verify(mockAuditService).audit(eqTo(DepartureJourneyStarted), eqTo(lrn), eqTo(eoriNumber))(any())
+        verify(mockAuditService).audit(eqTo(DepartureDraftStarted), eqTo(lrn), eqTo(eoriNumber))(any())
       }
     }
 
@@ -274,6 +274,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         val result  = route(app, request).value
 
         status(result) shouldBe OK
+        verify(mockAuditService).audit(eqTo(DepartureDraftDeleted), eqTo(lrn), eqTo(eoriNumber))(any())
       }
     }
 
