@@ -199,8 +199,8 @@ object consignmentType20 {
     departureTransportMeans     <- departureTransportMeansReads
     countriesOfRouting          <- countriesOfRoutingReads
     activeBorderTransportMeans  <- activeBorderTransportMeansReads
-    placeOfLoading              <- (routeDetailsPath \ "loading").readNullable[PlaceOfLoadingType03](placeOfLoadingType03.reads)
-    placeOfUnloading            <- (routeDetailsPath \ "unloading").readNullable[PlaceOfUnloadingType01](placeOfUnloadingType01.reads)
+    placeOfLoading              <- (loadingAndUnloadingPath \ "loading").readNullable[PlaceOfLoadingType03](placeOfLoadingType03.reads)
+    placeOfUnloading            <- (loadingAndUnloadingPath \ "unloading").readNullable[PlaceOfUnloadingType01](placeOfUnloadingType01.reads)
     previousDocuments           <- previousDocumentsReads
     supportingDocuments         <- supportingDocumentsReads
     transportDocuments          <- transportDocumentsReads

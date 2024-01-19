@@ -138,24 +138,26 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
             |          "telephoneNumber" : "+44 202 157 0192"
             |        }
             |      },
-            |      "loading" : {
-            |      "unLocode" : "AEFAT",
-            |        "additionalInformation" : {
-            |          "country" : {
-            |            "code" : "Loading country",
-            |            "description" : "United Kingdom"
-            |          },
-            |          "location" : "Loading location"
-            |        }
-            |      },
-            |      "unloading" : {
-            |        "unLocode" : "ADALV",
-            |        "additionalInformation" : {
-            |          "country" : {
-            |            "code" : "Unloading country",
-            |            "description" : "United Kingdom"
-            |          },
-            |          "location" : "Unloading location"
+            |      "loadingAndUnloading" : {
+            |        "loading" : {
+            |          "unLocode" : "AEFAT",
+            |          "additionalInformation" : {
+            |            "country" : {
+            |              "code" : "Loading country",
+            |              "description" : "United Kingdom"
+            |            },
+            |            "location" : "Loading location"
+            |          }
+            |        },
+            |        "unloading" : {
+            |          "unLocode" : "ADALV",
+            |          "additionalInformation" : {
+            |            "country" : {
+            |              "code" : "Unloading country",
+            |              "description" : "United Kingdom"
+            |            },
+            |            "location" : "Unloading location"
+            |          }
             |        }
             |      }
             |    },
@@ -1172,24 +1174,26 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
              |          "telephoneNumber" : "+44 202 157 0192"
              |        }
              |      },
-             |      "loading" : {
-             |      "unLocode" : "AEFAT",
-             |        "additionalInformation" : {
-             |          "country" : {
-             |            "code" : "Loading country",
-             |            "description" : "United Kingdom"
-             |          },
-             |          "location" : "Loading location"
-             |        }
-             |      },
-             |      "unloading" : {
-             |        "unLocode" : "ADALV",
-             |        "additionalInformation" : {
-             |          "country" : {
-             |            "code" : "Unloading country",
-             |            "description" : "United Kingdom"
-             |          },
-             |          "location" : "Unloading location"
+             |      "loadingAndUnloading" : {
+             |        "loading" : {
+             |          "unLocode" : "AEFAT",
+             |          "additionalInformation" : {
+             |            "country" : {
+             |              "code" : "Loading country",
+             |              "description" : "United Kingdom"
+             |            },
+             |            "location" : "Loading location"
+             |          }
+             |        },
+             |        "unloading" : {
+             |          "unLocode" : "ADALV",
+             |          "additionalInformation" : {
+             |            "country" : {
+             |              "code" : "Unloading country",
+             |              "description" : "United Kingdom"
+             |            },
+             |            "location" : "Unloading location"
+             |          }
              |        }
              |      }
              |    },
