@@ -164,24 +164,26 @@ class ApiConnectorSpec extends SpecBase with AppWithDefaultMockFixtures with Wir
     |          }
     |        }
     |      },
-    |      "loading" : {
-    |        "addUnLocodeYesNo" : false,
-    |        "additionalInformation" : {
-    |          "country" : {
-    |            "code" : "GB",
-    |            "description" : "United Kingdom"
-    |          },
-    |          "location" : "London"
-    |        }
-    |      },
-    |      "unloading" : {
-    |        "addUnLocodeYesNo" : false,
-    |        "additionalInformation" : {
-    |          "country" : {
-    |            "code" : "GB",
-    |            "description" : "United Kingdom"
-    |          },
-    |          "location" : "London"
+    |      "loadingAndUnloading" : {
+    |        "loading" : {
+    |          "addUnLocodeYesNo" : false,
+    |          "additionalInformation" : {
+    |            "country" : {
+    |              "code" : "GB",
+    |              "description" : "United Kingdom"
+    |            },
+    |            "location" : "London"
+    |          }
+    |        },
+    |        "unloading" : {
+    |          "addUnLocodeYesNo" : false,
+    |          "additionalInformation" : {
+    |            "country" : {
+    |              "code" : "GB",
+    |              "description" : "United Kingdom"
+    |            },
+    |            "location" : "London"
+    |          }
     |        }
     |      }
     |    },
