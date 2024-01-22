@@ -214,41 +214,45 @@ class ApiConnectorSpec extends SpecBase with AppWithDefaultMockFixtures with Wir
     |        "code": "2",
     |        "description": "Rail Transport"
     |      },
-    |      "transportMeansDeparture" : {
-    |        "identification" : {
-    |          "type": "21",
-    |          "description": "Train Number"
+    |      "transportMeans" : {
+    |        "departure" : [
+    |          {
+    |            "identification" : {
+    |              "type": "21",
+    |              "description": "Train Number"
+    |            },
+    |            "meansIdentificationNumber" : "1234567",
+    |            "vehicleCountry" : {
+    |              "code" : "GB",
+    |              "desc" : "United Kingdom"
+    |            }
+    |          }
+    |        ],
+    |        "borderModeOfTransport" : {
+    |          "code": "4",
+    |          "description": "Air transport"
     |        },
-    |        "meansIdentificationNumber" : "1234567",
-    |        "vehicleCountry" : {
-    |          "code" : "GB",
-    |          "desc" : "United Kingdom"
-    |        }
+    |        "active" : [
+    |          {
+    |            "identification" : {
+    |              "code": "41",
+    |              "description": "Registration Number of the Aircraft"
+    |            },
+    |            "identificationNumber" : "GB1234567",
+    |            "addNationalityYesNo" : true,
+    |            "nationality" : {
+    |              "code" : "GB",
+    |              "desc" : "United Kingdom"
+    |            },
+    |            "customsOfficeActiveBorder" : {
+    |              "id" : "IT018101",
+    |              "name" : "Aeroporto Bari - Palese",
+    |              "phoneNumber" : "0039 0805316196"
+    |            },
+    |            "conveyanceReferenceNumber" : "GB123456123456"
+    |          }
+    |        ]
     |      },
-    |      "borderModeOfTransport" : {
-    |        "code": "4",
-    |        "description": "Air transport"
-    |      },
-    |      "transportMeansActiveList" : [
-    |        {
-    |          "identification" : {
-    |            "code": "41",
-    |            "description": "Registration Number of the Aircraft"
-    |          },
-    |          "identificationNumber" : "GB1234567",
-    |          "addNationalityYesNo" : true,
-    |          "nationality" : {
-    |            "code" : "GB",
-    |            "desc" : "United Kingdom"
-    |          },
-    |          "customsOfficeActiveBorder" : {
-    |            "id" : "IT018101",
-    |            "name" : "Aeroporto Bari - Palese",
-    |            "phoneNumber" : "0039 0805316196"
-    |          },
-    |          "conveyanceReferenceNumber" : "GB123456123456"
-    |        }
-    |      ],
     |      "supplyChainActorYesNo" : false,
     |      "addAuthorisationsYesNo" : true,
     |      "authorisationsAndLimit" : {
