@@ -38,6 +38,7 @@ package object submission {
   lazy val transportDetailsPath: JsPath     = __ \ "transportDetails"
   lazy val preRequisitesPath: JsPath        = transportDetailsPath \ "preRequisites"
   lazy val authorisationsPath: JsPath       = transportDetailsPath \ "authorisationsAndLimit" \ "authorisations"
+  lazy val transportMeansPath: JsPath       = transportDetailsPath \ "transportMeans"
   lazy val equipmentsAndChargesPath: JsPath = transportDetailsPath \ "equipmentsAndCharges"
   lazy val equipmentsPath: JsPath           = equipmentsAndChargesPath \ "equipments"
 

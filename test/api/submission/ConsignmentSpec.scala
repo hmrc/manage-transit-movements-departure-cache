@@ -190,36 +190,40 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
             |          "telephoneNumber" : "+44 808 157 0192"
             |        }
             |      },
-            |      "transportMeansDeparture" : {
-            |        "identification" : {
-            |          "type": "10",
-            |          "description": "IMO Ship Identification Number"
-            |        },
-            |        "meansIdentificationNumber" : "means id number",
-            |        "vehicleCountry" : {
-            |          "code" : "FR",
-            |          "desc" : "France"
-            |        }
+            |      "transportMeans" : {
+            |        "departure" : [
+            |          {
+            |            "identification" : {
+            |              "type": "10",
+            |              "description": "IMO Ship Identification Number"
+            |            },
+            |            "meansIdentificationNumber" : "means id number",
+            |            "vehicleCountry" : {
+            |              "code" : "FR",
+            |              "desc" : "France"
+            |            }
+            |          }
+            |        ],
+            |        "active" : [
+            |          {
+            |            "identification" : {
+            |              "code": "11",
+            |              "description": "Name of the sea-going vessel"
+            |            },
+            |            "identificationNumber" : "active id number",
+            |            "customsOfficeActiveBorder" : {
+            |              "id" : "IT018101",
+            |              "name" : "Aeroporto Bari - Palese",
+            |              "phoneNumber" : "0039 0805316196"
+            |            },
+            |            "nationality" : {
+            |              "code" : "ES",
+            |              "desc" : "Spain"
+            |            },
+            |            "conveyanceReferenceNumber" : "conveyance ref number"
+            |          }
+            |        ]
             |      },
-            |      "transportMeansActiveList" : [
-            |        {
-            |          "identification" : {
-            |            "code": "11",
-            |            "description": "Name of the sea-going vessel"
-            |          },
-            |          "identificationNumber" : "active id number",
-            |          "customsOfficeActiveBorder" : {
-            |            "id" : "IT018101",
-            |            "name" : "Aeroporto Bari - Palese",
-            |            "phoneNumber" : "0039 0805316196"
-            |          },
-            |          "nationality" : {
-            |            "code" : "ES",
-            |            "desc" : "Spain"
-            |          },
-            |          "conveyanceReferenceNumber" : "conveyance ref number"
-            |        }
-            |      ],
             |      "supplyChainActors" : [
             |        {
             |          "supplyChainActorType" : {
@@ -1226,36 +1230,40 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
              |          "telephoneNumber" : "+44 808 157 0192"
              |        }
              |      },
-             |      "transportMeansDeparture" : {
-             |        "identification" : {
-             |          "type": "10",
-             |          "description": "IMO Ship Identification Number"
-             |        },
-             |        "meansIdentificationNumber" : "means id number",
-             |        "vehicleCountry" : {
-             |          "code" : "FR",
-             |          "desc" : "France"
-             |        }
+             |      "transportMeans" : {
+             |        "departure" : [
+             |          {
+             |            "identification" : {
+             |              "type": "10",
+             |              "description": "IMO Ship Identification Number"
+             |            },
+             |            "meansIdentificationNumber" : "means id number",
+             |            "vehicleCountry" : {
+             |              "code" : "FR",
+             |              "desc" : "France"
+             |            }
+             |          }
+             |        ],
+             |        "active" : [
+             |          {
+             |            "identification" : {
+             |              "code": "11",
+             |              "description": "Name of the sea-going vessel"
+             |            },
+             |            "identificationNumber" : "active id number",
+             |            "customsOfficeActiveBorder" : {
+             |              "id" : "IT018101",
+             |              "name" : "Aeroporto Bari - Palese",
+             |              "phoneNumber" : "0039 0805316196"
+             |            },
+             |            "nationality" : {
+             |              "code" : "ES",
+             |              "desc" : "Spain"
+             |            },
+             |            "conveyanceReferenceNumber" : "conveyance ref number"
+             |          }
+             |        ]
              |      },
-             |      "transportMeansActiveList" : [
-             |        {
-             |          "identification" : {
-             |            "code": "11",
-             |            "description": "Name of the sea-going vessel"
-             |          },
-             |          "identificationNumber" : "active id number",
-             |          "customsOfficeActiveBorder" : {
-             |            "id" : "IT018101",
-             |            "name" : "Aeroporto Bari - Palese",
-             |            "phoneNumber" : "0039 0805316196"
-             |          },
-             |          "nationality" : {
-             |            "code" : "ES",
-             |            "desc" : "Spain"
-             |          },
-             |          "conveyanceReferenceNumber" : "conveyance ref number"
-             |        }
-             |      ],
              |      "supplyChainActors" : [
              |        {
              |          "supplyChainActorType" : {
@@ -3265,31 +3273,33 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
         val json: JsValue = Json.parse(s"""
             |{
             |  "transportDetails" : {
-            |    "transportMeansActiveList" : [
-            |      {
-            |        "identification" : {
-            |          "code": "10",
-            |          "description": "IMO Ship Identification Number"
+            |    "transportMeans" : {
+            |      "active" : [
+            |        {
+            |          "identification" : {
+            |            "code": "10",
+            |            "description": "IMO Ship Identification Number"
+            |          },
+            |          "identificationNumber" : "active id number",
+            |          "customsOfficeActiveBorder" : {
+            |            "id" : "IT018101",
+            |            "name" : "Aeroporto Bari - Palese",
+            |            "phoneNumber" : "0039 0805316196"
+            |          },
+            |          "nationality" : {
+            |            "code" : "ES",
+            |            "desc" : "Spain"
+            |          },
+            |          "conveyanceReferenceNumber" : "conveyance ref number"
             |        },
-            |        "identificationNumber" : "active id number",
-            |        "customsOfficeActiveBorder" : {
-            |          "id" : "IT018101",
-            |          "name" : "Aeroporto Bari - Palese",
-            |          "phoneNumber" : "0039 0805316196"
-            |        },
-            |        "nationality" : {
-            |          "code" : "ES",
-            |          "desc" : "Spain"
-            |        },
-            |        "conveyanceReferenceNumber" : "conveyance ref number"
-            |      },
-            |      {
-            |        "identification" : {
-            |          "code": "80",
-            |          "description": "European Vessel Identification Number (ENI Code)"
+            |        {
+            |          "identification" : {
+            |            "code": "80",
+            |            "description": "European Vessel Identification Number (ENI Code)"
+            |          }
             |        }
-            |      }
-            |    ]
+            |      ]
+            |    }
             |  }
             |}
             |""".stripMargin)
@@ -3321,31 +3331,33 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
         val json: JsValue = Json.parse(s"""
             |{
             |  "transportDetails" : {
-            |    "transportMeansActiveList" : [
-            |      {
-            |        "inferredIdentification" : {
-            |          "code": "21",
-            |          "description": "Train Number"
+            |    "transportMeans" : {
+            |      "active" : [
+            |        {
+            |          "inferredIdentification" : {
+            |            "code": "21",
+            |            "description": "Train Number"
+            |          },
+            |          "identificationNumber" : "active id number",
+            |          "customsOfficeActiveBorder" : {
+            |            "id" : "IT018101",
+            |            "name" : "Aeroporto Bari - Palese",
+            |            "phoneNumber" : "0039 0805316196"
+            |          },
+            |          "nationality" : {
+            |            "code" : "ES",
+            |            "desc" : "Spain"
+            |          },
+            |          "conveyanceReferenceNumber" : "conveyance ref number"
             |        },
-            |        "identificationNumber" : "active id number",
-            |        "customsOfficeActiveBorder" : {
-            |          "id" : "IT018101",
-            |          "name" : "Aeroporto Bari - Palese",
-            |          "phoneNumber" : "0039 0805316196"
-            |        },
-            |        "nationality" : {
-            |          "code" : "ES",
-            |          "desc" : "Spain"
-            |        },
-            |        "conveyanceReferenceNumber" : "conveyance ref number"
-            |      },
-            |      {
-            |        "identification" : {
-            |          "code": "80",
-            |          "description": "European Vessel Identification Number (ENI Code)"
+            |        {
+            |          "identification" : {
+            |            "code": "80",
+            |            "description": "European Vessel Identification Number (ENI Code)"
+            |          }
             |        }
-            |      }
-            |    ]
+            |      ]
+            |    }
             |  }
             |}
             |""".stripMargin)
@@ -3377,27 +3389,29 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
         val json: JsValue = Json.parse(s"""
             |{
             |  "transportDetails" : {
-            |    "transportMeansActiveList" : [
-            |      {
-            |        "identificationNumber" : "active id number",
-            |        "customsOfficeActiveBorder" : {
-            |          "id" : "IT018101",
-            |          "name" : "Aeroporto Bari - Palese",
-            |          "phoneNumber" : "0039 0805316196"
+            |    "transportMeans" : {
+            |      "active" : [
+            |        {
+            |          "identificationNumber" : "active id number",
+            |          "customsOfficeActiveBorder" : {
+            |            "id" : "IT018101",
+            |            "name" : "Aeroporto Bari - Palese",
+            |            "phoneNumber" : "0039 0805316196"
+            |          },
+            |          "nationality" : {
+            |            "code" : "ES",
+            |            "desc" : "Spain"
+            |          },
+            |          "conveyanceReferenceNumber" : "conveyance ref number"
             |        },
-            |        "nationality" : {
-            |          "code" : "ES",
-            |          "desc" : "Spain"
-            |        },
-            |        "conveyanceReferenceNumber" : "conveyance ref number"
-            |      },
-            |      {
-            |        "identification" : {
-            |          "code": "80",
-            |          "description": "European Vessel Identification Number (ENI Code)"
+            |        {
+            |          "identification" : {
+            |            "code": "80",
+            |            "description": "European Vessel Identification Number (ENI Code)"
+            |          }
             |        }
-            |      }
-            |    ]
+            |      ]
+            |    }
             |  }
             |}
             |""".stripMargin)
@@ -3700,16 +3714,20 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
         val json = Json.parse("""
             |{
             |  "transportDetails" : {
-            |    "transportMeansDeparture" : {
-            |      "identification" : {
-            |        "type": "10",
-            |        "description": "IMO Ship Identification Number"
-            |      },
-            |      "meansIdentificationNumber" : "means id number",
-            |      "vehicleCountry" : {
-            |        "code" : "FR",
-            |        "desc" : "France"
-            |      }
+            |    "transportMeans" : {
+            |      "departure" : [
+            |        {
+            |          "identification" : {
+            |            "type": "10",
+            |            "description": "IMO Ship Identification Number"
+            |          },
+            |          "meansIdentificationNumber" : "means id number",
+            |          "vehicleCountry" : {
+            |            "code" : "FR",
+            |            "desc" : "France"
+            |          }
+            |        }
+            |      ]
             |    }
             |  }
             |}

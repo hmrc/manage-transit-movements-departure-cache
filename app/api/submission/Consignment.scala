@@ -241,16 +241,15 @@ object consignmentType20 {
     }
 
   def departureTransportMeansReads: Reads[Seq[DepartureTransportMeansType03]] =
-    (transportDetailsPath \ "transportMeansDeparture")
-      .readNullable[DepartureTransportMeansType03](departureTransportMeansType03.reads)
-      .map(Seq(_).flatten)
+    (transportMeansPath \ "departure")
+      .readArray[DepartureTransportMeansType03](departureTransportMeansType03.reads)
 
   private def countriesOfRoutingReads: Reads[Seq[CountryOfRoutingOfConsignmentType01]] =
     (routeDetailsPath \ "routing" \ "countriesOfRouting")
       .readArray[CountryOfRoutingOfConsignmentType01](countryOfRoutingOfConsignmentType01.reads)
 
   def activeBorderTransportMeansReads: Reads[Seq[ActiveBorderTransportMeansType02]] =
-    (transportDetailsPath \ "transportMeansActiveList")
+    (transportMeansPath \ "active")
       .readArray[ActiveBorderTransportMeansType02](activeBorderTransportMeansType02.reads)
 
   private def previousDocumentsReads: Reads[Seq[PreviousDocumentType09]] =
@@ -405,8 +404,8 @@ object economicOperatorType03 {
 
 object departureTransportMeansType03 {
 
-  implicit val reads: Reads[DepartureTransportMeansType03] = (
-    ("1": Reads[String]) and
+  def reads(index: Int): Reads[DepartureTransportMeansType03] = (
+    (index.toString: Reads[String]) and
       (__ \ "identification" \ "type").readNullable[String] and
       (__ \ "meansIdentificationNumber").readNullable[String] and
       (__ \ "vehicleCountry" \ "code").readNullable[String]
