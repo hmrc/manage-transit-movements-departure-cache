@@ -16,13 +16,15 @@
 
 package api.submission
 
-import generated.{CORRELATION_IDENTIFIERSequence, MESSAGESequence, MESSAGE_1Sequence, MESSAGE_TYPESequence, MessageTypes}
+import generated._
 import models.UserAnswers
 import play.api.libs.json.JsSuccess
+import services.MessageIdentificationService
 
 import java.time.LocalDateTime
+import javax.inject.Inject
 
-object Header extends {
+class Header @Inject() (messageIdentificationService: MessageIdentificationService) extends {
 
   def message(uA: UserAnswers, messageType: MessageTypes): MESSAGESequence =
     uA.metadata.data.validate((preTaskListPath \ "officeOfDeparture" \ "id").read[String].map(_.take(2))) match {
@@ -32,9 +34,11 @@ object Header extends {
           messagE_1Sequence2 = MESSAGE_1Sequence(
             messageRecipient = s"NTA.$officeOfDepartureCountryCode",
             preparationDateAndTime = LocalDateTime.now(),
-            messageIdentification = messageType.toString
+            messageIdentification = messageIdentificationService.randomIdentifier
           ),
-          messagE_TYPESequence3 = MESSAGE_TYPESequence(messageType),
+          messagE_TYPESequence3 = MESSAGE_TYPESequence(
+            messageType = messageType
+          ),
           correlatioN_IDENTIFIERSequence4 = CORRELATION_IDENTIFIERSequence(
             correlationIdentifier = None
           )

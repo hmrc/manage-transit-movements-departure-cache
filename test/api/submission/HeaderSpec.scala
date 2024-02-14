@@ -19,13 +19,35 @@ package api.submission
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import generated._
 import models.UserAnswers
+import org.mockito.Mockito.{reset, when}
+import org.scalacheck.Gen
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
+import services.MessageIdentificationService
 
-class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures {
+class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaCheckPropertyChecks {
+
+  private lazy val mockMessageIdentificationService = mock[MessageIdentificationService]
+
+  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
+    super
+      .guiceApplicationBuilder()
+      .overrides(
+        bind[MessageIdentificationService].toInstance(mockMessageIdentificationService)
+      )
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockMessageIdentificationService)
+  }
+
+  private val header: Header = app.injector.instanceOf[Header]
 
   "Conversions" when {
 
-    "message is called" when {
+    "message is called" must {
 
       val json: JsValue = Json.parse(s"""
           |{
@@ -50,26 +72,36 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       val uA: UserAnswers = json.as[UserAnswers]
 
-      "will convert to API format" in {
+      "convert to API format" when {
+        "declaration (IE015)" in {
+          forAll(Gen.alphaNumStr) {
+            messageIdentification =>
+              when(mockMessageIdentificationService.randomIdentifier).thenReturn(messageIdentification)
 
-        val result = Header.message(uA, CC015C)
+              val result = header.message(uA, CC015C)
 
-        result.messageSender shouldBe uA.eoriNumber
-        result.messagE_1Sequence2.messageRecipient shouldBe "NTA.GB"
-        result.messagE_1Sequence2.messageIdentification shouldBe CC015C.toString
-        result.messagE_TYPESequence3.messageType shouldBe CC015C
-        result.correlatioN_IDENTIFIERSequence4.correlationIdentifier shouldBe None
-      }
+              result.messageSender shouldBe uA.eoriNumber
+              result.messagE_1Sequence2.messageRecipient shouldBe "NTA.GB"
+              result.messagE_1Sequence2.messageIdentification shouldBe messageIdentification
+              result.messagE_TYPESequence3.messageType shouldBe CC015C
+              result.correlatioN_IDENTIFIERSequence4.correlationIdentifier shouldBe None
+          }
+        }
 
-      "will convert to API format for CC013C" in {
+        "amendment (IE013)" in {
+          forAll(Gen.alphaNumStr) {
+            messageIdentification =>
+              when(mockMessageIdentificationService.randomIdentifier).thenReturn(messageIdentification)
 
-        val result = Header.message(uA, CC013C)
+              val result = header.message(uA, CC013C)
 
-        result.messageSender shouldBe uA.eoriNumber
-        result.messagE_1Sequence2.messageRecipient shouldBe "NTA.GB"
-        result.messagE_1Sequence2.messageIdentification shouldBe CC013C.toString
-        result.messagE_TYPESequence3.messageType shouldBe CC013C
-        result.correlatioN_IDENTIFIERSequence4.correlationIdentifier shouldBe None
+              result.messageSender shouldBe uA.eoriNumber
+              result.messagE_1Sequence2.messageRecipient shouldBe "NTA.GB"
+              result.messagE_1Sequence2.messageIdentification shouldBe messageIdentification
+              result.messagE_TYPESequence3.messageType shouldBe CC013C
+              result.correlatioN_IDENTIFIERSequence4.correlationIdentifier shouldBe None
+          }
+        }
       }
     }
   }

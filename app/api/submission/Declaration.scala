@@ -26,7 +26,7 @@ import scalaxb.`package`.toXML
 import javax.inject.Inject
 import scala.xml.{NamespaceBinding, NodeSeq}
 
-class Declaration @Inject() (implicit config: AppConfig) {
+class Declaration @Inject() (header: Header)(implicit config: AppConfig) {
 
   private val scope: NamespaceBinding = scalaxb.toScope(Some("ncts") -> "http://ncts.dgtaxud.ec")
 
@@ -38,7 +38,7 @@ class Declaration @Inject() (implicit config: AppConfig) {
 
   private def IE015(uA: UserAnswers)(implicit config: AppConfig): CC015CType =
     CC015CType(
-      messageSequence1 = Header.message(uA, CC015C),
+      messageSequence1 = header.message(uA, CC015C),
       TransitOperation = TransitOperation.transform(uA),
       Authorisation = Authorisations.transform(uA),
       CustomsOfficeOfDeparture = CustomsOffices.transformOfficeOfDeparture(uA),
@@ -54,7 +54,7 @@ class Declaration @Inject() (implicit config: AppConfig) {
 
   private def IE013(uA: UserAnswers, mrn: Option[String], flag: Boolean)(implicit config: AppConfig): CC013CType =
     CC013CType(
-      messageSequence1 = Header.message(uA, CC013C),
+      messageSequence1 = header.message(uA, CC013C),
       TransitOperation = TransitOperation.transformIE013(uA, mrn, flag),
       Authorisation = Authorisations.transform(uA),
       CustomsOfficeOfDeparture = CustomsOffices.transformOfficeOfDeparture(uA),
