@@ -36,7 +36,7 @@ object Header extends {
           ),
           messagE_TYPESequence3 = MESSAGE_TYPESequence(messageType),
           correlatioN_IDENTIFIERSequence4 = CORRELATION_IDENTIFIERSequence(
-            correlationIdentifier = None // TODO - What should this be?
+            correlationIdentifier = None
           )
         )
       case _ => throw new Exception("Json did not contain office of departure ID")
