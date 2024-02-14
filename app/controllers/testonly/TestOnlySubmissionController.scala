@@ -17,7 +17,6 @@
 package controllers.testonly
 
 import api.submission.Declaration
-import config.AppConfig
 import models.{MovementReferenceNumber, SensitiveFormats, UserAnswers}
 import play.api.Logging
 import play.api.libs.json._
@@ -27,8 +26,9 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 import javax.inject.Inject
 
 class TestOnlySubmissionController @Inject() (
-  cc: ControllerComponents
-)(implicit sensitiveFormats: SensitiveFormats, config: AppConfig)
+  cc: ControllerComponents,
+  declaration: Declaration
+)(implicit sensitiveFormats: SensitiveFormats)
     extends BackendController(cc)
     with Logging {
 
@@ -36,7 +36,7 @@ class TestOnlySubmissionController @Inject() (
     request =>
       request.body.validate[UserAnswers](UserAnswers.nonSensitiveFormat orElse UserAnswers.sensitiveFormat) match {
         case JsSuccess(userAnswers, _) =>
-          Ok(Declaration.transform(userAnswers, mrn = MovementReferenceNumber.Empty))
+          Ok(declaration.transform(userAnswers, mrn = MovementReferenceNumber.Empty))
         case JsError(errors) =>
           logger.info(s"Failed to validate request body as UserAnswers: ${errors.mkString}")
           BadRequest

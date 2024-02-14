@@ -16,9 +16,10 @@
 
 package services
 
+import api.submission.Declaration
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import connectors.ApiConnector
-import models.{Departure, DepartureMessageType, DepartureMessageTypes, Departures}
+import models._
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
 import play.api.http.Status.OK
@@ -27,26 +28,36 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.Helpers.{await, defaultAwaitTimeout}
 import uk.gov.hmrc.http.HttpResponse
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
+import scala.xml.NodeSeq
 
 class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   private lazy val mockApiConnector = mock[ApiConnector]
-  private lazy val mockXPathService = mock[XPathService]
+  private lazy val mockDeclaration  = mock[Declaration]
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
       .guiceApplicationBuilder()
       .overrides(
         bind[ApiConnector].toInstance(mockApiConnector),
-        bind[XPathService].toInstance(mockXPathService)
+        bind[Declaration].toInstance(mockDeclaration)
       )
+
+  private val xml: NodeSeq =
+    <ncts:CC013C PhaseID="NCTS5.0" xmlns:ncts="http://ncts.dgtaxud.ec">
+      <foo>bar</foo>
+    </ncts:CC013C>
+
+  private val mrn = MovementReferenceNumber(Some("mrn"))
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockApiConnector)
-    reset(mockXPathService)
+    reset(mockDeclaration)
+
+    when(mockDeclaration.transform(any(), any()))
+      .thenReturn(xml)
   }
 
   private val service = app.injector.instanceOf[ApiService]
@@ -55,10 +66,13 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
     "call connector" in {
       val userAnswers    = emptyUserAnswers
       val expectedResult = Right(HttpResponse(OK, ""))
+
       when(mockApiConnector.submitDeclaration(any())(any())).thenReturn(Future.successful(expectedResult))
+
       val result = service.submitDeclaration(userAnswers).futureValue
       result shouldBe expectedResult
-      verify(mockApiConnector).submitDeclaration(eqTo(userAnswers))(any())
+
+      verify(mockApiConnector).submitDeclaration(eqTo(xml))(any())
     }
   }
 
@@ -67,10 +81,15 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
       val departureId    = "departureId123"
       val userAnswers    = emptyUserAnswersWithDepartureId
       val expectedResult = Right(HttpResponse(OK, ""))
+
+      when(mockApiConnector.getMRN(any())(any())).thenReturn(Future.successful(mrn))
       when(mockApiConnector.submitAmendment(any(), any())(any())).thenReturn(Future.successful(expectedResult))
+
       val result = service.submitAmendment(userAnswers, departureId).futureValue
       result shouldBe expectedResult
-      verify(mockApiConnector).submitAmendment(eqTo(userAnswers), eqTo(departureId))(any())
+
+      verify(mockApiConnector).getMRN(eqTo(departureId))(any())
+      verify(mockApiConnector).submitAmendment(eqTo(departureId), eqTo(xml))(any())
     }
   }
 

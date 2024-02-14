@@ -23,13 +23,14 @@ import models.{MovementReferenceNumber, UserAnswers}
 import scalaxb.DataRecord
 import scalaxb.`package`.toXML
 
+import javax.inject.Inject
 import scala.xml.{NamespaceBinding, NodeSeq}
 
-object Declaration {
+class Declaration @Inject() (implicit config: AppConfig) {
 
   private val scope: NamespaceBinding = scalaxb.toScope(Some("ncts") -> "http://ncts.dgtaxud.ec")
 
-  def transform(uA: UserAnswers, mrn: MovementReferenceNumber)(implicit config: AppConfig): NodeSeq = uA.status match {
+  def transform(uA: UserAnswers, mrn: MovementReferenceNumber): NodeSeq = uA.status match {
     case Amendment          => toXML(IE013(uA, mrn.value, flag = false), s"ncts:${CC013C.toString}", scope)
     case GuaranteeAmendment => toXML(IE013(uA, mrn.value, flag = true), s"ncts:${CC013C.toString}", scope)
     case _                  => toXML(IE015(uA), s"ncts:${CC015C.toString}", scope)

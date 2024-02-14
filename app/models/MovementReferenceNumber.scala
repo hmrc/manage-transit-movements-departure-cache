@@ -22,16 +22,13 @@ final case class MovementReferenceNumber(value: Option[String])
 
 object MovementReferenceNumber {
 
-  val Empty = MovementReferenceNumber(None)
+  val Empty: MovementReferenceNumber = MovementReferenceNumber(None)
 
   implicit val reads: Reads[MovementReferenceNumber] = (__ \ "movementReferenceNumber").readNullable[String].map(MovementReferenceNumber(_))
 
-  implicit val writes: Writes[MovementReferenceNumber] = (
+  implicit val writes: Writes[MovementReferenceNumber] =
     (JsPath \ "movementReferenceNumber")
       .writeNullable[String]
-    )
-    .contramap(
-      mrn => mrn.value
-    )
+      .contramap(_.value)
 
 }

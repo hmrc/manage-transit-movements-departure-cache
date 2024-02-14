@@ -48,7 +48,7 @@ class DuplicateServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
     "return true" when {
       "true is returned from isIE028DefinedForDeparture" in {
 
-        when(mockApiService.isIE028DefinedForDeparture(any())(any(), any())).thenReturn(Future.successful(true))
+        when(mockApiService.isIE028DefinedForDeparture(any())(any())).thenReturn(Future.successful(true))
 
         val result = service.doesIE028ExistForLrn(lrn).futureValue
 
@@ -59,7 +59,7 @@ class DuplicateServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
     "return false" when {
       "false is returned from isIE028DefinedForDeparture" in {
 
-        when(mockApiService.isIE028DefinedForDeparture(any())(any(), any())).thenReturn(Future.successful(false))
+        when(mockApiService.isIE028DefinedForDeparture(any())(any())).thenReturn(Future.successful(false))
 
         val result = service.doesIE028ExistForLrn(lrn).futureValue
 
@@ -100,18 +100,18 @@ class DuplicateServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
   "doesDraftOrSubmissionExistForLrn" should {
     "return true" when {
       "doesIE028ExistForLrn returns departures" in {
-        when(mockApiService.isIE028DefinedForDeparture(any())(any(), any()))
+        when(mockApiService.isIE028DefinedForDeparture(any())(any()))
           .thenReturn(Future.successful(true))
 
         val result = service.doesDraftOrSubmissionExistForLrn(lrn).futureValue
 
         result mustBe true
 
-        verify(mockApiService).isIE028DefinedForDeparture(eqTo(lrn))(any(), any())
+        verify(mockApiService).isIE028DefinedForDeparture(eqTo(lrn))(any())
       }
 
       "doesIE028ExistForLrn returns false, but doesDraftExistForLrn returns true" in {
-        when(mockApiService.isIE028DefinedForDeparture(any())(any(), any()))
+        when(mockApiService.isIE028DefinedForDeparture(any())(any()))
           .thenReturn(Future.successful(false))
         when(mockCacheRepository.doesDraftExistForLrn(any()))
           .thenReturn(Future.successful(true))
@@ -120,13 +120,13 @@ class DuplicateServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         result mustBe true
 
-        verify(mockApiService).isIE028DefinedForDeparture(eqTo(lrn))(any(), any())
+        verify(mockApiService).isIE028DefinedForDeparture(eqTo(lrn))(any())
         verify(mockCacheRepository).doesDraftExistForLrn(eqTo(lrn))
       }
     }
 
     "return false when both doesIE028ExistForLrn and doesDraftExistForLrn return false" in {
-      when(mockApiService.isIE028DefinedForDeparture(any())(any(), any()))
+      when(mockApiService.isIE028DefinedForDeparture(any())(any()))
         .thenReturn(Future.successful(false))
       when(mockCacheRepository.doesDraftExistForLrn(any()))
         .thenReturn(Future.successful(false))
@@ -135,7 +135,7 @@ class DuplicateServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       result mustBe false
 
-      verify(mockApiService).isIE028DefinedForDeparture(eqTo(lrn))(any(), any())
+      verify(mockApiService).isIE028DefinedForDeparture(eqTo(lrn))(any())
     }
   }
 
