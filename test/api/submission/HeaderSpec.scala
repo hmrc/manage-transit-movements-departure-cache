@@ -25,81 +25,134 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
-import services.MessageIdentificationService
+import scalaxb.XMLCalendar
+import services.{DateTimeService, MessageIdentificationService}
+
+import java.time.LocalDateTime
 
 class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaCheckPropertyChecks {
 
+  private lazy val mockDateTimeService              = mock[DateTimeService]
   private lazy val mockMessageIdentificationService = mock[MessageIdentificationService]
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
       .guiceApplicationBuilder()
       .overrides(
+        bind[DateTimeService].toInstance(mockDateTimeService),
         bind[MessageIdentificationService].toInstance(mockMessageIdentificationService)
       )
 
   override def beforeEach(): Unit = {
     super.beforeEach()
+    reset(mockDateTimeService)
     reset(mockMessageIdentificationService)
   }
 
   private val header: Header = app.injector.instanceOf[Header]
 
-  "Conversions" when {
+  private val dateTime: LocalDateTime =
+    LocalDateTime.of(2020, 1, 1, 0, 0, 0)
+
+  "Header" when {
 
     "message is called" must {
 
-      val json: JsValue = Json.parse(s"""
-          |{
-          |  "_id" : "$uuid",
-          |  "lrn" : "$lrn",
-          |  "eoriNumber" : "$eoriNumber",
-          |  "isSubmitted" : "notSubmitted",
-          |  "data" : {
-          |    "preTaskList" : {
-          |      "officeOfDeparture" : {
-          |        "id" : "GB000011",
-          |        "name" : "Birmingham Airport",
-          |        "phoneNumber" : "+44 (0)121 781 7850"
-          |      }
-          |    }
-          |  },
-          |  "tasks" : {},
-          |  "createdAt" : "2022-09-05T15:58:44.188Z",
-          |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
-          |}
-          |""".stripMargin)
+      def uA(officeOfDeparture: String): UserAnswers = {
+        val json: JsValue = Json.parse(s"""
+             |{
+             |  "_id" : "$uuid",
+             |  "lrn" : "$lrn",
+             |  "eoriNumber" : "$eoriNumber",
+             |  "isSubmitted" : "notSubmitted",
+             |  "data" : {
+             |    "preTaskList" : {
+             |      "officeOfDeparture" : {
+             |        "id" : "$officeOfDeparture",
+             |        "name" : "Birmingham Airport",
+             |        "phoneNumber" : "+44 (0)121 781 7850"
+             |      }
+             |    }
+             |  },
+             |  "tasks" : {},
+             |  "createdAt" : "2022-09-05T15:58:44.188Z",
+             |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
+             |}
+             |""".stripMargin)
 
-      val uA: UserAnswers = json.as[UserAnswers]
+        json.as[UserAnswers]
+      }
 
       "convert to API format" when {
-        "declaration (IE015)" in {
-          forAll(Gen.alphaNumStr) {
-            messageIdentification =>
-              when(mockMessageIdentificationService.randomIdentifier).thenReturn(messageIdentification)
+        "declaration (IE015)" when {
+          "GB office of departure" in {
+            forAll(Gen.alphaNumStr) {
+              messageIdentification =>
+                when(mockDateTimeService.now).thenReturn(dateTime)
+                when(mockMessageIdentificationService.randomIdentifier).thenReturn(messageIdentification)
 
-              val result = header.message(uA, CC015C)
+                val result = header.message(uA("GB000011"), CC015C)
 
-              result.messageSender shouldBe uA.eoriNumber
-              result.messagE_1Sequence2.messageRecipient shouldBe "NTA.GB"
-              result.messagE_1Sequence2.messageIdentification shouldBe messageIdentification
-              result.messagE_TYPESequence3.messageType shouldBe CC015C
-              result.correlatioN_IDENTIFIERSequence4.correlationIdentifier shouldBe None
+                result.messageSender shouldBe eoriNumber
+                result.messagE_1Sequence2.messageRecipient shouldBe "NTA.GB"
+                result.messagE_1Sequence2.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
+                result.messagE_1Sequence2.messageIdentification shouldBe messageIdentification
+                result.messagE_TYPESequence3.messageType shouldBe CC015C
+                result.correlatioN_IDENTIFIERSequence4.correlationIdentifier shouldBe None
+            }
+          }
+
+          "XI office of departure" in {
+            forAll(Gen.alphaNumStr) {
+              messageIdentification =>
+                when(mockDateTimeService.now).thenReturn(dateTime)
+                when(mockMessageIdentificationService.randomIdentifier).thenReturn(messageIdentification)
+
+                val result = header.message(uA("XIREX001"), CC015C)
+
+                result.messageSender shouldBe eoriNumber
+                result.messagE_1Sequence2.messageRecipient shouldBe "NTA.XI"
+                result.messagE_1Sequence2.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
+                result.messagE_1Sequence2.messageIdentification shouldBe messageIdentification
+                result.messagE_TYPESequence3.messageType shouldBe CC015C
+                result.correlatioN_IDENTIFIERSequence4.correlationIdentifier shouldBe None
+            }
           }
         }
 
-        "amendment (IE013)" in {
-          forAll(Gen.alphaNumStr) {
-            messageIdentification =>
-              when(mockMessageIdentificationService.randomIdentifier).thenReturn(messageIdentification)
+        "amendment (IE013)" when {
+          "GB office of departure" in {
+            forAll(Gen.alphaNumStr) {
+              messageIdentification =>
+                when(mockDateTimeService.now).thenReturn(dateTime)
+                when(mockMessageIdentificationService.randomIdentifier).thenReturn(messageIdentification)
 
-              val result = header.message(uA, CC013C)
+                val result = header.message(uA("GB000011"), CC013C)
 
-              result.messageSender shouldBe uA.eoriNumber
-              result.messagE_1Sequence2.messageRecipient shouldBe "NTA.GB"
-              result.messagE_1Sequence2.messageIdentification shouldBe messageIdentification
-              result.messagE_TYPESequence3.messageType shouldBe CC013C
-              result.correlatioN_IDENTIFIERSequence4.correlationIdentifier shouldBe None
+                result.messageSender shouldBe eoriNumber
+                result.messagE_1Sequence2.messageRecipient shouldBe "NTA.GB"
+                result.messagE_1Sequence2.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
+                result.messagE_1Sequence2.messageIdentification shouldBe messageIdentification
+                result.messagE_TYPESequence3.messageType shouldBe CC013C
+                result.correlatioN_IDENTIFIERSequence4.correlationIdentifier shouldBe None
+            }
+          }
+
+          "XI office of departure" in {
+            forAll(Gen.alphaNumStr) {
+              messageIdentification =>
+                when(mockDateTimeService.now).thenReturn(dateTime)
+                when(mockMessageIdentificationService.randomIdentifier).thenReturn(messageIdentification)
+
+                val result = header.message(uA("XIREX001"), CC013C)
+
+                result.messageSender shouldBe eoriNumber
+                result.messagE_1Sequence2.messageRecipient shouldBe "NTA.XI"
+                result.messagE_1Sequence2.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
+                result.messagE_1Sequence2.messageIdentification shouldBe messageIdentification
+                result.messagE_TYPESequence3.messageType shouldBe CC013C
+                result.correlatioN_IDENTIFIERSequence4.correlationIdentifier shouldBe None
+            }
           }
         }
       }

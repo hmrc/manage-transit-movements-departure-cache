@@ -19,12 +19,14 @@ package api.submission
 import generated._
 import models.UserAnswers
 import play.api.libs.json.JsSuccess
-import services.MessageIdentificationService
+import services.{DateTimeService, MessageIdentificationService}
 
-import java.time.LocalDateTime
 import javax.inject.Inject
 
-class Header @Inject() (messageIdentificationService: MessageIdentificationService) extends {
+class Header @Inject() (
+  dateTimeService: DateTimeService,
+  messageIdentificationService: MessageIdentificationService
+) extends {
 
   def message(uA: UserAnswers, messageType: MessageTypes): MESSAGESequence =
     uA.metadata.data.validate((preTaskListPath \ "officeOfDeparture" \ "id").read[String].map(_.take(2))) match {
@@ -33,7 +35,7 @@ class Header @Inject() (messageIdentificationService: MessageIdentificationServi
           messageSender = uA.eoriNumber,
           messagE_1Sequence2 = MESSAGE_1Sequence(
             messageRecipient = s"NTA.$officeOfDepartureCountryCode",
-            preparationDateAndTime = LocalDateTime.now(),
+            preparationDateAndTime = dateTimeService.now,
             messageIdentification = messageIdentificationService.randomIdentifier
           ),
           messagE_TYPESequence3 = MESSAGE_TYPESequence(
