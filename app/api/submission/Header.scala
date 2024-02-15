@@ -26,7 +26,7 @@ import javax.inject.Inject
 class Header @Inject() (
   dateTimeService: DateTimeService,
   messageIdentificationService: MessageIdentificationService
-) extends {
+) {
 
   def message(uA: UserAnswers, messageType: MessageTypes): MESSAGESequence =
     uA.metadata.data.validate((preTaskListPath \ "officeOfDeparture" \ "id").read[String].map(_.take(2))) match {
