@@ -23,13 +23,14 @@ import models.{MovementReferenceNumber, UserAnswers}
 import scalaxb.DataRecord
 import scalaxb.`package`.toXML
 
+import javax.inject.Inject
 import scala.xml.{NamespaceBinding, NodeSeq}
 
-object Declaration {
+class Declaration @Inject() (header: Header)(implicit config: AppConfig) {
 
   private val scope: NamespaceBinding = scalaxb.toScope(Some("ncts") -> "http://ncts.dgtaxud.ec")
 
-  def transform(uA: UserAnswers, mrn: MovementReferenceNumber)(implicit config: AppConfig): NodeSeq = uA.status match {
+  def transform(uA: UserAnswers, mrn: MovementReferenceNumber): NodeSeq = uA.status match {
     case Amendment          => toXML(IE013(uA, mrn.value, flag = false), s"ncts:${CC013C.toString}", scope)
     case GuaranteeAmendment => toXML(IE013(uA, mrn.value, flag = true), s"ncts:${CC013C.toString}", scope)
     case _                  => toXML(IE015(uA), s"ncts:${CC015C.toString}", scope)
@@ -37,7 +38,7 @@ object Declaration {
 
   private def IE015(uA: UserAnswers)(implicit config: AppConfig): CC015CType =
     CC015CType(
-      messageSequence1 = Header.message(uA, CC015C),
+      messageSequence1 = header.message(uA, CC015C),
       TransitOperation = TransitOperation.transform(uA),
       Authorisation = Authorisations.transform(uA),
       CustomsOfficeOfDeparture = CustomsOffices.transformOfficeOfDeparture(uA),
@@ -53,7 +54,7 @@ object Declaration {
 
   private def IE013(uA: UserAnswers, mrn: Option[String], flag: Boolean)(implicit config: AppConfig): CC013CType =
     CC013CType(
-      messageSequence1 = Header.message(uA, CC013C),
+      messageSequence1 = header.message(uA, CC013C),
       TransitOperation = TransitOperation.transformIE013(uA, mrn, flag),
       Authorisation = Authorisations.transform(uA),
       CustomsOfficeOfDeparture = CustomsOffices.transformOfficeOfDeparture(uA),

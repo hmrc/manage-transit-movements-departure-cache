@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,13 @@
  * limitations under the License.
  */
 
-package models
+package services
 
-import play.api.libs.json._
+import javax.inject.Inject
+import scala.util.Random
 
-final case class MovementReferenceNumber(value: Option[String])
+class MessageIdentificationService @Inject() {
 
-object MovementReferenceNumber {
-
-  val Empty: MovementReferenceNumber = MovementReferenceNumber(None)
-
-  implicit val reads: Reads[MovementReferenceNumber] = (__ \ "movementReferenceNumber").readNullable[String].map(MovementReferenceNumber(_))
-
-  implicit val writes: Writes[MovementReferenceNumber] =
-    (JsPath \ "movementReferenceNumber")
-      .writeNullable[String]
-      .contramap(_.value)
+  def randomIdentifier: String = Random.alphanumeric.take(35).mkString
 
 }

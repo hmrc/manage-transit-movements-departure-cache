@@ -16,6 +16,7 @@
 
 package services
 
+import api.submission.Declaration
 import cats.implicits._
 import connectors.ApiConnector
 import models._
@@ -27,16 +28,21 @@ import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 
 class ApiService @Inject() (
-  apiConnector: ApiConnector
-) {
+  apiConnector: ApiConnector,
+  declaration: Declaration
+)(implicit ec: ExecutionContext) {
 
   def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
-    apiConnector.submitDeclaration(userAnswers)
+    apiConnector.submitDeclaration(declaration.transform(userAnswers, MovementReferenceNumber.Empty))
 
   def submitAmendment(userAnswers: UserAnswers, departureId: String)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
-    apiConnector.submitAmendment(userAnswers, departureId)
+    for {
+      mrn <- apiConnector.getMRN(departureId)
+      payload = declaration.transform(userAnswers, mrn)
+      result <- apiConnector.submitAmendment(departureId, payload)
+    } yield result
 
-  def isIE028DefinedForDeparture(lrn: String)(implicit hc: HeaderCarrier, ec: ExecutionContext): Future[Boolean] =
+  def isIE028DefinedForDeparture(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
     apiConnector
       .getDepartures()
       .flatMap {

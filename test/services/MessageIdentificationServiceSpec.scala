@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,21 +14,19 @@
  * limitations under the License.
  */
 
-package models
+package services
 
-import play.api.libs.json._
+import base.{AppWithDefaultMockFixtures, SpecBase}
 
-final case class MovementReferenceNumber(value: Option[String])
+class MessageIdentificationServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
-object MovementReferenceNumber {
+  private val service = app.injector.instanceOf[MessageIdentificationService]
 
-  val Empty: MovementReferenceNumber = MovementReferenceNumber(None)
-
-  implicit val reads: Reads[MovementReferenceNumber] = (__ \ "movementReferenceNumber").readNullable[String].map(MovementReferenceNumber(_))
-
-  implicit val writes: Writes[MovementReferenceNumber] =
-    (JsPath \ "movementReferenceNumber")
-      .writeNullable[String]
-      .contramap(_.value)
-
+  "randomIdentifier" must {
+    "generate a random string of 35 characters" in {
+      val result = service.randomIdentifier
+      result.length shouldBe 35
+      result.matches("^[a-zA-Z0-9]*$") shouldBe true
+    }
+  }
 }

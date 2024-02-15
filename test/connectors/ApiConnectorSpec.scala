@@ -19,288 +19,16 @@ package connectors
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import com.github.tomakehurst.wiremock.client.WireMock._
 import helper.WireMockServerHandler
-import models.{Departure, Departures, UserAnswers}
+import models.{Departure, Departures}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.mvc.Results.{BadRequest, InternalServerError}
 import play.api.test.Helpers._
 import uk.gov.hmrc.http.HttpResponse
 
+import scala.xml.NodeSeq
+
 class ApiConnectorSpec extends SpecBase with AppWithDefaultMockFixtures with WireMockServerHandler {
-
-  private val json: JsValue = Json.parse(s"""
-    |{
-    |  "_id" : "$uuid",
-    |  "lrn" : "$lrn",
-    |  "eoriNumber" : "$eoriNumber",
-    |  "isSubmitted": "notSubmitted",
-    |  "data" : {
-    |    "preTaskList" : {
-    |      "officeOfDeparture" : {
-    |        "id" : "XI000142",
-    |        "name" : "Belfast EPU",
-    |        "phoneNumber" : "+44 (0)02896 931537"
-    |      },
-    |      "procedureType" : "normal",
-    |      "declarationType" : {
-    |        "code" : "TIR"
-    |      },
-    |      "additionalDeclarationType" : {
-    |        "code" : "A"
-    |      },
-    |      "tirCarnetReference" : "1234567",
-    |      "securityDetailsType" : {
-    |        "code" : "1"
-    |      },
-    |      "detailsConfirmed" : true
-    |    },
-    |    "traderDetails" : {
-    |      "holderOfTransit" : {
-    |        "tirIdentificationYesNo" : true,
-    |        "tirIdentification" : "ABC/123/12345",
-    |        "name" : "Joe Blog",
-    |        "country" : {
-    |          "code" : "GB",
-    |          "description" : "United Kingdom"
-    |        },
-    |        "address" : {
-    |          "numberAndStreet" : "1 Church lane",
-    |          "city" : "Godrics Hollow",
-    |          "postalCode" : "BA1 0AA"
-    |        },
-    |        "addContact" : true,
-    |        "contact" : {
-    |          "name" : "John contact",
-    |          "telephoneNumber" : "+2112212112"
-    |        }
-    |      },
-    |      "actingAsRepresentative" : true,
-    |      "representative" : {
-    |        "eori" : "FR123123132",
-    |        "name" : "Marie Rep",
-    |        "capacity" : "indirect",
-    |        "telephoneNumber" : "+11 1111 1111"
-    |      },
-    |      "consignment" : {
-    |        "consignor" : {
-    |          "eoriYesNo" : true,
-    |          "eori" : "IT12312313",
-    |          "name" : "Pip Consignor",
-    |          "country" : {
-    |            "code" : "GB",
-    |            "description" : "United Kingdom"
-    |          },
-    |          "address" : {
-    |            "numberAndStreet" : "1 Merry Lane",
-    |            "city" : "Godrics Hollow",
-    |            "postalCode" : "CA1 9AA"
-    |          },
-    |          "addContact" : true,
-    |          "contact" : {
-    |            "name" : "Pip Contact",
-    |            "telephoneNumber" : "+123123123213"
-    |          }
-    |        },
-    |        "moreThanOneConsignee" : false,
-    |        "consignee" : {
-    |          "eoriYesNo" : true,
-    |          "eori" : "GE00101001",
-    |          "name" : "Simpson Blog Consignee",
-    |          "country" : {
-    |            "code" : "GB",
-    |            "description" : "United Kingdom"
-    |          },
-    |          "address" : {
-    |            "numberAndStreet" : "1 Merry Lane",
-    |            "city" : "Godrics Hollow",
-    |            "postalCode" : "CA1 9AA"
-    |          }
-    |        }
-    |      }
-    |    },
-    |    "routeDetails" : {
-    |      "routing" : {
-    |        "countryOfDestination" : {
-    |          "code" : "IT",
-    |          "description" : "Italy"
-    |        },
-    |        "officeOfDestination" : {
-    |          "id" : "IT018101",
-    |          "name" : "Aeroporto Bari - Palese",
-    |          "phoneNumber" : "0039 0805316196"
-    |        },
-    |        "bindingItinerary" : false,
-    |        "countriesOfRouting" : [
-    |          {
-    |            "countryOfRouting" : {
-    |              "code" : "AD",
-    |              "description" : "Andorra"
-    |            }
-    |          },
-    |          {
-    |            "countryOfRouting" : {
-    |              "code" : "AR",
-    |              "description" : "Argentina"
-    |            }
-    |          }
-    |        ]
-    |      },
-    |      "countriesInSecurityAgreement" : false,
-    |      "addLocationOfGoods" : true,
-    |      "locationOfGoods" : {
-    |        "typeOfLocation" : {
-    |          "type": "A",
-    |          "description": "Designated location"
-    |        },
-    |        "qualifierOfIdentification" : {
-    |          "qualifier": "V",
-    |          "description": "Customs office identifier"
-    |        },
-    |        "identifier" : {
-    |          "customsOffice" : {
-    |            "id" : "XI000142",
-    |            "name" : "Belfast EPU",
-    |            "phoneNumber" : "+44 (0)02896 931537"
-    |          }
-    |        }
-    |      },
-    |      "loadingAndUnloading" : {
-    |        "loading" : {
-    |          "addUnLocodeYesNo" : false,
-    |          "additionalInformation" : {
-    |            "country" : {
-    |              "code" : "GB",
-    |              "description" : "United Kingdom"
-    |            },
-    |            "location" : "London"
-    |          }
-    |        },
-    |        "unloading" : {
-    |          "addUnLocodeYesNo" : false,
-    |          "additionalInformation" : {
-    |            "country" : {
-    |              "code" : "GB",
-    |              "description" : "United Kingdom"
-    |            },
-    |            "location" : "London"
-    |          }
-    |        }
-    |      }
-    |    },
-    |    "guaranteeDetails" : [
-    |      {
-    |        "guaranteeType" : {
-    |          "code" : "B",
-    |          "description": "Guarantee for goods dispatched under TIR procedure"
-    |        }
-    |      }
-    |    ],
-    |    "transportDetails" : {
-    |      "preRequisites" : {
-    |        "sameUcrYesNo" : true,
-    |        "uniqueConsignmentReference" : "GB123456123456",
-    |        "countryOfDispatch" : {
-    |          "code" : "GB",
-    |          "description" : "United Kingdom"
-    |        },
-    |        "transportedToSameCountryYesNo" : true,
-    |        "itemsDestinationCountry" : {
-    |          "code" : "GB",
-    |          "description" : "United Kingdom"
-    |        },
-    |        "containerIndicator" : true
-    |      },
-    |      "inlandMode" : {
-    |        "code": "2",
-    |        "description": "Rail Transport"
-    |      },
-    |      "transportMeans" : {
-    |        "departure" : [
-    |          {
-    |            "identification" : {
-    |              "type": "21",
-    |              "description": "Train Number"
-    |            },
-    |            "meansIdentificationNumber" : "1234567",
-    |            "vehicleCountry" : {
-    |              "code" : "GB",
-    |              "desc" : "United Kingdom"
-    |            }
-    |          }
-    |        ],
-    |        "borderModeOfTransport" : {
-    |          "code": "4",
-    |          "description": "Air transport"
-    |        },
-    |        "active" : [
-    |          {
-    |            "identification" : {
-    |              "code": "41",
-    |              "description": "Registration Number of the Aircraft"
-    |            },
-    |            "identificationNumber" : "GB1234567",
-    |            "addNationalityYesNo" : true,
-    |            "nationality" : {
-    |              "code" : "GB",
-    |              "desc" : "United Kingdom"
-    |            },
-    |            "customsOfficeActiveBorder" : {
-    |              "id" : "IT018101",
-    |              "name" : "Aeroporto Bari - Palese",
-    |              "phoneNumber" : "0039 0805316196"
-    |            },
-    |            "conveyanceReferenceNumber" : "GB123456123456"
-    |          }
-    |        ]
-    |      },
-    |      "supplyChainActorYesNo" : false,
-    |      "addAuthorisationsYesNo" : true,
-    |      "authorisationsAndLimit" : {
-    |        "limit": {
-    |          "limitDate": "2023-01-01"
-    |        },
-    |        "authorisations" : [
-    |          {
-    |            "authorisationType" : {
-    |              "code": "C524",
-    |              "description": "TRD - Authorisation to use transit declaration with a reduced dataset (Column 9e, Annex A of Delegated Regulation (EU) 2015/2446)"
-    |            },
-    |            "authorisationReferenceNumber" : "TRD123"
-    |          }
-    |        ]
-    |      },
-    |      "carrierDetails" : {
-    |        "identificationNumber" : "GB123456123456",
-    |        "addContactYesNo" : true,
-    |        "contact" : {
-    |          "name" : "Carry",
-    |          "telephoneNumber" : "+88 888 888"
-    |        }
-    |      }
-    |    },
-    |    "documents" : {
-    |      "documents" : [
-    |        {
-    |          "type" : {
-    |            "type" : "Transport",
-    |            "code" : "235",
-    |            "description" : "Container list"
-    |          },
-    |          "details" : {
-    |            "documentReferenceNumber" : "transport1"
-    |          }
-    |        }
-    |      ]
-    |    },
-    |    "items" : []
-    |  },
-    |  "tasks" : {},
-    |  "createdAt" : "2022-09-05T15:58:44.188Z",
-    |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
-    |}
-    |""".stripMargin)
-
-  private lazy val uA: UserAnswers = json.as[UserAnswers]
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
@@ -323,11 +51,10 @@ class ApiConnectorSpec extends SpecBase with AppWithDefaultMockFixtures with Wir
     .toString()
     .stripMargin
 
-  private val uri = "/movements/departures"
-
   "ApiConnector" when {
 
     "getDepartures" must {
+      val url = "/movements/departures"
 
       val lrn1 = "3CnsTh79I7vtOy6"
       val lrn2 = "DEF456"
@@ -380,7 +107,7 @@ class ApiConnectorSpec extends SpecBase with AppWithDefaultMockFixtures with Wir
 
       "return Departures" in {
         server.stubFor(
-          get(urlEqualTo(s"/movements/departures"))
+          get(urlEqualTo(url))
             .willReturn(okJson(responseJson.toString()))
         )
 
@@ -396,26 +123,62 @@ class ApiConnectorSpec extends SpecBase with AppWithDefaultMockFixtures with Wir
     }
 
     "submitDeclaration is called" when {
+      val url = "/movements/departures"
+
+      val payload: NodeSeq =
+        <ncts:CC015C PhaseID="NCTS5.0" xmlns:ncts="http://ncts.dgtaxud.ec">
+          <foo>bar</foo>
+        </ncts:CC015C>
 
       "success" in {
-        server.stubFor(post(urlEqualTo(uri)).willReturn(okJson(expected)))
+        server.stubFor(post(urlEqualTo(url)).willReturn(okJson(expected)))
 
-        val res = await(connector.submitDeclaration(uA))
+        val res = await(connector.submitDeclaration(payload))
         res.toString shouldBe Right(HttpResponse(OK, expected)).toString
       }
 
       "bad request" in {
-        server.stubFor(post(urlEqualTo(uri)).willReturn(badRequest()))
+        server.stubFor(post(urlEqualTo(url)).willReturn(badRequest()))
 
-        val res = await(connector.submitDeclaration(uA))
+        val res = await(connector.submitDeclaration(payload))
         res shouldBe Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
       }
 
       "internal server error" in {
-        server.stubFor(post(urlEqualTo(uri)).willReturn(serverError()))
+        server.stubFor(post(urlEqualTo(url)).willReturn(serverError()))
 
-        val res = await(connector.submitDeclaration(uA))
+        val res = await(connector.submitDeclaration(payload))
         res shouldBe Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
+      }
+    }
+
+    "submitAmendment is called" when {
+      val url = s"/movements/departures/$departureId/messages"
+
+      val payload: NodeSeq =
+        <ncts:CC013C PhaseID="NCTS5.0" xmlns:ncts="http://ncts.dgtaxud.ec">
+          <foo>bar</foo>
+        </ncts:CC013C>
+
+      "success" in {
+        server.stubFor(post(urlEqualTo(url)).willReturn(okJson(expected)))
+
+        val res = await(connector.submitAmendment(departureId, payload))
+        res.toString shouldBe Right(HttpResponse(OK, expected)).toString
+      }
+
+      "bad request" in {
+        server.stubFor(post(urlEqualTo(url)).willReturn(badRequest()))
+
+        val res = await(connector.submitAmendment(departureId, payload))
+        res shouldBe Left(BadRequest("ApiConnector:submitAmendment: bad request"))
+      }
+
+      "internal server error" in {
+        server.stubFor(post(urlEqualTo(url)).willReturn(serverError()))
+
+        val res = await(connector.submitAmendment(departureId, payload))
+        res shouldBe Left(InternalServerError("ApiConnector:submitAmendment: something went wrong"))
       }
     }
   }

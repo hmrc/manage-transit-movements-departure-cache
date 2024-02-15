@@ -16,13 +16,17 @@
 
 package api.submission
 
-import generated.{CORRELATION_IDENTIFIERSequence, MESSAGESequence, MESSAGE_1Sequence, MESSAGE_TYPESequence, MessageTypes}
+import generated._
 import models.UserAnswers
 import play.api.libs.json.JsSuccess
+import services.{DateTimeService, MessageIdentificationService}
 
-import java.time.LocalDateTime
+import javax.inject.Inject
 
-object Header extends {
+class Header @Inject() (
+  dateTimeService: DateTimeService,
+  messageIdentificationService: MessageIdentificationService
+) extends {
 
   def message(uA: UserAnswers, messageType: MessageTypes): MESSAGESequence =
     uA.metadata.data.validate((preTaskListPath \ "officeOfDeparture" \ "id").read[String].map(_.take(2))) match {
@@ -31,12 +35,14 @@ object Header extends {
           messageSender = uA.eoriNumber,
           messagE_1Sequence2 = MESSAGE_1Sequence(
             messageRecipient = s"NTA.$officeOfDepartureCountryCode",
-            preparationDateAndTime = LocalDateTime.now(),
-            messageIdentification = messageType.toString
+            preparationDateAndTime = dateTimeService.now,
+            messageIdentification = messageIdentificationService.randomIdentifier
           ),
-          messagE_TYPESequence3 = MESSAGE_TYPESequence(messageType),
+          messagE_TYPESequence3 = MESSAGE_TYPESequence(
+            messageType = messageType
+          ),
           correlatioN_IDENTIFIERSequence4 = CORRELATION_IDENTIFIERSequence(
-            correlationIdentifier = None // TODO - What should this be?
+            correlationIdentifier = None
           )
         )
       case _ => throw new Exception("Json did not contain office of departure ID")
