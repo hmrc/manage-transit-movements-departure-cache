@@ -20,79 +20,81 @@ import com.github.dwickern.macros.NameOf._
 import config.AppConfig
 import models.{DepartureMessageTypes, Departures, MovementReferenceNumber}
 import play.api.Logging
-import play.api.http.HeaderNames
+import play.api.http.HeaderNames._
 import play.api.http.Status._
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError}
 import uk.gov.hmrc.http.HttpReads.Implicits._
-import uk.gov.hmrc.http.{HeaderCarrier, HttpClient, HttpErrorFunctions, HttpReads, HttpResponse}
+import uk.gov.hmrc.http.client.HttpClientV2
+import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpResponse, StringContextOps}
 
+import java.net.URL
 import javax.inject.Inject
 import scala.concurrent.{ExecutionContext, Future}
 import scala.xml.NodeSeq
 
-class ApiConnector @Inject() (httpClient: HttpClient)(implicit ec: ExecutionContext, appConfig: AppConfig) extends HttpErrorFunctions with Logging {
+class ApiConnector @Inject() (http: HttpClientV2)(implicit ec: ExecutionContext, appConfig: AppConfig) extends HttpErrorFunctions with Logging {
 
-  private def headers(implicit hc: HeaderCarrier): HeaderCarrier = hc.withExtraHeaders(("Accept", "application/vnd.hmrc.2.0+json"))
+  private def acceptHeader: (String, String) = (ACCEPT, "application/vnd.hmrc.2.0+json")
 
   def getDepartures()(implicit hc: HeaderCarrier): Future[Departures] = {
-    val url = s"${appConfig.apiUrl}/movements/departures"
-    httpClient.GET[Departures](url)(implicitly, headers, ec)
+    val url = url"${appConfig.apiUrl}/movements/departures"
+    http
+      .get(url)
+      .setHeader(acceptHeader)
+      .execute[Departures]
   }
 
   def getMRN(departureId: String)(implicit hc: HeaderCarrier): Future[MovementReferenceNumber] = {
-    val url = s"${appConfig.apiUrl}/movements/departures/$departureId"
-    httpClient.GET[MovementReferenceNumber](url)(HttpReads[MovementReferenceNumber], headers, ec)
+    val url = url"${appConfig.apiUrl}/movements/departures/$departureId"
+    http
+      .get(url)
+      .setHeader(acceptHeader)
+      .execute[MovementReferenceNumber]
   }
 
-  def getMessageTypesByPath(
-    path: String
-  )(implicit ec: ExecutionContext, hc: HeaderCarrier, HttpReads: HttpReads[DepartureMessageTypes]): Future[DepartureMessageTypes] = {
-    val url = s"${appConfig.apiUrl}/$path"
-    httpClient.GET[DepartureMessageTypes](url)(implicitly, headers, ec)
+  def getMessages(departureId: String)(implicit hc: HeaderCarrier): Future[DepartureMessageTypes] = {
+    val url = url"${appConfig.apiUrl}/movements/departures/$departureId/messages"
+    http
+      .get(url)
+      .setHeader(acceptHeader)
+      .execute[DepartureMessageTypes]
   }
 
-  def submitAmendment(departureId: String, payload: NodeSeq)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
-    val url = s"${appConfig.apiUrl}/movements/departures/$departureId/messages"
-    val requestHeaders = Seq(
-      HeaderNames.ACCEPT       -> "application/vnd.hmrc.2.0+json",
-      HeaderNames.CONTENT_TYPE -> "application/xml"
-    )
-
-    getHttpResponse(url, requestHeaders, payload, HttpMethodName(nameOf(submitAmendment _)))
+  def submitAmendment(departureId: String, xml: NodeSeq)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
+    val url = url"${appConfig.apiUrl}/movements/departures/$departureId/messages"
+    getHttpResponse(url, xml, HttpMethodName(nameOf(submitAmendment _)))
   }
 
-  def submitDeclaration(payload: NodeSeq)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
-    val url = s"${appConfig.apiUrl}/movements/departures"
-    val requestHeaders = Seq(
-      HeaderNames.ACCEPT       -> "application/vnd.hmrc.2.0+json",
-      HeaderNames.CONTENT_TYPE -> "application/xml"
-    )
-
-    getHttpResponse(url, requestHeaders, payload, HttpMethodName(nameOf(submitDeclaration _)))
+  def submitDeclaration(xml: NodeSeq)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
+    val url = url"${appConfig.apiUrl}/movements/departures"
+    getHttpResponse(url, xml, HttpMethodName(nameOf(submitDeclaration _)))
   }
 
   private def getHttpResponse(
-    declarationUrl: String,
-    requestHeaders: Seq[(String, String)],
-    payload: NodeSeq,
+    url: URL,
+    xml: NodeSeq,
     httpMethod: HttpMethodName
   )(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
-    httpClient
-      .POSTString[HttpResponse](declarationUrl, payload.toString(), requestHeaders)
+    http
+      .post(url)
+      .setHeader(acceptHeader)
+      .setHeader(CONTENT_TYPE -> "application/xml")
+      .withBody(xml)
+      .execute[HttpResponse]
       .map {
         response =>
           response.status match {
             case x if is2xx(x) =>
-              logger.debug(s"ApiConnector:${httpMethod.name}: success: ${response.status}-${response.body}")
               Right(response)
             case BAD_REQUEST =>
-              logger.info(s"ApiConnector:${httpMethod.name}: bad request: ${response.body}")
+              logger.info(s"ApiConnector:${httpMethod.name}: bad request")
               Left(BadRequest(s"ApiConnector:${httpMethod.name}: bad request"))
-            case _ =>
-              logger.error(s"ApiConnector:${httpMethod.name}: something went wrong: ${response.body}")
+            case e =>
+              logger.error(s"ApiConnector:${httpMethod.name}: something went wrong: $e")
               Left(InternalServerError(s"ApiConnector:${httpMethod.name}: something went wrong"))
           }
       }
+
   private case class HttpMethodName(name: String)
 }

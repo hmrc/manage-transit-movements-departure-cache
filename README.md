@@ -227,7 +227,7 @@
 
 # Testing the Service
 * Run the unit tests by running `sbt test` in the root directory
-* Run the integration tests (requires `MongoDB`) by running `sbt IntegrationTest/test` in the root directory
+* Run the integration tests (requires `MongoDB`) by running `sbt it/test` in the root directory
 
 ### License
 

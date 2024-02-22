@@ -25,10 +25,4 @@ object MovementReferenceNumber {
   val Empty: MovementReferenceNumber = MovementReferenceNumber(None)
 
   implicit val reads: Reads[MovementReferenceNumber] = (__ \ "movementReferenceNumber").readNullable[String].map(MovementReferenceNumber(_))
-
-  implicit val writes: Writes[MovementReferenceNumber] =
-    (JsPath \ "movementReferenceNumber")
-      .writeNullable[String]
-      .contramap(_.value)
-
 }

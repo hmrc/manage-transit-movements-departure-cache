@@ -49,30 +49,6 @@ class MovementReferenceNumberSpec extends AnyFreeSpec with Generators with Match
                |}
                |""".stripMargin)
       json.as[MovementReferenceNumber] mustEqual mrn
-
-    }
-
-    "must serialise" in {
-      forAll(arbitrary[MovementReferenceNumber]) {
-        mrn =>
-          val jsonExpected: JsValue = Json.parse(s"""
-               |{
-               |    "movementReferenceNumber" : "${mrn.value.get}"
-               |}
-               |""".stripMargin)
-          Json.toJson(mrn) mustEqual jsonExpected
-      }
-    }
-
-    "must serialise when empty" in {
-      val mrn                   = MovementReferenceNumber(None)
-      val jsonExpected: JsValue = Json.parse(s"""
-               |{
-               |}
-               |""".stripMargin)
-
-      Json.toJson(mrn) mustEqual jsonExpected
-
     }
   }
 }
