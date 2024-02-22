@@ -20,7 +20,7 @@ import com.github.dwickern.macros.NameOf._
 import config.AppConfig
 import models.{DepartureMessageTypes, Departures, MovementReferenceNumber}
 import play.api.Logging
-import play.api.http.HeaderNames.CONTENT_TYPE
+import play.api.http.HeaderNames._
 import play.api.http.Status._
 import play.api.mvc.Result
 import play.api.mvc.Results.{BadRequest, InternalServerError}
@@ -35,7 +35,7 @@ import scala.xml.NodeSeq
 
 class ApiConnector @Inject() (http: HttpClientV2)(implicit ec: ExecutionContext, appConfig: AppConfig) extends HttpErrorFunctions with Logging {
 
-  private def acceptHeader: (String, String) = ("Accept", "application/vnd.hmrc.2.0+json")
+  private def acceptHeader: (String, String) = (ACCEPT, "application/vnd.hmrc.2.0+json")
 
   def getDepartures()(implicit hc: HeaderCarrier): Future[Departures] = {
     val url = url"${appConfig.apiUrl}/movements/departures"
