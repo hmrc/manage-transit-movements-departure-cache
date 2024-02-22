@@ -16,12 +16,12 @@
 
 package itbase
 
-import models.UserAnswers
-import repositories.CacheRepository
+import models.Lock
+import repositories.DefaultLockRepository
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
-trait CacheRepositorySpecBase extends ItSpecBase with DefaultPlayMongoRepositorySupport[UserAnswers] {
+trait LockRepositorySpecBase extends RepositorySpecBase with DefaultPlayMongoRepositorySupport[Lock] {
 
-  override protected val repository: CacheRepository =
-    app.injector.instanceOf[CacheRepository]
+  override protected val repository: DefaultLockRepository =
+    app.injector.instanceOf[DefaultLockRepository]
 }

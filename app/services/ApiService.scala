@@ -21,7 +21,6 @@ import cats.implicits._
 import connectors.ApiConnector
 import models._
 import play.api.mvc.Result
-import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.Inject
@@ -48,7 +47,7 @@ class ApiService @Inject() (
       .flatMap {
         _.departures.find(_.localReferenceNumber == lrn).traverse {
           departure =>
-            apiConnector.getMessageTypesByPath(departure.path).map {
+            apiConnector.getMessages(departure.id).map {
               _.messageTypes.exists(_.messageType == "IE028")
             }
         }

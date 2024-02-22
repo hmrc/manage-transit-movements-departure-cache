@@ -97,15 +97,14 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
     "must return true" when {
       "IE028 is defined" in {
 
-        val departure      = Departures(Seq(Departure("lrn", "test/path")))
+        val departure      = Departures(Seq(Departure("departureId", "lrn")))
         val departureTypes = DepartureMessageTypes(Seq(DepartureMessageType("IE028")))
 
         when(mockApiConnector.getDepartures()(any())).thenReturn(Future.successful(departure))
-        when(mockApiConnector.getMessageTypesByPath(any())(any(), any(), any())).thenReturn(Future.successful(departureTypes))
+        when(mockApiConnector.getMessages(any())(any())).thenReturn(Future.successful(departureTypes))
 
         await(service.isIE028DefinedForDeparture(lrn)) shouldBe true
       }
-
     }
 
     "must return false" when {
@@ -125,7 +124,7 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
         val departureTypes = DepartureMessageTypes(Seq(DepartureMessageType("IE015")))
 
         when(mockApiConnector.getDepartures()(any())).thenReturn(Future.successful(departure))
-        when(mockApiConnector.getMessageTypesByPath(any())(any(), any(), any())).thenReturn(Future.successful(departureTypes))
+        when(mockApiConnector.getMessages(any())(any())).thenReturn(Future.successful(departureTypes))
 
         await(service.isIE028DefinedForDeparture(lrn)) shouldBe false
       }

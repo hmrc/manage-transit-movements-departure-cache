@@ -10,7 +10,8 @@ object AppDependencies {
     "uk.gov.hmrc.mongo"       %% "hmrc-mongo-play-30"         % mongoVersion,
     "org.typelevel"           %% "cats-core"                  % "2.9.0",
     "com.github.dwickern"     %% "scala-nameof"               % "4.0.0" % "provided",
-    "uk.gov.hmrc"             %% "crypto-json-play-30"        % "7.6.0"
+    "uk.gov.hmrc"             %% "crypto-json-play-30"        % "7.6.0",
+    "javax.xml.bind"           % "jaxb-api"                   % "2.3.1"
   )
 
   val test: Seq[ModuleID] = Seq(
@@ -22,5 +23,5 @@ object AppDependencies {
     "org.scalacheck"          %% "scalacheck"                 % "1.17.0",
     "org.scalatestplus"       %% "scalacheck-1-17"            % "3.2.15.0",
     "com.vladsch.flexmark"     % "flexmark-all"               % "0.62.2"
-  ).map(_ % "test, it")
+  ).map(_ % "test")
 }
