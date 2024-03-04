@@ -19,9 +19,11 @@ package services
 import api.submission.Declaration
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import connectors.ApiConnector
+import generators.Generators
 import models._
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito._
+import org.scalacheck.Arbitrary.arbitrary
 import play.api.http.Status.OK
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -31,7 +33,7 @@ import uk.gov.hmrc.http.HttpResponse
 import scala.concurrent.Future
 import scala.xml.NodeSeq
 
-class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
+class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Generators {
 
   private lazy val mockApiConnector = mock[ApiConnector]
   private lazy val mockDeclaration  = mock[Declaration]
@@ -56,7 +58,7 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
     reset(mockApiConnector)
     reset(mockDeclaration)
 
-    when(mockDeclaration.transform(any(), any()))
+    when(mockDeclaration.transform(any(), any(), any()))
       .thenReturn(xml)
   }
 
@@ -64,12 +66,14 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "submitDeclaration" must {
     "call connector" in {
-      val userAnswers    = emptyUserAnswers
+      val userAnswers = emptyUserAnswers
+      val phase       = arbitrary[Phase].sample.value
+
       val expectedResult = Right(HttpResponse(OK, ""))
 
       when(mockApiConnector.submitDeclaration(any())(any())).thenReturn(Future.successful(expectedResult))
 
-      val result = service.submitDeclaration(userAnswers).futureValue
+      val result = service.submitDeclaration(userAnswers, phase).futureValue
       result shouldBe expectedResult
 
       verify(mockApiConnector).submitDeclaration(eqTo(xml))(any())
@@ -78,14 +82,16 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "submitAmend" must {
     "call connector" in {
-      val departureId    = "departureId123"
-      val userAnswers    = emptyUserAnswersWithDepartureId
+      val userAnswers = emptyUserAnswersWithDepartureId
+      val departureId = "departureId123"
+      val phase       = arbitrary[Phase].sample.value
+
       val expectedResult = Right(HttpResponse(OK, ""))
 
       when(mockApiConnector.getMRN(any())(any())).thenReturn(Future.successful(mrn))
       when(mockApiConnector.submitAmendment(any(), any())(any())).thenReturn(Future.successful(expectedResult))
 
-      val result = service.submitAmendment(userAnswers, departureId).futureValue
+      val result = service.submitAmendment(userAnswers, departureId, phase).futureValue
       result shouldBe expectedResult
 
       verify(mockApiConnector).getMRN(eqTo(departureId))(any())

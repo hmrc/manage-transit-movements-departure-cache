@@ -444,7 +444,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = Some(mrn), flag = false)
+          val converted = TransitOperation.transformIE013(uA, mrn = Some(mrn), amendmentTypeFlag = false)
 
           converted shouldBe expected
         }
@@ -517,7 +517,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = None, flag = false)
+          val converted = TransitOperation.transformIE013(uA, mrn = None, amendmentTypeFlag = false)
 
           converted shouldBe expected
         }
@@ -592,7 +592,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = Some(mrn), flag = true)
+          val converted = TransitOperation.transformIE013(uA, mrn = Some(mrn), amendmentTypeFlag = true)
 
           converted shouldBe expected
         }
@@ -667,7 +667,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = Some(mrn), flag = false)
+          val converted = TransitOperation.transformIE013(uA, mrn = Some(mrn), amendmentTypeFlag = false)
 
           converted shouldBe expected
         }
@@ -742,7 +742,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = None, flag = false)
+          val converted = TransitOperation.transformIE013(uA, mrn = None, amendmentTypeFlag = false)
 
           converted shouldBe expected
         }
@@ -812,7 +812,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = None, flag = false)
+          val converted = TransitOperation.transformIE013(uA, mrn = None, amendmentTypeFlag = false)
 
           converted shouldBe expected
         }
@@ -882,7 +882,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = None, flag = false)
+          val converted = TransitOperation.transformIE013(uA, mrn = None, amendmentTypeFlag = false)
 
           converted shouldBe expected
         }
@@ -952,7 +952,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = None, flag = false)
+          val converted = TransitOperation.transformIE013(uA, mrn = None, amendmentTypeFlag = false)
 
           converted shouldBe expected
         }
@@ -1016,7 +1016,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = None
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = None, flag = false)
+          val converted = TransitOperation.transformIE013(uA, mrn = None, amendmentTypeFlag = false)
 
           converted shouldBe expected
         }

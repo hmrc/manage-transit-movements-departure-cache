@@ -25,13 +25,13 @@ object TransitOperation {
   def transform(uA: UserAnswers): TransitOperationType06 =
     uA.metadata.data.as[TransitOperationType06](transitOperationType06.reads(uA.lrn))
 
-  def transformIE013(uA: UserAnswers, mrn: Option[String], flag: Boolean): TransitOperationType04 =
-    uA.metadata.data.as[TransitOperationType04](transitOperationType04.reads(uA.lrn, mrn, flag))
+  def transformIE013(uA: UserAnswers, mrn: Option[String], amendmentTypeFlag: Boolean): TransitOperationType04 =
+    uA.metadata.data.as[TransitOperationType04](transitOperationType04.reads(uA.lrn, mrn, amendmentTypeFlag))
 }
 
 object transitOperationType04 {
 
-  def reads(lrn: String, mrn: Option[String], flag: Boolean): Reads[TransitOperationType04] =
+  def reads(lrn: String, mrn: Option[String], amendmentTypeFlag: Boolean): Reads[TransitOperationType04] =
     CommonTransitOperation.reads.map(
       readsData =>
         TransitOperationType04(
@@ -46,7 +46,7 @@ object transitOperationType04 {
           specificCircumstanceIndicator = readsData.specificCircumstanceIndicator,
           communicationLanguageAtDeparture = None, // TODO - do we collect this?
           bindingItinerary = readsData.bindingItinerary,
-          amendmentTypeFlag = flag,
+          amendmentTypeFlag = amendmentTypeFlag,
           limitDate = readsData.limitDate
         )
     )

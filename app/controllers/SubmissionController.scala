@@ -18,10 +18,9 @@ package controllers
 
 import cats.data.OptionT
 import cats.implicits._
-import controllers.actions.AuthenticateActionProvider
+import controllers.actions.{AuthenticateActionProvider, VersionedAction}
 import models.AuditType._
 import models.SubmissionState._
-import models.request.AuthenticatedRequest
 import models.{AuditType, SubmissionState, UserAnswers}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
@@ -38,6 +37,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class SubmissionController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
+  getVersion: VersionedAction,
   apiService: ApiService,
   cacheRepository: CacheRepository,
   auditService: AuditService
@@ -45,29 +45,30 @@ class SubmissionController @Inject() (
     extends BackendController(cc)
     with Logging {
 
-  def post(): Action[JsValue] = authenticate().async(parse.json) {
-    implicit request =>
-      request.body.validate[String] match {
-        case JsSuccess(lrn, _) =>
-          val result = for {
-            userAnswers <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
-            result <- OptionT {
-              apiService
-                .submitDeclaration(userAnswers)
-                .flatMap(responseToResult(userAnswers, _, None, Submitted, DeclarationData))
-            }
-          } yield result
+  def post(): Action[JsValue] =
+    (authenticate() andThen getVersion).async(parse.json) {
+      implicit request =>
+        request.body.validate[String] match {
+          case JsSuccess(lrn, _) =>
+            val result = for {
+              userAnswers <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
+              result <- OptionT {
+                apiService
+                  .submitDeclaration(userAnswers, request.phase)
+                  .flatMap(responseToResult(userAnswers, _, None, Submitted, DeclarationData))
+              }
+            } yield result
 
-          result.value.map(_.getOrElse(InternalServerError))
-        case JsError(errors) =>
-          logger.warn(s"Failed to validate request body as String: $errors")
-          Future.successful(BadRequest)
-      }
-  }
+            result.value.map(_.getOrElse(InternalServerError))
+          case JsError(errors) =>
+            logger.warn(s"Failed to validate request body as String: $errors")
+            Future.successful(BadRequest)
+        }
+    }
 
   def postAmendment(): Action[JsValue] =
-    authenticate().async(parse.json) {
-      implicit request: AuthenticatedRequest[JsValue] =>
+    (authenticate() andThen getVersion).async(parse.json) {
+      implicit request =>
         request.body.validate[String] match {
           case JsSuccess(lrn, _) =>
             val result = for {
@@ -75,7 +76,7 @@ class SubmissionController @Inject() (
               departureId <- OptionT.fromOption[Future](userAnswers.departureId)
               result <- OptionT {
                 apiService
-                  .submitAmendment(userAnswers, departureId)
+                  .submitAmendment(userAnswers, departureId, request.phase)
                   .flatMap(responseToResult(userAnswers, _, Some(departureId), Amendment, DeclarationAmendment))
               }
             } yield result

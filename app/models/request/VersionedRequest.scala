@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,7 +16,10 @@
 
 package models.request
 
-import models.Lock
+import models.Phase
 import play.api.mvc.WrappedRequest
 
-case class LockRequest[A](authenticatedRequest: AuthenticatedRequest[A], lock: Lock) extends WrappedRequest[A](authenticatedRequest)
+case class VersionedRequest[A](request: AuthenticatedRequest[A], phase: Phase) extends WrappedRequest[A](request) {
+
+  val eoriNumber: String = request.eoriNumber
+}
