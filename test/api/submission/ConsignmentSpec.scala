@@ -619,7 +619,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         val uA: UserAnswers = json.as[UserAnswers]
 
-        val converted: ConsignmentType20 = Consignment.transform(uA, phase)
+        val converted: ConsignmentType20 = Consignment.transform(uA, Phase.PostTransition)
 
         converted.countryOfDispatch shouldBe Some("FR")
         converted.countryOfDestination shouldBe Some("IT")
@@ -1529,7 +1529,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         val uA: UserAnswers = json.as[UserAnswers]
 
-        val converted: ConsignmentType20 = Consignment.transform(uA, phase)
+        val converted: ConsignmentType20 = Consignment.transform(uA, Phase.PostTransition)
 
         converted.countryOfDispatch shouldBe Some("FR")
         converted.countryOfDestination shouldBe Some("IT")
