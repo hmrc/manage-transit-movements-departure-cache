@@ -20,13 +20,16 @@ import api.submission.Consignment.RichConsignmentType20
 import api.submission.consignmentType20.{activeBorderTransportMeansReads, transportEquipmentReads}
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import generated._
-import models.UserAnswers
+import generators.Generators
+import models.{Phase, UserAnswers}
+import org.scalacheck.Arbitrary.arbitrary
 import play.api.libs.json.{JsValue, Json}
 
 import scala.collection.immutable.Seq
-import org.scalacheck.Arbitrary.arbitrary
 
-class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
+class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Generators {
+
+  private val phase = arbitrary[Phase].sample.value
 
   "Consignment" when {
 
@@ -616,7 +619,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val uA: UserAnswers = json.as[UserAnswers]
 
-        val converted: ConsignmentType20 = Consignment.transform(uA)
+        val converted: ConsignmentType20 = Consignment.transform(uA, Phase.PostTransition)
 
         converted.countryOfDispatch shouldBe Some("FR")
         converted.countryOfDestination shouldBe Some("IT")
@@ -1526,7 +1529,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val uA: UserAnswers = json.as[UserAnswers]
 
-        val converted: ConsignmentType20 = Consignment.transform(uA)
+        val converted: ConsignmentType20 = Consignment.transform(uA, Phase.PostTransition)
 
         converted.countryOfDispatch shouldBe Some("FR")
         converted.countryOfDestination shouldBe Some("IT")
@@ -1928,7 +1931,6 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
     "postProcess is called" when {
 
       "rollUpTransportCharges" when {
-        val isTransition = arbitrary[Boolean].sample.value
 
         "every item has the same transport charges" when {
           "consignment transport charges undefined" must {
@@ -1965,7 +1967,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                 )
               )
 
-              val result = consignment.postProcess(isTransition)
+              val result = consignment.postProcess(phase)
 
               result shouldBe ConsignmentType20(
                 grossMass = BigDecimal(1),
@@ -2040,7 +2042,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                   )
                 )
 
-                val result = consignment.postProcess(isTransition)
+                val result = consignment.postProcess(phase)
 
                 result shouldBe ConsignmentType20(
                   grossMass = BigDecimal(1),
@@ -2112,7 +2114,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                   )
                 )
 
-                val result = consignment.postProcess(isTransition)
+                val result = consignment.postProcess(phase)
 
                 result shouldBe consignment
               }
@@ -2162,7 +2164,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess(isTransition)
+            val result = consignment.postProcess(phase)
 
             result shouldBe consignment
           }
@@ -2212,7 +2214,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess(isTransition)
+            val result = consignment.postProcess(phase)
 
             result shouldBe consignment
           }
@@ -2220,7 +2222,6 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
       }
 
       "rollUpUCR" when {
-        val isTransition = arbitrary[Boolean].sample.value
 
         "every item has the same UCR" must {
           "roll up UCR to consignment level and remove them from each item" in {
@@ -2252,7 +2253,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess(isTransition)
+            val result = consignment.postProcess(phase)
 
             result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
@@ -2323,7 +2324,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess(isTransition)
+            val result = consignment.postProcess(phase)
 
             result shouldBe consignment
           }
@@ -2367,7 +2368,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess(isTransition)
+            val result = consignment.postProcess(phase)
 
             result shouldBe consignment
           }
@@ -2375,7 +2376,6 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
       }
 
       "rollUpCountryOfDispatch" when {
-        val isTransition = arbitrary[Boolean].sample.value
 
         "every item has the same country of dispatch" must {
           "roll up country of dispatch to consignment level and remove them from each item" in {
@@ -2407,7 +2407,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess(isTransition)
+            val result = consignment.postProcess(phase)
 
             result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
@@ -2478,7 +2478,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess(isTransition)
+            val result = consignment.postProcess(phase)
 
             result shouldBe consignment
           }
@@ -2522,7 +2522,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess(isTransition)
+            val result = consignment.postProcess(phase)
 
             result shouldBe consignment
           }
@@ -2530,7 +2530,6 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
       }
 
       "rollUpCountryOfDestination" when {
-        val isTransition = arbitrary[Boolean].sample.value
 
         "every item has the same country of destination" must {
           "roll up country of destination to consignment level and remove them from each item" in {
@@ -2562,7 +2561,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess(isTransition)
+            val result = consignment.postProcess(phase)
 
             result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
@@ -2633,7 +2632,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess(isTransition)
+            val result = consignment.postProcess(phase)
 
             result shouldBe consignment
           }
@@ -2677,7 +2676,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val result = consignment.postProcess(isTransition)
+            val result = consignment.postProcess(phase)
 
             result shouldBe consignment
           }
@@ -2735,7 +2734,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                 )
               )
 
-              val result = consignment.postProcess(false)
+              val result = consignment.postProcess(Phase.PostTransition)
 
               result shouldBe ConsignmentType20(
                 grossMass = BigDecimal(1),
@@ -2830,7 +2829,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                 )
               )
 
-              val result = consignment.postProcess(false)
+              val result = consignment.postProcess(Phase.PostTransition)
 
               result shouldBe consignment
             }
@@ -2892,7 +2891,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                 )
               )
 
-              val result = consignment.postProcess(false)
+              val result = consignment.postProcess(Phase.PostTransition)
 
               result shouldBe consignment
             }
@@ -2912,7 +2911,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                 )
               )
 
-              val result = consignment.postProcess(false)
+              val result = consignment.postProcess(Phase.PostTransition)
 
               result shouldBe consignment
             }
@@ -2967,7 +2966,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                 )
               )
 
-              val result = consignment.postProcess(true)
+              val result = consignment.postProcess(Phase.Transition)
 
               result shouldBe consignment
             }
@@ -3026,7 +3025,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                 )
               )
 
-              val result = consignment.postProcess(false)
+              val result = consignment.postProcess(Phase.PostTransition)
 
               result shouldBe ConsignmentType20(
                 grossMass = BigDecimal(1),
@@ -3121,7 +3120,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                 )
               )
 
-              val result = consignment.postProcess(false)
+              val result = consignment.postProcess(Phase.PostTransition)
 
               result shouldBe consignment
             }
@@ -3183,7 +3182,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                 )
               )
 
-              val result = consignment.postProcess(false)
+              val result = consignment.postProcess(Phase.PostTransition)
 
               result shouldBe consignment
             }
@@ -3203,7 +3202,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                 )
               )
 
-              val result = consignment.postProcess(false)
+              val result = consignment.postProcess(Phase.PostTransition)
 
               result shouldBe consignment
             }
@@ -3258,7 +3257,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures {
                 )
               )
 
-              val result = consignment.postProcess(true)
+              val result = consignment.postProcess(Phase.Transition)
 
               result shouldBe consignment
             }

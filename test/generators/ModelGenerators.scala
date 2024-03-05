@@ -16,11 +16,18 @@
 
 package generators
 
-import models.{MovementReferenceNumber, SubmissionState, XPath}
+import models.{MovementReferenceNumber, Phase, SubmissionState, XPath}
 import org.scalacheck.Gen.{choose, listOfN}
 import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
+
+  implicit lazy val arbitraryPhase: Arbitrary[Phase] =
+    Arbitrary {
+      for {
+        phase <- Gen.oneOf(Phase.Transition, Phase.PostTransition)
+      } yield phase
+    }
 
   def stringsWithMaxLength(maxLength: Int, charGen: Gen[Char] = Gen.alphaNumChar): Gen[String] =
     for {

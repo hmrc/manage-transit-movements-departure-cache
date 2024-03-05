@@ -16,12 +16,7 @@
 
 package base
 
-import controllers.actions.{
-  AuthenticateActionProvider,
-  AuthenticateAndLockActionProvider,
-  FakeAuthenticateActionProvider,
-  FakeAuthenticateAndLockActionProvider
-}
+import controllers.actions._
 import org.mockito.Mockito.reset
 import org.scalatest.{BeforeAndAfterEach, TestSuite}
 import play.api.Application
@@ -51,10 +46,8 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach {
       .overrides(
         bind[AuthenticateActionProvider].to[FakeAuthenticateActionProvider],
         bind[AuthenticateAndLockActionProvider].to[FakeAuthenticateAndLockActionProvider],
+        bind[VersionedAction].to[FakeVersionedAction],
         bind[CacheRepository].toInstance(mockCacheRepository),
         bind[DefaultLockRepository].toInstance(mockLockRepository)
-      )
-      .configure(
-        "isTransitionEnabled" -> false
       )
 }

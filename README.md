@@ -37,27 +37,27 @@
   "totalMovements": 2,
   "totalMatchingMovements": 2, 
   "userAnswers": [
-      {
-        "lrn": "AB123",
-        "_links": {
-          "self": {
-            "href": "/manage-transit-movements-departure-cache/user-answers/AB123"
+    {
+      "lrn": "AB123",
+      "_links": {
+        "self": {
+          "href": "/manage-transit-movements-departure-cache/user-answers/AB123"
         }
       },
       "createdAt": "2023-01-26T10:32:15.648",
       "lastUpdated": "2023-01-27T08:43:17.064",
       "_id": "27e687a9-4544-4e22-937e-74e699d855f8"
-      },
-      {
-        "lrn": "CD123",
-        "_links": {
+    },
+    {
+      "lrn": "CD123",
+      "_links": {
         "self": {
           "href": "/manage-transit-movements-departure-cache/user-answers/CD123"
-      }
-    },
-    "createdAt": "2023-01-26T10:32:36.96",
-    "lastUpdated": "2023-01-26T10:32:41.377",
-    "_id": "750f1f92-6c61-4a3b-ad3e-95d8c7418eb4"
+        }
+      },
+      "createdAt": "2023-01-26T10:32:36.96",
+      "lastUpdated": "2023-01-26T10:32:41.377",
+      "_id": "750f1f92-6c61-4a3b-ad3e-95d8c7418eb4"
     }
   ]
 }
@@ -131,7 +131,7 @@
 ### Unsuccessful responses (with possible causes)
 
 #### 400 BAD_REQUEST
-* Request body could not be validated as a `UserAnswers'
+* Request body could not be validated as a `UserAnswers`
 
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
@@ -160,7 +160,7 @@
 ### Unsuccessful responses (with possible causes)
 
 #### 400 BAD_REQUEST
-* Request body could not be validated as a `String'
+* Request body could not be validated as a `String`
 
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
@@ -216,6 +216,68 @@
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
   * a valid `String` request body representing the LRN
 * Then, for the given local reference number in the url, it is checked against the API to see if that local reference number exists and returns the result as a boolean.
+
+---
+
+##  `POST /declaration/submit`
+
+### Successful response
+
+#### 200 OK
+
+* A call is made to the `POST` endpoint with:
+  * a valid bearer token
+  * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
+  * a valid `String` request body representing the LRN
+  * an `Accept` header with either:
+    * `application/vnd.hmrc.transition+json` for transition rules
+    * `application/vnd.hmrc.final+json` for final rules
+* Then, an IE015 gets successfully submitted to the API
+
+### Unsuccessful responses (with possible causes)
+
+#### 400 BAD_REQUEST
+* Request body could not be validated as a `String`
+
+#### 401 UNAUTHORIZED
+* A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
+
+#### 403 FORBIDDEN
+* User has insufficient enrolments
+
+#### 500 INTERNAL_SERVER_ERROR
+* An error occurred
+
+---
+
+##  `POST /declaration/submit-amendment`
+
+### Successful response
+
+#### 200 OK
+
+* A call is made to the `POST` endpoint with:
+  * a valid bearer token
+  * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
+  * a valid `String` request body representing the LRN
+  * an `Accept` header with either:
+    * `application/vnd.hmrc.transition+json` for transition rules
+    * `application/vnd.hmrc.final+json` for final rules
+* Then, an IE013 gets successfully submitted to the API
+
+### Unsuccessful responses (with possible causes)
+
+#### 400 BAD_REQUEST
+* Request body could not be validated as a `String`
+
+#### 401 UNAUTHORIZED
+* A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
+
+#### 403 FORBIDDEN
+* User has insufficient enrolments
+
+#### 500 INTERNAL_SERVER_ERROR
+* An error occurred
 
 ---
 

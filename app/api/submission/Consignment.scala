@@ -20,9 +20,8 @@ import api.submission.Level._
 import api.submission.additionalReferenceType04.RichAdditionalReferenceType04
 import api.submission.documentType.RichDocumentJsValue
 import api.submission.houseConsignmentType10.RichHouseConsignmentType10
-import config.AppConfig
 import generated._
-import models.UserAnswers
+import models.{Phase, UserAnswers}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -30,18 +29,18 @@ import java.util.UUID
 
 object Consignment {
 
-  def transform(uA: UserAnswers)(implicit config: AppConfig): ConsignmentType20 =
-    uA.metadata.data.as[ConsignmentType20](consignmentType20.reads).postProcess(config.isTransitionEnabled)
+  def transform(uA: UserAnswers, phase: Phase): ConsignmentType20 =
+    uA.metadata.data.as[ConsignmentType20](consignmentType20.reads).postProcess(phase)
 
   implicit class RichConsignmentType20(value: ConsignmentType20) {
 
-    def postProcess(isTransitionEnabled: Boolean): ConsignmentType20 = value
+    def postProcess(phase: Phase): ConsignmentType20 = value
       .rollUpTransportCharges()
       .rollUpUCR()
       .rollUpCountryOfDispatch()
       .rollUpCountryOfDestination()
-      .rollUpAdditionalInformation(isTransitionEnabled)
-      .rollUpAdditionalReferences(isTransitionEnabled)
+      .rollUpAdditionalInformation(phase)
+      .rollUpAdditionalReferences(phase)
 
     def rollUpTransportCharges(): ConsignmentType20 =
       rollUp[Option[TransportChargesType], Option[TransportChargesType]](
@@ -111,46 +110,48 @@ object Consignment {
         }
       )
 
-    def rollUpAdditionalInformation(isTransitionEnabled: Boolean): ConsignmentType20 =
-      if (isTransitionEnabled) {
-        value
-      } else {
-        rollUp[Seq[AdditionalInformationType03], Seq[AdditionalInformationType03]](
-          consignmentLevel = _.AdditionalInformation,
-          itemLevel = _.AdditionalInformation,
-          updateConsignmentLevel = additionalInformation => _.copy(AdditionalInformation = additionalInformation),
-          updateItemLevel = commonValues => item => item.copy(AdditionalInformation = item.AdditionalInformation.diff(commonValues)),
-          shouldRollUp = {
-            case (Nil, _)                                => true
-            case (consignmentLevelValue, itemLevelValue) => consignmentLevelValue.toSet == itemLevelValue.toSet
-            case _                                       => false
-          },
-          getCommonValueAtItemLevel = _.reduceLeft(_ intersect _) match {
-            case Nil          => None
-            case commonValues => Some(commonValues)
-          }
-        )
+    def rollUpAdditionalInformation(phase: Phase): ConsignmentType20 =
+      phase match {
+        case Phase.Transition =>
+          value
+        case Phase.PostTransition =>
+          rollUp[Seq[AdditionalInformationType03], Seq[AdditionalInformationType03]](
+            consignmentLevel = _.AdditionalInformation,
+            itemLevel = _.AdditionalInformation,
+            updateConsignmentLevel = additionalInformation => _.copy(AdditionalInformation = additionalInformation),
+            updateItemLevel = commonValues => item => item.copy(AdditionalInformation = item.AdditionalInformation.diff(commonValues)),
+            shouldRollUp = {
+              case (Nil, _)                                => true
+              case (consignmentLevelValue, itemLevelValue) => consignmentLevelValue.toSet == itemLevelValue.toSet
+              case _                                       => false
+            },
+            getCommonValueAtItemLevel = _.reduceLeft(_ intersect _) match {
+              case Nil          => None
+              case commonValues => Some(commonValues)
+            }
+          )
       }
 
-    def rollUpAdditionalReferences(isTransitionEnabled: Boolean): ConsignmentType20 =
-      if (isTransitionEnabled) {
-        value
-      } else {
-        rollUp[Seq[AdditionalReferenceType05], Seq[AdditionalReferenceType04]](
-          consignmentLevel = _.AdditionalReference,
-          itemLevel = _.AdditionalReference,
-          updateConsignmentLevel = additionalReference => _.copy(AdditionalReference = additionalReference.map(_.asAdditionalReferenceType05)),
-          updateItemLevel = commonValues => item => item.copy(AdditionalReference = item.AdditionalReference.diff(commonValues)),
-          shouldRollUp = {
-            case (Nil, _)                                => true
-            case (consignmentLevelValue, itemLevelValue) => consignmentLevelValue.toSet == itemLevelValue.toSet
-            case _                                       => false
-          },
-          getCommonValueAtItemLevel = _.reduceLeft(_ intersect _) match {
-            case Nil          => None
-            case commonValues => Some(commonValues)
-          }
-        )
+    def rollUpAdditionalReferences(phase: Phase): ConsignmentType20 =
+      phase match {
+        case Phase.Transition =>
+          value
+        case Phase.PostTransition =>
+          rollUp[Seq[AdditionalReferenceType05], Seq[AdditionalReferenceType04]](
+            consignmentLevel = _.AdditionalReference,
+            itemLevel = _.AdditionalReference,
+            updateConsignmentLevel = additionalReference => _.copy(AdditionalReference = additionalReference.map(_.asAdditionalReferenceType05)),
+            updateItemLevel = commonValues => item => item.copy(AdditionalReference = item.AdditionalReference.diff(commonValues)),
+            shouldRollUp = {
+              case (Nil, _)                                => true
+              case (consignmentLevelValue, itemLevelValue) => consignmentLevelValue.toSet == itemLevelValue.toSet
+              case _                                       => false
+            },
+            getCommonValueAtItemLevel = _.reduceLeft(_ intersect _) match {
+              case Nil          => None
+              case commonValues => Some(commonValues)
+            }
+          )
       }
 
     def update(f: ConsignmentType20 => ConsignmentType20): ConsignmentType20 = f(value)
@@ -205,7 +206,7 @@ object consignmentType20 {
     supportingDocuments         <- supportingDocumentsReads
     transportDocuments          <- transportDocumentsReads
     transportCharges            <- __.read[Option[TransportChargesType]](transportChargesType.consignmentReads)
-    houseConsignments           <- __.read[HouseConsignmentType10](houseConsignmentType10.reads).map(Seq(_))
+    houseConsignments           <- __.read[HouseConsignmentType10](houseConsignmentType10.reads()).map(Seq(_))
   } yield ConsignmentType20(
     countryOfDispatch = countryOfDispatch,
     countryOfDestination = countryOfDestination,
@@ -468,16 +469,16 @@ object transportChargesType {
 
 object houseConsignmentType10 {
 
-  implicit val reads: Reads[HouseConsignmentType10] = {
+  def reads(goodsItemNumberAcc: Int = 0): Reads[HouseConsignmentType10] =
     for {
-      documents        <- documentsPath.readWithDefault[JsArray](JsArray()).map(_.value.toSeq)
-      consignmentItems <- itemsPath.readArray[ConsignmentItemType09](consignmentItemType09.reads(_, documents))
+      documents <- documentsPath.readWithDefault[JsArray](JsArray()).map(_.value.toSeq)
+      consignmentItemReads = (goodsItemNumber: Int) => consignmentItemType09.reads(goodsItemNumber, goodsItemNumberAcc + goodsItemNumber, documents)
+      consignmentItems <- itemsPath.readArray[ConsignmentItemType09](consignmentItemReads)
     } yield HouseConsignmentType10(
       sequenceNumber = "1",
       grossMass = consignmentItems.flatMap(_.Commodity.GoodsMeasure.flatMap(_.grossMass)).sum,
       ConsignmentItem = consignmentItems
     )
-  }
 
   implicit class RichHouseConsignmentType10(value: HouseConsignmentType10) {
 
@@ -488,7 +489,12 @@ object houseConsignmentType10 {
 
 object consignmentItemType09 {
 
-  def reads(index: Int, documents: Seq[JsValue]): Reads[ConsignmentItemType09] =
+  /** @param goodsItemNumber should be unique to the house consignment (essentially the sequence number of an item within a house consignment)
+    * @param declarationGoodsItemNumber should be unique to the consignment as a whole
+    * @param documents documents as provided in the documents journey
+    * @return
+    */
+  def reads(goodsItemNumber: Int, declarationGoodsItemNumber: Int, documents: Seq[JsValue]): Reads[ConsignmentItemType09] =
     (__ \ "documents").readWithDefault[JsArray](JsArray()).map(_.value.toSeq).flatMap {
       itemDocuments =>
         def readDocuments[T](`type`: String)(implicit rds: Int => Reads[T]): Reads[Seq[T]] =
@@ -498,8 +504,8 @@ object consignmentItemType09 {
           }
 
         (
-          (index.toString: Reads[String]) and
-            (index: Reads[Int]).map(BigInt(_)) and
+          (goodsItemNumber.toString: Reads[String]) and
+            (declarationGoodsItemNumber: Reads[Int]).map(BigInt(_)) and
             (__ \ "declarationType" \ "code").readNullable[String] and
             (__ \ "countryOfDispatch" \ "code").readNullable[String] and
             (__ \ "countryOfDestination" \ "code").readNullable[String] and
@@ -508,7 +514,7 @@ object consignmentItemType09 {
             (__ \ "supplyChainActors").readArray[AdditionalSupplyChainActorType](additionalSupplyChainActorType.reads) and
             __.read[CommodityType07](commodityType07.reads) and
             (__ \ "packages").readArray[PackagingType03](packagingType03.reads) and
-            readDocuments[PreviousDocumentType08]("Previous")(previousDocumentType08.reads(index, _)) and
+            readDocuments[PreviousDocumentType08]("Previous")(previousDocumentType08.reads(goodsItemNumber, _)) and
             readDocuments[SupportingDocumentType05]("Support")(supportingDocumentType05.reads) and
             readDocuments[TransportDocumentType04]("Transport")(transportDocumentType04.reads) and
             (__ \ "additionalReferences").readArray[AdditionalReferenceType04](additionalReferenceType04.reads) and
@@ -612,11 +618,11 @@ object documentType {
 
 object previousDocumentType08 {
 
-  def reads(itemIndex: Int, documentIndex: Int): Reads[PreviousDocumentType08] = (
+  def reads(goodsItemNumber: Int, documentIndex: Int): Reads[PreviousDocumentType08] = (
     (documentIndex.toString: Reads[String]) and
       documentType.codeReads and
       (__ \ "details" \ "documentReferenceNumber").read[String] and
-      (itemIndex: Reads[Int]).map(BigInt(_)).map(Some(_)) and
+      (goodsItemNumber: Reads[Int]).map(BigInt(_)).map(Some(_)) and
       (__ \ "details" \ "packageType" \ "code").readNullable[String] and
       (__ \ "details" \ "numberOfPackages").readNullable[BigInt] and
       (__ \ "details" \ "metric" \ "code").readNullable[String] and

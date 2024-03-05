@@ -31,13 +31,13 @@ class ApiService @Inject() (
   declaration: Declaration
 )(implicit ec: ExecutionContext) {
 
-  def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
-    apiConnector.submitDeclaration(declaration.transform(userAnswers, MovementReferenceNumber.Empty))
+  def submitDeclaration(userAnswers: UserAnswers, phase: Phase)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
+    apiConnector.submitDeclaration(declaration.transform(userAnswers, MovementReferenceNumber.Empty, phase))
 
-  def submitAmendment(userAnswers: UserAnswers, departureId: String)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
+  def submitAmendment(userAnswers: UserAnswers, departureId: String, phase: Phase)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
     for {
       mrn <- apiConnector.getMRN(departureId)
-      payload = declaration.transform(userAnswers, mrn)
+      payload = declaration.transform(userAnswers, mrn, phase)
       result <- apiConnector.submitAmendment(departureId, payload)
     } yield result
 
