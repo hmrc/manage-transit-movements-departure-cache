@@ -58,7 +58,7 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
 
     "message is called" must {
 
-      def uA(officeOfDeparture: String): UserAnswers = {
+      def uA(officeOfDepartureCountryId: String): UserAnswers = {
         val json: JsValue = Json.parse(s"""
              |{
              |  "_id" : "$uuid",
@@ -68,9 +68,10 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
              |  "data" : {
              |    "preTaskList" : {
              |      "officeOfDeparture" : {
-             |        "id" : "$officeOfDeparture",
+             |        "id" : "foo",
              |        "name" : "Birmingham Airport",
-             |        "phoneNumber" : "+44 (0)121 781 7850"
+             |        "phoneNumber" : "+44 (0)121 781 7850",
+             |        "countryId" : "$officeOfDepartureCountryId"
              |      }
              |    }
              |  },
@@ -91,7 +92,7 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
                 when(mockDateTimeService.now).thenReturn(dateTime)
                 when(mockMessageIdentificationService.randomIdentifier).thenReturn(messageIdentification)
 
-                val result = header.message(uA("GB000011"), CC015C)
+                val result = header.message(uA("GB"), CC015C)
 
                 result.messageSender shouldBe eoriNumber
                 result.messagE_1Sequence2.messageRecipient shouldBe "NTA.GB"
@@ -108,7 +109,7 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
                 when(mockDateTimeService.now).thenReturn(dateTime)
                 when(mockMessageIdentificationService.randomIdentifier).thenReturn(messageIdentification)
 
-                val result = header.message(uA("XIREX001"), CC015C)
+                val result = header.message(uA("XI"), CC015C)
 
                 result.messageSender shouldBe eoriNumber
                 result.messagE_1Sequence2.messageRecipient shouldBe "NTA.XI"
@@ -127,7 +128,7 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
                 when(mockDateTimeService.now).thenReturn(dateTime)
                 when(mockMessageIdentificationService.randomIdentifier).thenReturn(messageIdentification)
 
-                val result = header.message(uA("GB000011"), CC013C)
+                val result = header.message(uA("GB"), CC013C)
 
                 result.messageSender shouldBe eoriNumber
                 result.messagE_1Sequence2.messageRecipient shouldBe "NTA.GB"
@@ -144,7 +145,7 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
                 when(mockDateTimeService.now).thenReturn(dateTime)
                 when(mockMessageIdentificationService.randomIdentifier).thenReturn(messageIdentification)
 
-                val result = header.message(uA("XIREX001"), CC013C)
+                val result = header.message(uA("XI"), CC013C)
 
                 result.messageSender shouldBe eoriNumber
                 result.messagE_1Sequence2.messageRecipient shouldBe "NTA.XI"
