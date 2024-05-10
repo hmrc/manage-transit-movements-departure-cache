@@ -21,7 +21,7 @@ import cats.implicits._
 import controllers.actions.{AuthenticateActionProvider, VersionedAction}
 import models.AuditType._
 import models.SubmissionState._
-import models.{AuditType, SubmissionState, UserAnswers}
+import models.{AuditType, UserAnswers}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue}
 import play.api.mvc.{Action, ControllerComponents, Result}
@@ -55,7 +55,7 @@ class SubmissionController @Inject() (
               result <- OptionT {
                 apiService
                   .submitDeclaration(userAnswers, request.phase)
-                  .flatMap(responseToResult(userAnswers, _, None, Submitted, DeclarationData))
+                  .flatMap(responseToResult(userAnswers, _, None, DeclarationData))
               }
             } yield result
 
@@ -77,7 +77,7 @@ class SubmissionController @Inject() (
               result <- OptionT {
                 apiService
                   .submitAmendment(userAnswers, departureId, request.phase)
-                  .flatMap(responseToResult(userAnswers, _, Some(departureId), Amendment, DeclarationAmendment))
+                  .flatMap(responseToResult(userAnswers, _, Some(departureId), DeclarationAmendment))
               }
             } yield result
 
@@ -92,9 +92,9 @@ class SubmissionController @Inject() (
     userAnswers: UserAnswers,
     resultOrResponse: Either[Result, HttpResponse],
     departureId: Option[String],
-    submissionState: SubmissionState,
     auditType: AuditType
-  )(implicit hc: HeaderCarrier): Future[Option[Result]] =
+  )(implicit hc: HeaderCarrier): Future[Option[Result]] = {
+    val submissionState = Submitted
     resultOrResponse match {
       case Right(response) =>
         cacheRepository
@@ -106,4 +106,5 @@ class SubmissionController @Inject() (
           }
       case Left(error) => Future.successful(Option(error))
     }
+  }
 }
