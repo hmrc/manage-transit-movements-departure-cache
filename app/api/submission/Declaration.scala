@@ -49,7 +49,7 @@ class Declaration @Inject() (header: Header) {
       Representative = Representative.transform(uA),
       Guarantee = Guarantee.transform(uA),
       Consignment = Consignment.transform(uA, phase),
-      attributes = Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString("NCTS5.0", scope)))
+      attributes = attributes
     )
 
   private def IE013(uA: UserAnswers, mrn: Option[String], amendmentTypeFlag: Boolean, phase: Phase): CC013CType =
@@ -65,7 +65,7 @@ class Declaration @Inject() (header: Header) {
       Representative = Representative.transform(uA),
       Guarantee = Guarantee.transformIE013(uA),
       Consignment = Consignment.transform(uA, phase),
-      attributes = Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString("NCTS5.0", scope)))
+      attributes = attributes
     )
 
   def attributes: Map[String, DataRecord[_]] =
