@@ -16,7 +16,7 @@
 
 package api.submission
 
-import generated.{CC013C, CC013CType, CC015C, CC015CType, PhaseIDtype}
+import generated._
 import models.SubmissionState.{Amendment, GuaranteeAmendment}
 import models.{MovementReferenceNumber, Phase, UserAnswers}
 import scalaxb.DataRecord
@@ -49,7 +49,7 @@ class Declaration @Inject() (header: Header) {
       Representative = Representative.transform(uA),
       Guarantee = Guarantee.transform(uA),
       Consignment = Consignment.transform(uA, phase),
-      attributes = Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString("NCTS5.0", scope)))
+      attributes = attributes
     )
 
   private def IE013(uA: UserAnswers, mrn: Option[String], amendmentTypeFlag: Boolean, phase: Phase): CC013CType =
@@ -65,6 +65,9 @@ class Declaration @Inject() (header: Header) {
       Representative = Representative.transform(uA),
       Guarantee = Guarantee.transformIE013(uA),
       Consignment = Consignment.transform(uA, phase),
-      attributes = Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString("NCTS5.0", scope)))
+      attributes = attributes
     )
+
+  def attributes: Map[String, DataRecord[_]] =
+    Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString(NCTS5u461.toString, scope)))
 }
