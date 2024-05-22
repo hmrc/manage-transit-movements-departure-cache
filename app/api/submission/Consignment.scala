@@ -29,18 +29,16 @@ import java.util.UUID
 
 object Consignment {
 
-  def transform(uA: UserAnswers, phase: Phase): ConsignmentType20 =
-    uA.metadata.data.as[ConsignmentType20](consignmentType20.reads).postProcess(phase)
+  def transform(uA: UserAnswers): ConsignmentType20 =
+    uA.metadata.data.as[ConsignmentType20](consignmentType20.reads).postProcess
 
   implicit class RichConsignmentType20(value: ConsignmentType20) {
 
-    def postProcess(phase: Phase): ConsignmentType20 = value
+    def postProcess: ConsignmentType20 = value
       .rollUpTransportCharges()
       .rollUpUCR()
       .rollUpCountryOfDispatch()
       .rollUpCountryOfDestination()
-      .rollUpAdditionalInformation(phase)
-      .rollUpAdditionalReferences(phase)
 
     def rollUpTransportCharges(): ConsignmentType20 =
       rollUp[Option[TransportChargesType], Option[TransportChargesType]](
@@ -110,50 +108,6 @@ object Consignment {
         }
       )
 
-    def rollUpAdditionalInformation(phase: Phase): ConsignmentType20 =
-      phase match {
-        case Phase.Transition =>
-          value
-        case Phase.PostTransition =>
-          rollUp[Seq[AdditionalInformationType03], Seq[AdditionalInformationType03]](
-            consignmentLevel = _.AdditionalInformation,
-            itemLevel = _.AdditionalInformation,
-            updateConsignmentLevel = additionalInformation => _.copy(AdditionalInformation = additionalInformation),
-            updateItemLevel = commonValues => item => item.copy(AdditionalInformation = item.AdditionalInformation.diff(commonValues)),
-            shouldRollUp = {
-              case (Nil, _)                                => true
-              case (consignmentLevelValue, itemLevelValue) => consignmentLevelValue.toSet == itemLevelValue.toSet
-              case _                                       => false
-            },
-            getCommonValueAtItemLevel = _.reduceLeft(_ intersect _) match {
-              case Nil          => None
-              case commonValues => Some(commonValues)
-            }
-          )
-      }
-
-    def rollUpAdditionalReferences(phase: Phase): ConsignmentType20 =
-      phase match {
-        case Phase.Transition =>
-          value
-        case Phase.PostTransition =>
-          rollUp[Seq[AdditionalReferenceType05], Seq[AdditionalReferenceType04]](
-            consignmentLevel = _.AdditionalReference,
-            itemLevel = _.AdditionalReference,
-            updateConsignmentLevel = additionalReference => _.copy(AdditionalReference = additionalReference.map(_.asAdditionalReferenceType05)),
-            updateItemLevel = commonValues => item => item.copy(AdditionalReference = item.AdditionalReference.diff(commonValues)),
-            shouldRollUp = {
-              case (Nil, _)                                => true
-              case (consignmentLevelValue, itemLevelValue) => consignmentLevelValue.toSet == itemLevelValue.toSet
-              case _                                       => false
-            },
-            getCommonValueAtItemLevel = _.reduceLeft(_ intersect _) match {
-              case Nil          => None
-              case commonValues => Some(commonValues)
-            }
-          )
-      }
-
     def update(f: ConsignmentType20 => ConsignmentType20): ConsignmentType20 = f(value)
 
     private def rollUp[A, B](
@@ -207,6 +161,8 @@ object consignmentType20 {
     transportDocuments          <- transportDocumentsReads
     transportCharges            <- __.read[Option[TransportChargesType]](transportChargesType.consignmentReads)
     houseConsignments           <- __.read[HouseConsignmentType10](houseConsignmentType10.reads()).map(Seq(_))
+    additionalReference         <- additionalReferenceReads
+    additionalInformation       <- additionalInformationReads
   } yield ConsignmentType20(
     countryOfDispatch = countryOfDispatch,
     countryOfDestination = countryOfDestination,
@@ -229,8 +185,8 @@ object consignmentType20 {
     PreviousDocument = previousDocuments,
     SupportingDocument = supportingDocuments,
     TransportDocument = transportDocuments,
-    AdditionalReference = Nil,
-    AdditionalInformation = Nil,
+    AdditionalReference = additionalReference,
+    AdditionalInformation = additionalInformation,
     TransportCharges = transportCharges,
     HouseConsignment = houseConsignments
   )
@@ -258,6 +214,14 @@ object consignmentType20 {
       .readFilteredArray[PreviousDocumentType09](
         _.hasCorrectTypeAndLevel("Previous", ConsignmentLevel)
       )(previousDocumentType09.reads)
+
+  private def additionalReferenceReads: Reads[Seq[AdditionalReferenceType05]] =
+    transportDetailsAdditionalReferencePath
+      .readArray[AdditionalReferenceType05](additionalReferenceType05.reads)
+
+  private def additionalInformationReads: Reads[Seq[AdditionalInformationType03]] =
+    transportDetailsAdditionalInformationPath
+      .readArray[AdditionalInformationType03](additionalInformationType03.readsConsignment)
 
   private def supportingDocumentsReads: Reads[Seq[SupportingDocumentType05]] =
     documentsPath
@@ -641,6 +605,15 @@ object previousDocumentType09 {
   )(PreviousDocumentType09.apply _)
 }
 
+object additionalReferenceType05 {
+
+  def reads(index: Int): Reads[AdditionalReferenceType05] = (
+    (index.toString: Reads[String]) and
+      (__ \ "type").read[String] and
+      (__ \ "additionalReferenceNumber").readNullable[String]
+  )(AdditionalReferenceType05.apply _)
+}
+
 object supportingDocumentType05 {
 
   def reads(index: Int): Reads[SupportingDocumentType05] = (
@@ -692,5 +665,11 @@ object additionalInformationType03 {
     (index.toString: Reads[String]) and
       (__ \ "additionalInformationType" \ "code").read[String] and
       (__ \ "additionalInformation").readNullable[String]
+  )(AdditionalInformationType03.apply _)
+
+  def readsConsignment(index: Int): Reads[AdditionalInformationType03] = (
+    (index.toString: Reads[String]) and
+      (__ \ "type").read[String] and
+      (__ \ "text").readNullable[String]
   )(AdditionalInformationType03.apply _)
 }

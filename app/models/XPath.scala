@@ -55,6 +55,8 @@ case class XPath(value: String) {
       case x if x.matches("^(.*)/Consignment/LocationOfGoods(.*)$")                                                             => RouteDetails
       case x if x.matches("^(.*)/Consignment/TransportEquipment(.*)$")                                                          => TransportDetails
       case x if x.matches("^(.*)/Consignment/ActiveBorderTransportMeans(.*)$")                                                  => TransportDetails
+      case x if x.matches("^(.*)/Consignment/AdditionalReference(.*)$")                                                         => TransportDetails
+      case x if x.matches("^(.*)/Consignment/AdditionalInformation(.*)$")                                                       => TransportDetails
       case x if x.matches("^(.*)/Consignment/PlaceOfLoading(.*)$")                                                              => RouteDetails
       case x if x.matches("^(.*)/Consignment/PlaceOfUnloading(.*)$")                                                            => RouteDetails
       case x if x.matches("^(.*)/Consignment/PreviousDocument(.*)$")                                                            => Documents

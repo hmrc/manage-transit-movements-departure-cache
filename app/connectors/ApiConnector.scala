@@ -91,6 +91,7 @@ class ApiConnector @Inject() (http: HttpClientV2)(implicit ec: ExecutionContext,
               Right(response)
             case BAD_REQUEST =>
               logger.info(s"ApiConnector:${httpMethod.name}: bad request")
+              logger.debug(s"${response.body}")
               Left(BadRequest(s"ApiConnector:${httpMethod.name}: bad request"))
             case e =>
               logger.error(s"ApiConnector:${httpMethod.name}: something went wrong: $e")
