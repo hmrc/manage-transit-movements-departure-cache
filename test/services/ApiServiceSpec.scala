@@ -51,8 +51,6 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Gener
       <foo>bar</foo>
     </ncts:CC013C>
 
-  private val mrn = MovementReferenceNumber(Some("mrn"))
-
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockApiConnector)
@@ -81,9 +79,10 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Gener
   }
 
   "submitAmend" must {
+    val mrn = MovementReferenceNumber(Some("mrn"))
+
     "call connector" in {
       val userAnswers = emptyUserAnswersWithDepartureId
-      val departureId = "departureId123"
       val phase       = arbitrary[Phase].sample.value
 
       val expectedResult = Right(HttpResponse(OK, ""))
@@ -99,42 +98,87 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Gener
     }
   }
 
+  "get" when {
+    "no departure found" must {
+      "return None" in {
+        when(mockApiConnector.getDeparture(any())(any()))
+          .thenReturn(Future.successful(None))
+
+        val result = service.get(lrn).futureValue
+        result shouldBe None
+
+        verify(mockApiConnector).getDeparture(eqTo(lrn))(any())
+      }
+    }
+
+    "departure found" when {
+      "messages found" must {
+        "return list of messages" in {
+          val departure = Departure(departureId, lrn)
+          val messages  = Messages(Seq(Message("IE015")))
+
+          when(mockApiConnector.getDeparture(any())(any()))
+            .thenReturn(Future.successful(Some(departure)))
+
+          when(mockApiConnector.getMessages(any())(any()))
+            .thenReturn(Future.successful(messages))
+
+          val result = await(service.get(lrn))
+          result shouldBe Some(messages)
+
+          verify(mockApiConnector).getDeparture(eqTo(lrn))(any())
+          verify(mockApiConnector).getMessages(eqTo(departureId))(any())
+        }
+      }
+    }
+  }
+
   "isIE028DefinedForDeparture" must {
     "must return true" when {
       "IE028 is defined" in {
+        val departure = Departure(departureId, lrn)
+        val messages  = Messages(Seq(Message("IE028")))
 
-        val departure      = Departures(Seq(Departure("departureId", "lrn")))
-        val departureTypes = DepartureMessageTypes(Seq(DepartureMessageType("IE028")))
+        when(mockApiConnector.getDeparture(any())(any()))
+          .thenReturn(Future.successful(Some(departure)))
 
-        when(mockApiConnector.getDepartures()(any())).thenReturn(Future.successful(departure))
-        when(mockApiConnector.getMessages(any())(any())).thenReturn(Future.successful(departureTypes))
+        when(mockApiConnector.getMessages(any())(any()))
+          .thenReturn(Future.successful(messages))
 
-        await(service.isIE028DefinedForDeparture(lrn)) shouldBe true
+        val result = await(service.isIE028DefinedForDeparture(lrn))
+        result shouldBe true
+
+        verify(mockApiConnector).getDeparture(eqTo(lrn))(any())
+        verify(mockApiConnector).getMessages(eqTo(departureId))(any())
       }
     }
 
     "must return false" when {
-
       "LRN does not match any returned movements " in {
+        when(mockApiConnector.getDeparture(any())(any())).thenReturn(Future.successful(None))
 
-        val departure = Departures(Seq(Departure(lrn, "test/path")))
+        val result = await(service.isIE028DefinedForDeparture(lrn))
 
-        when(mockApiConnector.getDepartures()(any())).thenReturn(Future.successful(departure))
+        result shouldBe false
 
-        await(service.isIE028DefinedForDeparture("invalid MRN")) shouldBe false
+        verify(mockApiConnector).getDeparture(eqTo(lrn))(any())
+        verify(mockApiConnector, never()).getMessages(any())(any())
       }
 
       "when returned messages do not contain IE028 " in {
+        val departure = Departure(departureId, lrn)
+        val messages  = Messages(Seq(Message("IE015")))
 
-        val departure      = Departures(Seq(Departure("lrn", "test/path")))
-        val departureTypes = DepartureMessageTypes(Seq(DepartureMessageType("IE015")))
+        when(mockApiConnector.getDeparture(any())(any())).thenReturn(Future.successful(Some(departure)))
+        when(mockApiConnector.getMessages(any())(any())).thenReturn(Future.successful(messages))
 
-        when(mockApiConnector.getDepartures()(any())).thenReturn(Future.successful(departure))
-        when(mockApiConnector.getMessages(any())(any())).thenReturn(Future.successful(departureTypes))
+        val result = await(service.isIE028DefinedForDeparture(lrn))
 
-        await(service.isIE028DefinedForDeparture(lrn)) shouldBe false
+        result shouldBe false
+
+        verify(mockApiConnector).getDeparture(eqTo(lrn))(any())
+        verify(mockApiConnector).getMessages(eqTo(departureId))(any())
       }
-
     }
   }
 }

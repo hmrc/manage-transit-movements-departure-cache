@@ -16,16 +16,11 @@
 
 package models
 
-import play.api.libs.functional.syntax.toFunctionalBuilderOps
-import play.api.libs.json.{__, Reads}
+import play.api.libs.json.{Json, Reads}
 
 case class Departure(id: String, localReferenceNumber: String)
 
 object Departure {
 
-  implicit val reads: Reads[Departure] = (
-    (__ \ "id").read[String] and
-      (__ \ "localReferenceNumber").read[String]
-  )(Departure.apply _)
-
+  implicit val reads: Reads[Departure] = Json.reads[Departure]
 }

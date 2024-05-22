@@ -38,14 +38,11 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
 
   "ApiConnector" when {
 
-    "getDepartures" must {
-      val url = "/movements/departures"
+    "getDeparture" must {
+      val lrn         = "3CnsTh79I7vtOy6"
+      val departureId = "63651574c3447b12"
 
-      val lrn1         = "3CnsTh79I7vtOy6"
-      val departureId1 = "63651574c3447b12"
-
-      val lrn2         = "DEF456"
-      val departureId2 = "6365135ba5e821ee"
+      val url = s"/movements/departures?localReferenceNumber=$lrn"
 
       val responseJson: JsValue = Json.parse(s"""
            |{
@@ -64,28 +61,11 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
            |          "href": "/customs/transits/movements/departures/63651574c3447b12/messages"
            |        }
            |      },
-           |      "id": "$departureId1",
+           |      "id": "$departureId",
            |      "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
-           |      "localReferenceNumber": "$lrn1",
+           |      "localReferenceNumber": "$lrn",
            |      "created": "2022-11-04T13:36:52.332Z",
            |      "updated": "2022-11-04T13:36:52.332Z",
-           |      "enrollmentEORINumber": "9999912345",
-           |      "movementEORINumber": "GB1234567890"
-           |    },
-           |    {
-           |      "_links": {
-           |        "self": {
-           |          "href": "/customs/transits/movements/departures/6365135ba5e821ee"
-           |        },
-           |        "messages": {
-           |          "href": "/customs/transits/movements/departures/6365135ba5e821ee/messages"
-           |        }
-           |      },
-           |      "id": "$departureId2",
-           |      "movementReferenceNumber": "27WF9X1FQ9RCKN0TM3",
-           |      "localReferenceNumber": "$lrn2",
-           |      "created": "2022-11-04T13:27:55.522Z",
-           |      "updated": "2022-11-04T13:27:55.522Z",
            |      "enrollmentEORINumber": "9999912345",
            |      "movementEORINumber": "GB1234567890"
            |    }
@@ -99,14 +79,9 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             .willReturn(okJson(responseJson.toString()))
         )
 
-        val expectedResult = Departures(
-          Seq(
-            Departure(departureId1, lrn1),
-            Departure(departureId2, lrn2)
-          )
-        )
+        val expectedResult = Some(Departure(departureId, lrn))
 
-        await(connector.getDepartures()) shouldBe expectedResult
+        await(connector.getDeparture(lrn)) shouldBe expectedResult
       }
     }
 
@@ -199,13 +174,13 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             .willReturn(okJson(responseJson.toString()))
         )
 
-        val expectedResult = DepartureMessageTypes(
-          messageTypes = Seq(
-            DepartureMessageType(
-              messageType = "IE015"
+        val expectedResult = Messages(
+          messages = Seq(
+            Message(
+              `type` = "IE015"
             ),
-            DepartureMessageType(
-              messageType = "IE013"
+            Message(
+              `type` = "IE013"
             )
           )
         )

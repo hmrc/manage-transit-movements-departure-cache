@@ -21,10 +21,10 @@ import cats.implicits._
 import controllers.actions.{AuthenticateActionProvider, VersionedAction}
 import models.AuditType._
 import models.SubmissionState._
-import models.{AuditType, UserAnswers}
+import models.{AuditType, Messages, UserAnswers}
 import play.api.Logging
-import play.api.libs.json.{JsError, JsSuccess, JsValue}
-import play.api.mvc.{Action, ControllerComponents, Result}
+import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
+import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.CacheRepository
 import services.{ApiService, AuditService}
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -106,5 +106,19 @@ class SubmissionController @Inject() (
           }
       case Left(error) => Future.successful(Option(error))
     }
+  }
+
+  def get(lrn: String): Action[AnyContent] = authenticate().async {
+    implicit request =>
+      apiService.get(lrn).map {
+        case Some(Messages(Nil)) =>
+          logger.info(s"No messages found for LRN $lrn")
+          NoContent
+        case Some(messages) =>
+          Ok(Json.toJson(messages))
+        case None =>
+          logger.warn(s"No departure found for LRN $lrn")
+          NotFound
+      }
   }
 }

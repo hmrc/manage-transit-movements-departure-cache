@@ -18,7 +18,7 @@ package connectors
 
 import com.github.dwickern.macros.NameOf._
 import config.AppConfig
-import models.{DepartureMessageTypes, Departures, MovementReferenceNumber}
+import models.{Departure, Departures, Messages, MovementReferenceNumber}
 import play.api.Logging
 import play.api.http.HeaderNames._
 import play.api.http.Status._
@@ -37,12 +37,14 @@ class ApiConnector @Inject() (http: HttpClientV2)(implicit ec: ExecutionContext,
 
   private def acceptHeader: (String, String) = (ACCEPT, "application/vnd.hmrc.2.0+json")
 
-  def getDepartures()(implicit hc: HeaderCarrier): Future[Departures] = {
+  def getDeparture(lrn: String)(implicit hc: HeaderCarrier): Future[Option[Departure]] = {
     val url = url"${appConfig.apiUrl}/movements/departures"
     http
       .get(url)
+      .transform(_.withQueryStringParameters("localReferenceNumber" -> lrn))
       .setHeader(acceptHeader)
       .execute[Departures]
+      .map(_.departures.headOption)
   }
 
   def getMRN(departureId: String)(implicit hc: HeaderCarrier): Future[MovementReferenceNumber] = {
@@ -53,12 +55,12 @@ class ApiConnector @Inject() (http: HttpClientV2)(implicit ec: ExecutionContext,
       .execute[MovementReferenceNumber]
   }
 
-  def getMessages(departureId: String)(implicit hc: HeaderCarrier): Future[DepartureMessageTypes] = {
+  def getMessages(departureId: String)(implicit hc: HeaderCarrier): Future[Messages] = {
     val url = url"${appConfig.apiUrl}/movements/departures/$departureId/messages"
     http
       .get(url)
       .setHeader(acceptHeader)
-      .execute[DepartureMessageTypes]
+      .execute[Messages]
   }
 
   def submitAmendment(departureId: String, xml: NodeSeq)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {

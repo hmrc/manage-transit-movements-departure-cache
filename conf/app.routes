@@ -10,6 +10,7 @@ GET        /user-answers/expiry/:lrn                            controllers.Cach
 # Submission
 POST       /declaration/submit                                  controllers.SubmissionController.post()
 POST       /declaration/submit-amendment                        controllers.SubmissionController.postAmendment()
+GET        /messages/:lrn                                       controllers.SubmissionController.get(lrn: String)
 
 GET        /user-answers/:lrn/lock                              controllers.LockController.checkLock(lrn: String)
 DELETE     /user-answers/:lrn/lock                              controllers.LockController.deleteLock(lrn: String)
