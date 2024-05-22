@@ -16,12 +16,11 @@
 
 package models
 
-import play.api.libs.json.{__, Reads}
+import play.api.libs.json.{Json, Reads}
 
 case class Departures(departures: Seq[Departure])
 
 object Departures {
 
-  implicit val reads: Reads[Departures] = (__ \ "departures").read[Seq[Departure]].map(Departures.apply)
-
+  implicit val reads: Reads[Departures] = Json.reads[Departures]
 }

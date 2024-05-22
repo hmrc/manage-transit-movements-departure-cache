@@ -18,7 +18,7 @@ package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.AuditType.{DeclarationAmendment, DeclarationData}
-import models.{Phase, SubmissionState, UserAnswers}
+import models._
 import org.mockito.ArgumentMatchers.{any, eq => eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
 import play.api.inject.bind
@@ -201,6 +201,56 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         verify(mockCacheRepository, never()).get(any(), any())
         verify(mockApiService, never()).submitAmendment(any(), any(), any())(any())
+      }
+    }
+  }
+
+  "get" should {
+    "return 200" when {
+      "messages found" in {
+        val messages = Messages(Seq(Message("IE015")))
+
+        when(mockApiService.get(any())(any()))
+          .thenReturn(Future.successful(Some(messages)))
+
+        val request = FakeRequest(GET, routes.SubmissionController.get(lrn).url)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(messages)
+
+        verify(mockApiService).get(eqTo(lrn))(any())
+      }
+    }
+
+    "return 204" when {
+      "no messages found" in {
+        when(mockApiService.get(any())(any()))
+          .thenReturn(Future.successful(Some(Messages(Nil))))
+
+        val request = FakeRequest(GET, routes.SubmissionController.get(lrn).url)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe NO_CONTENT
+
+        verify(mockApiService).get(eqTo(lrn))(any())
+      }
+    }
+
+    "return 404" when {
+      "no departure found" in {
+        when(mockApiService.get(any())(any()))
+          .thenReturn(Future.successful(None))
+
+        val request = FakeRequest(GET, routes.SubmissionController.get(lrn).url)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe NOT_FOUND
+
+        verify(mockApiService).get(eqTo(lrn))(any())
       }
     }
   }

@@ -41,16 +41,17 @@ class ApiService @Inject() (
       result <- apiConnector.submitAmendment(departureId, payload)
     } yield result
 
-  def isIE028DefinedForDeparture(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
-    apiConnector
-      .getDepartures()
-      .flatMap {
-        _.departures.find(_.localReferenceNumber == lrn).traverse {
-          departure =>
-            apiConnector.getMessages(departure.id).map {
-              _.messageTypes.exists(_.messageType == "IE028")
-            }
-        }
+  def get(lrn: String)(implicit hc: HeaderCarrier): Future[Option[Messages]] =
+    apiConnector.getDeparture(lrn).flatMap {
+      _.traverse {
+        departure => apiConnector.getMessages(departure.id)
       }
-      .map(_.getOrElse(false))
+    }
+
+  def isIE028DefinedForDeparture(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
+    get(lrn).map {
+      _.exists {
+        _.messages.exists(_.`type` == "IE028")
+      }
+    }
 }

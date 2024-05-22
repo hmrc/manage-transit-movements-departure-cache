@@ -16,12 +16,11 @@
 
 package models
 
-import play.api.libs.json.{__, Reads}
+import play.api.libs.json.{Format, Json}
 
-case class DepartureMessageTypes(messageTypes: Seq[DepartureMessageType])
+case class Messages(messages: Seq[Message])
 
-object DepartureMessageTypes {
+object Messages {
 
-  implicit lazy val reads: Reads[DepartureMessageTypes] =
-    (__ \ "messages").read[Seq[DepartureMessageType]].map(DepartureMessageTypes.apply)
+  implicit lazy val format: Format[Messages] = Json.format[Messages]
 }
