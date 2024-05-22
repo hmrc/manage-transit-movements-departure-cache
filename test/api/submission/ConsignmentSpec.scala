@@ -165,6 +165,26 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             |      }
             |    },
             |    "transportDetails" : {
+            |    "additionalReference" : [
+            |            {
+            |              "type" : "type123",
+            |             "additionalReferenceNumber" : "arno1"
+            |           },
+            |            {
+            |              "type" : "type321",
+            |             "additionalReferenceNumber" : "1onra"
+            |            }
+            |          ],
+            |         "additionalInformation" : [
+            |           {
+            |             "type" : "adinftype1",
+            |              "text" : "orca"
+            |            },
+            |           {
+            |            "type" : "adinftype2",
+            |             "text" : "acro"
+            |            }
+            |      ],
             |      "preRequisites" : {
             |        "uniqueConsignmentReference" : "ucr123",
             |        "countryOfDispatch" : {
@@ -619,7 +639,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         val uA: UserAnswers = json.as[UserAnswers]
 
-        val converted: ConsignmentType20 = Consignment.transform(uA, Phase.PostTransition)
+        val converted: ConsignmentType20 = Consignment.transform(uA)
 
         converted.countryOfDispatch shouldBe Some("FR")
         converted.countryOfDestination shouldBe Some("IT")
@@ -847,16 +867,26 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
         converted.AdditionalReference shouldBe Seq(
           AdditionalReferenceType05(
             sequenceNumber = "1",
-            typeValue = "ar1",
+            typeValue = "type123",
             referenceNumber = Some("arno1")
+          ),
+          AdditionalReferenceType05(
+            sequenceNumber = "2",
+            typeValue = "type321",
+            referenceNumber = Some("1onra")
           )
         )
 
         converted.AdditionalInformation shouldBe Seq(
           AdditionalInformationType03(
             sequenceNumber = "1",
-            code = "aiCode1",
-            text = Some("ai1")
+            code = "adinftype1",
+            text = Some("orca")
+          ),
+          AdditionalInformationType03(
+            sequenceNumber = "2",
+            code = "adinftype2",
+            text = Some("acro")
           )
         )
 
@@ -865,7 +895,9 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
         )
 
         converted.HouseConsignment.size shouldBe 1
-        converted.HouseConsignment.head shouldBe HouseConsignmentType10(
+        val ans = converted.HouseConsignment.head
+
+        val exp = HouseConsignmentType10(
           sequenceNumber = "1",
           countryOfDispatch = None,
           grossMass = 580.245,
@@ -1013,12 +1045,22 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               ),
               AdditionalReference = Seq(
                 AdditionalReferenceType04(
+                  sequenceNumber = "1",
+                  typeValue = "ar1",
+                  referenceNumber = Some("arno1")
+                ),
+                AdditionalReferenceType04(
                   sequenceNumber = "2",
                   typeValue = "ar2",
                   referenceNumber = None
                 )
               ),
               AdditionalInformation = Seq(
+                AdditionalInformationType03(
+                  sequenceNumber = "1",
+                  code = "aiCode1",
+                  text = Some("ai1")
+                ),
                 AdditionalInformationType03(
                   sequenceNumber = "2",
                   code = "aiCode2",
@@ -1067,12 +1109,26 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               PreviousDocument = Nil,
               SupportingDocument = Nil,
               TransportDocument = Nil,
-              AdditionalReference = Nil,
-              AdditionalInformation = Nil,
+              AdditionalReference = Seq(
+                AdditionalReferenceType04(
+                  sequenceNumber = "1",
+                  typeValue = "ar1",
+                  referenceNumber = Some("arno1")
+                )
+              ),
+              AdditionalInformation = Seq(
+                AdditionalInformationType03(
+                  sequenceNumber = "1",
+                  code = "aiCode1",
+                  text = Some("ai1")
+                )
+              ),
               TransportCharges = None
             )
           )
         )
+
+        ans shouldBe exp
       }
 
       "convert to API format without documents" in {
@@ -1205,6 +1261,26 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
              |      }
              |    },
              |    "transportDetails" : {
+             |      "additionalReference" : [
+             |            {
+             |              "type" : "type123",
+             |             "additionalReferenceNumber" : "ARNO1"
+             |           },
+             |            {
+             |              "type" : "type321",
+             |             "additionalReferenceNumber" : "1ONRA"
+             |            }
+             |          ],
+             |         "additionalInformation" : [
+             |           {
+             |             "type" : "ADDINFTYPE1",
+             |              "text" : "ORCA"
+             |            },
+             |           {
+             |            "type" : "ADDINFTYPE2",
+             |             "text" : "ACRO"
+             |            }
+             |      ],
              |      "preRequisites" : {
              |        "uniqueConsignmentReference" : "ucr123",
              |        "countryOfDispatch" : {
@@ -1529,7 +1605,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         val uA: UserAnswers = json.as[UserAnswers]
 
-        val converted: ConsignmentType20 = Consignment.transform(uA, Phase.PostTransition)
+        val converted: ConsignmentType20 = Consignment.transform(uA)
 
         converted.countryOfDispatch shouldBe Some("FR")
         converted.countryOfDestination shouldBe Some("IT")
@@ -1736,16 +1812,26 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
         converted.AdditionalReference shouldBe Seq(
           AdditionalReferenceType05(
             sequenceNumber = "1",
-            typeValue = "ar1",
-            referenceNumber = Some("arno1")
+            typeValue = "type123",
+            referenceNumber = Some("ARNO1")
+          ),
+          AdditionalReferenceType05(
+            sequenceNumber = "2",
+            typeValue = "type321",
+            referenceNumber = Some("1ONRA")
           )
         )
 
         converted.AdditionalInformation shouldBe Seq(
           AdditionalInformationType03(
             sequenceNumber = "1",
-            code = "aiCode1",
-            text = Some("ai1")
+            code = "ADDINFTYPE1",
+            text = Some("ORCA")
+          ),
+          AdditionalInformationType03(
+            sequenceNumber = "2",
+            code = "ADDINFTYPE2",
+            text = Some("ACRO")
           )
         )
 
@@ -1754,7 +1840,9 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
         )
 
         converted.HouseConsignment.size shouldBe 1
-        converted.HouseConsignment.head shouldBe HouseConsignmentType10(
+        val output = converted.HouseConsignment.head
+
+        val expected = HouseConsignmentType10(
           sequenceNumber = "1",
           countryOfDispatch = None,
           grossMass = 580.245,
@@ -1865,12 +1953,22 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               TransportDocument = Seq.empty,
               AdditionalReference = Seq(
                 AdditionalReferenceType04(
+                  sequenceNumber = "1",
+                  typeValue = "ar1",
+                  referenceNumber = Some("arno1")
+                ),
+                AdditionalReferenceType04(
                   sequenceNumber = "2",
                   typeValue = "ar2",
                   referenceNumber = None
                 )
               ),
               AdditionalInformation = Seq(
+                AdditionalInformationType03(
+                  sequenceNumber = "1",
+                  code = "aiCode1",
+                  text = Some("ai1")
+                ),
                 AdditionalInformationType03(
                   sequenceNumber = "2",
                   code = "aiCode2",
@@ -1919,12 +2017,26 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               PreviousDocument = Nil,
               SupportingDocument = Nil,
               TransportDocument = Nil,
-              AdditionalReference = Nil,
-              AdditionalInformation = Nil,
+              AdditionalReference = Seq(
+                AdditionalReferenceType04(
+                  sequenceNumber = "1",
+                  typeValue = "ar1",
+                  referenceNumber = Some("arno1")
+                )
+              ),
+              AdditionalInformation = Seq(
+                AdditionalInformationType03(
+                  sequenceNumber = "1",
+                  code = "aiCode1",
+                  text = Some("ai1")
+                )
+              ),
               TransportCharges = None
             )
           )
         )
+
+        output shouldBe expected
       }
     }
 
@@ -1967,7 +2079,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess(phase)
+              val result = consignment.postProcess
 
               result shouldBe ConsignmentType20(
                 grossMass = BigDecimal(1),
@@ -2042,7 +2154,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                   )
                 )
 
-                val result = consignment.postProcess(phase)
+                val result = consignment.postProcess
 
                 result shouldBe ConsignmentType20(
                   grossMass = BigDecimal(1),
@@ -2114,7 +2226,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                   )
                 )
 
-                val result = consignment.postProcess(phase)
+                val result = consignment.postProcess
 
                 result shouldBe consignment
               }
@@ -2164,7 +2276,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess(phase)
+            val result = consignment.postProcess
 
             result shouldBe consignment
           }
@@ -2214,7 +2326,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess(phase)
+            val result = consignment.postProcess
 
             result shouldBe consignment
           }
@@ -2253,7 +2365,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess(phase)
+            val result = consignment.postProcess
 
             result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
@@ -2324,7 +2436,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess(phase)
+            val result = consignment.postProcess
 
             result shouldBe consignment
           }
@@ -2368,7 +2480,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess(phase)
+            val result = consignment.postProcess
 
             result shouldBe consignment
           }
@@ -2407,7 +2519,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess(phase)
+            val result = consignment.postProcess
 
             result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
@@ -2478,7 +2590,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess(phase)
+            val result = consignment.postProcess
 
             result shouldBe consignment
           }
@@ -2522,7 +2634,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess(phase)
+            val result = consignment.postProcess
 
             result shouldBe consignment
           }
@@ -2561,7 +2673,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess(phase)
+            val result = consignment.postProcess
 
             result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
@@ -2632,7 +2744,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess(phase)
+            val result = consignment.postProcess
 
             result shouldBe consignment
           }
@@ -2676,7 +2788,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess(phase)
+            val result = consignment.postProcess
 
             result shouldBe consignment
           }
@@ -2734,17 +2846,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess(Phase.PostTransition)
+              val result = consignment.postProcess
 
-              result shouldBe ConsignmentType20(
+              val expected = ConsignmentType20(
                 grossMass = BigDecimal(1),
-                AdditionalInformation = Seq(
-                  AdditionalInformationType03(
-                    sequenceNumber = "1",
-                    code = "adi1",
-                    text = Some("ADI 1")
-                  )
-                ),
+                AdditionalInformation = Seq.empty,
                 HouseConsignment = Seq(
                   HouseConsignmentType10(
                     sequenceNumber = "1",
@@ -2758,6 +2864,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                         ),
                         AdditionalInformation = Seq(
                           AdditionalInformationType03(
+                            sequenceNumber = "1",
+                            code = "adi1",
+                            text = Some("ADI 1")
+                          ),
+                          AdditionalInformationType03(
                             sequenceNumber = "2",
                             code = "adi2",
                             text = Some("ADI 2")
@@ -2770,12 +2881,21 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
                         ),
-                        AdditionalInformation = Nil
+                        AdditionalInformation = Seq(
+                          AdditionalInformationType03(
+                            sequenceNumber = "1",
+                            code = "adi1",
+                            text = Some("ADI 1")
+                          )
+                        )
                       )
                     )
                   )
                 )
               )
+
+              result shouldBe expected
+
             }
           }
 
@@ -2829,7 +2949,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess(Phase.PostTransition)
+              val result = consignment.postProcess
 
               result shouldBe consignment
             }
@@ -2891,7 +3011,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess(Phase.PostTransition)
+              val result = consignment.postProcess
 
               result shouldBe consignment
             }
@@ -2911,7 +3031,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess(Phase.PostTransition)
+              val result = consignment.postProcess
 
               result shouldBe consignment
             }
@@ -2966,7 +3086,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess(Phase.Transition)
+              val result = consignment.postProcess
 
               result shouldBe consignment
             }
@@ -3025,17 +3145,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess(Phase.PostTransition)
+              val result = consignment.postProcess
 
               result shouldBe ConsignmentType20(
                 grossMass = BigDecimal(1),
-                AdditionalReference = Seq(
-                  AdditionalReferenceType05(
-                    sequenceNumber = "1",
-                    typeValue = "adi1",
-                    referenceNumber = Some("ADI 1")
-                  )
-                ),
+                AdditionalReference = Nil,
                 HouseConsignment = Seq(
                   HouseConsignmentType10(
                     sequenceNumber = "1",
@@ -3049,6 +3163,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                         ),
                         AdditionalReference = Seq(
                           AdditionalReferenceType04(
+                            sequenceNumber = "1",
+                            typeValue = "adi1",
+                            referenceNumber = Some("ADI 1")
+                          ),
+                          AdditionalReferenceType04(
                             sequenceNumber = "2",
                             typeValue = "adi2",
                             referenceNumber = Some("ADI 2")
@@ -3061,7 +3180,13 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
                         ),
-                        AdditionalReference = Nil
+                        AdditionalReference = Seq(
+                          AdditionalReferenceType04(
+                            sequenceNumber = "1",
+                            typeValue = "adi1",
+                            referenceNumber = Some("ADI 1")
+                          )
+                        )
                       )
                     )
                   )
@@ -3120,7 +3245,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess(Phase.PostTransition)
+              val result = consignment.postProcess
 
               result shouldBe consignment
             }
@@ -3182,7 +3307,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess(Phase.PostTransition)
+              val result = consignment.postProcess
 
               result shouldBe consignment
             }
@@ -3202,7 +3327,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess(Phase.PostTransition)
+              val result = consignment.postProcess
 
               result shouldBe consignment
             }
@@ -3257,7 +3382,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess(Phase.Transition)
+              val result = consignment.postProcess
 
               result shouldBe consignment
             }
