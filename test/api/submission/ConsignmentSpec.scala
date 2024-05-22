@@ -175,15 +175,15 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             |             "additionalReferenceNumber" : "1onra"
             |            }
             |          ],
-            |         "additionalInformation" : [
-            |           {
-            |             "type" : "adinftype1",
-            |              "text" : "orca"
-            |            },
-            |           {
-            |            "type" : "adinftype2",
-            |             "text" : "acro"
-            |            }
+            |     "additionalInformation" : [
+            |       {
+            |         "type" : "adinftype1",
+            |          "text" : "orca"
+            |        },
+            |       {
+            |        "type" : "adinftype2",
+            |         "text" : "acro"
+            |        }
             |      ],
             |      "preRequisites" : {
             |        "uniqueConsignmentReference" : "ucr123",
