@@ -64,7 +64,7 @@ class SubmissionController @Inject() (
 
             result.value.map(_.getOrElse {
               metricsService.increment(auditType.name, NOT_FOUND)
-              logger.error(s"SubmissionController:post:$auditType: Could not find user answers, or they did not contain a departure ID")
+              logger.error(s"SubmissionController:post:$auditType: Could not find user answers")
               NotFound
             })
           case JsError(errors) =>
