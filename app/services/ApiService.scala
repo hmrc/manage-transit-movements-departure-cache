@@ -20,7 +20,6 @@ import api.submission.Declaration
 import cats.implicits._
 import connectors.ApiConnector
 import models._
-import play.api.mvc.Result
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.Inject
@@ -31,10 +30,10 @@ class ApiService @Inject() (
   declaration: Declaration
 )(implicit ec: ExecutionContext) {
 
-  def submitDeclaration(userAnswers: UserAnswers, phase: Phase)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
+  def submitDeclaration(userAnswers: UserAnswers, phase: Phase)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     apiConnector.submitDeclaration(declaration.transform(userAnswers, MovementReferenceNumber.Empty, phase))
 
-  def submitAmendment(userAnswers: UserAnswers, departureId: String, phase: Phase)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
+  def submitAmendment(userAnswers: UserAnswers, departureId: String, phase: Phase)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     for {
       mrn <- apiConnector.getMRN(departureId)
       payload = declaration.transform(userAnswers, mrn, phase)

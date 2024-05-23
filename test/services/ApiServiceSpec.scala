@@ -67,7 +67,7 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Gener
       val userAnswers = emptyUserAnswers
       val phase       = arbitrary[Phase].sample.value
 
-      val expectedResult = Right(HttpResponse(OK, ""))
+      val expectedResult = HttpResponse(OK, "")
 
       when(mockApiConnector.submitDeclaration(any())(any())).thenReturn(Future.successful(expectedResult))
 
@@ -85,7 +85,7 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Gener
       val userAnswers = emptyUserAnswersWithDepartureId
       val phase       = arbitrary[Phase].sample.value
 
-      val expectedResult = Right(HttpResponse(OK, ""))
+      val expectedResult = HttpResponse(OK, "")
 
       when(mockApiConnector.getMRN(any())(any())).thenReturn(Future.successful(mrn))
       when(mockApiConnector.submitAmendment(any(), any())(any())).thenReturn(Future.successful(expectedResult))

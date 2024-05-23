@@ -26,7 +26,8 @@ import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.CacheRepository
-import services.{ApiService, AuditService}
+import services.{ApiService, AuditService, MetricsService}
+import uk.gov.hmrc.http.HttpReads.is2xx
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -40,7 +41,8 @@ class SubmissionController @Inject() (
   getVersion: VersionedAction,
   apiService: ApiService,
   cacheRepository: CacheRepository,
-  auditService: AuditService
+  auditService: AuditService,
+  metricsService: MetricsService
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
@@ -48,20 +50,26 @@ class SubmissionController @Inject() (
   def post(): Action[JsValue] =
     (authenticate() andThen getVersion).async(parse.json) {
       implicit request =>
+        val auditType = DeclarationData
         request.body.validate[String] match {
           case JsSuccess(lrn, _) =>
             val result = for {
               userAnswers <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
-              result <- OptionT {
+              result <- OptionT.liftF {
                 apiService
                   .submitDeclaration(userAnswers, request.phase)
                   .flatMap(responseToResult(userAnswers, _, None, DeclarationData))
               }
             } yield result
 
-            result.value.map(_.getOrElse(InternalServerError))
+            result.value.map(_.getOrElse {
+              metricsService.increment(auditType.name, NOT_FOUND)
+              logger.error(s"SubmissionController:post:$auditType: Could not find user answers, or they did not contain a departure ID")
+              NotFound
+            })
           case JsError(errors) =>
-            logger.warn(s"Failed to validate request body as String: $errors")
+            metricsService.increment(auditType.name, BAD_REQUEST)
+            logger.warn(s"SubmissionController:post:$auditType: Failed to validate request body as String: $errors")
             Future.successful(BadRequest)
         }
     }
@@ -69,42 +77,54 @@ class SubmissionController @Inject() (
   def postAmendment(): Action[JsValue] =
     (authenticate() andThen getVersion).async(parse.json) {
       implicit request =>
+        val auditType = DeclarationAmendment
         request.body.validate[String] match {
           case JsSuccess(lrn, _) =>
             val result = for {
               userAnswers <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
               departureId <- OptionT.fromOption[Future](userAnswers.departureId)
-              result <- OptionT {
+              result <- OptionT.liftF {
                 apiService
                   .submitAmendment(userAnswers, departureId, request.phase)
-                  .flatMap(responseToResult(userAnswers, _, Some(departureId), DeclarationAmendment))
+                  .flatMap(responseToResult(userAnswers, _, Some(departureId), auditType))
               }
             } yield result
 
-            result.value.map(_.getOrElse(InternalServerError))
+            result.value.map(_.getOrElse {
+              metricsService.increment(auditType.name, NOT_FOUND)
+              logger.error(s"SubmissionController:post:$auditType: Could not find user answers, or they did not contain a departure ID")
+              NotFound
+            })
           case JsError(errors) =>
-            logger.warn(s"Failed to validate request body as String: $errors")
+            metricsService.increment(auditType.name, BAD_REQUEST)
+            logger.warn(s"SubmissionController:post:$auditType: Failed to validate request body as String: $errors")
             Future.successful(BadRequest)
         }
     }
 
   private def responseToResult(
     userAnswers: UserAnswers,
-    resultOrResponse: Either[Result, HttpResponse],
+    response: HttpResponse,
     departureId: Option[String],
     auditType: AuditType
-  )(implicit hc: HeaderCarrier): Future[Option[Result]] = {
+  )(implicit hc: HeaderCarrier): Future[Result] = {
     val submissionState = Submitted
-    resultOrResponse match {
-      case Right(response) =>
+    metricsService.increment(auditType.name, response)
+    response.status match {
+      case status if is2xx(status) =>
         cacheRepository
           .set(userAnswers, submissionState, departureId)
           .map {
             _ =>
               auditService.audit(auditType, userAnswers.copy(status = submissionState))
-              Option(Ok(response.body))
+              Ok(response.body)
           }
-      case Left(error) => Future.successful(Option(error))
+      case BAD_REQUEST =>
+        logger.warn(s"SubmissionController:post:$auditType: Bad request")
+        Future.successful(BadRequest)
+      case e =>
+        logger.error(s"SubmissionController:post:$auditType: Something went wrong: $e")
+        Future.successful(InternalServerError)
     }
   }
 

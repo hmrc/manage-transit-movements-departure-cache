@@ -21,15 +21,12 @@ import api.submission.consignmentType20.{activeBorderTransportMeansReads, transp
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import generated._
 import generators.Generators
-import models.{Phase, UserAnswers}
-import org.scalacheck.Arbitrary.arbitrary
+import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 
 import scala.collection.immutable.Seq
 
 class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Generators {
-
-  private val phase = arbitrary[Phase].sample.value
 
   "Consignment" when {
 

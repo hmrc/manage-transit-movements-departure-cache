@@ -217,21 +217,21 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
           server.stubFor(post(urlEqualTo(url)).willReturn(okJson(expected)))
 
           val res = await(connector.submitDeclaration(payload))
-          res.toString shouldBe Right(HttpResponse(OK, expected)).toString
+          res.status shouldBe OK
         }
 
         "bad request" in {
           server.stubFor(post(urlEqualTo(url)).willReturn(badRequest()))
 
           val res = await(connector.submitDeclaration(payload))
-          res shouldBe Left(BadRequest("ApiConnector:submitDeclaration: bad request"))
+          res.status shouldBe BAD_REQUEST
         }
 
         "internal server error" in {
           server.stubFor(post(urlEqualTo(url)).willReturn(serverError()))
 
           val res = await(connector.submitDeclaration(payload))
-          res shouldBe Left(InternalServerError("ApiConnector:submitDeclaration: something went wrong"))
+          res.status shouldBe INTERNAL_SERVER_ERROR
         }
       }
 
@@ -247,21 +247,21 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
           server.stubFor(post(urlEqualTo(url)).willReturn(okJson(expected)))
 
           val res = await(connector.submitAmendment(departureId, payload))
-          res.toString shouldBe Right(HttpResponse(OK, expected)).toString
+          res.status shouldBe OK
         }
 
         "bad request" in {
           server.stubFor(post(urlEqualTo(url)).willReturn(badRequest()))
 
           val res = await(connector.submitAmendment(departureId, payload))
-          res shouldBe Left(BadRequest("ApiConnector:submitAmendment: bad request"))
+          res.status shouldBe BAD_REQUEST
         }
 
         "internal server error" in {
           server.stubFor(post(urlEqualTo(url)).willReturn(serverError()))
 
           val res = await(connector.submitAmendment(departureId, payload))
-          res shouldBe Left(InternalServerError("ApiConnector:submitAmendment: something went wrong"))
+          res.status shouldBe INTERNAL_SERVER_ERROR
         }
       }
     }
