@@ -19,12 +19,12 @@ package api.submission
 import api.submission.Consignment.RichConsignmentType20
 import api.submission.consignmentType20.{activeBorderTransportMeansReads, transportEquipmentReads}
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import config.Constants.ModeOfTransport.{Maritime, Rail}
 import generated._
 import generators.Generators
+import models.Phase.{PostTransition, Transition}
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
-
-import scala.collection.immutable.Seq
 
 class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Generators {
 
@@ -636,7 +636,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         val uA: UserAnswers = json.as[UserAnswers]
 
-        val converted: ConsignmentType20 = Consignment.transform(uA)
+        val converted: ConsignmentType20 = Consignment.transform(uA, Transition)
 
         converted.countryOfDispatch shouldBe Some("FR")
         converted.countryOfDestination shouldBe Some("IT")
@@ -1602,7 +1602,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         val uA: UserAnswers = json.as[UserAnswers]
 
-        val converted: ConsignmentType20 = Consignment.transform(uA)
+        val converted: ConsignmentType20 = Consignment.transform(uA, Transition)
 
         converted.countryOfDispatch shouldBe Some("FR")
         converted.countryOfDestination shouldBe Some("IT")
@@ -2076,7 +2076,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess(Transition)
 
               result shouldBe ConsignmentType20(
                 grossMass = BigDecimal(1),
@@ -2151,7 +2151,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                   )
                 )
 
-                val result = consignment.postProcess
+                val result = consignment.postProcess(Transition)
 
                 result shouldBe ConsignmentType20(
                   grossMass = BigDecimal(1),
@@ -2223,7 +2223,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                   )
                 )
 
-                val result = consignment.postProcess
+                val result = consignment.postProcess(Transition)
 
                 result shouldBe consignment
               }
@@ -2273,7 +2273,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(Transition)
 
             result shouldBe consignment
           }
@@ -2323,7 +2323,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(Transition)
 
             result shouldBe consignment
           }
@@ -2362,7 +2362,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(Transition)
 
             result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
@@ -2433,7 +2433,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(Transition)
 
             result shouldBe consignment
           }
@@ -2477,7 +2477,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(Transition)
 
             result shouldBe consignment
           }
@@ -2516,7 +2516,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(Transition)
 
             result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
@@ -2587,7 +2587,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(Transition)
 
             result shouldBe consignment
           }
@@ -2631,7 +2631,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(Transition)
 
             result shouldBe consignment
           }
@@ -2670,7 +2670,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(Transition)
 
             result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
@@ -2741,7 +2741,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(Transition)
 
             result shouldBe consignment
           }
@@ -2785,7 +2785,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(Transition)
 
             result shouldBe consignment
           }
@@ -2843,7 +2843,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess(Transition)
 
               val expected = ConsignmentType20(
                 grossMass = BigDecimal(1),
@@ -2946,7 +2946,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess(Transition)
 
               result shouldBe consignment
             }
@@ -3008,7 +3008,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess(Transition)
 
               result shouldBe consignment
             }
@@ -3028,7 +3028,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess(Transition)
 
               result shouldBe consignment
             }
@@ -3083,7 +3083,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess(Transition)
 
               result shouldBe consignment
             }
@@ -3142,7 +3142,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess(Transition)
 
               result shouldBe ConsignmentType20(
                 grossMass = BigDecimal(1),
@@ -3242,7 +3242,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess(Transition)
 
               result shouldBe consignment
             }
@@ -3304,7 +3304,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess(Transition)
 
               result shouldBe consignment
             }
@@ -3324,7 +3324,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess(Transition)
 
               result shouldBe consignment
             }
@@ -3379,10 +3379,49 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess(Transition)
 
               result shouldBe consignment
             }
+          }
+        }
+      }
+
+      "cleanUp" when {
+        "in Transition Phase" must {
+          "clean up Inland Mode if the mode is Rail" in {
+            val consignment = ConsignmentType20(
+              grossMass = BigDecimal(1),
+              inlandModeOfTransport = Some(Rail)
+            )
+
+            val result = consignment.postProcess(Transition)
+
+            result.inlandModeOfTransport shouldBe None
+          }
+
+          "keep Inland Mode same if the mode is not Rail" in {
+            val consignment = ConsignmentType20(
+              grossMass = BigDecimal(1),
+              inlandModeOfTransport = Some(Maritime)
+            )
+
+            val result = consignment.postProcess(Transition)
+
+            result.inlandModeOfTransport shouldBe Some(Maritime)
+          }
+        }
+
+        "in Post Transition Phase" must {
+          "keep Inland Mode same" in {
+            val consignment = ConsignmentType20(
+              grossMass = BigDecimal(1),
+              inlandModeOfTransport = Some(Rail)
+            )
+
+            val result = consignment.postProcess(PostTransition)
+
+            result.inlandModeOfTransport shouldBe Some(Rail)
           }
         }
       }

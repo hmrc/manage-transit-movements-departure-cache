@@ -48,7 +48,7 @@ class Declaration @Inject() (header: Header) {
       HolderOfTheTransitProcedure = HolderOfTheTransitProcedure.transform(uA),
       Representative = Representative.transform(uA),
       Guarantee = Guarantee.transform(uA),
-      Consignment = Consignment.transform(uA),
+      Consignment = Consignment.transform(uA, phase),
       attributes = attributes
     )
 
@@ -64,7 +64,7 @@ class Declaration @Inject() (header: Header) {
       HolderOfTheTransitProcedure = HolderOfTheTransitProcedure.transform(uA),
       Representative = Representative.transform(uA),
       Guarantee = Guarantee.transformIE013(uA),
-      Consignment = Consignment.transform(uA),
+      Consignment = Consignment.transform(uA, phase),
       attributes = attributes
     )
 

@@ -19,8 +19,10 @@ package api.submission
 import api.submission.Level._
 import api.submission.documentType.RichDocumentJsValue
 import api.submission.houseConsignmentType10.RichHouseConsignmentType10
+import config.Constants.ModeOfTransport.Rail
 import generated._
-import models.UserAnswers
+import models.Phase.Transition
+import models.{Phase, UserAnswers}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -28,16 +30,23 @@ import java.util.UUID
 
 object Consignment {
 
-  def transform(uA: UserAnswers): ConsignmentType20 =
-    uA.metadata.data.as[ConsignmentType20](consignmentType20.reads).postProcess
+  def transform(uA: UserAnswers, phase: Phase): ConsignmentType20 =
+    uA.metadata.data.as[ConsignmentType20](consignmentType20.reads).postProcess(phase)
 
   implicit class RichConsignmentType20(value: ConsignmentType20) {
 
-    def postProcess: ConsignmentType20 = value
+    def postProcess(phase: Phase): ConsignmentType20 = value
       .rollUpTransportCharges()
       .rollUpUCR()
       .rollUpCountryOfDispatch()
       .rollUpCountryOfDestination()
+      .cleanUp(phase)
+
+    def cleanUp(phase: Phase): ConsignmentType20 =
+      value.inlandModeOfTransport match {
+        case Some(Rail) if phase == Transition => value.copy(inlandModeOfTransport = None)
+        case _                                 => value
+      }
 
     def rollUpTransportCharges(): ConsignmentType20 =
       rollUp[Option[TransportChargesType], Option[TransportChargesType]](
