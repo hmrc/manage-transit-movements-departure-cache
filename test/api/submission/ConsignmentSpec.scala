@@ -24,6 +24,8 @@ import generated._
 import generators.Generators
 import models.Phase.{PostTransition, Transition}
 import models.UserAnswers
+import org.scalacheck.Gen
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.libs.json.{JsValue, Json}
 
 class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Generators {
@@ -1450,23 +1452,29 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           }
 
           "keep Inland Mode same if the mode is not Rail" in {
-            val json: JsValue   = getUserAnswersJson("5")
-            val uA: UserAnswers = json.as[UserAnswers]
+            forAll(genInlandMode().retryUntil(_ != Rail)) {
+              inlandMode =>
+                val json: JsValue   = getUserAnswersJson(inlandMode)
+                val uA: UserAnswers = json.as[UserAnswers]
 
-            val converted: ConsignmentType20 = Consignment.transform(uA, Transition)
+                val converted: ConsignmentType20 = Consignment.transform(uA, Transition)
 
-            converted.inlandModeOfTransport shouldBe Some("5")
+                converted.inlandModeOfTransport shouldBe Some(inlandMode)
+            }
           }
         }
 
         "in Post Transition Phase" must {
           "keep Inland Mode same" in {
-            val json: JsValue   = getUserAnswersJson(Rail)
-            val uA: UserAnswers = json.as[UserAnswers]
+            forAll(genInlandMode()) {
+              inlandMode =>
+                val json: JsValue   = getUserAnswersJson(inlandMode)
+                val uA: UserAnswers = json.as[UserAnswers]
 
-            val converted: ConsignmentType20 = Consignment.transform(uA, PostTransition)
+                val converted: ConsignmentType20 = Consignment.transform(uA, PostTransition)
 
-            converted.inlandModeOfTransport shouldBe Some(Rail)
+                converted.inlandModeOfTransport shouldBe Some(inlandMode)
+            }
           }
         }
       }

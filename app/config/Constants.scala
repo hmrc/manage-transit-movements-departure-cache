@@ -22,4 +22,8 @@ object Constants {
     val Rail = "2"
   }
 
+  object RepresentativeStatusCode {
+    val DirectRepresentation = "2"
+  }
+
 }

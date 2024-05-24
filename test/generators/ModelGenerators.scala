@@ -21,6 +21,9 @@ import org.scalacheck.Gen.{choose, listOfN}
 import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
+  self: Generators =>
+
+  lazy val stringMaxLength = 36
 
   implicit lazy val arbitraryPhase: Arbitrary[Phase] =
     Arbitrary {
@@ -28,12 +31,6 @@ trait ModelGenerators {
         phase <- Gen.oneOf(Phase.Transition, Phase.PostTransition)
       } yield phase
     }
-
-  def stringsWithMaxLength(maxLength: Int, charGen: Gen[Char] = Gen.alphaNumChar): Gen[String] =
-    for {
-      length <- choose(1, maxLength)
-      chars  <- listOfN(length, charGen)
-    } yield chars.mkString
 
   implicit lazy val arbitrarySubmissionState: Arbitrary[SubmissionState] = Arbitrary {
     val values = Seq(

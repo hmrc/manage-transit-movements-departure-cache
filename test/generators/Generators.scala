@@ -16,4 +16,16 @@
 
 package generators
 
-trait Generators extends ModelGenerators
+import org.scalacheck.Gen
+import org.scalacheck.Gen.{choose, listOfN}
+
+trait Generators extends ModelGenerators {
+
+  def stringsWithMaxLength(maxLength: Int, charGen: Gen[Char] = Gen.alphaNumChar): Gen[String] =
+    for {
+      length <- choose(1, maxLength)
+      chars  <- listOfN(length, charGen)
+    } yield chars.mkString
+
+  def genInlandMode(): Gen[String] = Gen.chooseNum(1, 9).map(_.toString)
+}
