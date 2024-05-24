@@ -16,7 +16,9 @@
 
 package models
 
-sealed abstract class AuditType(val name: String)
+sealed abstract class AuditType(val name: String) {
+  override def toString: String = name
+}
 
 object AuditType {
 

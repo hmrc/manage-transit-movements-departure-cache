@@ -17,11 +17,10 @@
 package api.submission
 
 import api.submission.Level._
-import api.submission.additionalReferenceType04.RichAdditionalReferenceType04
 import api.submission.documentType.RichDocumentJsValue
 import api.submission.houseConsignmentType10.RichHouseConsignmentType10
 import generated._
-import models.{Phase, UserAnswers}
+import models.UserAnswers
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
@@ -647,16 +646,6 @@ object additionalReferenceType04 {
 
   def reads(index: Int): Reads[AdditionalReferenceType04] =
     additionalReference.reads(index)(AdditionalReferenceType04)
-
-  implicit class RichAdditionalReferenceType04(value: AdditionalReferenceType04) {
-
-    def asAdditionalReferenceType05: AdditionalReferenceType05 =
-      AdditionalReferenceType05(
-        sequenceNumber = value.sequenceNumber,
-        typeValue = value.typeValue,
-        referenceNumber = value.referenceNumber
-      )
-  }
 }
 
 object additionalInformationType03 {

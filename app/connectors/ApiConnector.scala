@@ -16,14 +16,10 @@
 
 package connectors
 
-import com.github.dwickern.macros.NameOf._
 import config.AppConfig
 import models.{Departure, Departures, Messages, MovementReferenceNumber}
 import play.api.Logging
 import play.api.http.HeaderNames._
-import play.api.http.Status._
-import play.api.mvc.Result
-import play.api.mvc.Results.{BadRequest, InternalServerError}
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpResponse, StringContextOps}
@@ -63,41 +59,24 @@ class ApiConnector @Inject() (http: HttpClientV2)(implicit ec: ExecutionContext,
       .execute[Messages]
   }
 
-  def submitAmendment(departureId: String, xml: NodeSeq)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
+  def submitAmendment(departureId: String, xml: NodeSeq)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val url = url"${appConfig.apiUrl}/movements/departures/$departureId/messages"
-    getHttpResponse(url, xml, HttpMethodName(nameOf(submitAmendment _)))
+    submit(url, xml)
   }
 
-  def submitDeclaration(xml: NodeSeq)(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] = {
+  def submitDeclaration(xml: NodeSeq)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val url = url"${appConfig.apiUrl}/movements/departures"
-    getHttpResponse(url, xml, HttpMethodName(nameOf(submitDeclaration _)))
+    submit(url, xml)
   }
 
-  private def getHttpResponse(
+  private def submit(
     url: URL,
-    xml: NodeSeq,
-    httpMethod: HttpMethodName
-  )(implicit hc: HeaderCarrier): Future[Either[Result, HttpResponse]] =
+    xml: NodeSeq
+  )(implicit hc: HeaderCarrier): Future[HttpResponse] =
     http
       .post(url)
       .setHeader(acceptHeader)
       .setHeader(CONTENT_TYPE -> "application/xml")
       .withBody(xml)
       .execute[HttpResponse]
-      .map {
-        response =>
-          response.status match {
-            case x if is2xx(x) =>
-              Right(response)
-            case BAD_REQUEST =>
-              logger.info(s"ApiConnector:${httpMethod.name}: bad request")
-              logger.debug(s"${response.body}")
-              Left(BadRequest(s"ApiConnector:${httpMethod.name}: bad request"))
-            case e =>
-              logger.error(s"ApiConnector:${httpMethod.name}: something went wrong: $e")
-              Left(InternalServerError(s"ApiConnector:${httpMethod.name}: something went wrong"))
-          }
-      }
-
-  private case class HttpMethodName(name: String)
 }
