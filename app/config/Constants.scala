@@ -19,13 +19,7 @@ package config
 object Constants {
 
   object ModeOfTransport {
-    val Maritime = "1"
-    val Rail     = "2"
-    val Road     = "3"
-    val Air      = "4"
-    val Mail     = "5"
-    val Fixed    = "7"
-    val Unknown  = "9"
+    val Rail = "2"
   }
 
 }
