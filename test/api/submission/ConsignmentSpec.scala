@@ -19,12 +19,14 @@ package api.submission
 import api.submission.Consignment.RichConsignmentType20
 import api.submission.consignmentType20.{activeBorderTransportMeansReads, transportEquipmentReads}
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import config.Constants.ModeOfTransport.Rail
 import generated._
 import generators.Generators
+import models.Phase.{PostTransition, Transition}
 import models.UserAnswers
+import org.scalacheck.Gen
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.libs.json.{JsValue, Json}
-
-import scala.collection.immutable.Seq
 
 class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Generators {
 
@@ -34,609 +36,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
       "convert to API format with documents" in {
 
-        val json: JsValue = Json.parse(s"""
-            |{
-            |  "_id" : "$uuid",
-            |  "lrn" : "$lrn",
-            |  "eoriNumber" : "$eoriNumber",
-            |  "isSubmitted" : "notSubmitted",
-            |  "data" : {
-            |    "traderDetails" : {
-            |      "consignment" : {
-            |        "consignor" : {
-            |          "eori" : "consignor1",
-            |          "name" : "Mr Consignor",
-            |          "country" : {
-            |            "code" : "GB",
-            |            "description" : "United Kingdom"
-            |          },
-            |          "address" : {
-            |            "numberAndStreet" : "21 Test Lane",
-            |            "city" : "Newcastle upon Tyne",
-            |            "postalCode" : "NE1 1NE"
-            |          },
-            |          "contact" : {
-            |            "name" : "Consignor Contact",
-            |            "telephoneNumber" : "+44 101 157 0192"
-            |          }
-            |        },
-            |        "consignee" : {
-            |          "eori" : "consignee1",
-            |          "name" : "Mr Consignee",
-            |          "country" : {
-            |            "code" : "FR",
-            |            "description" : "France"
-            |          },
-            |          "address" : {
-            |            "numberAndStreet" : "21 Test Rue",
-            |            "city" : "Paris",
-            |            "postalCode" : "PA1 1PA"
-            |          }
-            |        }
-            |      }
-            |    },
-            |    "routeDetails" : {
-            |      "routing" : {
-            |        "countriesOfRouting" : [
-            |          {
-            |            "countryOfRouting" : {
-            |              "code" : "AD",
-            |              "description" : "Andorra"
-            |            }
-            |          },
-            |          {
-            |            "countryOfRouting" : {
-            |              "code" : "AR",
-            |              "description" : "Argentina"
-            |            }
-            |          }
-            |        ]
-            |      },
-            |      "locationOfGoods" : {
-            |        "typeOfLocation" : {
-            |          "type": "A",
-            |          "description": "Designated location"
-            |        },
-            |        "qualifierOfIdentification" : {
-            |          "qualifier": "T",
-            |          "description": "Postal code"
-            |        },
-            |        "identifier" : {
-            |          "authorisationNumber" : "authorisation number",
-            |          "additionalIdentifier" : "additional identifier",
-            |          "unLocode" : "DEAAL",
-            |          "customsOffice" : {
-            |            "id" : "XI000142",
-            |            "name" : "Belfast EPU",
-            |            "phoneNumber" : "+44 (0)02896 931537"
-            |          },
-            |          "coordinates" : {
-            |            "latitude" : "lat",
-            |            "longitude" : "lon"
-            |          },
-            |          "eori" : "GB12345",
-            |          "country" : {
-            |            "code" : "ES",
-            |            "description" : "Spain"
-            |          },
-            |          "address" : {
-            |            "numberAndStreet" : "21 Test Camino",
-            |            "city" : "Madrid",
-            |            "postalCode" : "ES1 1SE"
-            |          },
-            |          "postalCode" : {
-            |            "streetNumber" : "21",
-            |            "postalCode" : "DE1 1DE",
-            |            "country" : {
-            |              "code" : "DE",
-            |              "description" : "Germany"
-            |            }
-            |          }
-            |        },
-            |        "contact" : {
-            |          "name" : "Location of goods Contact",
-            |          "telephoneNumber" : "+44 202 157 0192"
-            |        }
-            |      },
-            |      "loadingAndUnloading" : {
-            |        "loading" : {
-            |          "unLocode" : "AEFAT",
-            |          "additionalInformation" : {
-            |            "country" : {
-            |              "code" : "Loading country",
-            |              "description" : "United Kingdom"
-            |            },
-            |            "location" : "Loading location"
-            |          }
-            |        },
-            |        "unloading" : {
-            |          "unLocode" : "ADALV",
-            |          "additionalInformation" : {
-            |            "country" : {
-            |              "code" : "Unloading country",
-            |              "description" : "United Kingdom"
-            |            },
-            |            "location" : "Unloading location"
-            |          }
-            |        }
-            |      }
-            |    },
-            |    "transportDetails" : {
-            |    "additionalReference" : [
-            |            {
-            |              "type" : "type123",
-            |             "additionalReferenceNumber" : "arno1"
-            |           },
-            |            {
-            |              "type" : "type321",
-            |             "additionalReferenceNumber" : "1onra"
-            |            }
-            |          ],
-            |     "additionalInformation" : [
-            |       {
-            |         "type" : "adinftype1",
-            |          "text" : "orca"
-            |        },
-            |       {
-            |        "type" : "adinftype2",
-            |         "text" : "acro"
-            |        }
-            |      ],
-            |      "preRequisites" : {
-            |        "uniqueConsignmentReference" : "ucr123",
-            |        "countryOfDispatch" : {
-            |          "code" : "FR",
-            |          "description" : "France"
-            |        },
-            |        "itemsDestinationCountry" : {
-            |          "code" : "IT",
-            |          "description" : "Italy"
-            |        },
-            |        "containerIndicator" : true
-            |      },
-            |      "inlandMode" : {
-            |        "code": "1",
-            |        "description": "Maritime Transport"
-            |      },
-            |      "borderModeOfTransport" : {
-            |        "code": "1",
-            |        "description": "Maritime Transport"
-            |      },
-            |      "carrierDetails" : {
-            |        "identificationNumber" : "carrier1",
-            |        "addContactYesNo" : true,
-            |        "contact" : {
-            |          "name" : "Carrier Contact",
-            |          "telephoneNumber" : "+44 808 157 0192"
-            |        }
-            |      },
-            |      "transportMeans" : {
-            |        "departure" : [
-            |          {
-            |            "identification" : {
-            |              "type": "10",
-            |              "description": "IMO Ship Identification Number"
-            |            },
-            |            "meansIdentificationNumber" : "means id number",
-            |            "vehicleCountry" : {
-            |              "code" : "FR",
-            |              "desc" : "France"
-            |            }
-            |          }
-            |        ],
-            |        "active" : [
-            |          {
-            |            "identification" : {
-            |              "code": "11",
-            |              "description": "Name of the sea-going vessel"
-            |            },
-            |            "identificationNumber" : "active id number",
-            |            "customsOfficeActiveBorder" : {
-            |              "id" : "IT018101",
-            |              "name" : "Aeroporto Bari - Palese",
-            |              "phoneNumber" : "0039 0805316196"
-            |            },
-            |            "nationality" : {
-            |              "code" : "ES",
-            |              "desc" : "Spain"
-            |            },
-            |            "conveyanceReferenceNumber" : "conveyance ref number"
-            |          }
-            |        ]
-            |      },
-            |      "supplyChainActors" : [
-            |        {
-            |          "supplyChainActorType" : {
-            |            "role": "CS",
-            |            "description": "Consolidator"
-            |          },
-            |          "identificationNumber" : "sca1"
-            |        },
-            |        {
-            |          "supplyChainActorType" : {
-            |            "role": "FW",
-            |            "description": "Freight Forwarder"
-            |          },
-            |          "identificationNumber" : "sca2"
-            |        },
-            |        {
-            |          "supplyChainActorType" : {
-            |            "role": "MF",
-            |            "description": "Manufacturer"
-            |          },
-            |          "identificationNumber" : "sca3"
-            |        },
-            |        {
-            |          "supplyChainActorType" : {
-            |            "role": "WH",
-            |            "description": "Warehouse Keeper"
-            |          },
-            |          "identificationNumber" : "sca4"
-            |        }
-            |      ],
-            |      "equipmentsAndCharges" : {
-            |        "equipments" : [
-            |          {
-            |            "containerIdentificationNumber" : "container id 1",
-            |            "seals" : [
-            |              {
-            |                "identificationNumber" : "seal 1"
-            |              },
-            |              {
-            |                "identificationNumber" : "seal 2"
-            |              }
-            |            ],
-            |            "uuid" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
-            |          }
-            |        ],
-            |        "paymentMethod" : {
-            |          "method": "A",
-            |          "description": "Payment in cash"
-            |        }
-            |      }
-            |    },
-            |    "documents" : {
-            |      "addDocumentsYesNo" : true,
-            |      "documents" : [
-            |        {
-            |          "attachToAllItems" : false,
-            |          "previousDocumentType" : {
-            |            "type" : "Previous",
-            |            "code" : "CO",
-            |            "description" : "SAD - Community goods subject"
-            |          },
-            |          "details" : {
-            |            "documentReferenceNumber" : "previous1",
-            |            "uuid" : "ac50154c-cad1-4320-8def-d282eea63b2e",
-            |            "addTypeOfPackageYesNo" : false,
-            |            "addNumberOfPackagesYesNo" : false,
-            |            "declareQuantityOfGoodsYesNo" : false,
-            |            "addAdditionalInformationYesNo" : false
-            |          }
-            |        },
-            |        {
-            |          "attachToAllItems" : false,
-            |          "type" : {
-            |            "type" : "Transport",
-            |            "code" : "235",
-            |            "description" : "Container list"
-            |          },
-            |          "details" : {
-            |            "documentReferenceNumber" : "transport1",
-            |            "uuid" : "1794d93b-17d5-44fe-a18d-aaa2059d06fe"
-            |          }
-            |        },
-            |        {
-            |          "inferredAttachToAllItems" : false,
-            |          "type" : {
-            |            "type" : "Support",
-            |            "code" : "C673",
-            |            "description" : "Catch certificate"
-            |          },
-            |          "details" : {
-            |            "documentReferenceNumber" : "support1",
-            |            "uuid" : "a573bfd3-6470-40c4-a290-ea2d8d43c02a",
-            |            "addLineItemNumberYesNo" : true,
-            |            "lineItemNumber" : 678,
-            |            "addAdditionalInformationYesNo" : true,
-            |            "additionalInformation" : "complement of information support1"
-            |          }
-            |        },
-            |        {
-            |          "attachToAllItems" : false,
-            |          "type" : {
-            |            "type" : "Previous",
-            |            "code" : "T2F",
-            |            "description" : "Internal Community transit Declaration"
-            |          },
-            |          "details" : {
-            |            "documentReferenceNumber" : "previous2",
-            |            "uuid" : "3882459f-b7bc-478d-9d24-359533aa8fe3",
-            |            "addTypeOfPackageYesNo" : true,
-            |            "packageType" : {
-            |              "code" : "AT",
-            |              "description" : "Atomizer"
-            |            },
-            |            "addNumberOfPackagesYesNo" : true,
-            |            "numberOfPackages" : 12,
-            |            "declareQuantityOfGoodsYesNo" : true,
-            |            "metric" : {
-            |              "code" : "MIL",
-            |              "description" : "1000 items"
-            |            },
-            |            "quantity" : 13,
-            |            "addAdditionalInformationYesNo" : true,
-            |            "additionalInformation" : "complement of information previous2"
-            |          }
-            |        },
-            |        {
-            |          "attachToAllItems" : true,
-            |          "type" : {
-            |            "type" : "Transport",
-            |            "code" : "235",
-            |            "description" : "Container list"
-            |          },
-            |          "details" : {
-            |            "documentReferenceNumber" : "transport2",
-            |            "uuid" : "4ab6bc5a-608d-41f6-acf7-241eb387cad9"
-            |          }
-            |        },
-            |        {
-            |          "attachToAllItems" : true,
-            |          "type" : {
-            |            "type" : "Support",
-            |            "code" : "C673",
-            |            "description" : "Catch certificate"
-            |          },
-            |          "details" : {
-            |            "documentReferenceNumber" : "support2",
-            |            "uuid" : "92626b24-d08e-4d96-ac2c-33b5549361c8",
-            |            "addLineItemNumberYesNo" : false,
-            |            "addAdditionalInformationYesNo" : false
-            |          }
-            |        },
-            |        {
-            |          "attachToAllItems" : true,
-            |          "type" : {
-            |            "type" : "Previous",
-            |            "code" : "IM",
-            |            "description" : "Single Administrative Document"
-            |          },
-            |          "details" : {
-            |            "documentReferenceNumber" : "previous3",
-            |            "uuid" : "a3184d85-9860-4258-b5ce-28201f0407d3",
-            |            "addAdditionalInformationYesNo" : true,
-            |            "additionalInformation" : "complement of information previous3"
-            |          }
-            |        }
-            |      ]
-            |    },
-            |    "items" : [
-            |      {
-            |        "description" : "Description 1",
-            |        "declarationType" : {
-            |          "code": "T1",
-            |          "description": "Goods not having the customs status of Union goods, which are placed under the common transit procedure."
-            |        },
-            |        "countryOfDispatch" : {
-            |          "code" : "GB",
-            |          "description" : "United Kingdom"
-            |        },
-            |        "countryOfDestination" : {
-            |          "code" : "FR",
-            |          "description" : "France"
-            |        },
-            |        "uniqueConsignmentReference" : "UCR 1",
-            |        "customsUnionAndStatisticsCode" : "CUS code 1",
-            |        "commodityCode" : "commodity code 1",
-            |        "combinedNomenclatureCode" : "CN code 1",
-            |        "dangerousGoodsList" : [
-            |          {
-            |            "unNumber" : "UN number 1_1"
-            |          },
-            |          {
-            |            "unNumber" : "UN number 1_2"
-            |          }
-            |        ],
-            |        "grossWeight" : 123.456,
-            |        "netWeight" : 1234,
-            |        "supplementaryUnits" : 12345,
-            |        "methodOfPayment" : {
-            |          "method" : "A",
-            |          "description" : "Payment in cash"
-            |        },
-            |        "packages" : [
-            |          {
-            |            "packageType" : {
-            |              "code" : "VL",
-            |              "description" : "Bulk, liquid",
-            |              "type" : "Bulk"
-            |            },
-            |            "addShippingMarkYesNo" : false
-            |          },
-            |          {
-            |            "packageType" : {
-            |              "code" : "NE",
-            |              "description" : "Unpacked or unpackaged",
-            |              "type" : "Unpacked"
-            |            },
-            |            "numberOfPackages" : 5,
-            |            "addShippingMarkYesNo" : false
-            |          },
-            |          {
-            |            "packageType" : {
-            |              "code" : "TR",
-            |              "description" : "Trunk",
-            |              "type" : "Other"
-            |            },
-            |            "shippingMark" : "mark3"
-            |          }
-            |        ],
-            |        "addSupplyChainActorYesNo" : true,
-            |        "supplyChainActors" : [
-            |          {
-            |            "supplyChainActorType" : {
-            |              "role": "CS",
-            |              "description": "Consolidator"
-            |            },
-            |            "identificationNumber" : "itemSCA1"
-            |          },
-            |          {
-            |            "supplyChainActorType" : {
-            |              "role": "FW",
-            |              "description": "Freight Forwarder"
-            |            },
-            |            "identificationNumber" : "itemSCA2"
-            |          },
-            |          {
-            |            "supplyChainActorType" : {
-            |              "role": "MF",
-            |              "description": "Manufacturer"
-            |            },
-            |            "identificationNumber" : "itemSCA3"
-            |          },
-            |          {
-            |            "supplyChainActorType" : {
-            |              "role": "WH",
-            |              "description": "Warehouse Keeper"
-            |            },
-            |            "identificationNumber" : "itemSCA4"
-            |          }
-            |        ],
-            |        "addDocumentsYesNo" : true,
-            |        "documents" : [
-            |          {
-            |            "document" : "1794d93b-17d5-44fe-a18d-aaa2059d06fe"
-            |          },
-            |          {
-            |            "document" : "a573bfd3-6470-40c4-a290-ea2d8d43c02a"
-            |          },
-            |          {
-            |            "document" : "3882459f-b7bc-478d-9d24-359533aa8fe3"
-            |          },
-            |          {
-            |            "document" : "ac50154c-cad1-4320-8def-d282eea63b2e"
-            |          },
-            |          {
-            |            "document" : "7d342b27-5171-428c-9354-fb2928b72c3a"
-            |          }
-            |        ],
-            |        "addAdditionalReferenceYesNo" : true,
-            |        "additionalReferences" : [
-            |          {
-            |            "additionalReference" : {
-            |              "documentType" : "ar1",
-            |              "description" : "Additional reference 1"
-            |            },
-            |            "addAdditionalReferenceNumberYesNo" : true,
-            |            "additionalReferenceNumber" : "arno1"
-            |          },
-            |          {
-            |            "additionalReference" : {
-            |              "documentType" : "ar2",
-            |              "description" : "Additional reference 2"
-            |            },
-            |            "addAdditionalReferenceNumberYesNo" : false
-            |          }
-            |        ],
-            |        "additionalInformationList" : [
-            |          {
-            |            "additionalInformationType" : {
-            |              "code" : "aiCode1",
-            |              "description" : "aiDescription1"
-            |            },
-            |            "additionalInformation" : "ai1"
-            |          },
-            |          {
-            |            "additionalInformationType" : {
-            |              "code" : "aiCode2",
-            |              "description" : "aiDescription2"
-            |            },
-            |            "additionalInformation" : "ai2"
-            |          }
-            |        ],
-            |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371",
-            |        "consignee" : {
-            |          "addConsigneeEoriNumberYesNo" : true,
-            |          "identificationNumber" : "GE00101001",
-            |          "name" : "Mr. Consignee",
-            |          "country" : {
-            |            "code" : "GB",
-            |            "description" : "United Kingdom"
-            |          },
-            |          "address" : {
-            |            "numberAndStreet" : "1 Merry Lane",
-            |            "city" : "Godrics Hollow",
-            |            "postalCode" : "CA1 9AA"
-            |          }
-            |        }
-            |      },
-            |      {
-            |        "description" : "Description 2",
-            |        "declarationType" : {
-            |          "code": "T2",
-            |          "description": "Goods having the customs status of Union goods, which are placed under the common transit procedure"
-            |        },
-            |        "countryOfDispatch" : {
-            |          "code" : "DE",
-            |          "description" : "Germany"
-            |        },
-            |        "countryOfDestination" : {
-            |          "code" : "ES",
-            |          "description" : "Spain"
-            |        },
-            |        "uniqueConsignmentReference" : "UCR 2",
-            |        "customsUnionAndStatisticsCode" : "CUS code 2",
-            |        "commodityCode" : "commodity code 2",
-            |        "combinedNomenclatureCode" : "CN code 2",
-            |        "dangerousGoodsList" : [
-            |          {
-            |            "unNumber" : "UN number 2_1"
-            |          },
-            |          {
-            |            "unNumber" : "UN number 2_2"
-            |          }
-            |        ],
-            |        "grossWeight" : 456.789,
-            |        "methodOfPayment" : {
-            |          "method" : "A",
-            |          "description" : "Payment in cash"
-            |        },
-            |        "addSupplyChainActorYesNo" : false,
-            |        "addDocumentsYesNo" : false,
-            |        "addAdditionalReferenceYesNo" : true,
-            |        "additionalReferences" : [
-            |          {
-            |            "additionalReference" : {
-            |              "documentType" : "ar1",
-            |              "description" : "Additional reference 1"
-            |            },
-            |            "addAdditionalReferenceNumberYesNo" : true,
-            |            "additionalReferenceNumber" : "arno1"
-            |          }
-            |        ],
-            |        "additionalInformationList" : [
-            |          {
-            |            "additionalInformationType" : {
-            |              "code" : "aiCode1",
-            |              "description" : "aiDescription1"
-            |            },
-            |            "additionalInformation" : "ai1"
-            |          }
-            |        ],
-            |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
-            |      }
-            |    ]
-            |  },
-            |  "tasks" : {},
-            |  "createdAt" : "2022-09-05T15:58:44.188Z",
-            |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
-            |}
-            |""".stripMargin)
+        val json: JsValue = getUserAnswersJson("1")
 
         val uA: UserAnswers = json.as[UserAnswers]
 
-        val converted: ConsignmentType20 = Consignment.transform(uA)
+        val converted: ConsignmentType20 = Consignment.transform(uA, Transition)
 
         converted.countryOfDispatch shouldBe Some("FR")
         converted.countryOfDestination shouldBe Some("IT")
@@ -1602,7 +1006,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         val uA: UserAnswers = json.as[UserAnswers]
 
-        val converted: ConsignmentType20 = Consignment.transform(uA)
+        val converted: ConsignmentType20 = Consignment.transform(uA, Transition)
 
         converted.countryOfDispatch shouldBe Some("FR")
         converted.countryOfDestination shouldBe Some("IT")
@@ -2034,6 +1438,45 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
         )
 
         output shouldBe expected
+      }
+
+      "cleanUp" when {
+        "in Transition Phase" must {
+          "clean up Inland Mode if the mode is Rail" in {
+            val json: JsValue   = getUserAnswersJson(Rail)
+            val uA: UserAnswers = json.as[UserAnswers]
+
+            val converted: ConsignmentType20 = Consignment.transform(uA, Transition)
+
+            converted.inlandModeOfTransport shouldBe None
+          }
+
+          "keep Inland Mode same if the mode is not Rail" in {
+            forAll(genInlandMode().retryUntil(_ != Rail)) {
+              inlandMode =>
+                val json: JsValue   = getUserAnswersJson(inlandMode)
+                val uA: UserAnswers = json.as[UserAnswers]
+
+                val converted: ConsignmentType20 = Consignment.transform(uA, Transition)
+
+                converted.inlandModeOfTransport shouldBe Some(inlandMode)
+            }
+          }
+        }
+
+        "in Post Transition Phase" must {
+          "keep Inland Mode same" in {
+            forAll(genInlandMode()) {
+              inlandMode =>
+                val json: JsValue   = getUserAnswersJson(inlandMode)
+                val uA: UserAnswers = json.as[UserAnswers]
+
+                val converted: ConsignmentType20 = Consignment.transform(uA, PostTransition)
+
+                converted.inlandModeOfTransport shouldBe Some(inlandMode)
+            }
+          }
+        }
       }
     }
 
@@ -3866,5 +3309,607 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
         )
       }
     }
+  }
+
+  private def getUserAnswersJson(inlandMode: String) = {
+    Json.parse(s"""
+         |{
+         |  "_id" : "$uuid",
+         |  "lrn" : "$lrn",
+         |  "eoriNumber" : "$eoriNumber",
+         |  "isSubmitted" : "notSubmitted",
+         |  "data" : {
+         |    "traderDetails" : {
+         |      "consignment" : {
+         |        "consignor" : {
+         |          "eori" : "consignor1",
+         |          "name" : "Mr Consignor",
+         |          "country" : {
+         |            "code" : "GB",
+         |            "description" : "United Kingdom"
+         |          },
+         |          "address" : {
+         |            "numberAndStreet" : "21 Test Lane",
+         |            "city" : "Newcastle upon Tyne",
+         |            "postalCode" : "NE1 1NE"
+         |          },
+         |          "contact" : {
+         |            "name" : "Consignor Contact",
+         |            "telephoneNumber" : "+44 101 157 0192"
+         |          }
+         |        },
+         |        "consignee" : {
+         |          "eori" : "consignee1",
+         |          "name" : "Mr Consignee",
+         |          "country" : {
+         |            "code" : "FR",
+         |            "description" : "France"
+         |          },
+         |          "address" : {
+         |            "numberAndStreet" : "21 Test Rue",
+         |            "city" : "Paris",
+         |            "postalCode" : "PA1 1PA"
+         |          }
+         |        }
+         |      }
+         |    },
+         |    "routeDetails" : {
+         |      "routing" : {
+         |        "countriesOfRouting" : [
+         |          {
+         |            "countryOfRouting" : {
+         |              "code" : "AD",
+         |              "description" : "Andorra"
+         |            }
+         |          },
+         |          {
+         |            "countryOfRouting" : {
+         |              "code" : "AR",
+         |              "description" : "Argentina"
+         |            }
+         |          }
+         |        ]
+         |      },
+         |      "locationOfGoods" : {
+         |        "typeOfLocation" : {
+         |          "type": "A",
+         |          "description": "Designated location"
+         |        },
+         |        "qualifierOfIdentification" : {
+         |          "qualifier": "T",
+         |          "description": "Postal code"
+         |        },
+         |        "identifier" : {
+         |          "authorisationNumber" : "authorisation number",
+         |          "additionalIdentifier" : "additional identifier",
+         |          "unLocode" : "DEAAL",
+         |          "customsOffice" : {
+         |            "id" : "XI000142",
+         |            "name" : "Belfast EPU",
+         |            "phoneNumber" : "+44 (0)02896 931537"
+         |          },
+         |          "coordinates" : {
+         |            "latitude" : "lat",
+         |            "longitude" : "lon"
+         |          },
+         |          "eori" : "GB12345",
+         |          "country" : {
+         |            "code" : "ES",
+         |            "description" : "Spain"
+         |          },
+         |          "address" : {
+         |            "numberAndStreet" : "21 Test Camino",
+         |            "city" : "Madrid",
+         |            "postalCode" : "ES1 1SE"
+         |          },
+         |          "postalCode" : {
+         |            "streetNumber" : "21",
+         |            "postalCode" : "DE1 1DE",
+         |            "country" : {
+         |              "code" : "DE",
+         |              "description" : "Germany"
+         |            }
+         |          }
+         |        },
+         |        "contact" : {
+         |          "name" : "Location of goods Contact",
+         |          "telephoneNumber" : "+44 202 157 0192"
+         |        }
+         |      },
+         |      "loadingAndUnloading" : {
+         |        "loading" : {
+         |          "unLocode" : "AEFAT",
+         |          "additionalInformation" : {
+         |            "country" : {
+         |              "code" : "Loading country",
+         |              "description" : "United Kingdom"
+         |            },
+         |            "location" : "Loading location"
+         |          }
+         |        },
+         |        "unloading" : {
+         |          "unLocode" : "ADALV",
+         |          "additionalInformation" : {
+         |            "country" : {
+         |              "code" : "Unloading country",
+         |              "description" : "United Kingdom"
+         |            },
+         |            "location" : "Unloading location"
+         |          }
+         |        }
+         |      }
+         |    },
+         |    "transportDetails" : {
+         |    "additionalReference" : [
+         |            {
+         |              "type" : "type123",
+         |             "additionalReferenceNumber" : "arno1"
+         |           },
+         |            {
+         |              "type" : "type321",
+         |             "additionalReferenceNumber" : "1onra"
+         |            }
+         |          ],
+         |     "additionalInformation" : [
+         |       {
+         |         "type" : "adinftype1",
+         |          "text" : "orca"
+         |        },
+         |       {
+         |        "type" : "adinftype2",
+         |         "text" : "acro"
+         |        }
+         |      ],
+         |      "preRequisites" : {
+         |        "uniqueConsignmentReference" : "ucr123",
+         |        "countryOfDispatch" : {
+         |          "code" : "FR",
+         |          "description" : "France"
+         |        },
+         |        "itemsDestinationCountry" : {
+         |          "code" : "IT",
+         |          "description" : "Italy"
+         |        },
+         |        "containerIndicator" : true
+         |      },
+         |      "inlandMode" : {
+         |        "code": "$inlandMode",
+         |        "description": "Maritime Transport"
+         |      },
+         |      "borderModeOfTransport" : {
+         |        "code": "1",
+         |        "description": "Maritime Transport"
+         |      },
+         |      "carrierDetails" : {
+         |        "identificationNumber" : "carrier1",
+         |        "addContactYesNo" : true,
+         |        "contact" : {
+         |          "name" : "Carrier Contact",
+         |          "telephoneNumber" : "+44 808 157 0192"
+         |        }
+         |      },
+         |      "transportMeans" : {
+         |        "departure" : [
+         |          {
+         |            "identification" : {
+         |              "type": "10",
+         |              "description": "IMO Ship Identification Number"
+         |            },
+         |            "meansIdentificationNumber" : "means id number",
+         |            "vehicleCountry" : {
+         |              "code" : "FR",
+         |              "desc" : "France"
+         |            }
+         |          }
+         |        ],
+         |        "active" : [
+         |          {
+         |            "identification" : {
+         |              "code": "11",
+         |              "description": "Name of the sea-going vessel"
+         |            },
+         |            "identificationNumber" : "active id number",
+         |            "customsOfficeActiveBorder" : {
+         |              "id" : "IT018101",
+         |              "name" : "Aeroporto Bari - Palese",
+         |              "phoneNumber" : "0039 0805316196"
+         |            },
+         |            "nationality" : {
+         |              "code" : "ES",
+         |              "desc" : "Spain"
+         |            },
+         |            "conveyanceReferenceNumber" : "conveyance ref number"
+         |          }
+         |        ]
+         |      },
+         |      "supplyChainActors" : [
+         |        {
+         |          "supplyChainActorType" : {
+         |            "role": "CS",
+         |            "description": "Consolidator"
+         |          },
+         |          "identificationNumber" : "sca1"
+         |        },
+         |        {
+         |          "supplyChainActorType" : {
+         |            "role": "FW",
+         |            "description": "Freight Forwarder"
+         |          },
+         |          "identificationNumber" : "sca2"
+         |        },
+         |        {
+         |          "supplyChainActorType" : {
+         |            "role": "MF",
+         |            "description": "Manufacturer"
+         |          },
+         |          "identificationNumber" : "sca3"
+         |        },
+         |        {
+         |          "supplyChainActorType" : {
+         |            "role": "WH",
+         |            "description": "Warehouse Keeper"
+         |          },
+         |          "identificationNumber" : "sca4"
+         |        }
+         |      ],
+         |      "equipmentsAndCharges" : {
+         |        "equipments" : [
+         |          {
+         |            "containerIdentificationNumber" : "container id 1",
+         |            "seals" : [
+         |              {
+         |                "identificationNumber" : "seal 1"
+         |              },
+         |              {
+         |                "identificationNumber" : "seal 2"
+         |              }
+         |            ],
+         |            "uuid" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+         |          }
+         |        ],
+         |        "paymentMethod" : {
+         |          "method": "A",
+         |          "description": "Payment in cash"
+         |        }
+         |      }
+         |    },
+         |    "documents" : {
+         |      "addDocumentsYesNo" : true,
+         |      "documents" : [
+         |        {
+         |          "attachToAllItems" : false,
+         |          "previousDocumentType" : {
+         |            "type" : "Previous",
+         |            "code" : "CO",
+         |            "description" : "SAD - Community goods subject"
+         |          },
+         |          "details" : {
+         |            "documentReferenceNumber" : "previous1",
+         |            "uuid" : "ac50154c-cad1-4320-8def-d282eea63b2e",
+         |            "addTypeOfPackageYesNo" : false,
+         |            "addNumberOfPackagesYesNo" : false,
+         |            "declareQuantityOfGoodsYesNo" : false,
+         |            "addAdditionalInformationYesNo" : false
+         |          }
+         |        },
+         |        {
+         |          "attachToAllItems" : false,
+         |          "type" : {
+         |            "type" : "Transport",
+         |            "code" : "235",
+         |            "description" : "Container list"
+         |          },
+         |          "details" : {
+         |            "documentReferenceNumber" : "transport1",
+         |            "uuid" : "1794d93b-17d5-44fe-a18d-aaa2059d06fe"
+         |          }
+         |        },
+         |        {
+         |          "inferredAttachToAllItems" : false,
+         |          "type" : {
+         |            "type" : "Support",
+         |            "code" : "C673",
+         |            "description" : "Catch certificate"
+         |          },
+         |          "details" : {
+         |            "documentReferenceNumber" : "support1",
+         |            "uuid" : "a573bfd3-6470-40c4-a290-ea2d8d43c02a",
+         |            "addLineItemNumberYesNo" : true,
+         |            "lineItemNumber" : 678,
+         |            "addAdditionalInformationYesNo" : true,
+         |            "additionalInformation" : "complement of information support1"
+         |          }
+         |        },
+         |        {
+         |          "attachToAllItems" : false,
+         |          "type" : {
+         |            "type" : "Previous",
+         |            "code" : "T2F",
+         |            "description" : "Internal Community transit Declaration"
+         |          },
+         |          "details" : {
+         |            "documentReferenceNumber" : "previous2",
+         |            "uuid" : "3882459f-b7bc-478d-9d24-359533aa8fe3",
+         |            "addTypeOfPackageYesNo" : true,
+         |            "packageType" : {
+         |              "code" : "AT",
+         |              "description" : "Atomizer"
+         |            },
+         |            "addNumberOfPackagesYesNo" : true,
+         |            "numberOfPackages" : 12,
+         |            "declareQuantityOfGoodsYesNo" : true,
+         |            "metric" : {
+         |              "code" : "MIL",
+         |              "description" : "1000 items"
+         |            },
+         |            "quantity" : 13,
+         |            "addAdditionalInformationYesNo" : true,
+         |            "additionalInformation" : "complement of information previous2"
+         |          }
+         |        },
+         |        {
+         |          "attachToAllItems" : true,
+         |          "type" : {
+         |            "type" : "Transport",
+         |            "code" : "235",
+         |            "description" : "Container list"
+         |          },
+         |          "details" : {
+         |            "documentReferenceNumber" : "transport2",
+         |            "uuid" : "4ab6bc5a-608d-41f6-acf7-241eb387cad9"
+         |          }
+         |        },
+         |        {
+         |          "attachToAllItems" : true,
+         |          "type" : {
+         |            "type" : "Support",
+         |            "code" : "C673",
+         |            "description" : "Catch certificate"
+         |          },
+         |          "details" : {
+         |            "documentReferenceNumber" : "support2",
+         |            "uuid" : "92626b24-d08e-4d96-ac2c-33b5549361c8",
+         |            "addLineItemNumberYesNo" : false,
+         |            "addAdditionalInformationYesNo" : false
+         |          }
+         |        },
+         |        {
+         |          "attachToAllItems" : true,
+         |          "type" : {
+         |            "type" : "Previous",
+         |            "code" : "IM",
+         |            "description" : "Single Administrative Document"
+         |          },
+         |          "details" : {
+         |            "documentReferenceNumber" : "previous3",
+         |            "uuid" : "a3184d85-9860-4258-b5ce-28201f0407d3",
+         |            "addAdditionalInformationYesNo" : true,
+         |            "additionalInformation" : "complement of information previous3"
+         |          }
+         |        }
+         |      ]
+         |    },
+         |    "items" : [
+         |      {
+         |        "description" : "Description 1",
+         |        "declarationType" : {
+         |          "code": "T1",
+         |          "description": "Goods not having the customs status of Union goods, which are placed under the common transit procedure."
+         |        },
+         |        "countryOfDispatch" : {
+         |          "code" : "GB",
+         |          "description" : "United Kingdom"
+         |        },
+         |        "countryOfDestination" : {
+         |          "code" : "FR",
+         |          "description" : "France"
+         |        },
+         |        "uniqueConsignmentReference" : "UCR 1",
+         |        "customsUnionAndStatisticsCode" : "CUS code 1",
+         |        "commodityCode" : "commodity code 1",
+         |        "combinedNomenclatureCode" : "CN code 1",
+         |        "dangerousGoodsList" : [
+         |          {
+         |            "unNumber" : "UN number 1_1"
+         |          },
+         |          {
+         |            "unNumber" : "UN number 1_2"
+         |          }
+         |        ],
+         |        "grossWeight" : 123.456,
+         |        "netWeight" : 1234,
+         |        "supplementaryUnits" : 12345,
+         |        "methodOfPayment" : {
+         |          "method" : "A",
+         |          "description" : "Payment in cash"
+         |        },
+         |        "packages" : [
+         |          {
+         |            "packageType" : {
+         |              "code" : "VL",
+         |              "description" : "Bulk, liquid",
+         |              "type" : "Bulk"
+         |            },
+         |            "addShippingMarkYesNo" : false
+         |          },
+         |          {
+         |            "packageType" : {
+         |              "code" : "NE",
+         |              "description" : "Unpacked or unpackaged",
+         |              "type" : "Unpacked"
+         |            },
+         |            "numberOfPackages" : 5,
+         |            "addShippingMarkYesNo" : false
+         |          },
+         |          {
+         |            "packageType" : {
+         |              "code" : "TR",
+         |              "description" : "Trunk",
+         |              "type" : "Other"
+         |            },
+         |            "shippingMark" : "mark3"
+         |          }
+         |        ],
+         |        "addSupplyChainActorYesNo" : true,
+         |        "supplyChainActors" : [
+         |          {
+         |            "supplyChainActorType" : {
+         |              "role": "CS",
+         |              "description": "Consolidator"
+         |            },
+         |            "identificationNumber" : "itemSCA1"
+         |          },
+         |          {
+         |            "supplyChainActorType" : {
+         |              "role": "FW",
+         |              "description": "Freight Forwarder"
+         |            },
+         |            "identificationNumber" : "itemSCA2"
+         |          },
+         |          {
+         |            "supplyChainActorType" : {
+         |              "role": "MF",
+         |              "description": "Manufacturer"
+         |            },
+         |            "identificationNumber" : "itemSCA3"
+         |          },
+         |          {
+         |            "supplyChainActorType" : {
+         |              "role": "WH",
+         |              "description": "Warehouse Keeper"
+         |            },
+         |            "identificationNumber" : "itemSCA4"
+         |          }
+         |        ],
+         |        "addDocumentsYesNo" : true,
+         |        "documents" : [
+         |          {
+         |            "document" : "1794d93b-17d5-44fe-a18d-aaa2059d06fe"
+         |          },
+         |          {
+         |            "document" : "a573bfd3-6470-40c4-a290-ea2d8d43c02a"
+         |          },
+         |          {
+         |            "document" : "3882459f-b7bc-478d-9d24-359533aa8fe3"
+         |          },
+         |          {
+         |            "document" : "ac50154c-cad1-4320-8def-d282eea63b2e"
+         |          },
+         |          {
+         |            "document" : "7d342b27-5171-428c-9354-fb2928b72c3a"
+         |          }
+         |        ],
+         |        "addAdditionalReferenceYesNo" : true,
+         |        "additionalReferences" : [
+         |          {
+         |            "additionalReference" : {
+         |              "documentType" : "ar1",
+         |              "description" : "Additional reference 1"
+         |            },
+         |            "addAdditionalReferenceNumberYesNo" : true,
+         |            "additionalReferenceNumber" : "arno1"
+         |          },
+         |          {
+         |            "additionalReference" : {
+         |              "documentType" : "ar2",
+         |              "description" : "Additional reference 2"
+         |            },
+         |            "addAdditionalReferenceNumberYesNo" : false
+         |          }
+         |        ],
+         |        "additionalInformationList" : [
+         |          {
+         |            "additionalInformationType" : {
+         |              "code" : "aiCode1",
+         |              "description" : "aiDescription1"
+         |            },
+         |            "additionalInformation" : "ai1"
+         |          },
+         |          {
+         |            "additionalInformationType" : {
+         |              "code" : "aiCode2",
+         |              "description" : "aiDescription2"
+         |            },
+         |            "additionalInformation" : "ai2"
+         |          }
+         |        ],
+         |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371",
+         |        "consignee" : {
+         |          "addConsigneeEoriNumberYesNo" : true,
+         |          "identificationNumber" : "GE00101001",
+         |          "name" : "Mr. Consignee",
+         |          "country" : {
+         |            "code" : "GB",
+         |            "description" : "United Kingdom"
+         |          },
+         |          "address" : {
+         |            "numberAndStreet" : "1 Merry Lane",
+         |            "city" : "Godrics Hollow",
+         |            "postalCode" : "CA1 9AA"
+         |          }
+         |        }
+         |      },
+         |      {
+         |        "description" : "Description 2",
+         |        "declarationType" : {
+         |          "code": "T2",
+         |          "description": "Goods having the customs status of Union goods, which are placed under the common transit procedure"
+         |        },
+         |        "countryOfDispatch" : {
+         |          "code" : "DE",
+         |          "description" : "Germany"
+         |        },
+         |        "countryOfDestination" : {
+         |          "code" : "ES",
+         |          "description" : "Spain"
+         |        },
+         |        "uniqueConsignmentReference" : "UCR 2",
+         |        "customsUnionAndStatisticsCode" : "CUS code 2",
+         |        "commodityCode" : "commodity code 2",
+         |        "combinedNomenclatureCode" : "CN code 2",
+         |        "dangerousGoodsList" : [
+         |          {
+         |            "unNumber" : "UN number 2_1"
+         |          },
+         |          {
+         |            "unNumber" : "UN number 2_2"
+         |          }
+         |        ],
+         |        "grossWeight" : 456.789,
+         |        "methodOfPayment" : {
+         |          "method" : "A",
+         |          "description" : "Payment in cash"
+         |        },
+         |        "addSupplyChainActorYesNo" : false,
+         |        "addDocumentsYesNo" : false,
+         |        "addAdditionalReferenceYesNo" : true,
+         |        "additionalReferences" : [
+         |          {
+         |            "additionalReference" : {
+         |              "documentType" : "ar1",
+         |              "description" : "Additional reference 1"
+         |            },
+         |            "addAdditionalReferenceNumberYesNo" : true,
+         |            "additionalReferenceNumber" : "arno1"
+         |          }
+         |        ],
+         |        "additionalInformationList" : [
+         |          {
+         |            "additionalInformationType" : {
+         |              "code" : "aiCode1",
+         |              "description" : "aiDescription1"
+         |            },
+         |            "additionalInformation" : "ai1"
+         |          }
+         |        ],
+         |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+         |      }
+         |    ]
+         |  },
+         |  "tasks" : {},
+         |  "createdAt" : "2022-09-05T15:58:44.188Z",
+         |  "lastUpdated" : "2022-09-07T10:33:23.472Z"
+         |}
+         |""".stripMargin)
   }
 }

@@ -19,17 +19,20 @@ package api.submission
 import api.submission.Level._
 import api.submission.documentType.RichDocumentJsValue
 import api.submission.houseConsignmentType10.RichHouseConsignmentType10
+import config.Constants.ModeOfTransport.Rail
 import generated._
-import models.UserAnswers
+import models.Phase.Transition
+import models.{Phase, UserAnswers}
 import play.api.libs.functional.syntax._
 import play.api.libs.json._
 
 import java.util.UUID
+import scala.language.implicitConversions
 
 object Consignment {
 
-  def transform(uA: UserAnswers): ConsignmentType20 =
-    uA.metadata.data.as[ConsignmentType20](consignmentType20.reads).postProcess
+  def transform(uA: UserAnswers, phase: Phase): ConsignmentType20 =
+    uA.metadata.data.as[ConsignmentType20](consignmentType20.reads(phase)).postProcess
 
   implicit class RichConsignmentType20(value: ConsignmentType20) {
 
@@ -137,11 +140,14 @@ object Consignment {
 
 object consignmentType20 {
 
-  implicit val reads: Reads[ConsignmentType20] = for {
-    countryOfDispatch           <- (preRequisitesPath \ "countryOfDispatch" \ "code").readNullable[String]
-    countryOfDestination        <- (preRequisitesPath \ "itemsDestinationCountry" \ "code").readNullable[String]
-    containerIndicator          <- (preRequisitesPath \ "containerIndicator").readNullable[Boolean]
-    inlandModeOfTransport       <- (transportDetailsPath \ "inlandMode" \ "code").readNullable[String]
+  implicit def reads(phase: Phase): Reads[ConsignmentType20] = for {
+    countryOfDispatch    <- (preRequisitesPath \ "countryOfDispatch" \ "code").readNullable[String]
+    countryOfDestination <- (preRequisitesPath \ "itemsDestinationCountry" \ "code").readNullable[String]
+    containerIndicator   <- (preRequisitesPath \ "containerIndicator").readNullable[Boolean]
+    inlandModeOfTransport <- (transportDetailsPath \ "inlandMode" \ "code").readNullable[String].map {
+      case Some(Rail) if phase == Transition => None
+      case value                             => value
+    }
     modeOfTransportAtTheBorder  <- (transportDetailsPath \ "borderModeOfTransport" \ "code").readNullable[String]
     referenceNumberUCR          <- (preRequisitesPath \ "uniqueConsignmentReference").readNullable[String]
     carrier                     <- (transportDetailsPath \ "carrierDetails").readNullable[CarrierType04](carrierType04.reads)

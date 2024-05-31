@@ -16,6 +16,7 @@
 
 package api.submission
 
+import config.Constants.RepresentativeStatusCode.DirectRepresentation
 import generated.{ContactPersonType05, RepresentativeType05}
 import models.UserAnswers
 import play.api.libs.functional.syntax._
@@ -37,7 +38,7 @@ object representativeType05 {
     (identificationNumber, ContactPerson) =>
       RepresentativeType05(
         identificationNumber = identificationNumber,
-        status = "2",
+        status = DirectRepresentation,
         ContactPerson = ContactPerson
       )
   }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2024 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +14,16 @@
  * limitations under the License.
  */
 
-package generators
+package config
 
-import org.scalacheck.Gen
-import org.scalacheck.Gen.{choose, listOfN}
+object Constants {
 
-trait Generators extends ModelGenerators {
+  object ModeOfTransport {
+    val Rail = "2"
+  }
 
-  def stringsWithMaxLength(maxLength: Int, charGen: Gen[Char] = Gen.alphaNumChar): Gen[String] =
-    for {
-      length <- choose(1, maxLength)
-      chars  <- listOfN(length, charGen)
-    } yield chars.mkString
+  object RepresentativeStatusCode {
+    val DirectRepresentation = "2"
+  }
 
-  def genInlandMode(): Gen[String] = Gen.chooseNum(1, 9).map(_.toString)
 }

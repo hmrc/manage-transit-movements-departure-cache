@@ -17,6 +17,7 @@
 package api.submission
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import config.Constants.RepresentativeStatusCode.DirectRepresentation
 import generated._
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
@@ -60,7 +61,7 @@ class RepresentativeSpec extends SpecBase with AppWithDefaultMockFixtures {
 
             val expected = RepresentativeType05(
               identificationNumber = "GB123456789000",
-              status = "2",
+              status = DirectRepresentation,
               ContactPerson = Some(
                 ContactPersonType05(
                   name = "Jack",
@@ -102,7 +103,7 @@ class RepresentativeSpec extends SpecBase with AppWithDefaultMockFixtures {
 
             val expected = RepresentativeType05(
               identificationNumber = "GB123456789000",
-              status = "2",
+              status = DirectRepresentation,
               ContactPerson = None
             )
 
