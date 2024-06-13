@@ -24,7 +24,7 @@ import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
-import services.AuditService
+import services.{AuditService, MetricsService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import java.time.Clock
@@ -37,7 +37,8 @@ class CacheController @Inject() (
   authenticate: AuthenticateActionProvider,
   authenticateAndLock: AuthenticateAndLockActionProvider,
   cacheRepository: CacheRepository,
-  auditService: AuditService
+  auditService: AuditService,
+  metricsService: MetricsService
 )(implicit ec: ExecutionContext, clock: Clock, appConfig: AppConfig)
     extends BackendController(cc)
     with Logging {
@@ -52,7 +53,7 @@ class CacheController @Inject() (
           if (request.eoriNumber == data.eoriNumber) {
             val status: Option[SubmissionState] = (request.body \ "isSubmitted").asOpt[SubmissionState]
             val departureId: Option[String]     = (request.body \ "departureId").asOpt[String]
-            set(data, status, departureId)
+            set(data, status, departureId)()
           } else {
             logger.warn(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
             Future.successful(Forbidden)
@@ -67,19 +68,28 @@ class CacheController @Inject() (
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(lrn, _) =>
-          auditService.audit(DepartureDraftStarted, lrn, request.eoriNumber)
-          set(Metadata(lrn, request.eoriNumber))
+          set(Metadata(lrn, request.eoriNumber)) {
+            val auditType = DepartureDraftStarted
+            auditService.audit(auditType, lrn, request.eoriNumber)
+            metricsService.increment(auditType.name)
+          }
         case JsError(errors) =>
           logger.warn(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)
       }
   }
 
-  private def set(data: Metadata, status: Option[SubmissionState] = None, departureId: Option[String] = None): Future[Status] =
+  private def set(
+    data: Metadata,
+    status: Option[SubmissionState] = None,
+    departureId: Option[String] = None
+  )(block: => Unit = ()): Future[Status] =
     cacheRepository
       .set(data, status, departureId)
       .map {
-        case true => Ok
+        case true =>
+          block
+          Ok
         case false =>
           logger.error("Write was not acknowledged")
           InternalServerError
@@ -96,7 +106,9 @@ class CacheController @Inject() (
         .remove(lrn, request.eoriNumber)
         .map {
           _ =>
-            auditService.audit(DepartureDraftDeleted, lrn, request.eoriNumber)
+            val auditType = DepartureDraftDeleted
+            auditService.audit(auditType, lrn, request.eoriNumber)
+            metricsService.increment(auditType.name)
             Ok
         }
         .recover {

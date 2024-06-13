@@ -27,24 +27,27 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers._
-import services.AuditService
+import services.{AuditService, MetricsService}
 
 import scala.concurrent.Future
 
 class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
-  private lazy val mockAuditService = mock[AuditService]
+  private lazy val mockAuditService   = mock[AuditService]
+  private lazy val mockMetricsService = mock[MetricsService]
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
       .guiceApplicationBuilder()
       .overrides(
-        bind[AuditService].toInstance(mockAuditService)
+        bind[AuditService].toInstance(mockAuditService),
+        bind[MetricsService].toInstance(mockMetricsService)
       )
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockAuditService)
+    reset(mockMetricsService)
   }
 
   "get" should {
@@ -189,6 +192,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
   }
 
   "put" should {
+    val auditType = DepartureDraftStarted
 
     "return 200" when {
       "write to mongo was acknowledged" in {
@@ -205,7 +209,8 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         verify(mockCacheRepository).set(metadataCaptor.capture(), eqTo(None), eqTo(None))
         metadataCaptor.getValue.lrn shouldBe lrn
 
-        verify(mockAuditService).audit(eqTo(DepartureDraftStarted), eqTo(lrn), eqTo(eoriNumber))(any())
+        verify(mockAuditService).audit(eqTo(auditType), eqTo(lrn), eqTo(eoriNumber))(any())
+        verify(mockMetricsService).increment(auditType.name)
       }
     }
 
@@ -217,7 +222,10 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         val result = route(app, request).value
 
         status(result) shouldBe BAD_REQUEST
+
         verifyNoInteractions(mockCacheRepository)
+        verifyNoInteractions(mockAuditService)
+        verifyNoInteractions(mockMetricsService)
       }
 
       "request body is empty" in {
@@ -227,7 +235,10 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         val result = route(app, request).value
 
         status(result) shouldBe BAD_REQUEST
+
         verifyNoInteractions(mockCacheRepository)
+        verifyNoInteractions(mockAuditService)
+        verifyNoInteractions(mockMetricsService)
       }
     }
 
@@ -243,7 +254,11 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         val metadataCaptor: ArgumentCaptor[Metadata] = ArgumentCaptor.forClass(classOf[Metadata])
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
+
         verify(mockCacheRepository).set(metadataCaptor.capture(), eqTo(None), eqTo(None))
+        verifyNoInteractions(mockAuditService)
+        verifyNoInteractions(mockMetricsService)
+
         metadataCaptor.getValue.lrn shouldBe lrn
       }
 
@@ -258,7 +273,11 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         val metadataCaptor: ArgumentCaptor[Metadata] = ArgumentCaptor.forClass(classOf[Metadata])
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
+
         verify(mockCacheRepository).set(metadataCaptor.capture(), eqTo(None), eqTo(None))
+        verifyNoInteractions(mockAuditService)
+        verifyNoInteractions(mockMetricsService)
+
         metadataCaptor.getValue.lrn shouldBe lrn
       }
     }
@@ -274,7 +293,10 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         val result  = route(app, request).value
 
         status(result) shouldBe OK
-        verify(mockAuditService).audit(eqTo(DepartureDraftDeleted), eqTo(lrn), eqTo(eoriNumber))(any())
+
+        val auditType = DepartureDraftDeleted
+        verify(mockAuditService).audit(eqTo(auditType), eqTo(lrn), eqTo(eoriNumber))(any())
+        verify(mockMetricsService).increment(auditType.name)
       }
     }
 
@@ -286,6 +308,9 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
         val result  = route(app, request).value
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
+
+        verifyNoInteractions(mockAuditService)
+        verifyNoInteractions(mockMetricsService)
       }
     }
   }

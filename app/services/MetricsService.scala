@@ -36,7 +36,9 @@ class MetricsService @Inject() (metrics: Metrics) {
     status match {
       case status if is4xx(status) => registry.counter(s"$name-4xx").inc()
       case status if is5xx(status) => registry.counter(s"$name-5xx").inc()
-      case _                       => registry.counter(name).inc()
+      case _                       => increment(name)
     }
 
+  def increment(name: String): Unit =
+    registry.counter(name).inc()
 }
