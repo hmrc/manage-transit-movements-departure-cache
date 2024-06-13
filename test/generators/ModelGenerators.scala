@@ -17,7 +17,6 @@
 package generators
 
 import models.{MovementReferenceNumber, Phase, SubmissionState, XPath}
-import org.scalacheck.Gen.{choose, listOfN}
 import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {

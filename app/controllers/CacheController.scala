@@ -22,7 +22,7 @@ import models.AuditType._
 import models.{Metadata, SubmissionState, UserAnswers}
 import play.api.Logging
 import play.api.libs.json._
-import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
 import services.AuditService
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
@@ -42,19 +42,16 @@ class CacheController @Inject() (
     extends BackendController(cc)
     with Logging {
 
-  // TODO replace with getAll when param's are added
-  def get(lrn: String): Action[AnyContent] = authenticate().async {
-    implicit request =>
-      getUserAnswers[UserAnswers](lrn, request.eoriNumber)(identity)
-  }
+  def get(lrn: String): Action[AnyContent] =
+    getUserAnswers[UserAnswers](lrn)(identity)
 
   def post(lrn: String): Action[JsValue] = authenticateAndLock(lrn).async(parse.json) {
     implicit request =>
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
           if (request.eoriNumber == data.eoriNumber) {
-            val status: Option[SubmissionState] = (request.body \ "isSubmitted").validate[SubmissionState].asOpt
-            val departureId: Option[String]     = (request.body \ "departureId").validate[String].asOpt
+            val status: Option[SubmissionState] = (request.body \ "isSubmitted").asOpt[SubmissionState]
+            val departureId: Option[String]     = (request.body \ "departureId").asOpt[String]
             set(data, status, departureId)
           } else {
             logger.warn(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
@@ -129,24 +126,26 @@ class CacheController @Inject() (
           }
     }
 
-  def getExpiry(lrn: String): Action[AnyContent] = authenticate().async {
-    implicit request =>
-      getUserAnswers[Long](lrn, request.eoriNumber)(_.expiryInDays)
-  }
+  def getExpiry(lrn: String): Action[AnyContent] =
+    getUserAnswers[Long](lrn)(_.expiryInDays)
 
-  private def getUserAnswers[T](lrn: String, eoriNumber: String)(f: UserAnswers => T)(implicit writes: Writes[T]): Future[Result] =
-    cacheRepository
-      .get(lrn, eoriNumber)
-      .map {
-        case Some(userAnswers) =>
-          Ok(Json.toJson(f(userAnswers)))
-        case None =>
-          logger.warn(s"No document found for LRN '$lrn' and EORI '$eoriNumber'")
-          NotFound
-      }
-      .recover {
-        case e =>
-          logger.error("Failed to read user answers from mongo", e)
-          InternalServerError
-      }
+  private def getUserAnswers[T](lrn: String)(f: UserAnswers => T)(implicit writes: Writes[T]): Action[AnyContent] =
+    authenticate().async {
+      implicit request =>
+        val eoriNumber = request.eoriNumber
+        cacheRepository
+          .get(lrn, eoriNumber)
+          .map {
+            case Some(userAnswers) =>
+              Ok(Json.toJson(f(userAnswers)))
+            case None =>
+              logger.warn(s"No document found for LRN '$lrn' and EORI '$eoriNumber'")
+              NotFound
+          }
+          .recover {
+            case e =>
+              logger.error("Failed to read user answers from mongo", e)
+              InternalServerError
+          }
+    }
 }
