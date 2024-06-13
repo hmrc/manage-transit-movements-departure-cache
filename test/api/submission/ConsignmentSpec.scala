@@ -24,7 +24,6 @@ import generated._
 import generators.Generators
 import models.Phase.{PostTransition, Transition}
 import models.UserAnswers
-import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.libs.json.{JsValue, Json}
 

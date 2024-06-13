@@ -22,9 +22,9 @@ import models.AuditType._
 import models.{Metadata, SubmissionState, UserAnswers}
 import play.api.Logging
 import play.api.libs.json._
-import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
+import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
-import services.AuditService
+import services.{AuditService, MetricsService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import java.time.Clock
@@ -37,25 +37,23 @@ class CacheController @Inject() (
   authenticate: AuthenticateActionProvider,
   authenticateAndLock: AuthenticateAndLockActionProvider,
   cacheRepository: CacheRepository,
-  auditService: AuditService
+  auditService: AuditService,
+  metricsService: MetricsService
 )(implicit ec: ExecutionContext, clock: Clock, appConfig: AppConfig)
     extends BackendController(cc)
     with Logging {
 
-  // TODO replace with getAll when param's are added
-  def get(lrn: String): Action[AnyContent] = authenticate().async {
-    implicit request =>
-      getUserAnswers[UserAnswers](lrn, request.eoriNumber)(identity)
-  }
+  def get(lrn: String): Action[AnyContent] =
+    getUserAnswers[UserAnswers](lrn)(identity)
 
   def post(lrn: String): Action[JsValue] = authenticateAndLock(lrn).async(parse.json) {
     implicit request =>
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
           if (request.eoriNumber == data.eoriNumber) {
-            val status: Option[SubmissionState] = (request.body \ "isSubmitted").validate[SubmissionState].asOpt
-            val departureId: Option[String]     = (request.body \ "departureId").validate[String].asOpt
-            set(data, status, departureId)
+            val status: Option[SubmissionState] = (request.body \ "isSubmitted").asOpt[SubmissionState]
+            val departureId: Option[String]     = (request.body \ "departureId").asOpt[String]
+            set(data, status, departureId)()
           } else {
             logger.warn(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
             Future.successful(Forbidden)
@@ -70,19 +68,28 @@ class CacheController @Inject() (
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(lrn, _) =>
-          auditService.audit(DepartureDraftStarted, lrn, request.eoriNumber)
-          set(Metadata(lrn, request.eoriNumber))
+          set(Metadata(lrn, request.eoriNumber)) {
+            val auditType = DepartureDraftStarted
+            auditService.audit(auditType, lrn, request.eoriNumber)
+            metricsService.increment(auditType.name)
+          }
         case JsError(errors) =>
           logger.warn(s"Failed to validate request body as String: $errors")
           Future.successful(BadRequest)
       }
   }
 
-  private def set(data: Metadata, status: Option[SubmissionState] = None, departureId: Option[String] = None): Future[Status] =
+  private def set(
+    data: Metadata,
+    status: Option[SubmissionState] = None,
+    departureId: Option[String] = None
+  )(block: => Unit = ()): Future[Status] =
     cacheRepository
       .set(data, status, departureId)
       .map {
-        case true => Ok
+        case true =>
+          block
+          Ok
         case false =>
           logger.error("Write was not acknowledged")
           InternalServerError
@@ -99,7 +106,9 @@ class CacheController @Inject() (
         .remove(lrn, request.eoriNumber)
         .map {
           _ =>
-            auditService.audit(DepartureDraftDeleted, lrn, request.eoriNumber)
+            val auditType = DepartureDraftDeleted
+            auditService.audit(auditType, lrn, request.eoriNumber)
+            metricsService.increment(auditType.name)
             Ok
         }
         .recover {
@@ -129,24 +138,26 @@ class CacheController @Inject() (
           }
     }
 
-  def getExpiry(lrn: String): Action[AnyContent] = authenticate().async {
-    implicit request =>
-      getUserAnswers[Long](lrn, request.eoriNumber)(_.expiryInDays)
-  }
+  def getExpiry(lrn: String): Action[AnyContent] =
+    getUserAnswers[Long](lrn)(_.expiryInDays)
 
-  private def getUserAnswers[T](lrn: String, eoriNumber: String)(f: UserAnswers => T)(implicit writes: Writes[T]): Future[Result] =
-    cacheRepository
-      .get(lrn, eoriNumber)
-      .map {
-        case Some(userAnswers) =>
-          Ok(Json.toJson(f(userAnswers)))
-        case None =>
-          logger.warn(s"No document found for LRN '$lrn' and EORI '$eoriNumber'")
-          NotFound
-      }
-      .recover {
-        case e =>
-          logger.error("Failed to read user answers from mongo", e)
-          InternalServerError
-      }
+  private def getUserAnswers[T](lrn: String)(f: UserAnswers => T)(implicit writes: Writes[T]): Action[AnyContent] =
+    authenticate().async {
+      implicit request =>
+        val eoriNumber = request.eoriNumber
+        cacheRepository
+          .get(lrn, eoriNumber)
+          .map {
+            case Some(userAnswers) =>
+              Ok(Json.toJson(f(userAnswers)))
+            case None =>
+              logger.warn(s"No document found for LRN '$lrn' and EORI '$eoriNumber'")
+              NotFound
+          }
+          .recover {
+            case e =>
+              logger.error("Failed to read user answers from mongo", e)
+              InternalServerError
+          }
+    }
 }
