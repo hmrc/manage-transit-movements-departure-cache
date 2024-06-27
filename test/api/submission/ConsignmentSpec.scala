@@ -662,24 +662,32 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
              |    },
              |    "transportDetails" : {
              |      "additionalReference" : [
-             |            {
-             |              "type" : "type123",
-             |             "additionalReferenceNumber" : "ARNO1"
-             |           },
-             |            {
-             |              "type" : "type321",
-             |             "additionalReferenceNumber" : "1ONRA"
-             |            }
-             |          ],
-             |         "additionalInformation" : [
-             |           {
-             |             "type" : "ADDINFTYPE1",
-             |              "text" : "ORCA"
-             |            },
-             |           {
-             |            "type" : "ADDINFTYPE2",
-             |             "text" : "ACRO"
-             |            }
+             |        {
+             |          "type" : {
+             |            "documentType" : "type123"
+             |          },
+             |          "additionalReferenceNumber" : "ARNO1"
+             |        },
+             |        {
+             |          "type" : {
+             |            "documentType" : "type321"
+             |          },
+             |          "additionalReferenceNumber" : "1ONRA"
+             |        }
+             |      ],
+             |      "additionalInformation" : [
+             |        {
+             |          "type" : {
+             |            "code" : "ADDINFTYPE1"
+             |          },
+             |          "text" : "ORCA"
+             |        },
+             |        {
+             |          "type" : {
+             |            "code" : "ADDINFTYPE2"
+             |          },
+             |          "text" : "ACRO"
+             |        }
              |      ],
              |      "preRequisites" : {
              |        "uniqueConsignmentReference" : "ucr123",
@@ -3439,24 +3447,32 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
          |      }
          |    },
          |    "transportDetails" : {
-         |    "additionalReference" : [
-         |            {
-         |              "type" : "type123",
-         |             "additionalReferenceNumber" : "arno1"
-         |           },
-         |            {
-         |              "type" : "type321",
-         |             "additionalReferenceNumber" : "1onra"
-         |            }
-         |          ],
-         |     "additionalInformation" : [
-         |       {
-         |         "type" : "adinftype1",
+         |      "additionalReference" : [
+         |        {
+         |          "type" : {
+         |            "documentType" : "type123"
+         |          },
+         |          "additionalReferenceNumber" : "arno1"
+         |        },
+         |        {
+         |          "type" : {
+         |            "documentType" : "type321"
+         |          },
+         |          "additionalReferenceNumber" : "1onra"
+         |        }
+         |      ],
+         |      "additionalInformation" : [
+         |        {
+         |          "type" : {
+         |            "code" : "adinftype1"
+         |          },
          |          "text" : "orca"
          |        },
-         |       {
-         |        "type" : "adinftype2",
-         |         "text" : "acro"
+         |        {
+         |          "type" : {
+         |            "code" : "adinftype2"
+         |          },
+         |          "text" : "acro"
          |        }
          |      ],
          |      "preRequisites" : {

@@ -226,7 +226,7 @@ object consignmentType20 {
 
   private def additionalInformationReads: Reads[Seq[AdditionalInformationType03]] =
     transportDetailsAdditionalInformationPath
-      .readArray[AdditionalInformationType03](additionalInformationType03.readsConsignment)
+      .readArray[AdditionalInformationType03](additionalInformationType03.consignmentReads)
 
   private def supportingDocumentsReads: Reads[Seq[SupportingDocumentType05]] =
     documentsPath
@@ -487,7 +487,7 @@ object consignmentItemType09 {
             readDocuments[SupportingDocumentType05]("Support")(supportingDocumentType05.reads) and
             readDocuments[TransportDocumentType04]("Transport")(transportDocumentType04.reads) and
             (__ \ "additionalReferences").readArray[AdditionalReferenceType04](additionalReferenceType04.reads) and
-            (__ \ "additionalInformationList").readArray[AdditionalInformationType03](additionalInformationType03.reads) and
+            (__ \ "additionalInformationList").readArray[AdditionalInformationType03](additionalInformationType03.itemReads) and
             __.read[Option[TransportChargesType]](transportChargesType.itemReads)
         )(ConsignmentItemType09.apply _)
     }
@@ -614,7 +614,7 @@ object additionalReferenceType05 {
 
   def reads(index: Int): Reads[AdditionalReferenceType05] = (
     (index.toString: Reads[String]) and
-      (__ \ "type").read[String] and
+      (__ \ "type" \ "documentType").read[String] and
       (__ \ "additionalReferenceNumber").readNullable[String]
   )(AdditionalReferenceType05.apply _)
 }
@@ -639,32 +639,26 @@ object transportDocumentType04 {
   )(TransportDocumentType04.apply _)
 }
 
-object additionalReference {
+object additionalReferenceType04 {
 
-  def reads[T](index: Int)(apply: (String, String, Option[String]) => T): Reads[T] = (
+  def reads(index: Int): Reads[AdditionalReferenceType04] = (
     (index.toString: Reads[String]) and
       (__ \ "additionalReference" \ "documentType").read[String] and
       (__ \ "additionalReferenceNumber").readNullable[String]
-  )(apply)
-}
-
-object additionalReferenceType04 {
-
-  def reads(index: Int): Reads[AdditionalReferenceType04] =
-    additionalReference.reads(index)(AdditionalReferenceType04)
+  )(AdditionalReferenceType04.apply _)
 }
 
 object additionalInformationType03 {
 
-  def reads(index: Int): Reads[AdditionalInformationType03] = (
+  def itemReads(index: Int): Reads[AdditionalInformationType03] = (
     (index.toString: Reads[String]) and
       (__ \ "additionalInformationType" \ "code").read[String] and
       (__ \ "additionalInformation").readNullable[String]
   )(AdditionalInformationType03.apply _)
 
-  def readsConsignment(index: Int): Reads[AdditionalInformationType03] = (
+  def consignmentReads(index: Int): Reads[AdditionalInformationType03] = (
     (index.toString: Reads[String]) and
-      (__ \ "type").read[String] and
+      (__ \ "type" \ "code").read[String] and
       (__ \ "text").readNullable[String]
   )(AdditionalInformationType03.apply _)
 }
