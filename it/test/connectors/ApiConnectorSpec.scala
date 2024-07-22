@@ -21,9 +21,7 @@ import itbase.{ItSpecBase, WireMockServerHandler}
 import models._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
-import play.api.mvc.Results.{BadRequest, InternalServerError}
 import play.api.test.Helpers._
-import uk.gov.hmrc.http.HttpResponse
 
 import scala.xml.NodeSeq
 
