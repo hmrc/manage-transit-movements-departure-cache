@@ -5,7 +5,7 @@ GET        /user-answers/:lrn                                   controllers.Cach
 POST       /user-answers/:lrn                                   controllers.CacheController.post(lrn: String)
 PUT        /user-answers                                        controllers.CacheController.put()
 DELETE     /user-answers/:lrn                                   controllers.CacheController.delete(lrn: String)
-GET        /user-answers/expiry/:lrn                            controllers.CacheController.getExpiry(lrn: String)
+GET        /user-answers/:lrn/expiry                            controllers.CacheController.getExpiry(lrn: String)
 
 # Submission
 POST       /declaration/submit                                  controllers.SubmissionController.post()
@@ -20,6 +20,9 @@ POST       /x-paths/:lrn/handle-errors                          controllers.XPat
 POST       /x-paths/:lrn/handle-amendment-errors                controllers.XPathController.handleAmendmentErrors(lrn: String)
 GET        /x-paths/:lrn/handle-guarantee-errors                controllers.XPathController.handleGuaranteeErrors(lrn: String)
 
-GET       /does-draft-or-submission-exist-for-lrn/:lrn          controllers.DuplicateController.doesDraftOrSubmissionExistForLrn(lrn: String)
-GET       /does-cache-exists-for-lrn/:lrn                       controllers.DuplicateController.doesDeclarationExist(lrn: String)
-GET       /does-ie028-exist-for-lrn/:lrn                        controllers.DuplicateController.doesIE028ExistForLrn(lrn: String)
+GET        /does-draft-or-submission-exist-for-lrn/:lrn         controllers.DuplicateController.doesDraftOrSubmissionExistForLrn(lrn: String)
+GET        /does-cache-exists-for-lrn/:lrn                      controllers.DuplicateController.doesDeclarationExist(lrn: String)
+
+# Deprecated
+GET        /user-answers/expiry/:lrn                            controllers.CacheController.getExpiry(lrn: String)
+GET        /does-ie028-exist-for-lrn/:lrn                       controllers.DuplicateController.doesIE028ExistForLrn(lrn: String)
