@@ -46,11 +46,4 @@ class ApiService @Inject() (
         departure => apiConnector.getMessages(departure.id)
       }
     }
-
-  def isIE028DefinedForDeparture(lrn: String)(implicit hc: HeaderCarrier): Future[Boolean] =
-    get(lrn).map {
-      _.exists {
-        _.messages.exists(_.`type` == "IE028")
-      }
-    }
 }

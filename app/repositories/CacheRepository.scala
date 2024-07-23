@@ -142,12 +142,6 @@ class CacheRepository @Inject() (
       totalMatchingDocuments
     )
   }
-
-  def doesDraftExistForLrn(lrn: String): Future[Boolean] = {
-    val lrnFilter = Filters.eq("lrn", lrn)
-    val filters   = Filters.and(lrnFilter)
-    collection.find(filters).toFuture().map(_.nonEmpty)
-  }
 }
 
 object CacheRepository {
