@@ -17,6 +17,8 @@
 package services
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import cats.data.NonEmptyList
+import models.Rejection.{BusinessRejectionType, IE055Rejection, IE056Rejection}
 import models.Status.Completed
 import models.Task._
 import models._
@@ -320,6 +322,95 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
           verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
           verify(mockCacheRepository).set(any(), eqTo(SubmissionState.GuaranteeAmendment), eqTo(None))
         }
+    }
+  }
+
+  "handleRejection" should {
+    "update user answers" when {
+
+      val tasks = Map(
+        PreTaskList.taskName      -> Status.Completed,
+        TraderDetails.taskName    -> Status.Completed,
+        RouteDetails.taskName     -> Status.Completed,
+        TransportDetails.taskName -> Status.Completed,
+        Documents.taskName        -> Status.Completed,
+        Items.taskName            -> Status.Completed,
+        GuaranteeDetails.taskName -> Status.Completed
+      )
+
+      "IE055 rejection" in {
+        val userAnswers = emptyUserAnswers.updateTasks(tasks)
+
+        val rejection = IE055Rejection(departureId)
+
+        val result = service.handleRejection(userAnswers, rejection)
+
+        result.status shouldBe SubmissionState.GuaranteeAmendment
+        result.metadata.tasks shouldBe Map(
+          PreTaskList.taskName      -> Status.Unavailable,
+          TraderDetails.taskName    -> Status.Unavailable,
+          RouteDetails.taskName     -> Status.Unavailable,
+          TransportDetails.taskName -> Status.Unavailable,
+          Documents.taskName        -> Status.Unavailable,
+          Items.taskName            -> Status.Unavailable,
+          GuaranteeDetails.taskName -> Status.Error
+        )
+        result.departureId shouldBe Some(departureId)
+      }
+
+      "IE056 rejection" when {
+        "013 business rejection type" in {
+          val userAnswers = emptyUserAnswers.updateTasks(tasks)
+
+          val rejection = IE056Rejection(
+            departureId,
+            BusinessRejectionType.AmendmentRejection,
+            NonEmptyList.of(
+              XPath("/CC015C/Representative/status")
+            )
+          )
+
+          val result = service.handleRejection(userAnswers, rejection)
+
+          result.status shouldBe SubmissionState.Amendment
+          result.metadata.tasks shouldBe Map(
+            PreTaskList.taskName      -> Status.Completed,
+            TraderDetails.taskName    -> Status.Error,
+            RouteDetails.taskName     -> Status.Completed,
+            TransportDetails.taskName -> Status.Completed,
+            Documents.taskName        -> Status.Completed,
+            Items.taskName            -> Status.Completed,
+            GuaranteeDetails.taskName -> Status.Completed
+          )
+          result.departureId shouldBe Some(departureId)
+        }
+
+        "015 business rejection type" in {
+          val userAnswers = emptyUserAnswers.updateTasks(tasks)
+
+          val rejection = IE056Rejection(
+            departureId,
+            BusinessRejectionType.DeclarationRejection,
+            NonEmptyList.of(
+              XPath("/CC015C/Representative/status")
+            )
+          )
+
+          val result = service.handleRejection(userAnswers, rejection)
+
+          result.status shouldBe SubmissionState.RejectedPendingChanges
+          result.metadata.tasks shouldBe Map(
+            PreTaskList.taskName      -> Status.Completed,
+            TraderDetails.taskName    -> Status.Error,
+            RouteDetails.taskName     -> Status.Completed,
+            TransportDetails.taskName -> Status.Completed,
+            Documents.taskName        -> Status.Completed,
+            Items.taskName            -> Status.Completed,
+            GuaranteeDetails.taskName -> Status.Completed
+          )
+          result.departureId shouldBe None
+        }
+      }
     }
   }
 }

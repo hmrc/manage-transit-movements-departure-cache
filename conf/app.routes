@@ -7,9 +7,11 @@ PUT        /user-answers                                        controllers.Cach
 DELETE     /user-answers/:lrn                                   controllers.CacheController.delete(lrn: String)
 GET        /user-answers/:lrn/expiry                            controllers.CacheController.getExpiry(lrn: String)
 
-# Submission
 POST       /declaration/submit                                  controllers.SubmissionController.post()
 POST       /declaration/submit-amendment                        controllers.SubmissionController.postAmendment()
+
+POST       /user-answers/:lrn/errors                            controllers.CacheController.handleErrors(lrn: String)
+
 GET        /messages/:lrn                                       controllers.SubmissionController.get(lrn: String)
 
 GET        /user-answers/:lrn/lock                              controllers.LockController.checkLock(lrn: String)

@@ -26,9 +26,8 @@ case class XPath(value: String) {
   def isAmendable: Boolean = this.task.isDefined
 
   def taskError: Option[(String, Status.Value)] =
-    this.task match {
-      case Some(task) => Some((task.taskName, Status(Status.Error.id)))
-      case _          => None
+    this.task.map {
+      task => task.taskName -> Status.Error
     }
 
   def task: Option[Task] = {
