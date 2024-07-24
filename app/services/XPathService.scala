@@ -16,8 +16,9 @@
 
 package services
 
+import models.Rejection.BusinessRejectionType
 import models.Task._
-import models.{Status, SubmissionState, XPath}
+import models._
 import play.api.Logging
 import repositories.CacheRepository
 
@@ -114,5 +115,37 @@ class XPathService @Inject() (
           case _ => Future.successful(false)
         }
       case _ => Future.successful(false)
+    }
+
+  def handleRejection(userAnswers: UserAnswers, rejection: Rejection): UserAnswers =
+    rejection match {
+      case Rejection.IE055Rejection(departureId) =>
+        val tasks = userAnswers.metadata.tasks.map {
+          case (GuaranteeDetails.taskName, _) => GuaranteeDetails.taskName -> Status.Error
+          case (taskName, _)                  => taskName                  -> Status.Unavailable
+        }
+        userAnswers
+          .updateTasks(tasks)
+          .copy(
+            status = SubmissionState.GuaranteeAmendment,
+            departureId = Some(departureId)
+          )
+      case Rejection.IE056Rejection(departureId, businessRejectionType, errorPointers) =>
+        val tasks = userAnswers.metadata.tasks ++ errorPointers.toList.flatMap(_.taskError).toMap
+        businessRejectionType match {
+          case BusinessRejectionType.AmendmentRejection =>
+            userAnswers
+              .updateTasks(tasks)
+              .copy(
+                status = SubmissionState.Amendment,
+                departureId = Some(departureId)
+              )
+          case BusinessRejectionType.DeclarationRejection =>
+            userAnswers
+              .updateTasks(tasks)
+              .copy(
+                status = SubmissionState.RejectedPendingChanges
+              )
+        }
     }
 }

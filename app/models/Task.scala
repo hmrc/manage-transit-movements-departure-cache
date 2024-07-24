@@ -17,36 +17,36 @@
 package models
 
 sealed trait Task {
-  def taskName: String
+  val taskName: String
 }
 
 object Task {
 
   case object PreTaskList extends Task {
-    override def taskName: String = ".preTaskList"
+    override val taskName: String = ".preTaskList"
   }
 
   case object TraderDetails extends Task {
-    override def taskName: String = ".traderDetails"
+    override val taskName: String = ".traderDetails"
   }
 
   case object RouteDetails extends Task {
-    override def taskName: String = ".routeDetails"
+    override val taskName: String = ".routeDetails"
   }
 
   case object TransportDetails extends Task {
-    override def taskName: String = ".transportDetails"
+    override val taskName: String = ".transportDetails"
   }
 
   case object Documents extends Task {
-    override def taskName: String = ".documents"
+    override val taskName: String = ".documents"
   }
 
   case object Items extends Task {
-    override def taskName: String = ".items"
+    override val taskName: String = ".items"
   }
 
   case object GuaranteeDetails extends Task {
-    override def taskName: String = ".guaranteeDetails"
+    override val taskName: String = ".guaranteeDetails"
   }
 }

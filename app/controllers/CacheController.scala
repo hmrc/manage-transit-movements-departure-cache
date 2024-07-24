@@ -19,12 +19,12 @@ package controllers
 import config.AppConfig
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
 import models.AuditType._
-import models.{Metadata, SubmissionState, UserAnswers}
+import models.{Metadata, Rejection, SubmissionState, UserAnswers}
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
-import services.{AuditService, MetricsService}
+import services.{AuditService, MetricsService, XPathService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import java.time.Clock
@@ -38,7 +38,8 @@ class CacheController @Inject() (
   authenticateAndLock: AuthenticateAndLockActionProvider,
   cacheRepository: CacheRepository,
   auditService: AuditService,
-  metricsService: MetricsService
+  metricsService: MetricsService,
+  xPathService: XPathService
 )(implicit ec: ExecutionContext, clock: Clock, appConfig: AppConfig)
     extends BackendController(cc)
     with Logging {
@@ -160,4 +161,21 @@ class CacheController @Inject() (
               InternalServerError
           }
     }
+
+  def handleErrors(lrn: String): Action[JsValue] = authenticate().async(parse.json) {
+    implicit request =>
+      request.body.validate[Rejection] match {
+        case JsSuccess(rejection, _) =>
+          cacheRepository.get(lrn, request.eoriNumber).flatMap {
+            case Some(userAnswers) =>
+              val updatedUserAnswers = xPathService.handleRejection(userAnswers, rejection)
+              set(updatedUserAnswers.metadata, Some(updatedUserAnswers.status), updatedUserAnswers.departureId)()
+            case None =>
+              Future.successful(NotFound)
+          }
+        case JsError(errors) =>
+          logger.warn(s"Failed to validate request body as Rejection: $errors")
+          Future.successful(BadRequest)
+      }
+  }
 }
