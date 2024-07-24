@@ -19,7 +19,7 @@ import play.api.libs.json.{JsonValidationError, Reads}
 
 package object models {
 
-  implicit def nonEmptyListReads[A: Reads]: Reads[NonEmptyList[A]] =
+  implicit def nonEmptyListReads[A](implicit rds: Reads[List[A]]): Reads[NonEmptyList[A]] =
     Reads
       .of[List[A]]
       .collect(
