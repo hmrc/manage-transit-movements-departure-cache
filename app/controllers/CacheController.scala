@@ -19,7 +19,7 @@ package controllers
 import config.AppConfig
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
 import models.AuditType._
-import models.{Metadata, Rejection, SubmissionState, UserAnswers}
+import models.{Metadata, Rejection, SubmissionState, UserAnswers, XPath}
 import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -175,6 +175,17 @@ class CacheController @Inject() (
           }
         case JsError(errors) =>
           logger.warn(s"Failed to validate request body as Rejection: $errors")
+          Future.successful(BadRequest)
+      }
+  }
+
+  def isDeclarationAmendable(lrn: String): Action[JsValue] = authenticate().async(parse.json) {
+    implicit request =>
+      request.body.validate[Seq[XPath]] match {
+        case JsSuccess(xPaths, _) =>
+          xPathService.isDeclarationAmendable(lrn, request.eoriNumber, xPaths).map(JsBoolean).map(Ok(_))
+        case JsError(errors) =>
+          logger.warn(s"Failed to validate request body as sequence of xPaths: $errors")
           Future.successful(BadRequest)
       }
   }

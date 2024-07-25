@@ -113,7 +113,7 @@
 
 ---
 
-##  `POST /user-answers`
+## `POST /user-answers/:lrn`
 
 ### Successful response
 
@@ -145,7 +145,40 @@
 
 ---
 
-##  `PUT /user-answers`
+## `PATCH /user-answers/:lrn`
+
+### Successful response
+
+#### 200 OK
+
+* A call is made to the `PATCH` endpoint with:
+  * a valid bearer token
+  * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
+  * a valid `String` request body containing the departure ID
+  * the same EORI number in the enrolment and request body
+* Then, the relevant document gets prepared for an amendment with the provided departure ID and a submission status of `amendment`
+
+### Unsuccessful responses (with possible causes)
+
+#### 400 BAD_REQUEST
+* Request body could not be validated as a `String`
+
+#### 401 UNAUTHORIZED
+* A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
+
+#### 403 FORBIDDEN
+* User has insufficient enrolments
+* EORI number in request body does not match the EORI number in the user's enrolment
+
+#### 404 NOT_FOUND
+* No document was found for the given LRN
+
+#### 500 INTERNAL_SERVER_ERROR
+* An error occurred in the mongo client
+
+---
+
+## `PUT /user-answers`
 
 ### Successful response
 
@@ -173,7 +206,7 @@
 
 ---
 
-##  `DELETE /user-answers/:lrn`
+## `DELETE /user-answers/:lrn`
 
 ### Successful response
 
@@ -191,35 +224,68 @@
 
 ---
 
-##  `GET /does-draft-or-submission-exist-for-lrn/:lrn`
+## `POST /user-answers/:lrn/is-amendable`
 
 ### Successful response
 
 #### 200 OK
 
-* A call is made to the `GET` endpoint with:
+* A call is made to the `POST` endpoint with:
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
-  * a valid `String` request body representing the LRN
-* Then, for the given local reference number in the url,  it is checked against the API to see if that local reference number exists, if false, the local reference number is then checked against the cache and the result is returned as a boolean.
+  * a valid series of `String` X-paths representing some error pointers for a rejection
+* Then, we check whether:
+  * at least one of the error pointers is amendable AND;
+  * there is a document in the cache for the given LRN
+
+### Unsuccessful responses (with possible causes)
+
+#### 400 BAD_REQUEST
+* Request body could not be validated as a series of `String` X-paths
+
+#### 401 UNAUTHORIZED
+* A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
+
+#### 403 FORBIDDEN
+* User has insufficient enrolments
+
+#### 500 INTERNAL_SERVER_ERROR
+* An error occurred in the mongo client
 
 ---
 
-##  `GET /does-submission-exist-for-lrn/:lrn`
+## `POST /user-answers/:lrn/errors`
 
 ### Successful response
 
 #### 200 OK
 
-* A call is made to the `GET` endpoint with:
+* A call is made to the `POST` endpoint with:
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
-  * a valid `String` request body representing the LRN
-* Then, for the given local reference number in the url, it is checked against the API to see if that local reference number exists and returns the result as a boolean.
+  * a valid `Rejection`, containing information about the rejection. In the case of an IE056 this should contain a business rejection type and some error pointers
+* Then, we check whether:
+  * at least one of the error pointers is amendable AND;
+  * there is a document in the cache for the given LRN
+
+### Unsuccessful responses (with possible causes)
+
+#### 400 BAD_REQUEST
+* Request body could not be validated as a `Rejection`
+* If provided, the error pointers (X-paths) must be non-empty
+
+#### 401 UNAUTHORIZED
+* A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
+
+#### 403 FORBIDDEN
+* User has insufficient enrolments
+
+#### 500 INTERNAL_SERVER_ERROR
+* An error occurred in the mongo client
 
 ---
 
-##  `POST /declaration/submit`
+## `POST /declaration/submit`
 
 ### Successful response
 
@@ -250,7 +316,7 @@
 
 ---
 
-##  `POST /declaration/submit-amendment`
+## `POST /declaration/submit-amendment`
 
 ### Successful response
 
