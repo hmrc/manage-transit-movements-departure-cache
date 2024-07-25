@@ -18,7 +18,7 @@ package services
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import cats.data.NonEmptyList
-import models.Rejection.{BusinessRejectionType, IE055Rejection, IE056Rejection}
+import models.Rejection._
 import models.Status.Completed
 import models.Task._
 import models._
@@ -411,6 +411,17 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
           result.departureId shouldBe None
         }
       }
+    }
+  }
+
+  "prepareForAmendment" should {
+    "update user answers" in {
+      val userAnswers = emptyUserAnswers
+
+      val result = service.prepareForAmendment(userAnswers, departureId)
+
+      result.status shouldBe SubmissionState.Amendment
+      result.departureId shouldBe Some(departureId)
     }
   }
 }

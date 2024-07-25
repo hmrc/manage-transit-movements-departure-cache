@@ -7,16 +7,19 @@ PUT        /user-answers                                        controllers.Cach
 DELETE     /user-answers/:lrn                                   controllers.CacheController.delete(lrn: String)
 GET        /user-answers/:lrn/expiry                            controllers.CacheController.getExpiry(lrn: String)
 
+POST       /user-answers/:lrn/is-amendable                      controllers.XPathController.isDeclarationAmendable(lrn: String)
+POST       /user-answers/:lrn/errors                            controllers.CacheController.handleErrors(lrn: String)
+PATCH      /user-answers/:lrn                                   controllers.CacheController.prepareForAmendment(lrn: String)
+
 POST       /declaration/submit                                  controllers.SubmissionController.post()
 POST       /declaration/submit-amendment                        controllers.SubmissionController.postAmendment()
-
-POST       /user-answers/:lrn/errors                            controllers.CacheController.handleErrors(lrn: String)
 
 GET        /messages/:lrn                                       controllers.SubmissionController.get(lrn: String)
 
 GET        /user-answers/:lrn/lock                              controllers.LockController.checkLock(lrn: String)
 DELETE     /user-answers/:lrn/lock                              controllers.LockController.deleteLock(lrn: String)
 
+# Deprecated
 POST       /x-paths/:lrn/is-declaration-amendable               controllers.XPathController.isDeclarationAmendable(lrn: String)
 POST       /x-paths/:lrn/handle-errors                          controllers.XPathController.handleErrors(lrn: String)
 POST       /x-paths/:lrn/handle-amendment-errors                controllers.XPathController.handleAmendmentErrors(lrn: String)

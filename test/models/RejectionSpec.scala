@@ -18,8 +18,8 @@ package models
 
 import base.SpecBase
 import cats.data.NonEmptyList
-import models.Rejection.BusinessRejectionType.{AmendmentRejection, DeclarationRejection}
-import models.Rejection.{IE055Rejection, IE056Rejection}
+import models.Rejection.BusinessRejectionType._
+import models.Rejection._
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.{JsError, Json}
