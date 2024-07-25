@@ -365,8 +365,10 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
           val rejection = IE056Rejection(
             departureId,
             BusinessRejectionType.AmendmentRejection,
-            NonEmptyList.of(
-              XPath("/CC015C/Representative/status")
+            Some(
+              NonEmptyList.of(
+                XPath("/CC015C/Representative/status")
+              )
             )
           )
 
@@ -391,8 +393,10 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
           val rejection = IE056Rejection(
             departureId,
             BusinessRejectionType.DeclarationRejection,
-            NonEmptyList.of(
-              XPath("/CC015C/Representative/status")
+            Some(
+              NonEmptyList.of(
+                XPath("/CC015C/Representative/status")
+              )
             )
           )
 

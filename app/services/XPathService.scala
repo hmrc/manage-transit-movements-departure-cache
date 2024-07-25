@@ -131,7 +131,8 @@ class XPathService @Inject() (
             departureId = Some(departureId)
           )
       case Rejection.IE056Rejection(departureId, businessRejectionType, errorPointers) =>
-        val tasks = userAnswers.metadata.tasks ++ errorPointers.toList.flatMap(_.taskError).toMap
+        val tasks = userAnswers.metadata.tasks ++
+          errorPointers.fold(Map.empty[String, Status.Value])(_.toList.flatMap(_.taskError).toMap)
         businessRejectionType match {
           case BusinessRejectionType.AmendmentRejection =>
             userAnswers
