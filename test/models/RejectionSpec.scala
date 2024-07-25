@@ -18,8 +18,8 @@ package models
 
 import base.SpecBase
 import cats.data.NonEmptyList
-import models.Rejection.BusinessRejectionType.{AmendmentRejection, DeclarationRejection}
-import models.Rejection.{IE055Rejection, IE056Rejection}
+import models.Rejection.BusinessRejectionType._
+import models.Rejection._
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.{JsError, Json}
@@ -48,109 +48,59 @@ class RejectionSpec extends SpecBase with ScalaCheckPropertyChecks {
 
       "IE056 rejection" when {
 
-        "013 business rejection type" when {
-          "error pointers provided" in {
-            forAll(Gen.alphaNumStr) {
-              departureId =>
-                val json = Json.parse(s"""
-                     |{
-                     |  "departureId" : "$departureId",
-                     |  "type" : "IE056",
-                     |  "businessRejectionType" : "013",
-                     |  "errorPointers" : [
-                     |    "foo",
-                     |    "bar"
-                     |  ]
-                     |}
-                     |""".stripMargin)
+        "013 business rejection type" in {
+          forAll(Gen.alphaNumStr) {
+            departureId =>
+              val json = Json.parse(s"""
+                   |{
+                   |  "departureId" : "$departureId",
+                   |  "type" : "IE056",
+                   |  "businessRejectionType" : "013",
+                   |  "errorPointers" : [
+                   |    "foo",
+                   |    "bar"
+                   |  ]
+                   |}
+                   |""".stripMargin)
 
-                val result = json.validate[Rejection].get
+              val result = json.validate[Rejection].get
 
-                result shouldBe IE056Rejection(
-                  departureId,
-                  AmendmentRejection,
-                  Some(
-                    NonEmptyList.of(
-                      XPath("foo"),
-                      XPath("bar")
-                    )
-                  )
+              result shouldBe IE056Rejection(
+                departureId,
+                AmendmentRejection,
+                NonEmptyList.of(
+                  XPath("foo"),
+                  XPath("bar")
                 )
-            }
-          }
-
-          "error pointers not provided" in {
-            forAll(Gen.alphaNumStr) {
-              departureId =>
-                val json = Json.parse(s"""
-                     |{
-                     |  "departureId" : "$departureId",
-                     |  "type" : "IE056",
-                     |  "businessRejectionType" : "013"
-                     |}
-                     |""".stripMargin)
-
-                val result = json.validate[Rejection].get
-
-                result shouldBe IE056Rejection(
-                  departureId,
-                  AmendmentRejection,
-                  None
-                )
-            }
+              )
           }
         }
 
-        "015 business rejection type" when {
-          "error pointers provided" in {
-            forAll(Gen.alphaNumStr) {
-              departureId =>
-                val json = Json.parse(s"""
-                     |{
-                     |  "departureId" : "$departureId",
-                     |  "type" : "IE056",
-                     |  "businessRejectionType" : "015",
-                     |  "errorPointers" : [
-                     |    "foo",
-                     |    "bar"
-                     |  ]
-                     |}
-                     |""".stripMargin)
+        "015 business rejection type" in {
+          forAll(Gen.alphaNumStr) {
+            departureId =>
+              val json = Json.parse(s"""
+                   |{
+                   |  "departureId" : "$departureId",
+                   |  "type" : "IE056",
+                   |  "businessRejectionType" : "015",
+                   |  "errorPointers" : [
+                   |    "foo",
+                   |    "bar"
+                   |  ]
+                   |}
+                   |""".stripMargin)
 
-                val result = json.validate[Rejection].get
+              val result = json.validate[Rejection].get
 
-                result shouldBe IE056Rejection(
-                  departureId,
-                  DeclarationRejection,
-                  Some(
-                    NonEmptyList.of(
-                      XPath("foo"),
-                      XPath("bar")
-                    )
-                  )
+              result shouldBe IE056Rejection(
+                departureId,
+                DeclarationRejection,
+                NonEmptyList.of(
+                  XPath("foo"),
+                  XPath("bar")
                 )
-            }
-          }
-
-          "error pointers not provided" in {
-            forAll(Gen.alphaNumStr) {
-              departureId =>
-                val json = Json.parse(s"""
-                     |{
-                     |  "departureId" : "$departureId",
-                     |  "type" : "IE056",
-                     |  "businessRejectionType" : "015"
-                     |}
-                     |""".stripMargin)
-
-                val result = json.validate[Rejection].get
-
-                result shouldBe IE056Rejection(
-                  departureId,
-                  DeclarationRejection,
-                  None
-                )
-            }
+              )
           }
         }
       }

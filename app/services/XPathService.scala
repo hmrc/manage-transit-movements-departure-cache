@@ -131,16 +131,10 @@ class XPathService @Inject() (
             departureId = Some(departureId)
           )
       case Rejection.IE056Rejection(departureId, businessRejectionType, errorPointers) =>
-        val tasks = userAnswers.metadata.tasks ++
-          errorPointers.fold(Map.empty[String, Status.Value])(_.toList.flatMap(_.taskError).toMap)
+        val tasks = userAnswers.metadata.tasks ++ errorPointers.toList.flatMap(_.taskError).toMap
         businessRejectionType match {
           case BusinessRejectionType.AmendmentRejection =>
-            userAnswers
-              .updateTasks(tasks)
-              .copy(
-                status = SubmissionState.Amendment,
-                departureId = Some(departureId)
-              )
+            prepareForAmendment(userAnswers.updateTasks(tasks), departureId)
           case BusinessRejectionType.DeclarationRejection =>
             userAnswers
               .updateTasks(tasks)
@@ -149,4 +143,11 @@ class XPathService @Inject() (
               )
         }
     }
+
+  def prepareForAmendment(userAnswers: UserAnswers, departureId: String): UserAnswers =
+    userAnswers
+      .copy(
+        status = SubmissionState.Amendment,
+        departureId = Some(departureId)
+      )
 }

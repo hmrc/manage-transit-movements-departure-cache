@@ -502,4 +502,99 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
       }
     }
   }
+
+  "prepareForAmendment" should {
+
+    "return 200" when {
+      "rejection successfully handled" in {
+        val userAnswers = emptyUserAnswers
+
+        when(mockCacheRepository.get(any(), any()))
+          .thenReturn(Future.successful(Some(userAnswers)))
+
+        when(mockXPathService.prepareForAmendment(any(), any()))
+          .thenReturn(userAnswers)
+
+        when(mockCacheRepository.set(any(): Metadata, any(): Option[SubmissionState], any(): Option[String]))
+          .thenReturn(Future.successful(true))
+
+        val json = JsString(departureId)
+
+        val request = FakeRequest(PATCH, routes.CacheController.prepareForAmendment(lrn).url)
+          .withJsonBody(json)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        verify(mockXPathService).prepareForAmendment(eqTo(userAnswers), eqTo(departureId))
+        verify(mockCacheRepository).set(eqTo(userAnswers.metadata), eqTo(Some(userAnswers.status)), eqTo(userAnswers.departureId))
+      }
+    }
+
+    "return 404" when {
+      "user answers not found" in {
+        when(mockCacheRepository.get(any(), any()))
+          .thenReturn(Future.successful(None))
+
+        val json = JsString(departureId)
+
+        val request = FakeRequest(PATCH, routes.CacheController.prepareForAmendment(lrn).url)
+          .withJsonBody(json)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe NOT_FOUND
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        verifyNoInteractions(mockXPathService)
+        verify(mockCacheRepository, never()).set(any(): Metadata, any(): Option[SubmissionState], any(): Option[String])
+      }
+    }
+
+    "return 400" when {
+      "request body can't be read as a departure ID" in {
+        val json = Json.parse(s"""
+            |{
+            |  "foo" : "bar"
+            |}
+            |""".stripMargin)
+
+        val request = FakeRequest(PATCH, routes.CacheController.prepareForAmendment(lrn).url)
+          .withJsonBody(json)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe BAD_REQUEST
+        verifyNoInteractions(mockCacheRepository)
+        verifyNoInteractions(mockXPathService)
+      }
+    }
+
+    "return 500" when {
+      "write to mongo is unsuccessful" in {
+        val userAnswers = emptyUserAnswers
+
+        when(mockCacheRepository.get(any(), any()))
+          .thenReturn(Future.successful(Some(userAnswers)))
+
+        when(mockXPathService.prepareForAmendment(any(), any()))
+          .thenReturn(userAnswers)
+
+        when(mockCacheRepository.set(any(): Metadata, any(): Option[SubmissionState], any(): Option[String]))
+          .thenReturn(Future.successful(false))
+
+        val json = JsString(departureId)
+
+        val request = FakeRequest(PATCH, routes.CacheController.prepareForAmendment(lrn).url)
+          .withJsonBody(json)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe INTERNAL_SERVER_ERROR
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        verify(mockXPathService).prepareForAmendment(eqTo(userAnswers), eqTo(departureId))
+        verify(mockCacheRepository).set(eqTo(userAnswers.metadata), eqTo(Some(userAnswers.status)), eqTo(userAnswers.departureId))
+      }
+    }
+  }
 }

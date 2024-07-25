@@ -178,4 +178,21 @@ class CacheController @Inject() (
           Future.successful(BadRequest)
       }
   }
+
+  def prepareForAmendment(lrn: String): Action[JsValue] = authenticate().async(parse.json) {
+    implicit request =>
+      request.body.validate[String] match {
+        case JsSuccess(departureId, _) =>
+          cacheRepository.get(lrn, request.eoriNumber).flatMap {
+            case Some(userAnswers) =>
+              val updatedUserAnswers = xPathService.prepareForAmendment(userAnswers, departureId)
+              set(updatedUserAnswers.metadata, Some(updatedUserAnswers.status), updatedUserAnswers.departureId)()
+            case None =>
+              Future.successful(NotFound)
+          }
+        case JsError(errors) =>
+          logger.warn(s"Failed to validate request body as departure ID: $errors")
+          Future.successful(BadRequest)
+      }
+  }
 }
