@@ -28,9 +28,9 @@ import scala.concurrent.{ExecutionContext, Future}
 class VersionedAction @Inject() (implicit val executionContext: ExecutionContext) extends ActionRefiner[AuthenticatedRequest, VersionedRequest] {
 
   override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, VersionedRequest[A]]] =
-    request.headers.get(ACCEPT) match {
-      case Some("application/vnd.hmrc.transition+json") => Future.successful(Right(VersionedRequest(request, Phase.Transition)))
-      case Some("application/vnd.hmrc.final+json")      => Future.successful(Right(VersionedRequest(request, Phase.PostTransition)))
-      case _                                            => Future.successful(Left(BadRequest))
+    request.headers.get("APIVersion") match {
+      case Some("transitional") => Future.successful(Right(VersionedRequest(request, Phase.Transition)))
+      case Some("final")        => Future.successful(Right(VersionedRequest(request, Phase.PostTransition)))
+      case _                    => Future.successful(Left(BadRequest))
     }
 }

@@ -295,9 +295,9 @@
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
   * a valid `String` request body representing the LRN
-  * an `Accept` header with either:
-    * `application/vnd.hmrc.transition+json` for transition rules
-    * `application/vnd.hmrc.final+json` for final rules
+  * an `APIVersion` header with either:
+    * `transitional` for transition rules
+    * `final` for final rules
 * Then, an IE015 gets successfully submitted to the API
 
 ### Unsuccessful responses (with possible causes)
@@ -327,8 +327,8 @@
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
   * a valid `String` request body representing the LRN
   * an `Accept` header with either:
-    * `application/vnd.hmrc.transition+json` for transition rules
-    * `application/vnd.hmrc.final+json` for final rules
+    * `transitional` for transition rules
+    * `final` for final rules
 * Then, an IE013 gets successfully submitted to the API
 
 ### Unsuccessful responses (with possible causes)
