@@ -29,6 +29,8 @@ class DateTimeService @Inject() (
 
   def now: LocalDateTime = LocalDateTime.now(clock)
 
+  def timestamp: Instant = Instant.now(clock)
+
   def expiresInDays(createdAt: Instant): Long =
     Duration.between(Instant.now(clock), createdAt.plus(config.mongoTtlInDays, DAYS)).toDays + 1
 }
