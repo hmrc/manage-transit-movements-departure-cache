@@ -5,14 +5,16 @@
 
 ---
 
-## `GET /user-answers?lrn=[Option[String]]&limit=[Option[Int]]&skip=[Option[Int]]`
+## `GET /user-answers?lrn=[Option[String]]&state=[Option[SubmissionState]]&limit=[Option[Int]]&skip=[Option[Int]]&sortBy=[Option[String]]`
 
 #### Params
 
 * Optional param list for user answers endpoint
   * lrn - Filters documents for partial or matching Local Reference Number of all user answers for given eori number
+  * state - Filters documents based on the submission state of the document
   * limit - Sets the maximum number of returned documents 
   * skip - Sets the increment of skipped documents for pagination purposes. The number of documents skipped is worked out as 'skip * limit'
+  * sortBy - Sorts the documents being returned. These can be sorted in ascending or descending order using the LRN or date created
 
 ### Successful response
 
@@ -46,7 +48,9 @@
       },
       "createdAt": "2023-01-26T10:32:15.648",
       "lastUpdated": "2023-01-27T08:43:17.064",
-      "_id": "27e687a9-4544-4e22-937e-74e699d855f8"
+      "expiresInDays": 29,
+      "_id": "27e687a9-4544-4e22-937e-74e699d855f8",
+      "isSubmitted": "notSubmitted"
     },
     {
       "lrn": "CD123",
@@ -57,7 +61,9 @@
       },
       "createdAt": "2023-01-26T10:32:36.96",
       "lastUpdated": "2023-01-26T10:32:41.377",
-      "_id": "750f1f92-6c61-4a3b-ad3e-95d8c7418eb4"
+      "expiresInDays": 29,
+      "_id": "750f1f92-6c61-4a3b-ad3e-95d8c7418eb4",
+      "isSubmitted": "notSubmitted"
     }
   ]
 }
@@ -344,6 +350,34 @@
 
 #### 500 INTERNAL_SERVER_ERROR
 * An error occurred
+
+---
+
+## `GET /user-answers/:lrn/expiry`
+
+### Successful response
+
+#### 200 OK
+
+* A call is made to the `GET` endpoint with:
+  * a valid bearer token
+  * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
+* A document is found in the `user-answers` collection for the given LRN (the EORI number is extracted from the enrolment)
+* The response JSON provides the number of days until the document expires
+
+### Unsuccessful responses (with possible causes)
+
+#### 401 UNAUTHORIZED
+* A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
+
+#### 403 FORBIDDEN
+* User has insufficient enrolments
+
+#### 404 NOT_FOUND
+* No document was found for the given LRN
+
+#### 500 INTERNAL_SERVER_ERROR
+* An error occurred in the mongo client
 
 ---
 
