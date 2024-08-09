@@ -16,10 +16,19 @@
 
 package services
 
-import java.time.{Clock, LocalDateTime}
+import config.AppConfig
+
+import java.time.temporal.ChronoUnit.DAYS
+import java.time.{Clock, Duration, Instant, LocalDateTime}
 import javax.inject.Inject
 
-class DateTimeService @Inject() (clock: Clock) {
+class DateTimeService @Inject() (
+  clock: Clock,
+  config: AppConfig
+) {
 
   def now: LocalDateTime = LocalDateTime.now(clock)
+
+  def expiresInDays(createdAt: Instant): Long =
+    Duration.between(Instant.now(clock), createdAt.plus(config.mongoTtlInDays, DAYS)).toDays + 1
 }

@@ -16,7 +16,6 @@
 
 package controllers
 
-import config.AppConfig
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
 import models.AuditType._
 import models.{Metadata, Rejection, SubmissionState, UserAnswers, XPath}
@@ -24,10 +23,9 @@ import play.api.Logging
 import play.api.libs.json._
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
-import services.{AuditService, MetricsService, XPathService}
+import services.{AuditService, DateTimeService, MetricsService, XPathService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
-import java.time.Clock
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -39,8 +37,9 @@ class CacheController @Inject() (
   cacheRepository: CacheRepository,
   auditService: AuditService,
   metricsService: MetricsService,
-  xPathService: XPathService
-)(implicit ec: ExecutionContext, clock: Clock, appConfig: AppConfig)
+  xPathService: XPathService,
+  dateTimeService: DateTimeService
+)(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
 
@@ -130,7 +129,7 @@ class CacheController @Inject() (
       implicit request =>
         cacheRepository
           .getAll(request.eoriNumber, lrn, state, limit, skip, sortBy)
-          .map(_.toHateoas())
+          .map(_.toHateoas(dateTimeService.expiresInDays))
           .map(Ok(_))
           .recover {
             case e =>
@@ -140,7 +139,10 @@ class CacheController @Inject() (
     }
 
   def getExpiry(lrn: String): Action[AnyContent] =
-    getUserAnswers[Long](lrn)(_.expiryInDays)
+    getUserAnswers[Long](lrn) {
+      userAnswers =>
+        dateTimeService.expiresInDays(userAnswers.createdAt)
+    }
 
   private def getUserAnswers[T](lrn: String)(f: UserAnswers => T)(implicit writes: Writes[T]): Action[AnyContent] =
     authenticate().async {

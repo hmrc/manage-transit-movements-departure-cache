@@ -337,7 +337,41 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         val result  = route(app, request).value
 
         status(result) shouldBe OK
-        contentAsJson(result) shouldBe UserAnswersSummary(eoriNumber, userAnswers, 2, 2).toHateoas()
+        contentAsJson(result) shouldBe Json.parse(s"""
+            |{
+            |  "eoriNumber": "$eoriNumber",
+            |  "totalMovements": 2,
+            |  "totalMatchingMovements": 2,
+            |  "userAnswers": [
+            |    {
+            |      "lrn": "${userAnswer1.lrn}",
+            |      "_links": {
+            |        "self": {
+            |          "href": "/manage-transit-movements-departure-cache/user-answers/${userAnswer1.lrn}"
+            |        }
+            |      },
+            |      "createdAt": "${userAnswer1.createdAt}",
+            |      "lastUpdated": "${userAnswer1.lastUpdated}",
+            |      "expiresInDays": 30,
+            |      "_id": "${userAnswer1.id}",
+            |      "isSubmitted": "${userAnswer1.status.asString}"
+            |    },
+            |    {
+            |      "lrn": "${userAnswer2.lrn}",
+            |      "_links": {
+            |        "self": {
+            |          "href": "/manage-transit-movements-departure-cache/user-answers/${userAnswer2.lrn}"
+            |        }
+            |      },
+            |      "createdAt": "${userAnswer2.createdAt}",
+            |      "lastUpdated": "${userAnswer2.lastUpdated}",
+            |      "expiresInDays": 30,
+            |      "_id": "${userAnswer2.id}",
+            |      "isSubmitted": "${userAnswer2.status.asString}"
+            |    }
+            |  ]
+            |}
+            |""".stripMargin)
         verify(mockCacheRepository).getAll(eqTo(eoriNumber), any(), any(), any(), any(), any())
       }
     }
