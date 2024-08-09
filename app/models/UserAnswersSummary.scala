@@ -16,15 +16,13 @@
 
 package models
 
-import config.AppConfig
 import play.api.libs.json.{JsObject, Json}
-import utils.TTLUtils
 
-import java.time.Clock
+import java.time.Instant
 
 case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers], totalMovements: Int, totalMatchingMovements: Int) {
 
-  def toHateoas()(implicit clock: Clock, appConfig: AppConfig): JsObject =
+  def toHateoas(expiresInDays: Instant => Long): JsObject =
     Json.obj(
       "eoriNumber"             -> eoriNumber,
       "totalMovements"         -> totalMovements,
@@ -38,7 +36,7 @@ case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers],
             ),
             "createdAt"     -> userAnswer.createdAt,
             "lastUpdated"   -> userAnswer.lastUpdated,
-            "expiresInDays" -> TTLUtils.expiresInDays(userAnswer.createdAt),
+            "expiresInDays" -> expiresInDays(userAnswer.createdAt),
             "_id"           -> userAnswer.id,
             "isSubmitted"   -> userAnswer.status
           )

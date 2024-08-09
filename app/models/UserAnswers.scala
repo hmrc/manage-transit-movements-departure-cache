@@ -16,12 +16,10 @@
 
 package models
 
-import config.AppConfig
 import play.api.libs.json._
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
-import utils.TTLUtils
 
-import java.time.{Clock, Instant}
+import java.time.Instant
 import java.util.UUID
 
 final case class UserAnswers(
@@ -38,9 +36,6 @@ final case class UserAnswers(
 
   def get[A](path: JsPath)(implicit rds: Reads[A]): Option[A] =
     Reads.optionNoError(Reads.at(path)).reads(metadata.data).getOrElse(None)
-
-  def expiryInDays(implicit clock: Clock, appConfig: AppConfig): Long =
-    TTLUtils.expiresInDays(createdAt)
 
   def updateTasks(tasks: Map[String, Status.Value]): UserAnswers =
     this.copy(metadata = metadata.updateTasks(tasks))

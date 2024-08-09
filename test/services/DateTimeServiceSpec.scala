@@ -14,24 +14,25 @@
  * limitations under the License.
  */
 
-package utils
+package services
 
 import base.SpecBase
-import org.scalatest.matchers.must.Matchers.convertToAnyMustWrapper
-import java.time.temporal.ChronoUnit.DAYS
 
 import java.time.Instant
+import java.time.temporal.ChronoUnit.DAYS
 
-class TTLUtilsSpec extends SpecBase {
+class DateTimeServiceSpec extends SpecBase {
+
+  private val service = app.injector.instanceOf[DateTimeService]
 
   "expiresInDays" should {
 
     "return correct days for a date today" in {
-      TTLUtils.expiresInDays(Instant.now()) mustBe 30L
+      service.expiresInDays(Instant.now()) shouldBe 30L
     }
 
     "return correct days for a date 5 days ago" in {
-      TTLUtils.expiresInDays(Instant.now().minus(5, DAYS)) mustBe 25L
+      service.expiresInDays(Instant.now().minus(5, DAYS)) shouldBe 25L
     }
   }
 
