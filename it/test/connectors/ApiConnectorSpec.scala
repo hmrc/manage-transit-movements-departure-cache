@@ -30,7 +30,10 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
       .guiceApplicationBuilder()
-      .configure(conf = "microservice.services.common-transit-convention-traders.port" -> server.port())
+      .configure(
+        "microservice.services.common-transit-convention-traders.port"    -> server.port(),
+        "microservice.services.common-transit-convention-traders.version" -> "2.0"
+      )
 
   private lazy val connector: ApiConnector = app.injector.instanceOf[ApiConnector]
 
@@ -74,6 +77,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
       "return Departures" in {
         server.stubFor(
           get(urlEqualTo(url))
+            .withHeader("Accept", equalTo("application/vnd.hmrc.2.0+json"))
             .willReturn(okJson(responseJson.toString()))
         )
 
@@ -111,6 +115,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
       "return MRN" in {
         server.stubFor(
           get(urlEqualTo(url))
+            .withHeader("Accept", equalTo("application/vnd.hmrc.2.0+json"))
             .willReturn(okJson(responseJson.toString()))
         )
 
@@ -169,6 +174,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
       "return messages" in {
         server.stubFor(
           get(urlEqualTo(url))
+            .withHeader("Accept", equalTo("application/vnd.hmrc.2.0+json"))
             .willReturn(okJson(responseJson.toString()))
         )
 
@@ -212,21 +218,33 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
           </ncts:CC015C>
 
         "success" in {
-          server.stubFor(post(urlEqualTo(url)).willReturn(okJson(expected)))
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader("Accept", equalTo("application/vnd.hmrc.2.0+json"))
+              .willReturn(okJson(expected))
+          )
 
           val res = await(connector.submitDeclaration(payload))
           res.status shouldBe OK
         }
 
         "bad request" in {
-          server.stubFor(post(urlEqualTo(url)).willReturn(badRequest()))
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader("Accept", equalTo("application/vnd.hmrc.2.0+json"))
+              .willReturn(badRequest())
+          )
 
           val res = await(connector.submitDeclaration(payload))
           res.status shouldBe BAD_REQUEST
         }
 
         "internal server error" in {
-          server.stubFor(post(urlEqualTo(url)).willReturn(serverError()))
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader("Accept", equalTo("application/vnd.hmrc.2.0+json"))
+              .willReturn(serverError())
+          )
 
           val res = await(connector.submitDeclaration(payload))
           res.status shouldBe INTERNAL_SERVER_ERROR
@@ -242,21 +260,33 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
           </ncts:CC013C>
 
         "success" in {
-          server.stubFor(post(urlEqualTo(url)).willReturn(okJson(expected)))
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader("Accept", equalTo("application/vnd.hmrc.2.0+json"))
+              .willReturn(okJson(expected))
+          )
 
           val res = await(connector.submitAmendment(departureId, payload))
           res.status shouldBe OK
         }
 
         "bad request" in {
-          server.stubFor(post(urlEqualTo(url)).willReturn(badRequest()))
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader("Accept", equalTo("application/vnd.hmrc.2.0+json"))
+              .willReturn(badRequest())
+          )
 
           val res = await(connector.submitAmendment(departureId, payload))
           res.status shouldBe BAD_REQUEST
         }
 
         "internal server error" in {
-          server.stubFor(post(urlEqualTo(url)).willReturn(serverError()))
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader("Accept", equalTo("application/vnd.hmrc.2.0+json"))
+              .willReturn(serverError())
+          )
 
           val res = await(connector.submitAmendment(departureId, payload))
           res.status shouldBe INTERNAL_SERVER_ERROR

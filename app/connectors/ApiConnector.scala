@@ -31,7 +31,7 @@ import scala.xml.NodeSeq
 
 class ApiConnector @Inject() (http: HttpClientV2)(implicit ec: ExecutionContext, appConfig: AppConfig) extends HttpErrorFunctions with Logging {
 
-  private def acceptHeader: (String, String) = (ACCEPT, "application/vnd.hmrc.2.0+json")
+  private def acceptHeader: (String, String) = (ACCEPT, s"application/vnd.hmrc.${appConfig.apiVersion}+json")
 
   def getDeparture(lrn: String)(implicit hc: HeaderCarrier): Future[Option[Departure]] = {
     val url = url"${appConfig.apiUrl}/movements/departures"
