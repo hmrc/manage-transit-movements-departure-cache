@@ -21,16 +21,20 @@ import models.Lock
 import org.mongodb.scala.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
 import org.mongodb.scala.model._
+import services.DateTimeService
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
 
-import java.time.{Clock, Instant}
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DefaultLockRepository @Inject() (mongoComponent: MongoComponent, appConfig: AppConfig, clock: Clock)(implicit ec: ExecutionContext)
+class DefaultLockRepository @Inject() (
+  mongoComponent: MongoComponent,
+  appConfig: AppConfig,
+  dateTimeService: DateTimeService
+)(implicit ec: ExecutionContext)
     extends PlayMongoRepository[Lock](
       mongoComponent = mongoComponent,
       collectionName = "draft-locks",
@@ -50,7 +54,7 @@ class DefaultLockRepository @Inject() (mongoComponent: MongoComponent, appConfig
       .map(_.wasAcknowledged())
 
   private def updateLock(existingLock: Lock): Future[Boolean] = {
-    val updatedLock = existingLock.copy(lastUpdated = Instant.now(clock))
+    val updatedLock = existingLock.copy(lastUpdated = dateTimeService.timestamp)
     collection
       .replaceOne(primaryFilter(existingLock.eoriNumber, existingLock.lrn), updatedLock)
       .head()

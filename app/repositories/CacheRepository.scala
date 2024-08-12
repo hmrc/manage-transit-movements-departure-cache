@@ -22,10 +22,10 @@ import models._
 import org.bson.conversions.Bson
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
 import org.mongodb.scala.model._
+import services.DateTimeService
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
 
-import java.time.{Clock, Instant}
 import java.util.UUID
 import java.util.concurrent.TimeUnit
 import javax.inject.{Inject, Singleton}
@@ -35,7 +35,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class CacheRepository @Inject() (
   mongoComponent: MongoComponent,
   appConfig: AppConfig,
-  clock: Clock
+  dateTimeService: DateTimeService
 )(implicit ec: ExecutionContext, sensitiveFormats: SensitiveFormats)
     extends PlayMongoRepository[UserAnswers](
       mongoComponent = mongoComponent,
@@ -49,7 +49,7 @@ class CacheRepository @Inject() (
       Filters.eq("lrn", lrn),
       Filters.eq("eoriNumber", eoriNumber)
     )
-    val update  = Updates.set("lastUpdated", Instant.now(clock))
+    val update  = Updates.set("lastUpdated", dateTimeService.timestamp)
     val options = FindOneAndUpdateOptions().upsert(false).sort(Sorts.descending("createdAt"))
 
     collection
@@ -64,7 +64,7 @@ class CacheRepository @Inject() (
     set(userAnswers.metadata, Updates.set("isSubmitted", status.asString), departureId)
 
   private def set(data: Metadata, statusUpdate: Bson, departureId: Option[String]): Future[Boolean] = {
-    val now = Instant.now(clock)
+    val now = dateTimeService.timestamp
     val filter = Filters.and(
       Filters.eq("lrn", data.lrn),
       Filters.eq("eoriNumber", data.eoriNumber)
