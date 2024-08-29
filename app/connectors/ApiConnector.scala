@@ -31,14 +31,15 @@ import scala.xml.NodeSeq
 
 class ApiConnector @Inject() (http: HttpClientV2)(implicit ec: ExecutionContext, appConfig: AppConfig) extends HttpErrorFunctions with Logging {
 
-  private def acceptHeader: (String, String) = (ACCEPT, "application/vnd.hmrc.2.0+json")
+  private def headers(implicit hc: HeaderCarrier): Seq[(String, String)] =
+    hc.headers(Seq(ACCEPT))
 
   def getDeparture(lrn: String)(implicit hc: HeaderCarrier): Future[Option[Departure]] = {
     val url = url"${appConfig.apiUrl}/movements/departures"
     http
       .get(url)
       .transform(_.withQueryStringParameters("localReferenceNumber" -> lrn))
-      .setHeader(acceptHeader)
+      .setHeader(headers: _*)
       .execute[Departures]
       .map(_.departures.headOption)
   }
@@ -47,7 +48,7 @@ class ApiConnector @Inject() (http: HttpClientV2)(implicit ec: ExecutionContext,
     val url = url"${appConfig.apiUrl}/movements/departures/$departureId"
     http
       .get(url)
-      .setHeader(acceptHeader)
+      .setHeader(headers: _*)
       .execute[MovementReferenceNumber]
   }
 
@@ -55,7 +56,7 @@ class ApiConnector @Inject() (http: HttpClientV2)(implicit ec: ExecutionContext,
     val url = url"${appConfig.apiUrl}/movements/departures/$departureId/messages"
     http
       .get(url)
-      .setHeader(acceptHeader)
+      .setHeader(headers: _*)
       .execute[Messages]
   }
 
@@ -75,7 +76,7 @@ class ApiConnector @Inject() (http: HttpClientV2)(implicit ec: ExecutionContext,
   )(implicit hc: HeaderCarrier): Future[HttpResponse] =
     http
       .post(url)
-      .setHeader(acceptHeader)
+      .setHeader(headers: _*)
       .setHeader(CONTENT_TYPE -> "application/xml")
       .withBody(xml)
       .execute[HttpResponse]
