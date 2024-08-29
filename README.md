@@ -359,7 +359,7 @@
 
 #### 200 OK
 
-* A call is made to the `POST` endpoint with:
+* A call is made to the `GET` endpoint with:
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
   * an `Accept` header with either:
