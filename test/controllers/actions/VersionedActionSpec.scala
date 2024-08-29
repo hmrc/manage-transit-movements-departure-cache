@@ -39,7 +39,7 @@ class VersionedActionSpec extends SpecBase {
 
         val action = new Harness()
 
-        val request              = fakeRequest.withHeaders("APIVersion" -> "transitional")
+        val request              = fakeRequest.withHeaders("Accept" -> "application/vnd.hmrc.2.0+json")
         val authenticatedRequest = AuthenticatedRequest(request, "EORINumber")
         val result               = action.callRefine(authenticatedRequest).futureValue
 
@@ -52,7 +52,7 @@ class VersionedActionSpec extends SpecBase {
 
         val action = new Harness()
 
-        val request              = fakeRequest.withHeaders("APIVersion" -> "final")
+        val request              = fakeRequest.withHeaders("Accept" -> "application/vnd.hmrc.2.1+json")
         val authenticatedRequest = AuthenticatedRequest(request, "EORINumber")
         val result               = action.callRefine(authenticatedRequest).futureValue
 
