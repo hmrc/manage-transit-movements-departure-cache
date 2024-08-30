@@ -22,10 +22,15 @@ import models._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.xml.NodeSeq
 
 class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
+
+  implicit override val hc: HeaderCarrier = HeaderCarrier(
+    otherHeaders = Seq(ACCEPT -> "application/vnd.hmrc.2.0+json")
+  )
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
@@ -74,6 +79,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
       "return Departures" in {
         server.stubFor(
           get(urlEqualTo(url))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
             .willReturn(okJson(responseJson.toString()))
         )
 
@@ -111,6 +117,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
       "return MRN" in {
         server.stubFor(
           get(urlEqualTo(url))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
             .willReturn(okJson(responseJson.toString()))
         )
 
@@ -169,6 +176,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
       "return messages" in {
         server.stubFor(
           get(urlEqualTo(url))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
             .willReturn(okJson(responseJson.toString()))
         )
 
@@ -212,21 +220,33 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
           </ncts:CC015C>
 
         "success" in {
-          server.stubFor(post(urlEqualTo(url)).willReturn(okJson(expected)))
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+              .willReturn(okJson(expected))
+          )
 
           val res = await(connector.submitDeclaration(payload))
           res.status shouldBe OK
         }
 
         "bad request" in {
-          server.stubFor(post(urlEqualTo(url)).willReturn(badRequest()))
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+              .willReturn(badRequest())
+          )
 
           val res = await(connector.submitDeclaration(payload))
           res.status shouldBe BAD_REQUEST
         }
 
         "internal server error" in {
-          server.stubFor(post(urlEqualTo(url)).willReturn(serverError()))
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+              .willReturn(serverError())
+          )
 
           val res = await(connector.submitDeclaration(payload))
           res.status shouldBe INTERNAL_SERVER_ERROR
@@ -242,21 +262,33 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
           </ncts:CC013C>
 
         "success" in {
-          server.stubFor(post(urlEqualTo(url)).willReturn(okJson(expected)))
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+              .willReturn(okJson(expected))
+          )
 
           val res = await(connector.submitAmendment(departureId, payload))
           res.status shouldBe OK
         }
 
         "bad request" in {
-          server.stubFor(post(urlEqualTo(url)).willReturn(badRequest()))
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+              .willReturn(badRequest())
+          )
 
           val res = await(connector.submitAmendment(departureId, payload))
           res.status shouldBe BAD_REQUEST
         }
 
         "internal server error" in {
-          server.stubFor(post(urlEqualTo(url)).willReturn(serverError()))
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.0+json"))
+              .willReturn(serverError())
+          )
 
           val res = await(connector.submitAmendment(departureId, payload))
           res.status shouldBe INTERNAL_SERVER_ERROR
