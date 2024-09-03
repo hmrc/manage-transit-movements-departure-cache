@@ -245,7 +245,7 @@ object carrierType04 {
   implicit val reads: Reads[CarrierType04] = (
     (__ \ "identificationNumber").read[String] and
       (__ \ "contact").readNullable[ContactPersonType05](contactPersonType05.reads)
-  )(CarrierType04.apply _)
+  )(CarrierType04.apply)
 }
 
 object consignorType07 {
@@ -255,7 +255,7 @@ object consignorType07 {
       (__ \ "name").readNullable[String] and
       __.read[Option[AddressType17]](addressType17.optionalReads) and
       (__ \ "contact").readNullable[ContactPersonType05](contactPersonType05.reads)
-  )(ConsignorType07.apply _)
+  )(ConsignorType07.apply)
 }
 
 object consigneeType05 {
@@ -264,7 +264,7 @@ object consigneeType05 {
     (__ \ "eori").readNullable[String] and
       (__ \ "name").readNullable[String] and
       __.read[Option[AddressType17]](addressType17.optionalReads)
-  )(ConsigneeType05.apply _)
+  )(ConsigneeType05.apply)
 }
 
 object consigneeType02 {
@@ -273,7 +273,7 @@ object consigneeType02 {
     (__ \ "identificationNumber").readNullable[String] and
       (__ \ "name").readNullable[String] and
       __.read[Option[AddressType12]](addressType12.optionalReads)
-  )(ConsigneeType02.apply _)
+  )(ConsigneeType02.apply)
 }
 
 object additionalSupplyChainActorType {
@@ -282,7 +282,7 @@ object additionalSupplyChainActorType {
     (index.toString: Reads[String]) and
       (__ \ "supplyChainActorType" \ "role").read[String] and
       (__ \ "identificationNumber").read[String]
-  )(AdditionalSupplyChainActorType.apply _)
+  )(AdditionalSupplyChainActorType.apply)
 }
 
 object transportEquipmentType06 {
@@ -316,7 +316,7 @@ object transportEquipmentType06 {
       (__ \ "containerIdentificationNumber").readNullable[String] and
       (__ \ "seals").readArray[SealType05](sealType05.reads) and
       (__ \ "uuid").read[UUID].flatMap(goodsReferencesReads(_, items))
-  )(transportEquipmentType06.apply _)
+  )(transportEquipmentType06.apply)
 }
 
 object sealType05 {
@@ -324,7 +324,7 @@ object sealType05 {
   def reads(index: Int): Reads[SealType05] = (
     (index.toString: Reads[String]) and
       (__ \ "identificationNumber").read[String]
-  )(SealType05.apply _)
+  )(SealType05.apply)
 }
 
 object locationOfGoodsType05 {
@@ -349,13 +349,13 @@ object locationOfGoodsType05 {
       (__ \ "identifier").read[Option[AddressType14]](addressType14.optionalReads) and
       (__ \ "identifier" \ "postalCode").readNullable[PostcodeAddressType02](postcodeAddressType02.reads) and
       (__ \ "contact").readNullable[ContactPersonType06](contactPersonType06.reads)
-  )(LocationOfGoodsType05.apply _)
+  )(LocationOfGoodsType05.apply)
 }
 
 object customsOfficeType02 {
 
   implicit val reads: Reads[CustomsOfficeType02] =
-    (__ \ "id").read[String].map(CustomsOfficeType02)
+    (__ \ "id").read[String].map(CustomsOfficeType02.apply)
 }
 
 object gnssType {
@@ -363,13 +363,13 @@ object gnssType {
   implicit val reads: Reads[GNSSType] = (
     (__ \ "latitude").read[String] and
       (__ \ "longitude").read[String]
-  )(GNSSType.apply _)
+  )(GNSSType.apply)
 }
 
 object economicOperatorType03 {
 
   implicit val reads: Reads[EconomicOperatorType03] =
-    __.read[String].map(EconomicOperatorType03)
+    __.read[String].map(EconomicOperatorType03.apply)
 }
 
 object departureTransportMeansType03 {
@@ -379,7 +379,7 @@ object departureTransportMeansType03 {
       (__ \ "identification" \ "type").readNullable[String] and
       (__ \ "meansIdentificationNumber").readNullable[String] and
       (__ \ "vehicleCountry" \ "code").readNullable[String]
-  )(DepartureTransportMeansType03.apply _)
+  )(DepartureTransportMeansType03.apply)
 }
 
 object countryOfRoutingOfConsignmentType01 {
@@ -387,7 +387,7 @@ object countryOfRoutingOfConsignmentType01 {
   def reads(index: Int): Reads[CountryOfRoutingOfConsignmentType01] = (
     (index.toString: Reads[String]) and
       (__ \ "countryOfRouting" \ "code").read[String]
-  )(CountryOfRoutingOfConsignmentType01.apply _)
+  )(CountryOfRoutingOfConsignmentType01.apply)
 }
 
 object activeBorderTransportMeansType02 {
@@ -404,7 +404,7 @@ object activeBorderTransportMeansType02 {
       (__ \ "identificationNumber").readNullable[String] and
       (__ \ "nationality" \ "code").readNullable[String] and
       (__ \ "conveyanceReferenceNumber").readNullable[String]
-  )(ActiveBorderTransportMeansType02.apply _)
+  )(ActiveBorderTransportMeansType02.apply)
 }
 
 object placeOfLoadingType03 {
@@ -413,7 +413,7 @@ object placeOfLoadingType03 {
     (__ \ "unLocode").readNullable[String] and
       (__ \ "additionalInformation" \ "country" \ "code").readNullable[String] and
       (__ \ "additionalInformation" \ "location").readNullable[String]
-  )(PlaceOfLoadingType03.apply _)
+  )(PlaceOfLoadingType03.apply)
 }
 
 object placeOfUnloadingType01 {
@@ -422,18 +422,18 @@ object placeOfUnloadingType01 {
     (__ \ "unLocode").readNullable[String] and
       (__ \ "additionalInformation" \ "country" \ "code").readNullable[String] and
       (__ \ "additionalInformation" \ "location").readNullable[String]
-  )(PlaceOfUnloadingType01.apply _)
+  )(PlaceOfUnloadingType01.apply)
 }
 
 object transportChargesType {
 
   val itemReads: Reads[Option[TransportChargesType]] =
-    (__ \ "methodOfPayment" \ "method").readNullable[String].map(_.map(TransportChargesType))
+    (__ \ "methodOfPayment" \ "method").readNullable[String].map(_.map(TransportChargesType.apply))
 
   val consignmentReads: Reads[Option[TransportChargesType]] =
     (equipmentsAndChargesPath \ "paymentMethod" \ "method")
       .readNullable[String]
-      .map(_.map(TransportChargesType))
+      .map(_.map(TransportChargesType.apply))
 }
 
 object houseConsignmentType10 {
@@ -489,7 +489,7 @@ object consignmentItemType09 {
             (__ \ "additionalReferences").readArray[AdditionalReferenceType04](additionalReferenceType04.reads) and
             (__ \ "additionalInformationList").readArray[AdditionalInformationType03](additionalInformationType03.itemReads) and
             __.read[Option[TransportChargesType]](transportChargesType.itemReads)
-        )(ConsignmentItemType09.apply _)
+        )(ConsignmentItemType09.apply)
     }
 }
 
@@ -501,7 +501,7 @@ object commodityType07 {
       __.read[Option[CommodityCodeType02]](commodityCodeType02.reads) and
       (__ \ "dangerousGoodsList").readArray[DangerousGoodsType01](dangerousGoodsType01.reads) and
       __.readNullable[GoodsMeasureType02](goodsMeasureType02.reads)
-  )(CommodityType07.apply _)
+  )(CommodityType07.apply)
 }
 
 object commodityCodeType02 {
@@ -521,7 +521,7 @@ object dangerousGoodsType01 {
   def reads(index: Int): Reads[DangerousGoodsType01] = (
     (index.toString: Reads[String]) and
       (__ \ "unNumber").read[String]
-  )(DangerousGoodsType01.apply _)
+  )(DangerousGoodsType01.apply)
 }
 
 object goodsMeasureType02 {
@@ -530,7 +530,7 @@ object goodsMeasureType02 {
     (__ \ "grossWeight").readNullable[BigDecimal] and
       (__ \ "netWeight").readNullable[BigDecimal] and
       (__ \ "supplementaryUnits").readNullable[BigDecimal]
-  )(GoodsMeasureType02.apply _)
+  )(GoodsMeasureType02.apply)
 }
 
 object packagingType03 {
@@ -540,7 +540,7 @@ object packagingType03 {
       (__ \ "packageType" \ "code").read[String] and
       (__ \ "numberOfPackages").readNullable[BigInt] and
       (__ \ "shippingMark").readNullable[String]
-  )(PackagingType03.apply _)
+  )(PackagingType03.apply)
 }
 
 object documentType {
@@ -597,7 +597,7 @@ object previousDocumentType08 {
       (__ \ "details" \ "metric" \ "code").readNullable[String] and
       (__ \ "details" \ "quantity").readNullable[BigDecimal] and
       (__ \ "details" \ "additionalInformation").readNullable[String]
-  )(PreviousDocumentType08.apply _)
+  )(PreviousDocumentType08.apply)
 }
 
 object previousDocumentType09 {
@@ -607,7 +607,7 @@ object previousDocumentType09 {
       documentType.codeReads and
       (__ \ "details" \ "documentReferenceNumber").read[String] and
       (__ \ "details" \ "additionalInformation").readNullable[String]
-  )(PreviousDocumentType09.apply _)
+  )(PreviousDocumentType09.apply)
 }
 
 object additionalReferenceType05 {
@@ -616,7 +616,7 @@ object additionalReferenceType05 {
     (index.toString: Reads[String]) and
       (__ \ "type" \ "documentType").read[String] and
       (__ \ "additionalReferenceNumber").readNullable[String]
-  )(AdditionalReferenceType05.apply _)
+  )(AdditionalReferenceType05.apply)
 }
 
 object supportingDocumentType05 {
@@ -627,7 +627,7 @@ object supportingDocumentType05 {
       (__ \ "details" \ "documentReferenceNumber").read[String] and
       (__ \ "details" \ "lineItemNumber").readNullable[BigInt] and
       (__ \ "details" \ "additionalInformation").readNullable[String]
-  )(SupportingDocumentType05.apply _)
+  )(SupportingDocumentType05.apply)
 }
 
 object transportDocumentType04 {
@@ -636,7 +636,7 @@ object transportDocumentType04 {
     (index.toString: Reads[String]) and
       (__ \ "type" \ "code").read[String] and
       (__ \ "details" \ "documentReferenceNumber").read[String]
-  )(TransportDocumentType04.apply _)
+  )(TransportDocumentType04.apply)
 }
 
 object additionalReferenceType04 {
@@ -645,7 +645,7 @@ object additionalReferenceType04 {
     (index.toString: Reads[String]) and
       (__ \ "additionalReference" \ "documentType").read[String] and
       (__ \ "additionalReferenceNumber").readNullable[String]
-  )(AdditionalReferenceType04.apply _)
+  )(AdditionalReferenceType04.apply)
 }
 
 object additionalInformationType03 {
@@ -654,11 +654,11 @@ object additionalInformationType03 {
     (index.toString: Reads[String]) and
       (__ \ "additionalInformationType" \ "code").read[String] and
       (__ \ "additionalInformation").readNullable[String]
-  )(AdditionalInformationType03.apply _)
+  )(AdditionalInformationType03.apply)
 
   def consignmentReads(index: Int): Reads[AdditionalInformationType03] = (
     (index.toString: Reads[String]) and
       (__ \ "type" \ "code").read[String] and
       (__ \ "text").readNullable[String]
-  )(AdditionalInformationType03.apply _)
+  )(AdditionalInformationType03.apply)
 }

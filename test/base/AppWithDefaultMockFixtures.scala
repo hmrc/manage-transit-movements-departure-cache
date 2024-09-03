@@ -25,7 +25,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import repositories.{CacheRepository, DefaultLockRepository}
 
 trait AppWithDefaultMockFixtures extends BeforeAndAfterEach {
-  self: TestSuite with SpecBase =>
+  self: TestSuite & SpecBase =>
 
   lazy val mockCacheRepository: CacheRepository      = mock[CacheRepository]
   lazy val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]

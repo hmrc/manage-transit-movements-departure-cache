@@ -40,7 +40,7 @@ object Lock {
         (__ \ "lrn").read[String] and
         (__ \ "createdAt").read(MongoJavatimeFormats.instantReads) and
         (__ \ "lastUpdated").read(MongoJavatimeFormats.instantReads)
-    )(Lock.apply _)
+    )(Lock.apply)
 
   implicit val writes: Writes[Lock] =
     (
@@ -49,7 +49,9 @@ object Lock {
         (__ \ "lrn").write[String] and
         (__ \ "createdAt").write(MongoJavatimeFormats.instantWrites) and
         (__ \ "lastUpdated").write(MongoJavatimeFormats.instantWrites)
-    )(unlift(Lock.unapply))
+    )(
+      l => Tuple.fromProductTyped(l)
+    )
 
   implicit lazy val format: Format[Lock] = Format(reads, writes)
 }

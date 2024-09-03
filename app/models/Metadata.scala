@@ -42,7 +42,7 @@ object Metadata {
         (__ \ "eoriNumber").read[String] and
         (__ \ "data").read[JsObject](sensitiveFormats.jsObjectReads) and
         (__ \ "tasks").read[Map[String, Status.Value]]
-    )(Metadata.apply _)
+    )(Metadata.apply)
 
   def sensitiveWrites(implicit sensitiveFormats: SensitiveFormats): Writes[Metadata] =
     (
@@ -50,5 +50,7 @@ object Metadata {
         (__ \ "eoriNumber").write[String] and
         (__ \ "data").write[JsObject](sensitiveFormats.jsObjectWrites) and
         (__ \ "tasks").write[Map[String, Status.Value]]
-    )(unlift(Metadata.unapply))
+    )(
+      md => Tuple.fromProductTyped(md)
+    )
 }

@@ -23,6 +23,7 @@ import play.api.http.HeaderNames._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpResponse, StringContextOps}
+import play.api.libs.ws.XMLBodyWritables._
 
 import java.net.URL
 import javax.inject.Inject
@@ -39,7 +40,7 @@ class ApiConnector @Inject() (http: HttpClientV2)(implicit ec: ExecutionContext,
     http
       .get(url)
       .transform(_.withQueryStringParameters("localReferenceNumber" -> lrn))
-      .setHeader(headers: _*)
+      .setHeader(headers *)
       .execute[Departures]
       .map(_.departures.headOption)
   }
@@ -48,7 +49,7 @@ class ApiConnector @Inject() (http: HttpClientV2)(implicit ec: ExecutionContext,
     val url = url"${appConfig.apiUrl}/movements/departures/$departureId"
     http
       .get(url)
-      .setHeader(headers: _*)
+      .setHeader(headers *)
       .execute[MovementReferenceNumber]
   }
 
@@ -56,7 +57,7 @@ class ApiConnector @Inject() (http: HttpClientV2)(implicit ec: ExecutionContext,
     val url = url"${appConfig.apiUrl}/movements/departures/$departureId/messages"
     http
       .get(url)
-      .setHeader(headers: _*)
+      .setHeader(headers *)
       .execute[Messages]
   }
 
@@ -76,7 +77,7 @@ class ApiConnector @Inject() (http: HttpClientV2)(implicit ec: ExecutionContext,
   )(implicit hc: HeaderCarrier): Future[HttpResponse] =
     http
       .post(url)
-      .setHeader(headers: _*)
+      .setHeader(headers *)
       .setHeader(CONTENT_TYPE -> "application/xml")
       .withBody(xml)
       .execute[HttpResponse]

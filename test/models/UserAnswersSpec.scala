@@ -81,7 +81,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
 
       "be readable as a LocalDateTime for backwards compatibility" in {
         val json = Json.toJson(Instant.now())
-        json.validate[LocalDateTime] shouldBe a[JsSuccess[_]]
+        json.validate[LocalDateTime] shouldBe a[JsSuccess[?]]
       }
     }
 

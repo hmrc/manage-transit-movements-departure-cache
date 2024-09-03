@@ -20,6 +20,7 @@ import itbase.CacheRepositorySpecBase
 import models.{Metadata, SubmissionState, UserAnswers}
 import org.mongodb.scala.model.Filters
 import play.api.libs.json.{JsObject, JsString, Json}
+import play.api.libs.ws.JsonBodyWritables._
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit.DAYS

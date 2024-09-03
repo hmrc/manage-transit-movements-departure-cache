@@ -68,6 +68,6 @@ class Declaration @Inject() (header: Header) {
       attributes = attributes
     )
 
-  def attributes: Map[String, DataRecord[_]] =
+  def attributes: Map[String, DataRecord[?]] =
     Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString(NCTS5u461.toString, scope)))
 }

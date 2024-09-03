@@ -37,5 +37,5 @@ object holderOfTheTransitProcedureType14 {
       (__ \ "name").readNullable[String] and
       __.read[Option[AddressType17]](addressType17.optionalReads) and
       (__ \ "contact").readNullable[ContactPersonType05](contactPersonType05.reads)
-  )(HolderOfTheTransitProcedureType14.apply _)
+  )(HolderOfTheTransitProcedureType14.apply)
 }
