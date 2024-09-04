@@ -85,7 +85,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
 
         val expectedResult = Some(Departure(departureId, lrn))
 
-        await(connector.getDeparture(lrn)) shouldBe expectedResult
+        await(connector.getDeparture(lrn, Phase.Transition)) shouldBe expectedResult
       }
     }
 
@@ -121,7 +121,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             .willReturn(okJson(responseJson.toString()))
         )
 
-        await(connector.getMRN(departureId)) shouldBe MovementReferenceNumber(Some(mrn))
+        await(connector.getMRN(departureId, Phase.Transition)) shouldBe MovementReferenceNumber(Some(mrn))
       }
     }
 
@@ -191,7 +191,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
           )
         )
 
-        await(connector.getMessages(departureId)) shouldBe expectedResult
+        await(connector.getMessages(departureId, Phase.Transition)) shouldBe expectedResult
       }
     }
 
@@ -226,7 +226,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
               .willReturn(okJson(expected))
           )
 
-          val res = await(connector.submitDeclaration(payload))
+          val res = await(connector.submitDeclaration(payload, Phase.Transition))
           res.status shouldBe OK
         }
 
@@ -237,7 +237,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
               .willReturn(badRequest())
           )
 
-          val res = await(connector.submitDeclaration(payload))
+          val res = await(connector.submitDeclaration(payload, Phase.Transition))
           res.status shouldBe BAD_REQUEST
         }
 
@@ -248,7 +248,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
               .willReturn(serverError())
           )
 
-          val res = await(connector.submitDeclaration(payload))
+          val res = await(connector.submitDeclaration(payload, Phase.Transition))
           res.status shouldBe INTERNAL_SERVER_ERROR
         }
       }
@@ -268,7 +268,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
               .willReturn(okJson(expected))
           )
 
-          val res = await(connector.submitAmendment(departureId, payload))
+          val res = await(connector.submitAmendment(departureId, payload, Phase.Transition))
           res.status shouldBe OK
         }
 
@@ -279,7 +279,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
               .willReturn(badRequest())
           )
 
-          val res = await(connector.submitAmendment(departureId, payload))
+          val res = await(connector.submitAmendment(departureId, payload, Phase.Transition))
           res.status shouldBe BAD_REQUEST
         }
 
@@ -290,7 +290,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
               .willReturn(serverError())
           )
 
-          val res = await(connector.submitAmendment(departureId, payload))
+          val res = await(connector.submitAmendment(departureId, payload, Phase.Transition))
           res.status shouldBe INTERNAL_SERVER_ERROR
         }
       }

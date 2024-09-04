@@ -128,9 +128,9 @@ class SubmissionController @Inject() (
     }
   }
 
-  def get(lrn: String): Action[AnyContent] = authenticate().async {
+  def get(lrn: String): Action[AnyContent] = (authenticate() andThen getVersion).async {
     implicit request =>
-      apiService.get(lrn).map {
+      apiService.get(lrn, request.phase).map {
         case Some(Messages(Nil)) =>
           logger.info(s"No messages found for LRN $lrn")
           NoContent
