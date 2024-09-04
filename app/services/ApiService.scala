@@ -31,19 +31,19 @@ class ApiService @Inject() (
 )(implicit ec: ExecutionContext) {
 
   def submitDeclaration(userAnswers: UserAnswers, phase: Phase)(implicit hc: HeaderCarrier): Future[HttpResponse] =
-    apiConnector.submitDeclaration(declaration.transform(userAnswers, MovementReferenceNumber.Empty, phase))
+    apiConnector.submitDeclaration(declaration.transform(userAnswers, MovementReferenceNumber.Empty, phase), phase)
 
   def submitAmendment(userAnswers: UserAnswers, departureId: String, phase: Phase)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     for {
-      mrn <- apiConnector.getMRN(departureId)
+      mrn <- apiConnector.getMRN(departureId, phase)
       payload = declaration.transform(userAnswers, mrn, phase)
-      result <- apiConnector.submitAmendment(departureId, payload)
+      result <- apiConnector.submitAmendment(departureId, payload, phase)
     } yield result
 
-  def get(lrn: String)(implicit hc: HeaderCarrier): Future[Option[Messages]] =
-    apiConnector.getDeparture(lrn).flatMap {
+  def get(lrn: String, phase: Phase)(implicit hc: HeaderCarrier): Future[Option[Messages]] =
+    apiConnector.getDeparture(lrn, phase).flatMap {
       _.traverse {
-        departure => apiConnector.getMessages(departure.id)
+        departure => apiConnector.getMessages(departure.id, phase)
       }
     }
 }

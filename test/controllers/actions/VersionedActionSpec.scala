@@ -19,12 +19,13 @@ package controllers.actions
 import base.SpecBase
 import models.Phase
 import models.request.{AuthenticatedRequest, VersionedRequest}
+import org.scalatest.concurrent.ScalaFutures
 import play.api.mvc._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class VersionedActionSpec extends SpecBase {
+class VersionedActionSpec extends SpecBase with ScalaFutures {
 
   private class Harness extends VersionedAction {
 
@@ -39,7 +40,7 @@ class VersionedActionSpec extends SpecBase {
 
         val action = new Harness()
 
-        val request              = fakeRequest.withHeaders("Accept" -> "application/vnd.hmrc.2.0+json")
+        val request              = fakeRequest.withHeaders("APIVersion" -> "2.0")
         val authenticatedRequest = AuthenticatedRequest(request, "EORINumber")
         val result               = action.callRefine(authenticatedRequest).futureValue
 
@@ -47,12 +48,12 @@ class VersionedActionSpec extends SpecBase {
       }
     }
 
-    "post transition header" should {
-      "return request with post transition phase value" in {
+    "post-transition header" should {
+      "return request with post-transition phase value" in {
 
         val action = new Harness()
 
-        val request              = fakeRequest.withHeaders("Accept" -> "application/vnd.hmrc.2.1+json")
+        val request              = fakeRequest.withHeaders("APIVersion" -> "2.1")
         val authenticatedRequest = AuthenticatedRequest(request, "EORINumber")
         val result               = action.callRefine(authenticatedRequest).futureValue
 
