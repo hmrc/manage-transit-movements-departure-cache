@@ -301,9 +301,9 @@
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
   * a valid `String` request body representing the LRN
-  * an `Accept` header with either:
-    * `application/vnd.hmrc.2.0+json` for transition rules
-    * `application/vnd.hmrc.2.1+json` for final rules
+  * an `APIVersion` header with either:
+    * `2.0` for transition rules
+    * `2.1` for final rules
 * Then, an IE015 gets successfully submitted to the API
 
 ### Unsuccessful responses (with possible causes)
@@ -332,9 +332,9 @@
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
   * a valid `String` request body representing the LRN
-  * an `Accept` header with either:
-    * `application/vnd.hmrc.2.0+json` for transition rules
-    * `application/vnd.hmrc.2.1+json` for final rules
+  * an `APIVersion` header with either:
+    * `2.0` for transition rules
+    * `2.1` for final rules
 * Then, an IE013 gets successfully submitted to the API
 
 ### Unsuccessful responses (with possible causes)
@@ -362,9 +362,9 @@
 * A call is made to the `GET` endpoint with:
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
-  * an `Accept` header with either:
-    * `application/vnd.hmrc.2.0+json` for transition rules
-    * `application/vnd.hmrc.2.1+json` for final rules
+  * an `APIVersion` header with either:
+    * `2.0` for transition rules
+    * `2.1` for final rules
 * A departure is found in the API for the given LRN and EORI number (extracted from the enrolment)
 * Then, the messages corresponding to this departure ID are retrieved 
 
