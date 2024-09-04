@@ -18,7 +18,6 @@ package controllers.actions
 
 import models.Phase
 import models.request.{AuthenticatedRequest, VersionedRequest}
-import play.api.http.HeaderNames._
 import play.api.mvc.Results.BadRequest
 import play.api.mvc.{ActionRefiner, Result}
 
@@ -28,9 +27,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class VersionedAction @Inject() (implicit val executionContext: ExecutionContext) extends ActionRefiner[AuthenticatedRequest, VersionedRequest] {
 
   override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, VersionedRequest[A]]] =
-    request.headers.get(ACCEPT) match {
-      case Some("application/vnd.hmrc.2.0+json") => Future.successful(Right(VersionedRequest(request, Phase.Transition)))
-      case Some("application/vnd.hmrc.2.1+json") => Future.successful(Right(VersionedRequest(request, Phase.PostTransition)))
-      case _                                     => Future.successful(Left(BadRequest))
+    request.headers.get("APIVersion").flatMap(Phase(_)) match {
+      case Some(phase) => Future.successful(Right(VersionedRequest(request, phase)))
+      case None        => Future.successful(Left(BadRequest))
     }
 }

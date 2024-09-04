@@ -16,10 +16,23 @@
 
 package models
 
-sealed trait Phase
+sealed trait Phase {
+  val version: String
+}
 
 object Phase {
 
-  case object Transition extends Phase
-  case object PostTransition extends Phase
+  case object Transition extends Phase {
+    override val version: String = "2.0"
+  }
+
+  case object PostTransition extends Phase {
+    override val version: String = "2.1"
+  }
+
+  def apply(header: String): Option[Phase] = header match {
+    case Transition.version     => Some(Transition)
+    case PostTransition.version => Some(PostTransition)
+    case _                      => None
+  }
 }
