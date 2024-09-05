@@ -25,6 +25,7 @@ import org.mongodb.scala.model._
 import services.DateTimeService
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
+import org.mongodb.scala._
 
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -73,7 +74,13 @@ class CacheRepository @Inject() (
     val updates: Seq[Bson] = Seq(
       Some(Updates.setOnInsert("lrn", data.lrn)),
       Some(Updates.setOnInsert("eoriNumber", data.eoriNumber)),
-      Some(Updates.set("data", Codecs.toBson(data.data)(sensitiveFormats.jsObjectWrites))),
+      Some(
+        Updates.set("data",
+                    Codecs.toBson(data.data)(using {
+                      sensitiveFormats.jsObjectWrites
+                    })
+        )
+      ),
       Some(Updates.set("tasks", Codecs.toBson(data.tasks))),
       Some(Updates.setOnInsert("createdAt", now)),
       Some(Updates.set("lastUpdated", now)),
@@ -82,7 +89,7 @@ class CacheRepository @Inject() (
       departureId.map(Updates.set("departureId", _))
     ).flatten
 
-    val combineUpdates: Bson = Updates.combine(updates: _*)
+    val combineUpdates: Bson = Updates.combine(updates *)
     val options              = UpdateOptions().upsert(true)
 
     collection
@@ -122,7 +129,7 @@ class CacheRepository @Inject() (
 
     val filters = Seq(Some(eoriFilter), lrnFilter, stateFilter).flatten
 
-    val primaryFilter = Aggregates.filter(mAnd(filters: _*))
+    val primaryFilter = Aggregates.filter(mAnd(filters *))
 
     val aggregates: Seq[Bson] = Seq(
       primaryFilter,
@@ -151,7 +158,7 @@ object CacheRepository {
   def indexes(appConfig: AppConfig): Seq[IndexModel] = {
     val userAnswersCreatedAtIndex: IndexModel = IndexModel(
       keys = Indexes.ascending("createdAt"),
-      indexOptions = IndexOptions().name("user-answers-created-at-index").expireAfter(appConfig.mongoTtlInDays, TimeUnit.DAYS)
+      indexOptions = IndexOptions().name("user-answers-created-at-index").expireAfter(appConfig.mongoTtlInDays.asInstanceOf[Number].longValue, TimeUnit.DAYS)
     )
 
     val eoriNumberAndLrnCompoundIndex: IndexModel = IndexModel(

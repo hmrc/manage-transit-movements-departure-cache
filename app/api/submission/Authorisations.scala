@@ -40,6 +40,6 @@ object authorisationType03 {
       (index.toString: Reads[String]) and
         authorisationTypeReads and
         (__ \ "authorisationReferenceNumber").read[String]
-    )(AuthorisationType03.apply _)
+    )(AuthorisationType03.apply)
   }
 }

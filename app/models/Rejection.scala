@@ -47,13 +47,13 @@ object Rejection {
   implicit val reads: Reads[Rejection] =
     (__ \ "type").read[String].flatMap {
       case "IE055" =>
-        (__ \ "departureId").read[String].map(IE055Rejection)
+        (__ \ "departureId").read[String].map(IE055Rejection.apply)
       case "IE056" =>
         (
           (__ \ "departureId").read[String] and
             (__ \ "businessRejectionType").read[BusinessRejectionType] and
             (__ \ "errorPointers").read[NonEmptyList[XPath]]
-        )(IE056Rejection.apply _)
+        )(IE056Rejection.apply)
       case value => Reads.failed(s"Unexpected rejection type: $value")
     }
 }

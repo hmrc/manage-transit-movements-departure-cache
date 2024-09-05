@@ -65,7 +65,7 @@ object UserAnswers {
         (__ \ "_id").read[UUID] and
         (__ \ "isSubmitted").read[SubmissionState] and
         (__ \ "departureId").readNullable[String]
-    )(UserAnswers.apply _)
+    )(UserAnswers.apply)
 
   private def writes(implicit instantWrites: Writes[Instant], metaDataWrites: Writes[Metadata]): Writes[UserAnswers] =
     (
@@ -75,6 +75,8 @@ object UserAnswers {
         (__ \ "_id").write[UUID] and
         (__ \ "isSubmitted").write[SubmissionState] and
         (__ \ "departureId").writeNullable[String]
-    )(unlift(UserAnswers.unapply))
+    )(
+      ua => Tuple.fromProductTyped(ua)
+    )
 
 }

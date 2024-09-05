@@ -37,13 +37,13 @@ object addressType {
 object addressType14 {
 
   implicit val optionalReads: Reads[Option[AddressType14]] =
-    addressType.optionalReads(AddressType14)
+    addressType.optionalReads(AddressType14.apply)
 }
 
 object addressType17 {
 
   implicit val optionalReads: Reads[Option[AddressType17]] =
-    addressType.optionalReads(AddressType17)
+    addressType.optionalReads(AddressType17.apply)
 }
 
 object postcodeAddressType02 {
@@ -52,13 +52,13 @@ object postcodeAddressType02 {
     (__ \ "streetNumber").readNullable[String] and
       (__ \ "postalCode").read[String] and
       (__ \ "country" \ "code").read[String]
-  )(PostcodeAddressType02.apply _)
+  )(PostcodeAddressType02.apply)
 }
 
 object addressType12 {
 
   implicit val optionalReads: Reads[Option[AddressType12]] =
-    addressType.optionalReads(AddressType12)
+    addressType.optionalReads(AddressType12.apply)
 
   implicit class RichAddressType12(value: AddressType12) {
 

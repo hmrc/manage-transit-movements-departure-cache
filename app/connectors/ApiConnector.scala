@@ -23,6 +23,7 @@ import play.api.http.HeaderNames._
 import uk.gov.hmrc.http.HttpReads.Implicits._
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpResponse, StringContextOps}
+import play.api.libs.ws.XMLBodyWritables._
 
 import java.net.URL
 import javax.inject.Inject

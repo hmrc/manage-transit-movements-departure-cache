@@ -45,13 +45,13 @@ object CustomsOffices {
 object customsOfficeOfDepartureType03 {
 
   implicit val reads: Reads[CustomsOfficeOfDepartureType03] =
-    (__ \ "officeOfDeparture" \ "id").read[String].map(CustomsOfficeOfDepartureType03)
+    (__ \ "officeOfDeparture" \ "id").read[String].map(CustomsOfficeOfDepartureType03.apply)
 }
 
 object customsOfficeOfDestinationDeclaredType01 {
 
   implicit val reads: Reads[CustomsOfficeOfDestinationDeclaredType01] =
-    (__ \ "officeOfDestination" \ "id").read[String].map(CustomsOfficeOfDestinationDeclaredType01)
+    (__ \ "officeOfDestination" \ "id").read[String].map(CustomsOfficeOfDestinationDeclaredType01.apply)
 }
 
 object customsOfficeOfTransitDeclaredType04 {
@@ -60,7 +60,7 @@ object customsOfficeOfTransitDeclaredType04 {
     (index.toString: Reads[String]) and
       (__ \ "officeOfTransit" \ "id").read[String] and
       (__ \ "arrivalDateTime").readNullable[String].map(stringToXMLGregorianCalendar)
-  )(CustomsOfficeOfTransitDeclaredType04.apply _)
+  )(CustomsOfficeOfTransitDeclaredType04.apply)
 }
 
 object customsOfficeOfExitForTransitDeclaredType02 {
@@ -68,5 +68,5 @@ object customsOfficeOfExitForTransitDeclaredType02 {
   def reads(index: Int): Reads[CustomsOfficeOfExitForTransitDeclaredType02] = (
     (index.toString: Reads[String]) and
       (__ \ "officeOfExit" \ "id").read[String]
-  )(CustomsOfficeOfExitForTransitDeclaredType02.apply _)
+  )(CustomsOfficeOfExitForTransitDeclaredType02.apply)
 }

@@ -45,7 +45,7 @@ object Guarantee {
           (__ \ "guaranteeType" \ "code").read[String] and
           (__ \ "otherReference").readNullable[String] and
           __.read[GuaranteeReferenceType03](guaranteeReferenceType03.reads(index)).map(Seq(_))
-      )(GuaranteeType.apply _)
+      )(GuaranteeType.apply)
   }
 
   def transform(uA: UserAnswers): Seq[GuaranteeType02] =
@@ -89,5 +89,5 @@ object guaranteeReferenceType03 {
         (__ \ "accessCode").readNullable[String] and
         (__ \ "liabilityAmount").readNullable[BigDecimal] and
         (__ \ "currency" \ "currency").readNullable[String]
-    )(GuaranteeReferenceType03.apply _)
+    )(GuaranteeReferenceType03.apply)
 }

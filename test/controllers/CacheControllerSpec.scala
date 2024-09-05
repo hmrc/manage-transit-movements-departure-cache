@@ -548,7 +548,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockXPathService.isDeclarationAmendable(any(), any(), any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, routes.CacheController.isDeclarationAmendable(lrn).url)
-          .withBody(JsArray(xPaths.map(_.value).map(JsString)))
+          .withBody(JsArray(xPaths.map(_.value).map(JsString.apply)))
 
         val result = route(app, request).value
 
@@ -563,7 +563,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockXPathService.isDeclarationAmendable(any(), any(), any())).thenReturn(Future.successful(false))
 
         val request = FakeRequest(POST, routes.CacheController.isDeclarationAmendable(lrn).url)
-          .withBody(JsArray(xPaths.map(_.value).map(JsString)))
+          .withBody(JsArray(xPaths.map(_.value).map(JsString.apply)))
 
         val result = route(app, request).value
 

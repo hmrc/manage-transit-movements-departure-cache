@@ -42,5 +42,5 @@ object CommonTransitOperation {
       (routeDetailsPath \ "specificCircumstanceIndicator" \ "code").readNullable[String] and
       (routeDetailsPath \ "routing" \ "bindingItinerary").readWithDefault[Boolean](false) and
       (transportDetailsPath \ "authorisationsAndLimit" \ "limit" \ "limitDate").readNullable[LocalDate]
-  )(CommonTransitOperation.apply _)
+  )(CommonTransitOperation.apply)
 }

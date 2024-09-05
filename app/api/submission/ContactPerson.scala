@@ -36,7 +36,7 @@ object contactPersonType05 {
   import contactPerson._
 
   implicit val reads: Reads[ContactPersonType05] =
-    contactPerson.reads(ContactPersonType05)
+    contactPerson.reads(ContactPersonType05.apply)
 
   implicit val optionalReads: Reads[Option[ContactPersonType05]] = (
     (__ \ name).readNullable[String] and
@@ -50,5 +50,5 @@ object contactPersonType05 {
 object contactPersonType06 {
 
   implicit val reads: Reads[ContactPersonType06] =
-    contactPerson.reads(ContactPersonType06)
+    contactPerson.reads(ContactPersonType06.apply)
 }
