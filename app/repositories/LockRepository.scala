@@ -95,7 +95,7 @@ object LockRepository {
 
     val userAnswersLastUpdatedIndex: IndexModel = IndexModel(
       keys = Indexes.ascending("lastUpdated"),
-      indexOptions = IndexOptions().name("draft-lock-last-updated-index").expireAfter(appConfig.lockTTLInMins.asInstanceOf[Number].longValue, TimeUnit.MINUTES)
+      indexOptions = IndexOptions().name("draft-lock-last-updated-index").expireAfter(appConfig.lockTTLInMins.toLong, TimeUnit.MINUTES)
     )
 
     val eoriNumberAndLrnCompoundIndex: IndexModel = IndexModel(
