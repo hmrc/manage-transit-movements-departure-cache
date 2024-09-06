@@ -158,7 +158,7 @@ object CacheRepository {
   def indexes(appConfig: AppConfig): Seq[IndexModel] = {
     val userAnswersCreatedAtIndex: IndexModel = IndexModel(
       keys = Indexes.ascending("createdAt"),
-      indexOptions = IndexOptions().name("user-answers-created-at-index").expireAfter(appConfig.mongoTtlInDays.asInstanceOf[Number].longValue, TimeUnit.DAYS)
+      indexOptions = IndexOptions().name("user-answers-created-at-index").expireAfter(appConfig.mongoTtlInDays.toLong, TimeUnit.DAYS)
     )
 
     val eoriNumberAndLrnCompoundIndex: IndexModel = IndexModel(
