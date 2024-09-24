@@ -16,7 +16,7 @@
 
 package repositories
 
-import com.mongodb.client.model.Filters.{regex, and => mAnd, eq => mEq}
+import com.mongodb.client.model.Filters.{and => mAnd, eq => mEq, regex}
 import config.AppConfig
 import models._
 import org.bson.conversions.Bson
@@ -74,6 +74,7 @@ class CacheRepository @Inject() (
     val updates: Seq[Bson] = Seq(
       Some(Updates.setOnInsert("lrn", data.lrn)),
       Some(Updates.setOnInsert("eoriNumber", data.eoriNumber)),
+      // format: off
       Some(
         Updates.set("data",
                     Codecs.toBson(data.data)(using {
@@ -81,6 +82,7 @@ class CacheRepository @Inject() (
                     })
         )
       ),
+      // format: on
       Some(Updates.set("tasks", Codecs.toBson(data.tasks))),
       Some(Updates.setOnInsert("createdAt", now)),
       Some(Updates.set("lastUpdated", now)),
@@ -89,7 +91,7 @@ class CacheRepository @Inject() (
       departureId.map(Updates.set("departureId", _))
     ).flatten
 
-    val combineUpdates: Bson = Updates.combine(updates *)
+    val combineUpdates: Bson = Updates.combine(updates*)
     val options              = UpdateOptions().upsert(true)
 
     collection
@@ -129,7 +131,7 @@ class CacheRepository @Inject() (
 
     val filters = Seq(Some(eoriFilter), lrnFilter, stateFilter).flatten
 
-    val primaryFilter = Aggregates.filter(mAnd(filters *))
+    val primaryFilter = Aggregates.filter(mAnd(filters*))
 
     val aggregates: Seq[Bson] = Seq(
       primaryFilter,

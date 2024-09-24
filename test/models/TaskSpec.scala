@@ -25,21 +25,27 @@ class TaskSpec extends SpecBase with ScalaCheckPropertyChecks {
   "PreTaskList must have correct taskName" in {
     PreTaskList.taskName shouldBe ".preTaskList"
   }
+
   "TraderDetails must have correct taskName" in {
     TraderDetails.taskName shouldBe ".traderDetails"
   }
+
   "RouteDetails must have correct taskName" in {
     RouteDetails.taskName shouldBe ".routeDetails"
   }
+
   "TransportDetails must have correct taskName" in {
     TransportDetails.taskName shouldBe ".transportDetails"
   }
+
   "GuaranteeDetails must have correct taskName" in {
     GuaranteeDetails.taskName shouldBe ".guaranteeDetails"
   }
+
   "Documents must have correct taskName" in {
     Documents.taskName shouldBe ".documents"
   }
+
   "Items must have correct taskName" in {
     Items.taskName shouldBe ".items"
   }
