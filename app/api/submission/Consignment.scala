@@ -296,20 +296,22 @@ object transportEquipmentType06 {
     TransportEquipmentType06(sequenceNumber, containerIdentificationNumber, Seal.length, Seal, GoodsReference)
 
   private def goodsReferencesReads(transportEquipmentUuid: UUID, items: Seq[JsValue]): Reads[Seq[GoodsReferenceType02]] =
-    items.zipWithSequenceNumber
-      .foldLeft[Seq[Int]](Nil) {
-        case (acc, (value, itemIndex)) =>
-          val reads = (__ \ "transportEquipment").read[UUID] orElse (__ \ "inferredTransportEquipment").read[UUID]
-          value.validate(reads) match {
-            case JsSuccess(`transportEquipmentUuid`, _) => acc :+ itemIndex
-            case _                                      => acc
-          }
-      }
-      .zipWithSequenceNumber
-      .map {
-        case (declarationGoodsItemNumber, sequenceNumber) =>
-          GoodsReferenceType02(sequenceNumber, BigInt(declarationGoodsItemNumber))
-      }
+    Reads.pure {
+      items.zipWithSequenceNumber
+        .foldLeft[Seq[Int]](Nil) {
+          case (acc, (value, itemIndex)) =>
+            val reads = (__ \ "transportEquipment").read[UUID] orElse (__ \ "inferredTransportEquipment").read[UUID]
+            value.validate(reads) match {
+              case JsSuccess(`transportEquipmentUuid`, _) => acc :+ itemIndex
+              case _                                      => acc
+            }
+        }
+        .zipWithSequenceNumber
+        .map {
+          case (declarationGoodsItemNumber, sequenceNumber) =>
+            GoodsReferenceType02(sequenceNumber, BigInt(declarationGoodsItemNumber))
+        }
+    }
 
   def reads(index: Int, items: Seq[JsValue]): Reads[TransportEquipmentType06] = (
     Reads.pure[BigInt](index) and
@@ -395,7 +397,7 @@ object activeBorderTransportMeansType02 {
   private lazy val identificationReads: Reads[Option[String]] =
     ((__ \ "identification" \ "code").read[String] orElse (__ \ "inferredIdentification" \ "code").read[String])
       .map(Option(_))
-      .orElse(None)
+      .orElse(Reads.pure[Option[String]](None))
 
   def reads(index: Int): Reads[ActiveBorderTransportMeansType02] = (
     Reads.pure[BigInt](index) and
@@ -470,9 +472,11 @@ object consignmentItemType09 {
     (__ \ "documents").readWithDefault[JsArray](JsArray()).map(_.value.toSeq).flatMap {
       itemDocuments =>
         def readDocuments[T](`type`: String)(implicit rds: Int => Reads[T]): Reads[Seq[T]] =
-          documents.readFilteredValuesAs {
-            document =>
-              document.hasCorrectTypeAndLevel(`type`, ItemLevel) && document.addedForItem(itemDocuments)
+          Reads.pure {
+            documents.readFilteredValuesAs {
+              document =>
+                document.hasCorrectTypeAndLevel(`type`, ItemLevel) && document.addedForItem(itemDocuments)
+            }
           }
 
         (

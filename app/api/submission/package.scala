@@ -110,6 +110,11 @@ package object submission {
 
   implicit class RichJsValues(values: Seq[JsValue]) {
 
+    def flatMapWithSequenceNumber[T](f: (JsValue, Int) => Option[T]): Seq[T] =
+      values.zipWithSequenceNumber.flatMap {
+        case (value, index) => f(value, index)
+      }
+
     def mapWithSequenceNumber[T](f: (JsValue, Int) => T): Seq[T] =
       values.zipWithSequenceNumber.map {
         case (value, index) => f(value, index)
@@ -121,8 +126,8 @@ package object submission {
       }
 
     def readFilteredValuesAs[T](f: JsValue => Boolean)(implicit reads: Int => Reads[T]): Seq[T] =
-      values.filter(f).mapWithSequenceNumber {
-        case (value, index) => value.as[T](reads(index))
+      values.filter(f).flatMapWithSequenceNumber {
+        case (value, index) => value.asOpt[T](reads(index))
       }
   }
 
@@ -177,10 +182,6 @@ package object submission {
   implicit def localDateTimeToXMLGregorianCalendar(localDateTime: LocalDateTime): XMLGregorianCalendar = {
     val formatterNoMillis: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
     localDateTime.format(formatterNoMillis)
-  }
-
-  implicit def successfulReads[T](value: T): Reads[T] = Reads {
-    _ => JsSuccess(value)
   }
 
 }
