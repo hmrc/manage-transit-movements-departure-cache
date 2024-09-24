@@ -101,22 +101,22 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         converted.AdditionalSupplyChainActor shouldBe Seq(
           AdditionalSupplyChainActorType(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             role = "CS",
             identificationNumber = "sca1"
           ),
           AdditionalSupplyChainActorType(
-            sequenceNumber = "2",
+            sequenceNumber = 2,
             role = "FW",
             identificationNumber = "sca2"
           ),
           AdditionalSupplyChainActorType(
-            sequenceNumber = "3",
+            sequenceNumber = 3,
             role = "MF",
             identificationNumber = "sca3"
           ),
           AdditionalSupplyChainActorType(
-            sequenceNumber = "4",
+            sequenceNumber = 4,
             role = "WH",
             identificationNumber = "sca4"
           )
@@ -124,26 +124,26 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         converted.TransportEquipment shouldBe Seq(
           TransportEquipmentType06(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             containerIdentificationNumber = Some("container id 1"),
             numberOfSeals = 2,
             Seal = Seq(
               SealType05(
-                sequenceNumber = "1",
+                sequenceNumber = 1,
                 identifier = "seal 1"
               ),
               SealType05(
-                sequenceNumber = "2",
+                sequenceNumber = 2,
                 identifier = "seal 2"
               )
             ),
             GoodsReference = Seq(
               GoodsReferenceType02(
-                sequenceNumber = "1",
+                sequenceNumber = 1,
                 declarationGoodsItemNumber = 1
               ),
               GoodsReferenceType02(
-                sequenceNumber = "2",
+                sequenceNumber = 2,
                 declarationGoodsItemNumber = 2
               )
             )
@@ -192,7 +192,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         converted.DepartureTransportMeans shouldBe Seq(
           DepartureTransportMeansType03(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             typeOfIdentification = Some("10"),
             identificationNumber = Some("means id number"),
             nationality = Some("FR")
@@ -201,18 +201,18 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         converted.CountryOfRoutingOfConsignment shouldBe Seq(
           CountryOfRoutingOfConsignmentType01(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             country = "AD"
           ),
           CountryOfRoutingOfConsignmentType01(
-            sequenceNumber = "2",
+            sequenceNumber = 2,
             country = "AR"
           )
         )
 
         converted.ActiveBorderTransportMeans shouldBe Seq(
           ActiveBorderTransportMeansType02(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             customsOfficeAtBorderReferenceNumber = Some("IT018101"),
             typeOfIdentification = Some("11"),
             identificationNumber = Some("active id number"),
@@ -239,7 +239,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         converted.PreviousDocument shouldBe Seq(
           PreviousDocumentType09(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             typeValue = "IM",
             referenceNumber = "previous3",
             complementOfInformation = Some("complement of information previous3")
@@ -248,7 +248,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         converted.SupportingDocument shouldBe Seq(
           SupportingDocumentType05(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             typeValue = "C673",
             referenceNumber = "support2",
             documentLineItemNumber = None,
@@ -258,7 +258,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         converted.TransportDocument shouldBe Seq(
           TransportDocumentType04(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             typeValue = "235",
             referenceNumber = "transport2"
           )
@@ -266,12 +266,12 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         converted.AdditionalReference shouldBe Seq(
           AdditionalReferenceType05(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             typeValue = "type123",
             referenceNumber = Some("arno1")
           ),
           AdditionalReferenceType05(
-            sequenceNumber = "2",
+            sequenceNumber = 2,
             typeValue = "type321",
             referenceNumber = Some("1onra")
           )
@@ -279,12 +279,12 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         converted.AdditionalInformation shouldBe Seq(
           AdditionalInformationType03(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             code = "adinftype1",
             text = Some("orca")
           ),
           AdditionalInformationType03(
-            sequenceNumber = "2",
+            sequenceNumber = 2,
             code = "adinftype2",
             text = Some("acro")
           )
@@ -298,7 +298,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
         val ans = converted.HouseConsignment.head
 
         val exp = HouseConsignmentType10(
-          sequenceNumber = "1",
+          sequenceNumber = 1,
           countryOfDispatch = None,
           grossMass = 580.245,
           referenceNumberUCR = None,
@@ -314,7 +314,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           TransportCharges = None,
           ConsignmentItem = Seq(
             ConsignmentItemType09(
-              goodsItemNumber = "1",
+              goodsItemNumber = 1,
               declarationGoodsItemNumber = 1,
               declarationType = Some("T1"),
               countryOfDispatch = Some("GB"),
@@ -336,22 +336,22 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               ),
               AdditionalSupplyChainActor = Seq(
                 AdditionalSupplyChainActorType(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   role = "CS",
                   identificationNumber = "itemSCA1"
                 ),
                 AdditionalSupplyChainActorType(
-                  sequenceNumber = "2",
+                  sequenceNumber = 2,
                   role = "FW",
                   identificationNumber = "itemSCA2"
                 ),
                 AdditionalSupplyChainActorType(
-                  sequenceNumber = "3",
+                  sequenceNumber = 3,
                   role = "MF",
                   identificationNumber = "itemSCA3"
                 ),
                 AdditionalSupplyChainActorType(
-                  sequenceNumber = "4",
+                  sequenceNumber = 4,
                   role = "WH",
                   identificationNumber = "itemSCA4"
                 )
@@ -367,11 +367,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 ),
                 DangerousGoods = Seq(
                   DangerousGoodsType01(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     UNNumber = "UN number 1_1"
                   ),
                   DangerousGoodsType01(
-                    sequenceNumber = "2",
+                    sequenceNumber = 2,
                     UNNumber = "UN number 1_2"
                   )
                 ),
@@ -385,19 +385,19 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               ),
               Packaging = Seq(
                 PackagingType03(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   typeOfPackages = "VL",
                   numberOfPackages = None,
                   shippingMarks = None
                 ),
                 PackagingType03(
-                  sequenceNumber = "2",
+                  sequenceNumber = 2,
                   typeOfPackages = "NE",
                   numberOfPackages = Some(5),
                   shippingMarks = None
                 ),
                 PackagingType03(
-                  sequenceNumber = "3",
+                  sequenceNumber = 3,
                   typeOfPackages = "TR",
                   numberOfPackages = None,
                   shippingMarks = Some("mark3")
@@ -405,7 +405,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               ),
               PreviousDocument = Seq(
                 PreviousDocumentType08(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   typeValue = "CO",
                   referenceNumber = "previous1",
                   goodsItemNumber = Some(1),
@@ -416,7 +416,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                   complementOfInformation = None
                 ),
                 PreviousDocumentType08(
-                  sequenceNumber = "2",
+                  sequenceNumber = 2,
                   typeValue = "T2F",
                   referenceNumber = "previous2",
                   goodsItemNumber = Some(1),
@@ -429,7 +429,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               ),
               SupportingDocument = Seq(
                 SupportingDocumentType05(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   typeValue = "C673",
                   referenceNumber = "support1",
                   documentLineItemNumber = Some(678),
@@ -438,31 +438,31 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               ),
               TransportDocument = Seq(
                 TransportDocumentType04(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   typeValue = "235",
                   referenceNumber = "transport1"
                 )
               ),
               AdditionalReference = Seq(
                 AdditionalReferenceType04(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   typeValue = "ar1",
                   referenceNumber = Some("arno1")
                 ),
                 AdditionalReferenceType04(
-                  sequenceNumber = "2",
+                  sequenceNumber = 2,
                   typeValue = "ar2",
                   referenceNumber = None
                 )
               ),
               AdditionalInformation = Seq(
                 AdditionalInformationType03(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   code = "aiCode1",
                   text = Some("ai1")
                 ),
                 AdditionalInformationType03(
-                  sequenceNumber = "2",
+                  sequenceNumber = 2,
                   code = "aiCode2",
                   text = Some("ai2")
                 )
@@ -470,7 +470,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               TransportCharges = None
             ),
             ConsignmentItemType09(
-              goodsItemNumber = "2",
+              goodsItemNumber = 2,
               declarationGoodsItemNumber = 2,
               declarationType = Some("T2"),
               countryOfDispatch = Some("DE"),
@@ -489,11 +489,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 ),
                 DangerousGoods = Seq(
                   DangerousGoodsType01(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     UNNumber = "UN number 2_1"
                   ),
                   DangerousGoodsType01(
-                    sequenceNumber = "2",
+                    sequenceNumber = 2,
                     UNNumber = "UN number 2_2"
                   )
                 ),
@@ -511,14 +511,14 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               TransportDocument = Nil,
               AdditionalReference = Seq(
                 AdditionalReferenceType04(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   typeValue = "ar1",
                   referenceNumber = Some("arno1")
                 )
               ),
               AdditionalInformation = Seq(
                 AdditionalInformationType03(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   code = "aiCode1",
                   text = Some("ai1")
                 )
@@ -1075,22 +1075,22 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         converted.AdditionalSupplyChainActor shouldBe Seq(
           AdditionalSupplyChainActorType(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             role = "CS",
             identificationNumber = "sca1"
           ),
           AdditionalSupplyChainActorType(
-            sequenceNumber = "2",
+            sequenceNumber = 2,
             role = "FW",
             identificationNumber = "sca2"
           ),
           AdditionalSupplyChainActorType(
-            sequenceNumber = "3",
+            sequenceNumber = 3,
             role = "MF",
             identificationNumber = "sca3"
           ),
           AdditionalSupplyChainActorType(
-            sequenceNumber = "4",
+            sequenceNumber = 4,
             role = "WH",
             identificationNumber = "sca4"
           )
@@ -1098,26 +1098,26 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         converted.TransportEquipment shouldBe Seq(
           TransportEquipmentType06(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             containerIdentificationNumber = Some("container id 1"),
             numberOfSeals = 2,
             Seal = Seq(
               SealType05(
-                sequenceNumber = "1",
+                sequenceNumber = 1,
                 identifier = "seal 1"
               ),
               SealType05(
-                sequenceNumber = "2",
+                sequenceNumber = 2,
                 identifier = "seal 2"
               )
             ),
             GoodsReference = Seq(
               GoodsReferenceType02(
-                sequenceNumber = "1",
+                sequenceNumber = 1,
                 declarationGoodsItemNumber = 1
               ),
               GoodsReferenceType02(
-                sequenceNumber = "2",
+                sequenceNumber = 2,
                 declarationGoodsItemNumber = 2
               )
             )
@@ -1166,7 +1166,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         converted.DepartureTransportMeans shouldBe Seq(
           DepartureTransportMeansType03(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             typeOfIdentification = Some("10"),
             identificationNumber = Some("means id number"),
             nationality = Some("FR")
@@ -1175,18 +1175,18 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         converted.CountryOfRoutingOfConsignment shouldBe Seq(
           CountryOfRoutingOfConsignmentType01(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             country = "AD"
           ),
           CountryOfRoutingOfConsignmentType01(
-            sequenceNumber = "2",
+            sequenceNumber = 2,
             country = "AR"
           )
         )
 
         converted.ActiveBorderTransportMeans shouldBe Seq(
           ActiveBorderTransportMeansType02(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             customsOfficeAtBorderReferenceNumber = Some("IT018101"),
             typeOfIdentification = Some("11"),
             identificationNumber = Some("active id number"),
@@ -1219,12 +1219,12 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         converted.AdditionalReference shouldBe Seq(
           AdditionalReferenceType05(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             typeValue = "type123",
             referenceNumber = Some("ARNO1")
           ),
           AdditionalReferenceType05(
-            sequenceNumber = "2",
+            sequenceNumber = 2,
             typeValue = "type321",
             referenceNumber = Some("1ONRA")
           )
@@ -1232,12 +1232,12 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         converted.AdditionalInformation shouldBe Seq(
           AdditionalInformationType03(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             code = "ADDINFTYPE1",
             text = Some("ORCA")
           ),
           AdditionalInformationType03(
-            sequenceNumber = "2",
+            sequenceNumber = 2,
             code = "ADDINFTYPE2",
             text = Some("ACRO")
           )
@@ -1251,7 +1251,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
         val output = converted.HouseConsignment.head
 
         val expected = HouseConsignmentType10(
-          sequenceNumber = "1",
+          sequenceNumber = 1,
           countryOfDispatch = None,
           grossMass = 580.245,
           referenceNumberUCR = None,
@@ -1267,7 +1267,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           TransportCharges = None,
           ConsignmentItem = Seq(
             ConsignmentItemType09(
-              goodsItemNumber = "1",
+              goodsItemNumber = 1,
               declarationGoodsItemNumber = 1,
               declarationType = Some("T1"),
               countryOfDispatch = Some("GB"),
@@ -1289,22 +1289,22 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               ),
               AdditionalSupplyChainActor = Seq(
                 AdditionalSupplyChainActorType(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   role = "CS",
                   identificationNumber = "itemSCA1"
                 ),
                 AdditionalSupplyChainActorType(
-                  sequenceNumber = "2",
+                  sequenceNumber = 2,
                   role = "FW",
                   identificationNumber = "itemSCA2"
                 ),
                 AdditionalSupplyChainActorType(
-                  sequenceNumber = "3",
+                  sequenceNumber = 3,
                   role = "MF",
                   identificationNumber = "itemSCA3"
                 ),
                 AdditionalSupplyChainActorType(
-                  sequenceNumber = "4",
+                  sequenceNumber = 4,
                   role = "WH",
                   identificationNumber = "itemSCA4"
                 )
@@ -1320,11 +1320,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 ),
                 DangerousGoods = Seq(
                   DangerousGoodsType01(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     UNNumber = "UN number 1_1"
                   ),
                   DangerousGoodsType01(
-                    sequenceNumber = "2",
+                    sequenceNumber = 2,
                     UNNumber = "UN number 1_2"
                   )
                 ),
@@ -1338,19 +1338,19 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               ),
               Packaging = Seq(
                 PackagingType03(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   typeOfPackages = "VL",
                   numberOfPackages = None,
                   shippingMarks = None
                 ),
                 PackagingType03(
-                  sequenceNumber = "2",
+                  sequenceNumber = 2,
                   typeOfPackages = "NE",
                   numberOfPackages = Some(5),
                   shippingMarks = None
                 ),
                 PackagingType03(
-                  sequenceNumber = "3",
+                  sequenceNumber = 3,
                   typeOfPackages = "TR",
                   numberOfPackages = None,
                   shippingMarks = Some("mark3")
@@ -1361,24 +1361,24 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               TransportDocument = Seq.empty,
               AdditionalReference = Seq(
                 AdditionalReferenceType04(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   typeValue = "ar1",
                   referenceNumber = Some("arno1")
                 ),
                 AdditionalReferenceType04(
-                  sequenceNumber = "2",
+                  sequenceNumber = 2,
                   typeValue = "ar2",
                   referenceNumber = None
                 )
               ),
               AdditionalInformation = Seq(
                 AdditionalInformationType03(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   code = "aiCode1",
                   text = Some("ai1")
                 ),
                 AdditionalInformationType03(
-                  sequenceNumber = "2",
+                  sequenceNumber = 2,
                   code = "aiCode2",
                   text = Some("ai2")
                 )
@@ -1386,7 +1386,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               TransportCharges = None
             ),
             ConsignmentItemType09(
-              goodsItemNumber = "2",
+              goodsItemNumber = 2,
               declarationGoodsItemNumber = 2,
               declarationType = Some("T2"),
               countryOfDispatch = Some("DE"),
@@ -1405,11 +1405,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 ),
                 DangerousGoods = Seq(
                   DangerousGoodsType01(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     UNNumber = "UN number 2_1"
                   ),
                   DangerousGoodsType01(
-                    sequenceNumber = "2",
+                    sequenceNumber = 2,
                     UNNumber = "UN number 2_2"
                   )
                 ),
@@ -1427,14 +1427,14 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               TransportDocument = Nil,
               AdditionalReference = Seq(
                 AdditionalReferenceType04(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   typeValue = "ar1",
                   referenceNumber = Some("arno1")
                 )
               ),
               AdditionalInformation = Seq(
                 AdditionalInformationType03(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   code = "aiCode1",
                   text = Some("ai1")
                 )
@@ -1498,11 +1498,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
                   HouseConsignmentType10(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     grossMass = BigDecimal(1),
                     ConsignmentItem = Seq(
                       ConsignmentItemType09(
-                        goodsItemNumber = "1",
+                        goodsItemNumber = 1,
                         declarationGoodsItemNumber = BigInt(1),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 1"
@@ -1512,7 +1512,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                         )
                       ),
                       ConsignmentItemType09(
-                        goodsItemNumber = "2",
+                        goodsItemNumber = 2,
                         declarationGoodsItemNumber = BigInt(2),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
@@ -1537,11 +1537,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 ),
                 HouseConsignment = Seq(
                   HouseConsignmentType10(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     grossMass = BigDecimal(1),
                     ConsignmentItem = Seq(
                       ConsignmentItemType09(
-                        goodsItemNumber = "1",
+                        goodsItemNumber = 1,
                         declarationGoodsItemNumber = BigInt(1),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 1"
@@ -1549,7 +1549,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                         TransportCharges = None
                       ),
                       ConsignmentItemType09(
-                        goodsItemNumber = "2",
+                        goodsItemNumber = 2,
                         declarationGoodsItemNumber = BigInt(2),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
@@ -1573,11 +1573,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                   ),
                   HouseConsignment = Seq(
                     HouseConsignmentType10(
-                      sequenceNumber = "1",
+                      sequenceNumber = 1,
                       grossMass = BigDecimal(1),
                       ConsignmentItem = Seq(
                         ConsignmentItemType09(
-                          goodsItemNumber = "1",
+                          goodsItemNumber = 1,
                           declarationGoodsItemNumber = BigInt(1),
                           Commodity = CommodityType07(
                             descriptionOfGoods = "Item 1"
@@ -1587,7 +1587,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                           )
                         ),
                         ConsignmentItemType09(
-                          goodsItemNumber = "2",
+                          goodsItemNumber = 2,
                           declarationGoodsItemNumber = BigInt(2),
                           Commodity = CommodityType07(
                             descriptionOfGoods = "Item 2"
@@ -1610,11 +1610,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                   ),
                   HouseConsignment = Seq(
                     HouseConsignmentType10(
-                      sequenceNumber = "1",
+                      sequenceNumber = 1,
                       grossMass = BigDecimal(1),
                       ConsignmentItem = Seq(
                         ConsignmentItemType09(
-                          goodsItemNumber = "1",
+                          goodsItemNumber = 1,
                           declarationGoodsItemNumber = BigInt(1),
                           Commodity = CommodityType07(
                             descriptionOfGoods = "Item 1"
@@ -1622,7 +1622,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                           TransportCharges = None
                         ),
                         ConsignmentItemType09(
-                          goodsItemNumber = "2",
+                          goodsItemNumber = 2,
                           declarationGoodsItemNumber = BigInt(2),
                           Commodity = CommodityType07(
                             descriptionOfGoods = "Item 2"
@@ -1645,11 +1645,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                   ),
                   HouseConsignment = Seq(
                     HouseConsignmentType10(
-                      sequenceNumber = "1",
+                      sequenceNumber = 1,
                       grossMass = BigDecimal(1),
                       ConsignmentItem = Seq(
                         ConsignmentItemType09(
-                          goodsItemNumber = "1",
+                          goodsItemNumber = 1,
                           declarationGoodsItemNumber = BigInt(1),
                           Commodity = CommodityType07(
                             descriptionOfGoods = "Item 1"
@@ -1659,7 +1659,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                           )
                         ),
                         ConsignmentItemType09(
-                          goodsItemNumber = "2",
+                          goodsItemNumber = 2,
                           declarationGoodsItemNumber = BigInt(2),
                           Commodity = CommodityType07(
                             descriptionOfGoods = "Item 2"
@@ -1687,11 +1687,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
                 HouseConsignmentType10(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
                     ConsignmentItemType09(
-                      goodsItemNumber = "1",
+                      goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 1"
@@ -1701,7 +1701,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       )
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "2",
+                      goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 2"
@@ -1711,7 +1711,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       )
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "3",
+                      goodsItemNumber = 3,
                       declarationGoodsItemNumber = BigInt(3),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 3"
@@ -1735,11 +1735,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
                 HouseConsignmentType10(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
                     ConsignmentItemType09(
-                      goodsItemNumber = "1",
+                      goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 1"
@@ -1749,7 +1749,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       )
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "2",
+                      goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 2"
@@ -1759,7 +1759,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       )
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "3",
+                      goodsItemNumber = 3,
                       declarationGoodsItemNumber = BigInt(3),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 3"
@@ -1788,11 +1788,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
                 HouseConsignmentType10(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
                     ConsignmentItemType09(
-                      goodsItemNumber = "1",
+                      goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 1"
@@ -1800,7 +1800,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       referenceNumberUCR = Some("UCR")
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "2",
+                      goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 2"
@@ -1819,11 +1819,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               referenceNumberUCR = Some("UCR"),
               HouseConsignment = Seq(
                 HouseConsignmentType10(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
                     ConsignmentItemType09(
-                      goodsItemNumber = "1",
+                      goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 1"
@@ -1831,7 +1831,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       referenceNumberUCR = None
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "2",
+                      goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 2"
@@ -1851,11 +1851,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
                 HouseConsignmentType10(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
                     ConsignmentItemType09(
-                      goodsItemNumber = "1",
+                      goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 1"
@@ -1863,7 +1863,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       referenceNumberUCR = Some("UCR")
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "2",
+                      goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 2"
@@ -1871,7 +1871,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       referenceNumberUCR = Some("UCR")
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "3",
+                      goodsItemNumber = 3,
                       declarationGoodsItemNumber = BigInt(3),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 3"
@@ -1895,11 +1895,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
                 HouseConsignmentType10(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
                     ConsignmentItemType09(
-                      goodsItemNumber = "1",
+                      goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 1"
@@ -1907,7 +1907,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       referenceNumberUCR = Some("UCR1")
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "2",
+                      goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 2"
@@ -1915,7 +1915,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       referenceNumberUCR = Some("UCR2")
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "3",
+                      goodsItemNumber = 3,
                       declarationGoodsItemNumber = BigInt(3),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 3"
@@ -1942,11 +1942,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
                 HouseConsignmentType10(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
                     ConsignmentItemType09(
-                      goodsItemNumber = "1",
+                      goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 1"
@@ -1954,7 +1954,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       countryOfDispatch = Some("GB")
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "2",
+                      goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 2"
@@ -1973,11 +1973,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               countryOfDispatch = Some("GB"),
               HouseConsignment = Seq(
                 HouseConsignmentType10(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
                     ConsignmentItemType09(
-                      goodsItemNumber = "1",
+                      goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 1"
@@ -1985,7 +1985,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       countryOfDispatch = None
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "2",
+                      goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 2"
@@ -2005,11 +2005,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
                 HouseConsignmentType10(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
                     ConsignmentItemType09(
-                      goodsItemNumber = "1",
+                      goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 1"
@@ -2017,7 +2017,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       countryOfDispatch = Some("GB")
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "2",
+                      goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 2"
@@ -2025,7 +2025,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       countryOfDispatch = Some("GB")
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "3",
+                      goodsItemNumber = 3,
                       declarationGoodsItemNumber = BigInt(3),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 3"
@@ -2049,11 +2049,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
                 HouseConsignmentType10(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
                     ConsignmentItemType09(
-                      goodsItemNumber = "1",
+                      goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 1"
@@ -2061,7 +2061,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       countryOfDispatch = Some("GB")
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "2",
+                      goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 2"
@@ -2069,7 +2069,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       countryOfDispatch = Some("FR")
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "3",
+                      goodsItemNumber = 3,
                       declarationGoodsItemNumber = BigInt(3),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 3"
@@ -2096,11 +2096,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
                 HouseConsignmentType10(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
                     ConsignmentItemType09(
-                      goodsItemNumber = "1",
+                      goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 1"
@@ -2108,7 +2108,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       countryOfDestination = Some("GB")
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "2",
+                      goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 2"
@@ -2127,11 +2127,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               countryOfDestination = Some("GB"),
               HouseConsignment = Seq(
                 HouseConsignmentType10(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
                     ConsignmentItemType09(
-                      goodsItemNumber = "1",
+                      goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 1"
@@ -2139,7 +2139,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       countryOfDestination = None
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "2",
+                      goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 2"
@@ -2159,11 +2159,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
                 HouseConsignmentType10(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
                     ConsignmentItemType09(
-                      goodsItemNumber = "1",
+                      goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 1"
@@ -2171,7 +2171,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       countryOfDestination = Some("GB")
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "2",
+                      goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 2"
@@ -2179,7 +2179,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       countryOfDestination = Some("GB")
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "3",
+                      goodsItemNumber = 3,
                       declarationGoodsItemNumber = BigInt(3),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 3"
@@ -2203,11 +2203,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
                 HouseConsignmentType10(
-                  sequenceNumber = "1",
+                  sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
                     ConsignmentItemType09(
-                      goodsItemNumber = "1",
+                      goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 1"
@@ -2215,7 +2215,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       countryOfDispatch = Some("GB")
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "2",
+                      goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 2"
@@ -2223,7 +2223,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                       countryOfDispatch = Some("FR")
                     ),
                     ConsignmentItemType09(
-                      goodsItemNumber = "3",
+                      goodsItemNumber = 3,
                       declarationGoodsItemNumber = BigInt(3),
                       Commodity = CommodityType07(
                         descriptionOfGoods = "Item 3"
@@ -2252,37 +2252,37 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
                   HouseConsignmentType10(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     grossMass = BigDecimal(1),
                     ConsignmentItem = Seq(
                       ConsignmentItemType09(
-                        goodsItemNumber = "1",
+                        goodsItemNumber = 1,
                         declarationGoodsItemNumber = BigInt(1),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 1"
                         ),
                         AdditionalInformation = Seq(
                           AdditionalInformationType03(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             code = "adi1",
                             text = Some("ADI 1")
                           ),
                           AdditionalInformationType03(
-                            sequenceNumber = "2",
+                            sequenceNumber = 2,
                             code = "adi2",
                             text = Some("ADI 2")
                           )
                         )
                       ),
                       ConsignmentItemType09(
-                        goodsItemNumber = "2",
+                        goodsItemNumber = 2,
                         declarationGoodsItemNumber = BigInt(2),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
                         ),
                         AdditionalInformation = Seq(
                           AdditionalInformationType03(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             code = "adi1",
                             text = Some("ADI 1")
                           )
@@ -2300,37 +2300,37 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 AdditionalInformation = Seq.empty,
                 HouseConsignment = Seq(
                   HouseConsignmentType10(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     grossMass = BigDecimal(1),
                     ConsignmentItem = Seq(
                       ConsignmentItemType09(
-                        goodsItemNumber = "1",
+                        goodsItemNumber = 1,
                         declarationGoodsItemNumber = BigInt(1),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 1"
                         ),
                         AdditionalInformation = Seq(
                           AdditionalInformationType03(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             code = "adi1",
                             text = Some("ADI 1")
                           ),
                           AdditionalInformationType03(
-                            sequenceNumber = "2",
+                            sequenceNumber = 2,
                             code = "adi2",
                             text = Some("ADI 2")
                           )
                         )
                       ),
                       ConsignmentItemType09(
-                        goodsItemNumber = "2",
+                        goodsItemNumber = 2,
                         declarationGoodsItemNumber = BigInt(2),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
                         ),
                         AdditionalInformation = Seq(
                           AdditionalInformationType03(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             code = "adi1",
                             text = Some("ADI 1")
                           )
@@ -2352,39 +2352,39 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
                   HouseConsignmentType10(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     grossMass = BigDecimal(1),
                     ConsignmentItem = Seq(
                       ConsignmentItemType09(
-                        goodsItemNumber = "1",
+                        goodsItemNumber = 1,
                         declarationGoodsItemNumber = BigInt(1),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 1"
                         ),
                         AdditionalInformation = Seq(
                           AdditionalInformationType03(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             code = "adi1",
                             text = Some("ADI 1")
                           )
                         )
                       ),
                       ConsignmentItemType09(
-                        goodsItemNumber = "2",
+                        goodsItemNumber = 2,
                         declarationGoodsItemNumber = BigInt(2),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
                         ),
                         AdditionalInformation = Seq(
                           AdditionalInformationType03(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             code = "adi1",
                             text = Some("ADI 1")
                           )
                         )
                       ),
                       ConsignmentItemType09(
-                        goodsItemNumber = "3",
+                        goodsItemNumber = 3,
                         declarationGoodsItemNumber = BigInt(3),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 3"
@@ -2408,46 +2408,46 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
                   HouseConsignmentType10(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     grossMass = BigDecimal(1),
                     ConsignmentItem = Seq(
                       ConsignmentItemType09(
-                        goodsItemNumber = "1",
+                        goodsItemNumber = 1,
                         declarationGoodsItemNumber = BigInt(1),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 1"
                         ),
                         AdditionalInformation = Seq(
                           AdditionalInformationType03(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             code = "adi1",
                             text = Some("ADI 1")
                           )
                         )
                       ),
                       ConsignmentItemType09(
-                        goodsItemNumber = "2",
+                        goodsItemNumber = 2,
                         declarationGoodsItemNumber = BigInt(2),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
                         ),
                         AdditionalInformation = Seq(
                           AdditionalInformationType03(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             code = "adi2",
                             text = Some("ADI 2")
                           )
                         )
                       ),
                       ConsignmentItemType09(
-                        goodsItemNumber = "3",
+                        goodsItemNumber = 3,
                         declarationGoodsItemNumber = BigInt(3),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 3"
                         ),
                         AdditionalInformation = Seq(
                           AdditionalInformationType03(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             code = "adi3",
                             text = Some("ADI 3")
                           )
@@ -2471,7 +2471,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
                   HouseConsignmentType10(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     grossMass = BigDecimal(1),
                     ConsignmentItem = Nil
                   )
@@ -2492,37 +2492,37 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
                   HouseConsignmentType10(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     grossMass = BigDecimal(1),
                     ConsignmentItem = Seq(
                       ConsignmentItemType09(
-                        goodsItemNumber = "1",
+                        goodsItemNumber = 1,
                         declarationGoodsItemNumber = BigInt(1),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 1"
                         ),
                         AdditionalInformation = Seq(
                           AdditionalInformationType03(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             code = "adi1",
                             text = Some("ADI 1")
                           ),
                           AdditionalInformationType03(
-                            sequenceNumber = "2",
+                            sequenceNumber = 2,
                             code = "adi2",
                             text = Some("ADI 2")
                           )
                         )
                       ),
                       ConsignmentItemType09(
-                        goodsItemNumber = "2",
+                        goodsItemNumber = 2,
                         declarationGoodsItemNumber = BigInt(2),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
                         ),
                         AdditionalInformation = Seq(
                           AdditionalInformationType03(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             code = "adi1",
                             text = Some("ADI 1")
                           )
@@ -2551,37 +2551,37 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
                   HouseConsignmentType10(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     grossMass = BigDecimal(1),
                     ConsignmentItem = Seq(
                       ConsignmentItemType09(
-                        goodsItemNumber = "1",
+                        goodsItemNumber = 1,
                         declarationGoodsItemNumber = BigInt(1),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 1"
                         ),
                         AdditionalReference = Seq(
                           AdditionalReferenceType04(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             typeValue = "adi1",
                             referenceNumber = Some("ADI 1")
                           ),
                           AdditionalReferenceType04(
-                            sequenceNumber = "2",
+                            sequenceNumber = 2,
                             typeValue = "adi2",
                             referenceNumber = Some("ADI 2")
                           )
                         )
                       ),
                       ConsignmentItemType09(
-                        goodsItemNumber = "2",
+                        goodsItemNumber = 2,
                         declarationGoodsItemNumber = BigInt(2),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
                         ),
                         AdditionalReference = Seq(
                           AdditionalReferenceType04(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             typeValue = "adi1",
                             referenceNumber = Some("ADI 1")
                           )
@@ -2599,37 +2599,37 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 AdditionalReference = Nil,
                 HouseConsignment = Seq(
                   HouseConsignmentType10(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     grossMass = BigDecimal(1),
                     ConsignmentItem = Seq(
                       ConsignmentItemType09(
-                        goodsItemNumber = "1",
+                        goodsItemNumber = 1,
                         declarationGoodsItemNumber = BigInt(1),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 1"
                         ),
                         AdditionalReference = Seq(
                           AdditionalReferenceType04(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             typeValue = "adi1",
                             referenceNumber = Some("ADI 1")
                           ),
                           AdditionalReferenceType04(
-                            sequenceNumber = "2",
+                            sequenceNumber = 2,
                             typeValue = "adi2",
                             referenceNumber = Some("ADI 2")
                           )
                         )
                       ),
                       ConsignmentItemType09(
-                        goodsItemNumber = "2",
+                        goodsItemNumber = 2,
                         declarationGoodsItemNumber = BigInt(2),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
                         ),
                         AdditionalReference = Seq(
                           AdditionalReferenceType04(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             typeValue = "adi1",
                             referenceNumber = Some("ADI 1")
                           )
@@ -2648,39 +2648,39 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
                   HouseConsignmentType10(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     grossMass = BigDecimal(1),
                     ConsignmentItem = Seq(
                       ConsignmentItemType09(
-                        goodsItemNumber = "1",
+                        goodsItemNumber = 1,
                         declarationGoodsItemNumber = BigInt(1),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 1"
                         ),
                         AdditionalReference = Seq(
                           AdditionalReferenceType04(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             typeValue = "adi1",
                             referenceNumber = Some("ADI 1")
                           )
                         )
                       ),
                       ConsignmentItemType09(
-                        goodsItemNumber = "2",
+                        goodsItemNumber = 2,
                         declarationGoodsItemNumber = BigInt(2),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
                         ),
                         AdditionalReference = Seq(
                           AdditionalReferenceType04(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             typeValue = "adi1",
                             referenceNumber = Some("ADI 1")
                           )
                         )
                       ),
                       ConsignmentItemType09(
-                        goodsItemNumber = "3",
+                        goodsItemNumber = 3,
                         declarationGoodsItemNumber = BigInt(3),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 3"
@@ -2704,46 +2704,46 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
                   HouseConsignmentType10(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     grossMass = BigDecimal(1),
                     ConsignmentItem = Seq(
                       ConsignmentItemType09(
-                        goodsItemNumber = "1",
+                        goodsItemNumber = 1,
                         declarationGoodsItemNumber = BigInt(1),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 1"
                         ),
                         AdditionalReference = Seq(
                           AdditionalReferenceType04(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             typeValue = "adi1",
                             referenceNumber = Some("ADI 1")
                           )
                         )
                       ),
                       ConsignmentItemType09(
-                        goodsItemNumber = "2",
+                        goodsItemNumber = 2,
                         declarationGoodsItemNumber = BigInt(2),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
                         ),
                         AdditionalReference = Seq(
                           AdditionalReferenceType04(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             typeValue = "adi2",
                             referenceNumber = Some("ADI 2")
                           )
                         )
                       ),
                       ConsignmentItemType09(
-                        goodsItemNumber = "3",
+                        goodsItemNumber = 3,
                         declarationGoodsItemNumber = BigInt(3),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 3"
                         ),
                         AdditionalReference = Seq(
                           AdditionalReferenceType04(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             typeValue = "adi3",
                             referenceNumber = Some("ADI 3")
                           )
@@ -2767,7 +2767,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
                   HouseConsignmentType10(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     grossMass = BigDecimal(1),
                     ConsignmentItem = Nil
                   )
@@ -2788,37 +2788,37 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
                   HouseConsignmentType10(
-                    sequenceNumber = "1",
+                    sequenceNumber = 1,
                     grossMass = BigDecimal(1),
                     ConsignmentItem = Seq(
                       ConsignmentItemType09(
-                        goodsItemNumber = "1",
+                        goodsItemNumber = 1,
                         declarationGoodsItemNumber = BigInt(1),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 1"
                         ),
                         AdditionalReference = Seq(
                           AdditionalReferenceType04(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             typeValue = "adi1",
                             referenceNumber = Some("ADI 1")
                           ),
                           AdditionalReferenceType04(
-                            sequenceNumber = "2",
+                            sequenceNumber = 2,
                             typeValue = "adi2",
                             referenceNumber = Some("ADI 2")
                           )
                         )
                       ),
                       ConsignmentItemType09(
-                        goodsItemNumber = "2",
+                        goodsItemNumber = 2,
                         declarationGoodsItemNumber = BigInt(2),
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
                         ),
                         AdditionalReference = Seq(
                           AdditionalReferenceType04(
-                            sequenceNumber = "1",
+                            sequenceNumber = 1,
                             typeValue = "adi1",
                             referenceNumber = Some("ADI 1")
                           )
@@ -2880,7 +2880,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         result shouldBe Seq(
           ActiveBorderTransportMeansType02(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             customsOfficeAtBorderReferenceNumber = Some("IT018101"),
             typeOfIdentification = Some("10"),
             identificationNumber = Some("active id number"),
@@ -2888,7 +2888,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             conveyanceReferenceNumber = Some("conveyance ref number")
           ),
           ActiveBorderTransportMeansType02(
-            sequenceNumber = "2",
+            sequenceNumber = 2,
             customsOfficeAtBorderReferenceNumber = None,
             typeOfIdentification = Some("80"),
             identificationNumber = None,
@@ -2938,7 +2938,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         result shouldBe Seq(
           ActiveBorderTransportMeansType02(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             customsOfficeAtBorderReferenceNumber = Some("IT018101"),
             typeOfIdentification = Some("21"),
             identificationNumber = Some("active id number"),
@@ -2946,7 +2946,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             conveyanceReferenceNumber = Some("conveyance ref number")
           ),
           ActiveBorderTransportMeansType02(
-            sequenceNumber = "2",
+            sequenceNumber = 2,
             customsOfficeAtBorderReferenceNumber = None,
             typeOfIdentification = Some("80"),
             identificationNumber = None,
@@ -2992,7 +2992,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         result shouldBe Seq(
           ActiveBorderTransportMeansType02(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             customsOfficeAtBorderReferenceNumber = Some("IT018101"),
             typeOfIdentification = None,
             identificationNumber = Some("active id number"),
@@ -3000,7 +3000,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             conveyanceReferenceNumber = Some("conveyance ref number")
           ),
           ActiveBorderTransportMeansType02(
-            sequenceNumber = "2",
+            sequenceNumber = 2,
             customsOfficeAtBorderReferenceNumber = None,
             typeOfIdentification = Some("80"),
             identificationNumber = None,
@@ -3144,17 +3144,17 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         result shouldBe Seq(
           TransportEquipmentType06(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             containerIdentificationNumber = Some("container id 1"),
             numberOfSeals = BigInt(2),
             Seal = Seq(
-              SealType05("1", "seal 1"),
-              SealType05("2", "seal 2")
+              SealType05(1, "seal 1"),
+              SealType05(2, "seal 2")
             ),
             GoodsReference = Seq(
-              GoodsReferenceType02("1", 1),
-              GoodsReferenceType02("2", 2),
-              GoodsReferenceType02("3", 3)
+              GoodsReferenceType02(1, 1),
+              GoodsReferenceType02(2, 2),
+              GoodsReferenceType02(3, 3)
             )
           )
         )
@@ -3206,31 +3206,31 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         result shouldBe Seq(
           TransportEquipmentType06(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             containerIdentificationNumber = Some("container id 1"),
             numberOfSeals = BigInt(0),
             Seal = Nil,
             GoodsReference = Seq(
-              GoodsReferenceType02("1", 3)
+              GoodsReferenceType02(1, 3)
             )
           ),
           TransportEquipmentType06(
-            sequenceNumber = "2",
+            sequenceNumber = 2,
             containerIdentificationNumber = Some("container id 2"),
             numberOfSeals = BigInt(0),
             Seal = Nil,
             GoodsReference = Seq(
-              GoodsReferenceType02("1", 2)
+              GoodsReferenceType02(1, 2)
             )
           ),
           TransportEquipmentType06(
-            sequenceNumber = "3",
+            sequenceNumber = 3,
             containerIdentificationNumber = Some("container id 3"),
             numberOfSeals = BigInt(0),
             Seal = Nil,
             GoodsReference = Seq(
-              GoodsReferenceType02("1", 1),
-              GoodsReferenceType02("2", 4)
+              GoodsReferenceType02(1, 1),
+              GoodsReferenceType02(2, 4)
             )
           )
         )
@@ -3308,7 +3308,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         result shouldBe Seq(
           DepartureTransportMeansType03(
-            sequenceNumber = "1",
+            sequenceNumber = 1,
             typeOfIdentification = Some("10"),
             identificationNumber = Some("means id number"),
             nationality = Some("FR")

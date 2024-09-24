@@ -57,7 +57,7 @@ object customsOfficeOfDestinationDeclaredType01 {
 object customsOfficeOfTransitDeclaredType04 {
 
   def reads(index: Int): Reads[CustomsOfficeOfTransitDeclaredType04] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "officeOfTransit" \ "id").read[String] and
       (__ \ "arrivalDateTime").readNullable[String].map(stringToXMLGregorianCalendar)
   )(CustomsOfficeOfTransitDeclaredType04.apply)
@@ -66,7 +66,7 @@ object customsOfficeOfTransitDeclaredType04 {
 object customsOfficeOfExitForTransitDeclaredType02 {
 
   def reads(index: Int): Reads[CustomsOfficeOfExitForTransitDeclaredType02] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "officeOfExit" \ "id").read[String]
   )(CustomsOfficeOfExitForTransitDeclaredType02.apply)
 }

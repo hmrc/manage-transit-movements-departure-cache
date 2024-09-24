@@ -95,11 +95,11 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
                 val result = header.message(uA("GB"), CC015C)
 
                 result.messageSender shouldBe eoriNumber
-                result.messagE_1Sequence2.messageRecipient shouldBe "NTA.GB"
-                result.messagE_1Sequence2.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
-                result.messagE_1Sequence2.messageIdentification shouldBe messageIdentification
-                result.messagE_TYPESequence3.messageType shouldBe CC015C
-                result.correlatioN_IDENTIFIERSequence4.correlationIdentifier shouldBe None
+                result.messageRecipient shouldBe "NTA.GB"
+                result.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
+                result.messageIdentification shouldBe messageIdentification
+                result.messageType shouldBe CC015C
+                result.correlationIdentifier shouldBe None
             }
           }
 
@@ -112,11 +112,11 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
                 val result = header.message(uA("XI"), CC015C)
 
                 result.messageSender shouldBe eoriNumber
-                result.messagE_1Sequence2.messageRecipient shouldBe "NTA.XI"
-                result.messagE_1Sequence2.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
-                result.messagE_1Sequence2.messageIdentification shouldBe messageIdentification
-                result.messagE_TYPESequence3.messageType shouldBe CC015C
-                result.correlatioN_IDENTIFIERSequence4.correlationIdentifier shouldBe None
+                result.messageRecipient shouldBe "NTA.XI"
+                result.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
+                result.messageIdentification shouldBe messageIdentification
+                result.messageType shouldBe CC015C
+                result.correlationIdentifier shouldBe None
             }
           }
         }
@@ -131,11 +131,11 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
                 val result = header.message(uA("GB"), CC013C)
 
                 result.messageSender shouldBe eoriNumber
-                result.messagE_1Sequence2.messageRecipient shouldBe "NTA.GB"
-                result.messagE_1Sequence2.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
-                result.messagE_1Sequence2.messageIdentification shouldBe messageIdentification
-                result.messagE_TYPESequence3.messageType shouldBe CC013C
-                result.correlatioN_IDENTIFIERSequence4.correlationIdentifier shouldBe None
+                result.messageRecipient shouldBe "NTA.GB"
+                result.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
+                result.messageIdentification shouldBe messageIdentification
+                result.messageType shouldBe CC013C
+                result.correlationIdentifier shouldBe None
             }
           }
 
@@ -148,11 +148,11 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
                 val result = header.message(uA("XI"), CC013C)
 
                 result.messageSender shouldBe eoriNumber
-                result.messagE_1Sequence2.messageRecipient shouldBe "NTA.XI"
-                result.messagE_1Sequence2.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
-                result.messagE_1Sequence2.messageIdentification shouldBe messageIdentification
-                result.messagE_TYPESequence3.messageType shouldBe CC013C
-                result.correlatioN_IDENTIFIERSequence4.correlationIdentifier shouldBe None
+                result.messageRecipient shouldBe "NTA.XI"
+                result.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
+                result.messageIdentification shouldBe messageIdentification
+                result.messageType shouldBe CC013C
+                result.correlationIdentifier shouldBe None
             }
           }
         }

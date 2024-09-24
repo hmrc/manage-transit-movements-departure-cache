@@ -37,7 +37,7 @@ object authorisationType03 {
       (__ \ "authorisationType" \ "code").read[String] orElse (__ \ "inferredAuthorisationType" \ "code").read[String]
 
     (
-      (index.toString: Reads[String]) and
+      Reads.pure[BigInt](index) and
         authorisationTypeReads and
         (__ \ "authorisationReferenceNumber").read[String]
     )(AuthorisationType03.apply)

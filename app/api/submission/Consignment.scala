@@ -279,7 +279,7 @@ object consigneeType02 {
 object additionalSupplyChainActorType {
 
   def reads(index: Int): Reads[AdditionalSupplyChainActorType] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "supplyChainActorType" \ "role").read[String] and
       (__ \ "identificationNumber").read[String]
   )(AdditionalSupplyChainActorType.apply)
@@ -288,7 +288,7 @@ object additionalSupplyChainActorType {
 object transportEquipmentType06 {
 
   def apply(
-    sequenceNumber: String,
+    sequenceNumber: BigInt,
     containerIdentificationNumber: Option[String],
     Seal: Seq[SealType05],
     GoodsReference: Seq[GoodsReferenceType02]
@@ -308,11 +308,11 @@ object transportEquipmentType06 {
       .zipWithSequenceNumber
       .map {
         case (declarationGoodsItemNumber, sequenceNumber) =>
-          GoodsReferenceType02(sequenceNumber.toString, BigInt(declarationGoodsItemNumber))
+          GoodsReferenceType02(sequenceNumber, BigInt(declarationGoodsItemNumber))
       }
 
   def reads(index: Int, items: Seq[JsValue]): Reads[TransportEquipmentType06] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "containerIdentificationNumber").readNullable[String] and
       (__ \ "seals").readArray[SealType05](sealType05.reads) and
       (__ \ "uuid").read[UUID].flatMap(goodsReferencesReads(_, items))
@@ -322,7 +322,7 @@ object transportEquipmentType06 {
 object sealType05 {
 
   def reads(index: Int): Reads[SealType05] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "identificationNumber").read[String]
   )(SealType05.apply)
 }
@@ -375,7 +375,7 @@ object economicOperatorType03 {
 object departureTransportMeansType03 {
 
   def reads(index: Int): Reads[DepartureTransportMeansType03] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "identification" \ "type").readNullable[String] and
       (__ \ "meansIdentificationNumber").readNullable[String] and
       (__ \ "vehicleCountry" \ "code").readNullable[String]
@@ -385,7 +385,7 @@ object departureTransportMeansType03 {
 object countryOfRoutingOfConsignmentType01 {
 
   def reads(index: Int): Reads[CountryOfRoutingOfConsignmentType01] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "countryOfRouting" \ "code").read[String]
   )(CountryOfRoutingOfConsignmentType01.apply)
 }
@@ -398,7 +398,7 @@ object activeBorderTransportMeansType02 {
       .orElse(None)
 
   def reads(index: Int): Reads[ActiveBorderTransportMeansType02] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "customsOfficeActiveBorder" \ "id").readNullable[String] and
       identificationReads and
       (__ \ "identificationNumber").readNullable[String] and
@@ -444,7 +444,7 @@ object houseConsignmentType10 {
       consignmentItemReads = (goodsItemNumber: Int) => consignmentItemType09.reads(goodsItemNumber, goodsItemNumberAcc + goodsItemNumber, documents)
       consignmentItems <- itemsPath.readArray[ConsignmentItemType09](consignmentItemReads)
     } yield HouseConsignmentType10(
-      sequenceNumber = "1",
+      sequenceNumber = 1,
       grossMass = consignmentItems.flatMap(_.Commodity.GoodsMeasure.flatMap(_.grossMass)).sum,
       ConsignmentItem = consignmentItems
     )
@@ -476,8 +476,8 @@ object consignmentItemType09 {
           }
 
         (
-          (goodsItemNumber.toString: Reads[String]) and
-            (declarationGoodsItemNumber: Reads[Int]).map(BigInt(_)) and
+          Reads.pure[BigInt](goodsItemNumber) and
+            Reads.pure[BigInt](declarationGoodsItemNumber) and
             (__ \ "declarationType" \ "code").readNullable[String] and
             (__ \ "countryOfDispatch" \ "code").readNullable[String] and
             (__ \ "countryOfDestination" \ "code").readNullable[String] and
@@ -522,7 +522,7 @@ object commodityCodeType02 {
 object dangerousGoodsType01 {
 
   def reads(index: Int): Reads[DangerousGoodsType01] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "unNumber").read[String]
   )(DangerousGoodsType01.apply)
 }
@@ -539,7 +539,7 @@ object goodsMeasureType02 {
 object packagingType03 {
 
   def reads(index: Int): Reads[PackagingType03] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "packageType" \ "code").read[String] and
       (__ \ "numberOfPackages").readNullable[BigInt] and
       (__ \ "shippingMark").readNullable[String]
@@ -591,10 +591,10 @@ object documentType {
 object previousDocumentType08 {
 
   def reads(goodsItemNumber: Int, documentIndex: Int): Reads[PreviousDocumentType08] = (
-    (documentIndex.toString: Reads[String]) and
+    Reads.pure[BigInt](documentIndex) and
       documentType.codeReads and
       (__ \ "details" \ "documentReferenceNumber").read[String] and
-      (goodsItemNumber: Reads[Int]).map(BigInt(_)).map(Some(_)) and
+      Reads.pure[BigInt](goodsItemNumber).map(Some(_)) and
       (__ \ "details" \ "packageType" \ "code").readNullable[String] and
       (__ \ "details" \ "numberOfPackages").readNullable[BigInt] and
       (__ \ "details" \ "metric" \ "code").readNullable[String] and
@@ -606,7 +606,7 @@ object previousDocumentType08 {
 object previousDocumentType09 {
 
   def reads(index: Int): Reads[PreviousDocumentType09] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       documentType.codeReads and
       (__ \ "details" \ "documentReferenceNumber").read[String] and
       (__ \ "details" \ "additionalInformation").readNullable[String]
@@ -616,7 +616,7 @@ object previousDocumentType09 {
 object additionalReferenceType05 {
 
   def reads(index: Int): Reads[AdditionalReferenceType05] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "type" \ "documentType").read[String] and
       (__ \ "additionalReferenceNumber").readNullable[String]
   )(AdditionalReferenceType05.apply)
@@ -625,7 +625,7 @@ object additionalReferenceType05 {
 object supportingDocumentType05 {
 
   def reads(index: Int): Reads[SupportingDocumentType05] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "type" \ "code").read[String] and
       (__ \ "details" \ "documentReferenceNumber").read[String] and
       (__ \ "details" \ "lineItemNumber").readNullable[BigInt] and
@@ -636,7 +636,7 @@ object supportingDocumentType05 {
 object transportDocumentType04 {
 
   def reads(index: Int): Reads[TransportDocumentType04] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "type" \ "code").read[String] and
       (__ \ "details" \ "documentReferenceNumber").read[String]
   )(TransportDocumentType04.apply)
@@ -645,7 +645,7 @@ object transportDocumentType04 {
 object additionalReferenceType04 {
 
   def reads(index: Int): Reads[AdditionalReferenceType04] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "additionalReference" \ "documentType").read[String] and
       (__ \ "additionalReferenceNumber").readNullable[String]
   )(AdditionalReferenceType04.apply)
@@ -654,13 +654,13 @@ object additionalReferenceType04 {
 object additionalInformationType03 {
 
   def itemReads(index: Int): Reads[AdditionalInformationType03] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "additionalInformationType" \ "code").read[String] and
       (__ \ "additionalInformation").readNullable[String]
   )(AdditionalInformationType03.apply)
 
   def consignmentReads(index: Int): Reads[AdditionalInformationType03] = (
-    (index.toString: Reads[String]) and
+    Reads.pure[BigInt](index) and
       (__ \ "type" \ "code").read[String] and
       (__ \ "text").readNullable[String]
   )(AdditionalInformationType03.apply)
