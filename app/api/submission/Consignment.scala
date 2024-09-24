@@ -458,9 +458,12 @@ object houseConsignmentType10 {
 
 object consignmentItemType09 {
 
-  /** @param goodsItemNumber should be unique to the house consignment (essentially the sequence number of an item within a house consignment)
-    * @param declarationGoodsItemNumber should be unique to the consignment as a whole
-    * @param documents documents as provided in the documents journey
+  /** @param goodsItemNumber
+    *   should be unique to the house consignment (essentially the sequence number of an item within a house consignment)
+    * @param declarationGoodsItemNumber
+    *   should be unique to the consignment as a whole
+    * @param documents
+    *   documents as provided in the documents journey
     * @return
     */
   def reads(goodsItemNumber: Int, declarationGoodsItemNumber: Int, documents: Seq[JsValue]): Reads[ConsignmentItemType09] =

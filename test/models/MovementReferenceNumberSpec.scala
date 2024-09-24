@@ -43,7 +43,7 @@ class MovementReferenceNumberSpec extends AnyFreeSpec with Generators with Match
 
     "must deserialise when empty" in {
 
-      val mrn           = MovementReferenceNumber(None)
+      val mrn = MovementReferenceNumber(None)
       val json: JsValue = Json.parse(s"""
                |{
                |}

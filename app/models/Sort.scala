@@ -39,12 +39,12 @@ object Sort {
   object Order {
 
     case object Ascending extends Order {
-      override def sortBy(fields: String*): Bson = ascending(fields *)
+      override def sortBy(fields: String*): Bson = ascending(fields*)
       override def toString: String              = "asc"
     }
 
     case object Descending extends Order {
-      override def sortBy(fields: String*): Bson = descending(fields *)
+      override def sortBy(fields: String*): Bson = descending(fields*)
       override def toString: String              = "dsc"
     }
   }
