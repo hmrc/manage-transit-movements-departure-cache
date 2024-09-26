@@ -24,10 +24,10 @@ import play.api.libs.json.{__, JsArray, Reads}
 object Guarantee {
 
   private case class GuaranteeType(
-    sequenceNumber: String,
+    sequenceNumber: BigInt,
     guaranteeType: String,
     otherGuaranteeReference: Option[String] = None,
-    GuaranteeReference: Seq[generated.GuaranteeReferenceType03] = Nil
+    GuaranteeReference: Seq[GuaranteeReferenceType03] = Nil
   ) {
 
     def asGuaranteeType01: GuaranteeType01 =
@@ -41,7 +41,7 @@ object Guarantee {
 
     def reads(index: Int): Reads[GuaranteeType] =
       (
-        (index.toString: Reads[String]) and
+        Reads.pure[BigInt](index) and
           (__ \ "guaranteeType" \ "code").read[String] and
           (__ \ "otherReference").readNullable[String] and
           __.read[GuaranteeReferenceType03](guaranteeReferenceType03.reads(index)).map(Seq(_))
@@ -65,7 +65,7 @@ object Guarantee {
       .map {
         case (((guaranteeType, otherGuaranteeReference), guarantees), index) =>
           GuaranteeType(
-            sequenceNumber = index.toString,
+            sequenceNumber = index,
             guaranteeType = guaranteeType,
             otherGuaranteeReference = otherGuaranteeReference,
             GuaranteeReference = guaranteeReference(guarantees)
@@ -76,7 +76,7 @@ object Guarantee {
   private def guaranteeReference(guarantees: Iterable[GuaranteeType]): Seq[GuaranteeReferenceType03] =
     guarantees.flatMap(_.GuaranteeReference).toSeq.zipWithSequenceNumber.map {
       case (guaranteeReference, index) =>
-        guaranteeReference.copy(sequenceNumber = index.toString)
+        guaranteeReference.copy(sequenceNumber = index)
     }
 }
 
@@ -84,7 +84,7 @@ object guaranteeReferenceType03 {
 
   def reads(index: Int): Reads[GuaranteeReferenceType03] =
     (
-      (index.toString: Reads[String]) and
+      Reads.pure[BigInt](index) and
         (__ \ "referenceNumber").readNullable[String] and
         (__ \ "accessCode").readNullable[String] and
         (__ \ "liabilityAmount").readNullable[BigDecimal] and

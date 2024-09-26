@@ -33,17 +33,11 @@ class Header @Inject() (
       case JsSuccess(officeOfDepartureCountryCode, _) =>
         MESSAGESequence(
           messageSender = uA.eoriNumber,
-          messagE_1Sequence2 = MESSAGE_1Sequence(
-            messageRecipient = s"NTA.$officeOfDepartureCountryCode",
-            preparationDateAndTime = dateTimeService.now,
-            messageIdentification = messageIdentificationService.randomIdentifier
-          ),
-          messagE_TYPESequence3 = MESSAGE_TYPESequence(
-            messageType = messageType
-          ),
-          correlatioN_IDENTIFIERSequence4 = CORRELATION_IDENTIFIERSequence(
-            correlationIdentifier = None
-          )
+          messageRecipient = s"NTA.$officeOfDepartureCountryCode",
+          preparationDateAndTime = dateTimeService.now,
+          messageIdentification = messageIdentificationService.randomIdentifier,
+          messageType = messageType,
+          correlationIdentifier = None
         )
       case _ => throw new Exception("Json did not contain office of departure ID")
     }

@@ -28,7 +28,7 @@ object contactPerson {
   def reads[T](apply: (String, String, Option[String]) => T): Reads[T] = (
     (__ \ name).read[String] and
       (__ \ telephoneNumber).read[String] and
-      None
+      Reads.pure[Option[String]](None)
   )(apply)
 }
 
