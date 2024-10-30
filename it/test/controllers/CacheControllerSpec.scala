@@ -20,7 +20,8 @@ import itbase.CacheRepositorySpecBase
 import models.{Metadata, SubmissionState, UserAnswers}
 import org.mongodb.scala.model.Filters
 import play.api.libs.json.{JsObject, JsString, Json}
-import play.api.libs.ws.JsonBodyWritables._
+import play.api.libs.ws.JsonBodyWritables.*
+import uk.gov.hmrc.http.HeaderNames
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit.DAYS
@@ -78,6 +79,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
 
         val response = wsClient
           .url(url)
+          .addHttpHeaders(("APIVersion", "2.0"))
           .post(Json.toJson(emptyMetadata))
           .futureValue
 
@@ -121,6 +123,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
 
         val response = wsClient
           .url(url)
+          .addHttpHeaders(("APIVersion", "2.0"))
           .post(Json.toJson(userAnswers))
           .futureValue
 
@@ -137,6 +140,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
       "respond with 200 status" in {
         val response = wsClient
           .url(url)
+          .addHttpHeaders(("APIVersion", "2.0"))
           .put(JsString(lrn))
           .futureValue
 

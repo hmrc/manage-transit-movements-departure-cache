@@ -30,44 +30,60 @@ class UserAnswersSummarySpec extends SpecBase {
 
   "toHateoas" must {
 
-    "turn an UserAnswersSummary to hateos jjobject" in {
+    "turn an UserAnswersSummary to hateos json object" in {
 
       val now = Instant.now(clock)
       val id1 = UUID.randomUUID()
       val id2 = UUID.randomUUID()
+      val id3 = UUID.randomUUID()
 
-      val userAnswers1 = UserAnswers(Metadata("AB123", eoriNumber), now, now, id1, SubmissionState.NotSubmitted)
+      val userAnswers1 = UserAnswers(Metadata("AB123", eoriNumber), now, now, id1, SubmissionState.NotSubmitted, isTransitional = Some(false))
       val userAnswers2 = UserAnswers(Metadata("CD123", eoriNumber), now.minus(1, DAYS), now.minus(1, DAYS), id2, SubmissionState.Submitted)
+      val userAnswers3 = UserAnswers(Metadata("EF123", eoriNumber), now, now, id3, SubmissionState.NotSubmitted, isTransitional = Some(true))
 
-      val userAnswersSummary = UserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2), 2, 2)
+      val userAnswersSummary = UserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2, userAnswers3), 3, 3)
 
       val expectedResult =
         Json.obj(
           "eoriNumber"             -> eoriNumber,
-          "totalMovements"         -> 2,
-          "totalMatchingMovements" -> 2,
+          "totalMovements"         -> 3,
+          "totalMatchingMovements" -> 3,
           "userAnswers" -> Json.arr(
             Json.obj(
               "lrn" -> "AB123",
               "_links" -> Json.obj(
                 "self" -> Json.obj("href" -> controllers.routes.CacheController.get("AB123").url)
               ),
-              "createdAt"     -> now,
-              "lastUpdated"   -> now,
-              "expiresInDays" -> 30,
-              "_id"           -> id1,
-              "isSubmitted"   -> "notSubmitted"
+              "createdAt"      -> now,
+              "lastUpdated"    -> now,
+              "expiresInDays"  -> 30,
+              "_id"            -> id1,
+              "isSubmitted"    -> "notSubmitted",
+              "isTransitional" -> false
             ),
             Json.obj(
               "lrn" -> "CD123",
               "_links" -> Json.obj(
                 "self" -> Json.obj("href" -> controllers.routes.CacheController.get("CD123").url)
               ),
-              "createdAt"     -> now.minus(1, DAYS),
-              "lastUpdated"   -> now.minus(1, DAYS),
-              "expiresInDays" -> 29,
-              "_id"           -> id2,
-              "isSubmitted"   -> "submitted"
+              "createdAt"      -> now.minus(1, DAYS),
+              "lastUpdated"    -> now.minus(1, DAYS),
+              "expiresInDays"  -> 29,
+              "_id"            -> id2,
+              "isSubmitted"    -> "submitted",
+              "isTransitional" -> true
+            ),
+            Json.obj(
+              "lrn" -> "EF123",
+              "_links" -> Json.obj(
+                "self" -> Json.obj("href" -> controllers.routes.CacheController.get("EF123").url)
+              ),
+              "createdAt"      -> now,
+              "lastUpdated"    -> now,
+              "expiresInDays"  -> 30,
+              "_id"            -> id3,
+              "isSubmitted"    -> "notSubmitted",
+              "isTransitional" -> true
             )
           )
         )

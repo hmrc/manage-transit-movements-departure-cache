@@ -16,11 +16,12 @@
 
 package controllers
 
-import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
-import models.AuditType._
+import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider, VersionedAction}
+import models.AuditType.*
+import models.request.VersionedRequest
 import models.{Metadata, Rejection, SubmissionState, UserAnswers, XPath}
 import play.api.Logging
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
 import services.{AuditService, DateTimeService, MetricsService, XPathService}
@@ -34,6 +35,7 @@ class CacheController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
   authenticateAndLock: AuthenticateAndLockActionProvider,
+  getVersion: VersionedAction,
   cacheRepository: CacheRepository,
   auditService: AuditService,
   metricsService: MetricsService,
@@ -46,7 +48,7 @@ class CacheController @Inject() (
   def get(lrn: String): Action[AnyContent] =
     getUserAnswers[UserAnswers](lrn)(identity)
 
-  def post(lrn: String): Action[JsValue] = authenticateAndLock(lrn).async(parse.json) {
+  def post(lrn: String): Action[JsValue] = (authenticateAndLock(lrn) andThen getVersion).async(parse.json) {
     implicit request =>
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
@@ -64,7 +66,7 @@ class CacheController @Inject() (
       }
   }
 
-  def put(): Action[JsValue] = authenticate().async(parse.json) {
+  def put(): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(lrn, _) =>
@@ -83,9 +85,9 @@ class CacheController @Inject() (
     data: Metadata,
     status: Option[SubmissionState] = None,
     departureId: Option[String] = None
-  )(block: => Unit = ()): Future[Status] =
+  )(block: => Unit = ())(implicit request: VersionedRequest[JsValue]): Future[Status] =
     cacheRepository
-      .set(data, status, departureId)
+      .set(data, status, departureId, request.phase)
       .map {
         case true =>
           block
@@ -164,7 +166,7 @@ class CacheController @Inject() (
           }
     }
 
-  def handleErrors(lrn: String): Action[JsValue] = authenticate().async(parse.json) {
+  def handleErrors(lrn: String): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
     implicit request =>
       request.body.validate[Rejection] match {
         case JsSuccess(rejection, _) =>
@@ -192,7 +194,7 @@ class CacheController @Inject() (
       }
   }
 
-  def prepareForAmendment(lrn: String): Action[JsValue] = authenticate().async(parse.json) {
+  def prepareForAmendment(lrn: String): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(departureId, _) =>

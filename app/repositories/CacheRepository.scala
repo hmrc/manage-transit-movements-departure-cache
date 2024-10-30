@@ -58,13 +58,13 @@ class CacheRepository @Inject() (
       .toFutureOption()
   }
 
-  def set(data: Metadata, status: Option[SubmissionState], departureId: Option[String]): Future[Boolean] =
-    set(data, Updates.set("isSubmitted", status.getOrElse(SubmissionState.NotSubmitted).asString), departureId)
+  def set(data: Metadata, status: Option[SubmissionState], departureId: Option[String], phase: Phase): Future[Boolean] =
+    set(data, Updates.set("isSubmitted", status.getOrElse(SubmissionState.NotSubmitted).asString), departureId, phase)
 
-  def set(userAnswers: UserAnswers, status: SubmissionState, departureId: Option[String]): Future[Boolean] =
-    set(userAnswers.metadata, Updates.set("isSubmitted", status.asString), departureId)
+  def set(userAnswers: UserAnswers, status: SubmissionState, departureId: Option[String], phase: Phase): Future[Boolean] =
+    set(userAnswers.metadata, Updates.set("isSubmitted", status.asString), departureId, phase)
 
-  private def set(data: Metadata, statusUpdate: Bson, departureId: Option[String]): Future[Boolean] = {
+  private def set(data: Metadata, statusUpdate: Bson, departureId: Option[String], phase: Phase): Future[Boolean] = {
     val now = dateTimeService.timestamp
     val filter = Filters.and(
       Filters.eq("lrn", data.lrn),
@@ -85,6 +85,7 @@ class CacheRepository @Inject() (
       // format: on
       Some(Updates.set("tasks", Codecs.toBson(data.tasks))),
       Some(Updates.setOnInsert("createdAt", now)),
+      Some(Updates.setOnInsert("isTransitional", phase == Phase.Transition)),
       Some(Updates.set("lastUpdated", now)),
       Some(Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID()))),
       Some(statusUpdate),

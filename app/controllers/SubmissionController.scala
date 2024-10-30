@@ -17,10 +17,11 @@
 package controllers
 
 import cats.data.OptionT
-import cats.implicits._
+import cats.implicits.*
 import controllers.actions.{AuthenticateActionProvider, VersionedAction}
-import models.AuditType._
-import models.SubmissionState._
+import models.AuditType.*
+import models.SubmissionState.*
+import models.request.VersionedRequest
 import models.{AuditType, Messages, UserAnswers}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
@@ -107,13 +108,13 @@ class SubmissionController @Inject() (
     response: HttpResponse,
     departureId: Option[String],
     auditType: AuditType
-  )(implicit hc: HeaderCarrier): Future[Result] = {
+  )(implicit hc: HeaderCarrier, request: VersionedRequest[JsValue]): Future[Result] = {
     val submissionState = Submitted
     metricsService.increment(auditType.name, response)
     response.status match {
       case status if is2xx(status) =>
         cacheRepository
-          .set(userAnswers, submissionState, departureId)
+          .set(userAnswers, submissionState, departureId, request.phase)
           .map {
             _ =>
               auditService.audit(auditType, userAnswers.copy(status = submissionState))

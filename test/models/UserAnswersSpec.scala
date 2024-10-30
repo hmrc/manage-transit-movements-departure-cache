@@ -43,7 +43,8 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
     lastUpdated = Instant.ofEpochMilli(1662546803472L),
     id = UUID.fromString(uuid),
     status = SubmissionState.NotSubmitted,
-    departureId = Some(departureId)
+    departureId = Some(departureId),
+    isTransitional = Some(true)
   )
 
   "User answers" when {
@@ -65,13 +66,37 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
           |  "createdAt" : "2022-09-05T15:58:44.188Z",
           |  "lastUpdated" : "2022-09-07T10:33:23.472Z",
           |  "isSubmitted" : "notSubmitted",
-          |  "departureId": "$departureId"
+          |  "departureId": "$departureId",
+          |  "isTransitional": true
           |}
           |""".stripMargin)
 
       "read correctly" in {
         val result = json.as[UserAnswers]
         result shouldBe userAnswers
+      }
+
+      "default non existent isTransitional to true" in {
+        Json
+          .parse(s"""
+             |{
+             |  "_id" : "$uuid",
+             |  "lrn" : "$lrn",
+             |  "eoriNumber" : "$eoriNumber",
+             |  "data" : {},
+             |  "tasks" : {
+             |    "task1" : "completed",
+             |    "task2" : "in-progress",
+             |    "task3" : "not-started",
+             |    "task4" : "cannot-start-yet"
+             |  },
+             |  "createdAt" : "2022-09-05T15:58:44.188Z",
+             |  "lastUpdated" : "2022-09-07T10:33:23.472Z",
+             |  "isSubmitted" : "notSubmitted",
+             |  "departureId": "$departureId"
+             |}
+             |""".stripMargin)
+          .as[UserAnswers] shouldBe userAnswers
       }
 
       "write correctly" in {
@@ -119,7 +144,8 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                |      "$$numberLong" : "1662546803472"
                |    }
                |  },
-               |  "departureId": "$departureId"
+               |  "departureId": "$departureId",
+               |  "isTransitional": true
                |}
                |""".stripMargin)
 
@@ -167,7 +193,8 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                |      "$$numberLong" : "1662546803472"
                |    }
                |  },
-               |  "departureId": "$departureId"
+               |  "departureId": "$departureId",
+               |  "isTransitional": true
                |}
                |""".stripMargin)
 
