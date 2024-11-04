@@ -44,7 +44,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
     id = UUID.fromString(uuid),
     status = SubmissionState.NotSubmitted,
     departureId = Some(departureId),
-    isTransitional = Some(true)
+    isTransitional = true
   )
 
   "User answers" when {

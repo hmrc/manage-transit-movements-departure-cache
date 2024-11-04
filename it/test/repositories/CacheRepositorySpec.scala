@@ -125,7 +125,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       getResult.metadata shouldBe userAnswers3.metadata
       getResult.status shouldBe SubmissionState.NotSubmitted
       getResult.departureId.get shouldBe depId
-      getResult.isTransitional shouldBe Some(true)
+      getResult.isTransitional shouldBe true
     }
 
     "create new document when given valid UserAnswers and stats" in {

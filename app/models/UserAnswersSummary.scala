@@ -22,8 +22,6 @@ import java.time.Instant
 
 case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers], totalMovements: Int, totalMatchingMovements: Int) {
 
-  private val DefaultIsTransitionalFlag = true
-
   def toHateoas(expiresInDays: Instant => Long): JsObject =
     Json.obj(
       "eoriNumber"             -> eoriNumber,
@@ -41,7 +39,7 @@ case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers],
             "expiresInDays"  -> expiresInDays(userAnswer.createdAt),
             "_id"            -> userAnswer.id,
             "isSubmitted"    -> userAnswer.status,
-            "isTransitional" -> userAnswer.isTransitional.getOrElse(DefaultIsTransitionalFlag)
+            "isTransitional" -> userAnswer.isTransitional
           )
       }
     )

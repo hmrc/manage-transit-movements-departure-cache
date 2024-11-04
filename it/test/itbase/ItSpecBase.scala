@@ -36,7 +36,6 @@ trait ItSpecBase extends AnyWordSpec with Matchers with ScalaFutures with Option
   def guiceApplicationBuilder(): GuiceApplicationBuilder =
     GuiceApplicationBuilder()
       .configure("metrics.enabled" -> false)
-      .configure("microservice.services.features.isTransitional" -> true)
       .overrides(bind[AuthenticateActionProvider].toInstance(new FakeAuthenticateActionProvider))
       .overrides(bind[AuthenticateAndLockActionProvider].toInstance(new FakeAuthenticateAndLockActionProvider))
 

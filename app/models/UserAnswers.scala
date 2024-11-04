@@ -29,7 +29,7 @@ final case class UserAnswers(
   id: UUID,
   status: SubmissionState,
   departureId: Option[String] = None,
-  isTransitional: Option[Boolean] = Some(true)
+  isTransitional: Boolean = true
 ) {
 
   val lrn: String        = metadata.lrn
@@ -66,11 +66,7 @@ object UserAnswers {
         (__ \ "_id").read[UUID] and
         (__ \ "isSubmitted").read[SubmissionState] and
         (__ \ "departureId").readNullable[String] and
-        (__ \ "isTransitional")
-          .readNullable[Boolean]
-          .map(
-            result => result.orElse(Some(true))
-          )
+        (__ \ "isTransitional").readWithDefault[Boolean](true)
     )(UserAnswers.apply)
 
   private def writes(implicit instantWrites: Writes[Instant], metaDataWrites: Writes[Metadata]): Writes[UserAnswers] =
@@ -81,7 +77,7 @@ object UserAnswers {
         (__ \ "_id").write[UUID] and
         (__ \ "isSubmitted").write[SubmissionState] and
         (__ \ "departureId").writeNullable[String] and
-        (__ \ "isTransitional").writeNullable[Boolean]
+        (__ \ "isTransitional").write[Boolean]
     )(
       ua => Tuple.fromProductTyped(ua)
     )

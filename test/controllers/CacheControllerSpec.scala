@@ -327,7 +327,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
 
       "read from mongo is successful" in {
         val userAnswer1 = emptyUserAnswers.copy(metadata = Metadata("AB123", eoriNumber))
-        val userAnswer2 = emptyUserAnswers.copy(metadata = Metadata("CD123", eoriNumber), isTransitional = Some(false))
+        val userAnswer2 = emptyUserAnswers.copy(metadata = Metadata("CD123", eoriNumber), isTransitional = false)
         val userAnswers = Seq(userAnswer1, userAnswer2)
 
         when(mockCacheRepository.getAll(any(), any(), any(), any(), any(), any()))
