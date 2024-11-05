@@ -36,6 +36,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
       "respond with 404 status" in {
         val response = wsClient
           .url(url)
+          .addHttpHeaders(("APIVersion", "2.0"))
           .get()
           .futureValue
 

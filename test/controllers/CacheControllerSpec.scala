@@ -17,6 +17,7 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider, FakeAuthenticateActionProvider, FakeAuthenticateAndLockActionProvider}
 import generators.Generators
 import models.AuditType.*
 import models.Rejection.IE055Rejection
@@ -30,6 +31,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsArray, JsBoolean, JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import repositories.{CacheRepository, DefaultLockRepository}
 import services.{AuditService, MetricsService, XPathService}
 
 import scala.concurrent.Future
@@ -41,9 +43,12 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
   private lazy val mockXPathService   = mock[XPathService]
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
-    super
-      .guiceApplicationBuilder()
+    new GuiceApplicationBuilder()
       .overrides(
+        bind[AuthenticateActionProvider].to[FakeAuthenticateActionProvider],
+        bind[AuthenticateAndLockActionProvider].to[FakeAuthenticateAndLockActionProvider],
+        bind[CacheRepository].toInstance(mockCacheRepository),
+        bind[DefaultLockRepository].toInstance(mockLockRepository),
         bind[AuditService].toInstance(mockAuditService),
         bind[MetricsService].toInstance(mockMetricsService),
         bind[XPathService].toInstance(mockXPathService)
@@ -76,7 +81,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
       "document not found in mongo for given lrn and eori number" in {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
 
-        val request = FakeRequest(GET, routes.CacheController.get(lrn).url)
+        val request = FakeRequest(GET, routes.CacheController.get(lrn).url).withHeaders(("APIVersion", "2.0"))
         val result  = route(app, request).value
 
         status(result) shouldBe NOT_FOUND
@@ -112,7 +117,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
       "read from mongo fails" in {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.failed(new Throwable()))
 
-        val request = FakeRequest(GET, routes.CacheController.get(lrn).url)
+        val request = FakeRequest(GET, routes.CacheController.get(lrn).url).withHeaders(("APIVersion", "2.0"))
         val result  = route(app, request).value
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
@@ -131,6 +136,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
             .thenReturn(Future.successful(true))
 
           val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
+            .withHeaders(("APIVersion", "2.0"))
             .withBody(Json.toJson(metaData))
           val result = route(app, request).value
 
@@ -144,6 +150,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
             .thenReturn(Future.successful(true))
 
           val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
+            .withHeaders(("APIVersion", "2.0"))
             .withBody(Json.toJson(userAnswers.copy(status = SubmissionState.RejectedPendingChanges)))
           val result = route(app, request).value
 
@@ -156,6 +163,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
     "return 400" when {
       "request body is invalid" in {
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
+          .withHeaders(("APIVersion", "2.0"))
           .withBody(JsString("foo"))
 
         val result = route(app, request).value
@@ -166,6 +174,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
 
       "request body is empty" in {
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
+          .withHeaders(("APIVersion", "2.0"))
           .withBody(Json.obj())
 
         val result = route(app, request).value
@@ -181,6 +190,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         val userAnswers = emptyUserAnswers.copy(metadata = metadata)
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
+          .withHeaders(("APIVersion", "2.0"))
           .withBody(Json.toJson(userAnswers))
 
         val result = route(app, request).value
@@ -198,6 +208,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
           .thenReturn(Future.successful(false))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
+          .withHeaders(("APIVersion", "2.0"))
           .withBody(Json.toJson(metaData))
 
         val result = route(app, request).value
@@ -212,6 +223,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
           .thenReturn(Future.failed(new Throwable()))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
+          .withHeaders(("APIVersion", "2.0"))
           .withBody(Json.toJson(metaData))
 
         val result = route(app, request).value
@@ -230,6 +242,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
           .thenReturn(Future.successful(true))
 
         val request = FakeRequest(PUT, routes.CacheController.put().url)
+          .withHeaders(("APIVersion", "2.0"))
           .withBody(JsString(lrn))
 
         val result                                   = route(app, request).value
@@ -247,6 +260,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
     "return 400" when {
       "request body is invalid" in {
         val request = FakeRequest(PUT, routes.CacheController.put().url)
+          .withHeaders(("APIVersion", "2.0"))
           .withBody(Json.obj("foo" -> "bar"))
 
         val result = route(app, request).value
@@ -260,6 +274,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
 
       "request body is empty" in {
         val request = FakeRequest(PUT, routes.CacheController.put().url)
+          .withHeaders(("APIVersion", "2.0"))
           .withBody(Json.obj())
 
         val result = route(app, request).value
@@ -278,6 +293,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
           .thenReturn(Future.successful(false))
 
         val request = FakeRequest(PUT, routes.CacheController.put().url)
+          .withHeaders(("APIVersion", "2.0"))
           .withBody(JsString(lrn))
 
         val result                                   = route(app, request).value
@@ -297,6 +313,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
           .thenReturn(Future.failed(new Throwable()))
 
         val request = FakeRequest(PUT, routes.CacheController.put().url)
+          .withHeaders(("APIVersion", "2.0"))
           .withBody(JsString(lrn))
 
         val result                                   = route(app, request).value
@@ -319,7 +336,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
       "deletion was successful" in {
         when(mockCacheRepository.remove(any(), any())).thenReturn(Future.successful(true))
 
-        val request = FakeRequest(DELETE, routes.CacheController.delete(lrn).url)
+        val request = FakeRequest(DELETE, routes.CacheController.delete(lrn).url).withHeaders(("APIVersion", "2.0"))
         val result  = route(app, request).value
 
         status(result) shouldBe OK
@@ -334,7 +351,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
       "deletion was unsuccessful" in {
         when(mockCacheRepository.remove(any(), any())).thenReturn(Future.failed(new Throwable()))
 
-        val request = FakeRequest(DELETE, routes.CacheController.delete(lrn).url)
+        val request = FakeRequest(DELETE, routes.CacheController.delete(lrn).url).withHeaders(("APIVersion", "2.0"))
         val result  = route(app, request).value
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
@@ -357,7 +374,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockCacheRepository.getAll(any(), any(), any(), any(), any(), any()))
           .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, userAnswers, 2, 2)))
 
-        val request = FakeRequest(GET, routes.CacheController.getAll().url)
+        val request = FakeRequest(GET, routes.CacheController.getAll().url).withHeaders(("APIVersion", "2.0"))
         val result  = route(app, request).value
 
         status(result) shouldBe OK
@@ -406,7 +423,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
       "read from mongo fails" in {
         when(mockCacheRepository.getAll(any(), any(), any(), any(), any(), any())).thenReturn(Future.failed(new Throwable()))
 
-        val request = FakeRequest(GET, routes.CacheController.getAll().url)
+        val request = FakeRequest(GET, routes.CacheController.getAll().url).withHeaders(("APIVersion", "2.0"))
         val result  = route(app, request).value
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
@@ -434,7 +451,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
       "document not found in mongo for given lrn and eori number" in {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
 
-        val request = FakeRequest(GET, routes.CacheController.getExpiry(lrn).url)
+        val request = FakeRequest(GET, routes.CacheController.getExpiry(lrn).url).withHeaders(("APIVersion", "2.0"))
         val result  = route(app, request).value
 
         status(result) shouldBe NOT_FOUND
@@ -446,7 +463,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
       "read from mongo fails" in {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.failed(new Throwable()))
 
-        val request = FakeRequest(GET, routes.CacheController.getExpiry(lrn).url)
+        val request = FakeRequest(GET, routes.CacheController.getExpiry(lrn).url).withHeaders(("APIVersion", "2.0"))
         val result  = route(app, request).value
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
@@ -478,6 +495,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
             |""".stripMargin)
 
         val request = FakeRequest(POST, routes.CacheController.handleErrors(lrn).url)
+          .withHeaders(("APIVersion", "2.0"))
           .withJsonBody(json)
 
         val result = route(app, request).value
@@ -502,6 +520,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
             |""".stripMargin)
 
         val request = FakeRequest(POST, routes.CacheController.handleErrors(lrn).url)
+          .withHeaders(("APIVersion", "2.0"))
           .withJsonBody(json)
 
         val result = route(app, request).value
@@ -522,6 +541,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
             |""".stripMargin)
 
         val request = FakeRequest(POST, routes.CacheController.handleErrors(lrn).url)
+          .withHeaders(("APIVersion", "2.0"))
           .withJsonBody(json)
 
         val result = route(app, request).value
@@ -553,6 +573,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
              |""".stripMargin)
 
         val request = FakeRequest(POST, routes.CacheController.handleErrors(lrn).url)
+          .withHeaders(("APIVersion", "2.0"))
           .withJsonBody(json)
 
         val result = route(app, request).value
@@ -574,6 +595,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockXPathService.isDeclarationAmendable(any(), any(), any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, routes.CacheController.isDeclarationAmendable(lrn).url)
+          .withHeaders(("APIVersion", "2.0"))
           .withBody(JsArray(xPaths.map(_.value).map(JsString.apply)))
 
         val result = route(app, request).value
@@ -589,6 +611,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockXPathService.isDeclarationAmendable(any(), any(), any())).thenReturn(Future.successful(false))
 
         val request = FakeRequest(POST, routes.CacheController.isDeclarationAmendable(lrn).url)
+          .withHeaders(("APIVersion", "2.0"))
           .withBody(JsArray(xPaths.map(_.value).map(JsString.apply)))
 
         val result = route(app, request).value
@@ -602,6 +625,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
     "return 400" when {
       "request body is not an array of xpaths" in {
         val request = FakeRequest(POST, routes.CacheController.isDeclarationAmendable(lrn).url)
+          .withHeaders(("APIVersion", "2.0"))
           .withBody(Json.obj("foo" -> "bar"))
 
         val result = route(app, request).value
@@ -630,6 +654,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         val json = JsString(departureId)
 
         val request = FakeRequest(PATCH, routes.CacheController.prepareForAmendment(lrn).url)
+          .withHeaders(("APIVersion", "2.0"))
           .withJsonBody(json)
 
         val result = route(app, request).value
@@ -649,6 +674,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         val json = JsString(departureId)
 
         val request = FakeRequest(PATCH, routes.CacheController.prepareForAmendment(lrn).url)
+          .withHeaders(("APIVersion", "2.0"))
           .withJsonBody(json)
 
         val result = route(app, request).value
@@ -669,6 +695,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
             |""".stripMargin)
 
         val request = FakeRequest(PATCH, routes.CacheController.prepareForAmendment(lrn).url)
+          .withHeaders(("APIVersion", "2.0"))
           .withJsonBody(json)
 
         val result = route(app, request).value
@@ -695,6 +722,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         val json = JsString(departureId)
 
         val request = FakeRequest(PATCH, routes.CacheController.prepareForAmendment(lrn).url)
+          .withHeaders(("APIVersion", "2.0"))
           .withJsonBody(json)
 
         val result = route(app, request).value

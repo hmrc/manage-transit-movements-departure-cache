@@ -18,7 +18,7 @@ package controllers
 
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider, VersionedAction}
 import models.AuditType.*
-import models.request.{AuthenticatedRequest, VersionedRequest}
+import models.request.VersionedRequest
 import models.{Metadata, Phase, Rejection, SubmissionState, UserAnswers, XPath}
 import play.api.Logging
 import play.api.libs.json.*
@@ -81,8 +81,7 @@ class CacheController @Inject() (
       }
   }
 
-  private def isRequestTransitional()(implicit request: AuthenticatedRequest[AnyContent]) =
-    request.headers.get("APIVersion").flatMap(Phase(_)).contains(Phase.Transition)
+  private def isRequestTransitional()(implicit request: VersionedRequest[AnyContent]) = request.phase == Phase.Transition
 
   private def set(
     data: Metadata,
@@ -150,7 +149,7 @@ class CacheController @Inject() (
     }
 
   private def getUserAnswers[T](lrn: String)(f: UserAnswers => T)(implicit writes: Writes[T]): Action[AnyContent] =
-    authenticate().async {
+    (authenticate() andThen getVersion).async {
       implicit request =>
         val eoriNumber = request.eoriNumber
         cacheRepository
