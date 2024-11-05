@@ -21,7 +21,6 @@ import models.{Metadata, SubmissionState, UserAnswers}
 import org.mongodb.scala.model.Filters
 import play.api.libs.json.{JsObject, JsString, Json}
 import play.api.libs.ws.JsonBodyWritables.*
-import uk.gov.hmrc.http.HeaderNames
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit.DAYS
@@ -51,6 +50,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
 
         val response = wsClient
           .url(url)
+          .addHttpHeaders(("APIVersion", "2.0"))
           .get()
           .futureValue
 

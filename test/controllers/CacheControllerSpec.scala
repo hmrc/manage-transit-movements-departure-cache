@@ -59,23 +59,11 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
   "get" should {
 
     "return 200" when {
-      "read from mongo is successful when request and user answers phases match" in {
+      "read from mongo is successful" in {
         val userAnswers = emptyUserAnswers
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
         val request = FakeRequest(GET, routes.CacheController.get(lrn).url).withHeaders(("APIVersion", "2.0"))
-        val result  = route(app, request).value
-
-        status(result) shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(userAnswers)
-        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-      }
-
-      "read from mongo is successful when request doesn't have phase (APIVersion)" in {
-        val userAnswers = emptyUserAnswers
-        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
-
-        val request = FakeRequest(GET, routes.CacheController.get(lrn).url)
         val result  = route(app, request).value
 
         status(result) shouldBe OK
@@ -433,8 +421,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
       "read from mongo is successful" in {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
 
-        // Note that this endpoint doesn't require API version to be set in the headers
-        val request = FakeRequest(GET, routes.CacheController.getExpiry(lrn).url)
+        val request = FakeRequest(GET, routes.CacheController.getExpiry(lrn).url).withHeaders(("APIVersion", "2.0"))
         val result  = route(app, request).value
 
         status(result) shouldBe OK

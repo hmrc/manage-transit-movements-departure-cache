@@ -84,9 +84,6 @@ class CacheController @Inject() (
   private def isRequestTransitional()(implicit request: AuthenticatedRequest[AnyContent]) =
     request.headers.get("APIVersion").flatMap(Phase(_)).contains(Phase.Transition)
 
-  private def requestHasPhase()(implicit request: AuthenticatedRequest[AnyContent]) =
-    request.headers.get("APIVersion").flatMap(Phase(_)).isDefined
-
   private def set(
     data: Metadata,
     status: Option[SubmissionState] = None,
@@ -159,7 +156,7 @@ class CacheController @Inject() (
         cacheRepository
           .get(lrn, eoriNumber)
           .map {
-            case Some(userAnswers) if !requestHasPhase() || isRequestTransitional() == userAnswers.isTransitional =>
+            case Some(userAnswers) if isRequestTransitional() == userAnswers.isTransitional =>
               Ok(Json.toJson(f(userAnswers)))
             case Some(userAnswers) =>
               NotAcceptable
