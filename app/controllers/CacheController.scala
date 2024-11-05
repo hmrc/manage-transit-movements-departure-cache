@@ -18,8 +18,8 @@ package controllers
 
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider, VersionedAction}
 import models.AuditType.*
-import models.request.VersionedRequest
-import models.{Metadata, Rejection, SubmissionState, UserAnswers, XPath}
+import models.request.{AuthenticatedRequest, VersionedRequest}
+import models.{Metadata, Phase, Rejection, SubmissionState, UserAnswers, XPath}
 import play.api.Logging
 import play.api.libs.json.*
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -80,6 +80,12 @@ class CacheController @Inject() (
           Future.successful(BadRequest)
       }
   }
+
+  private def isRequestTransitional()(implicit request: AuthenticatedRequest[AnyContent]) =
+    request.headers.get("APIVersion").flatMap(Phase(_)).contains(Phase.Transition)
+
+  private def requestHasPhase()(implicit request: AuthenticatedRequest[AnyContent]) =
+    request.headers.get("APIVersion").flatMap(Phase(_)).isDefined
 
   private def set(
     data: Metadata,
@@ -153,8 +159,10 @@ class CacheController @Inject() (
         cacheRepository
           .get(lrn, eoriNumber)
           .map {
-            case Some(userAnswers) =>
+            case Some(userAnswers) if !requestHasPhase() || isRequestTransitional() == userAnswers.isTransitional =>
               Ok(Json.toJson(f(userAnswers)))
+            case Some(userAnswers) =>
+              NotAcceptable
             case None =>
               logger.warn(s"No document found for LRN '$lrn' and EORI '$eoriNumber'")
               NotFound

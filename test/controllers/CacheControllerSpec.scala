@@ -59,7 +59,19 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
   "get" should {
 
     "return 200" when {
-      "read from mongo is successful" in {
+      "read from mongo is successful when request and user answers phases match" in {
+        val userAnswers = emptyUserAnswers
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
+
+        val request = FakeRequest(GET, routes.CacheController.get(lrn).url).withHeaders(("APIVersion", "2.0"))
+        val result  = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe Json.toJson(userAnswers)
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+      }
+
+      "read from mongo is successful when request doesn't have phase (APIVersion)" in {
         val userAnswers = emptyUserAnswers
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
@@ -80,6 +92,30 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         val result  = route(app, request).value
 
         status(result) shouldBe NOT_FOUND
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+      }
+    }
+
+    "return 406" when {
+      "request phase doesn't match user answers - transitional" in {
+        val transitionalUserAnswers = emptyUserAnswers.copy(isTransitional = true)
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(transitionalUserAnswers)))
+
+        val finalRequest = FakeRequest(GET, routes.CacheController.get(lrn).url).withHeaders(("APIVersion", "2.1"))
+        val result       = route(app, finalRequest).value
+
+        status(result) shouldBe NOT_ACCEPTABLE
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+      }
+
+      "request phase doesn't match user answers - final" in {
+        val finalUserAnswers = emptyUserAnswers.copy(isTransitional = false)
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(finalUserAnswers)))
+
+        val transitionalRequest = FakeRequest(GET, routes.CacheController.get(lrn).url).withHeaders(("APIVersion", "2.0"))
+        val result              = route(app, transitionalRequest).value
+
+        status(result) shouldBe NOT_ACCEPTABLE
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
       }
     }
@@ -397,6 +433,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
       "read from mongo is successful" in {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
 
+        // Note that this endpoint doesn't require API version to be set in the headers
         val request = FakeRequest(GET, routes.CacheController.getExpiry(lrn).url)
         val result  = route(app, request).value
 
