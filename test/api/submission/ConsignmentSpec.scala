@@ -3237,7 +3237,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           )
         }
 
-        "all some have not been attached to an item" in {
+        "some have not been attached to an item" in {
           val json = Json.parse("""
               |{
               |  "transportDetails" : {
