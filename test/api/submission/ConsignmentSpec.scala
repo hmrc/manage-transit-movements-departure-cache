@@ -3160,80 +3160,142 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
         )
       }
 
-      "there are multiple transport equipments" in {
-        val json = Json.parse("""
-            |{
-            |  "transportDetails" : {
-            |    "addTransportEquipmentYesNo" : true,
-            |    "equipmentsAndCharges" : {
-            |      "equipments" : [
-            |        {
-            |          "containerIdentificationNumber" : "container id 1",
-            |          "seals" : [],
-            |          "uuid" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
-            |        },
-            |        {
-            |          "containerIdentificationNumber" : "container id 2",
-            |          "seals" : [],
-            |          "uuid" : "b8f72766-3781-49f2-8788-db8913d41f8c"
-            |        },
-            |        {
-            |          "containerIdentificationNumber" : "container id 3",
-            |          "seals" : [],
-            |          "uuid" : "00602057-2652-43f4-8fe5-d97460d708ec"
-            |        }
-            |      ]
-            |    }
-            |  },
-            |  "items" : [
-            |    {
-            |      "transportEquipment" : "00602057-2652-43f4-8fe5-d97460d708ec"
-            |    },
-            |    {
-            |      "transportEquipment" : "b8f72766-3781-49f2-8788-db8913d41f8c"
-            |    },
-            |    {
-            |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
-            |    },
-            |    {
-            |      "transportEquipment" : "00602057-2652-43f4-8fe5-d97460d708ec"
-            |    }
-            |  ]
-            |}
-            |""".stripMargin)
+      "there are multiple transport equipments" when {
+        "all have been attached to an item" in {
+          val json = Json.parse("""
+              |{
+              |  "transportDetails" : {
+              |    "addTransportEquipmentYesNo" : true,
+              |    "equipmentsAndCharges" : {
+              |      "equipments" : [
+              |        {
+              |          "containerIdentificationNumber" : "container id 1",
+              |          "seals" : [],
+              |          "uuid" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+              |        },
+              |        {
+              |          "containerIdentificationNumber" : "container id 2",
+              |          "seals" : [],
+              |          "uuid" : "b8f72766-3781-49f2-8788-db8913d41f8c"
+              |        },
+              |        {
+              |          "containerIdentificationNumber" : "container id 3",
+              |          "seals" : [],
+              |          "uuid" : "00602057-2652-43f4-8fe5-d97460d708ec"
+              |        }
+              |      ]
+              |    }
+              |  },
+              |  "items" : [
+              |    {
+              |      "transportEquipment" : "00602057-2652-43f4-8fe5-d97460d708ec"
+              |    },
+              |    {
+              |      "transportEquipment" : "b8f72766-3781-49f2-8788-db8913d41f8c"
+              |    },
+              |    {
+              |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+              |    },
+              |    {
+              |      "transportEquipment" : "00602057-2652-43f4-8fe5-d97460d708ec"
+              |    }
+              |  ]
+              |}
+              |""".stripMargin)
 
-        val result = json.as[Seq[TransportEquipmentType06]](transportEquipmentReads)
+          val result = json.as[Seq[TransportEquipmentType06]](transportEquipmentReads)
 
-        result shouldBe Seq(
-          TransportEquipmentType06(
-            sequenceNumber = 1,
-            containerIdentificationNumber = Some("container id 1"),
-            numberOfSeals = BigInt(0),
-            Seal = Nil,
-            GoodsReference = Seq(
-              GoodsReferenceType02(1, 3)
-            )
-          ),
-          TransportEquipmentType06(
-            sequenceNumber = 2,
-            containerIdentificationNumber = Some("container id 2"),
-            numberOfSeals = BigInt(0),
-            Seal = Nil,
-            GoodsReference = Seq(
-              GoodsReferenceType02(1, 2)
-            )
-          ),
-          TransportEquipmentType06(
-            sequenceNumber = 3,
-            containerIdentificationNumber = Some("container id 3"),
-            numberOfSeals = BigInt(0),
-            Seal = Nil,
-            GoodsReference = Seq(
-              GoodsReferenceType02(1, 1),
-              GoodsReferenceType02(2, 4)
+          result shouldBe Seq(
+            TransportEquipmentType06(
+              sequenceNumber = 1,
+              containerIdentificationNumber = Some("container id 1"),
+              numberOfSeals = BigInt(0),
+              Seal = Nil,
+              GoodsReference = Seq(
+                GoodsReferenceType02(1, 3)
+              )
+            ),
+            TransportEquipmentType06(
+              sequenceNumber = 2,
+              containerIdentificationNumber = Some("container id 2"),
+              numberOfSeals = BigInt(0),
+              Seal = Nil,
+              GoodsReference = Seq(
+                GoodsReferenceType02(1, 2)
+              )
+            ),
+            TransportEquipmentType06(
+              sequenceNumber = 3,
+              containerIdentificationNumber = Some("container id 3"),
+              numberOfSeals = BigInt(0),
+              Seal = Nil,
+              GoodsReference = Seq(
+                GoodsReferenceType02(1, 1),
+                GoodsReferenceType02(2, 4)
+              )
             )
           )
-        )
+        }
+
+        "all some have not been attached to an item" in {
+          val json = Json.parse("""
+              |{
+              |  "transportDetails" : {
+              |    "addTransportEquipmentYesNo" : true,
+              |    "equipmentsAndCharges" : {
+              |      "equipments" : [
+              |        {
+              |          "containerIdentificationNumber" : "container id 1",
+              |          "seals" : [],
+              |          "uuid" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+              |        },
+              |        {
+              |          "containerIdentificationNumber" : "container id 2",
+              |          "seals" : [],
+              |          "uuid" : "b8f72766-3781-49f2-8788-db8913d41f8c"
+              |        },
+              |        {
+              |          "containerIdentificationNumber" : "container id 3",
+              |          "seals" : [],
+              |          "uuid" : "00602057-2652-43f4-8fe5-d97460d708ec"
+              |        }
+              |      ]
+              |    }
+              |  },
+              |  "items" : [
+              |    {
+              |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+              |    },
+              |    {
+              |      "transportEquipment" : "00602057-2652-43f4-8fe5-d97460d708ec"
+              |    }
+              |  ]
+              |}
+              |""".stripMargin)
+
+          val result = json.as[Seq[TransportEquipmentType06]](transportEquipmentReads)
+
+          result shouldBe Seq(
+            TransportEquipmentType06(
+              sequenceNumber = 1,
+              containerIdentificationNumber = Some("container id 1"),
+              numberOfSeals = BigInt(0),
+              Seal = Nil,
+              GoodsReference = Seq(
+                GoodsReferenceType02(1, 1)
+              )
+            ),
+            TransportEquipmentType06(
+              sequenceNumber = 2,
+              containerIdentificationNumber = Some("container id 3"),
+              numberOfSeals = BigInt(0),
+              Seal = Nil,
+              GoodsReference = Seq(
+                GoodsReferenceType02(1, 2)
+              )
+            )
+          )
+        }
       }
     }
 
