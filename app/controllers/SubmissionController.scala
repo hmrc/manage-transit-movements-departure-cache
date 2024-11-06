@@ -21,8 +21,7 @@ import cats.implicits.*
 import controllers.actions.{AuthenticateActionProvider, VersionedAction}
 import models.AuditType.*
 import models.SubmissionState.*
-import models.request.VersionedRequest
-import models.{AuditType, Messages, UserAnswers}
+import models.{AuditType, Messages, Phase, UserAnswers}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
@@ -59,7 +58,7 @@ class SubmissionController @Inject() (
               result <- OptionT.liftF {
                 apiService
                   .submitDeclaration(userAnswers, request.phase)
-                  .flatMap(responseToResult(userAnswers, _, None, DeclarationData))
+                  .flatMap(responseToResult(userAnswers, _, None, DeclarationData, request.phase))
               }
             } yield result
 
@@ -87,7 +86,7 @@ class SubmissionController @Inject() (
               result <- OptionT.liftF {
                 apiService
                   .submitAmendment(userAnswers, departureId, request.phase)
-                  .flatMap(responseToResult(userAnswers, _, Some(departureId), auditType))
+                  .flatMap(responseToResult(userAnswers, _, Some(departureId), auditType, request.phase))
               }
             } yield result
 
@@ -107,14 +106,15 @@ class SubmissionController @Inject() (
     userAnswers: UserAnswers,
     response: HttpResponse,
     departureId: Option[String],
-    auditType: AuditType
-  )(implicit hc: HeaderCarrier, request: VersionedRequest[JsValue]): Future[Result] = {
+    auditType: AuditType,
+    phase: Phase
+  )(implicit hc: HeaderCarrier): Future[Result] = {
     val submissionState = Submitted
     metricsService.increment(auditType.name, response)
     response.status match {
       case status if is2xx(status) =>
         cacheRepository
-          .set(userAnswers, submissionState, departureId, request.phase)
+          .set(userAnswers, submissionState, departureId, phase)
           .map {
             _ =>
               auditService.audit(auditType, userAnswers.copy(status = submissionState))

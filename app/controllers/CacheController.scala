@@ -55,7 +55,7 @@ class CacheController @Inject() (
           if (request.eoriNumber == data.eoriNumber) {
             val status: Option[SubmissionState] = (request.body \ "isSubmitted").asOpt[SubmissionState]
             val departureId: Option[String]     = (request.body \ "departureId").asOpt[String]
-            set(data, status, departureId)()
+            set(data, status, departureId, request.phase)()
           } else {
             logger.warn(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
             Future.successful(Forbidden)
@@ -70,7 +70,7 @@ class CacheController @Inject() (
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(lrn, _) =>
-          set(Metadata(lrn, request.eoriNumber)) {
+          set(Metadata(lrn, request.eoriNumber), phase = request.phase) {
             val auditType = DepartureDraftStarted
             auditService.audit(auditType, lrn, request.eoriNumber)
             metricsService.increment(auditType.name)
@@ -81,15 +81,16 @@ class CacheController @Inject() (
       }
   }
 
-  private def isRequestTransitional()(implicit request: VersionedRequest[AnyContent]) = request.phase == Phase.Transition
+  private def isRequestTransitional()(implicit request: VersionedRequest[AnyContent]) = request.phase.isTransitional
 
   private def set(
     data: Metadata,
     status: Option[SubmissionState] = None,
-    departureId: Option[String] = None
-  )(block: => Unit = ())(implicit request: VersionedRequest[JsValue]): Future[Status] =
+    departureId: Option[String] = None,
+    phase: Phase
+  )(block: => Unit = ()): Future[Status] =
     cacheRepository
-      .set(data, status, departureId, request.phase)
+      .set(data, status, departureId, phase)
       .map {
         case true =>
           block
@@ -177,7 +178,7 @@ class CacheController @Inject() (
           cacheRepository.get(lrn, request.eoriNumber).flatMap {
             case Some(userAnswers) =>
               val updatedUserAnswers = xPathService.handleRejection(userAnswers, rejection)
-              set(updatedUserAnswers.metadata, Some(updatedUserAnswers.status), updatedUserAnswers.departureId)()
+              set(updatedUserAnswers.metadata, Some(updatedUserAnswers.status), updatedUserAnswers.departureId, request.phase)()
             case None =>
               Future.successful(NotFound)
           }
@@ -205,7 +206,7 @@ class CacheController @Inject() (
           cacheRepository.get(lrn, request.eoriNumber).flatMap {
             case Some(userAnswers) =>
               val updatedUserAnswers = xPathService.prepareForAmendment(userAnswers, departureId)
-              set(updatedUserAnswers.metadata, Some(updatedUserAnswers.status), updatedUserAnswers.departureId)()
+              set(updatedUserAnswers.metadata, Some(updatedUserAnswers.status), updatedUserAnswers.departureId, request.phase)()
             case None =>
               Future.successful(NotFound)
           }
