@@ -16,27 +16,20 @@
 
 package models
 
-import models.Phase.Transition
+import models.Phase.*
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
 
-sealed trait Phase {
-  val version: String
+class PhaseSpec extends AnyFreeSpec with Matchers {
 
-  def isTransitional: Boolean = this == Transition
-}
+  "Phase" - {
 
-object Phase {
+    "Transition" in {
+      Transition.isTransitional mustEqual true
+    }
 
-  case object Transition extends Phase {
-    override val version: String = "2.0"
-  }
-
-  case object PostTransition extends Phase {
-    override val version: String = "2.1"
-  }
-
-  def apply(header: String): Option[Phase] = header match {
-    case Transition.version     => Some(Transition)
-    case PostTransition.version => Some(PostTransition)
-    case _                      => None
+    "PostTransition" in {
+      PostTransition.isTransitional mustEqual false
+    }
   }
 }

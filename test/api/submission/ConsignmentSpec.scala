@@ -539,6 +539,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
              |  "lrn" : "$lrn",
              |  "eoriNumber" : "$eoriNumber",
              |  "isSubmitted" : "notSubmitted",
+             |  "isTransitional": false,
              |  "data" : {
              |    "traderDetails" : {
              |      "consignment" : {
@@ -3325,6 +3326,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
          |  "lrn" : "$lrn",
          |  "eoriNumber" : "$eoriNumber",
          |  "isSubmitted" : "notSubmitted",
+         |  "isTransitional": false,
          |  "data" : {
          |    "traderDetails" : {
          |      "consignment" : {

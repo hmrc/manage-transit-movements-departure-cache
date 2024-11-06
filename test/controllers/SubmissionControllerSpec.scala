@@ -51,7 +51,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
     reset(mockApiService)
     reset(mockAuditService)
 
-    when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState, any(): Option[String])).thenReturn(Future.successful(true))
+    when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState, any(): Option[String], any(): Phase)).thenReturn(Future.successful(true))
   }
 
   "post" should {
@@ -75,7 +75,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         contentAsJson(result) shouldBe body
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.Submitted), eqTo(None))
+        verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.Submitted), eqTo(None), eqTo(Phase.Transition))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Phase.Transition))(any())
         verify(mockAuditService).audit(eqTo(DeclarationData), eqTo(userAnswers.copy(status = SubmissionState.Submitted)))(any())
       }
@@ -154,7 +154,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         contentAsJson(result) shouldBe body
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.Submitted), eqTo(Some("departureId123")))
+        verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.Submitted), eqTo(Some("departureId123")), eqTo(Phase.Transition))
         verify(mockApiService).submitAmendment(eqTo(userAnswers), eqTo(departureId), eqTo(Phase.Transition))(any())
         verify(mockAuditService).audit(eqTo(DeclarationAmendment), eqTo(userAnswers.copy(status = SubmissionState.Submitted)))(any())
       }
