@@ -18,7 +18,6 @@ package controllers
 
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider, VersionedAction}
 import models.AuditType.*
-import models.request.VersionedRequest
 import models.{Metadata, Phase, Rejection, SubmissionState, UserAnswers, XPath}
 import play.api.Logging
 import play.api.libs.json.*
@@ -80,8 +79,6 @@ class CacheController @Inject() (
           Future.successful(BadRequest)
       }
   }
-
-  private def isRequestTransitional()(implicit request: VersionedRequest[AnyContent]) = request.phase.isTransitional
 
   private def set(
     data: Metadata,
@@ -156,7 +153,7 @@ class CacheController @Inject() (
         cacheRepository
           .get(lrn, eoriNumber)
           .map {
-            case Some(userAnswers) if isRequestTransitional() == userAnswers.isTransitional =>
+            case Some(userAnswers) if request.phase.isTransitional == userAnswers.isTransitional =>
               Ok(Json.toJson(f(userAnswers)))
             case Some(userAnswers) =>
               NotAcceptable

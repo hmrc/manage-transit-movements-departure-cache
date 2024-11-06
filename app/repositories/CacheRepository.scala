@@ -85,7 +85,7 @@ class CacheRepository @Inject() (
       // format: on
       Some(Updates.set("tasks", Codecs.toBson(data.tasks))),
       Some(Updates.setOnInsert("createdAt", now)),
-      Some(Updates.setOnInsert("isTransitional", phase == Phase.Transition)),
+      Some(Updates.setOnInsert("isTransitional", phase.isTransitional)),
       Some(Updates.set("lastUpdated", now)),
       Some(Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID()))),
       Some(statusUpdate),
