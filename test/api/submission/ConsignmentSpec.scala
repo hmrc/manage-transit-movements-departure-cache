@@ -20,10 +20,11 @@ import api.submission.Consignment.RichConsignmentType20
 import api.submission.consignmentType20.{activeBorderTransportMeansReads, transportEquipmentReads}
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import config.Constants.ModeOfTransport.Rail
-import generated._
+import generated.*
 import generators.Generators
 import models.Phase.{PostTransition, Transition}
-import models.UserAnswers
+import models.{Phase, UserAnswers}
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks.forAll
 import play.api.libs.json.{JsValue, Json}
 
@@ -1489,6 +1490,8 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
     "postProcess is called" when {
 
+      val phase = arbitrary[Phase].sample.value
+
       "rollUpTransportCharges" when {
 
         "every item has the same transport charges" when {
@@ -1526,7 +1529,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess(phase)
 
               result shouldBe ConsignmentType20(
                 grossMass = BigDecimal(1),
@@ -1601,7 +1604,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                   )
                 )
 
-                val result = consignment.postProcess
+                val result = consignment.postProcess(phase)
 
                 result shouldBe ConsignmentType20(
                   grossMass = BigDecimal(1),
@@ -1673,7 +1676,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                   )
                 )
 
-                val result = consignment.postProcess
+                val result = consignment.postProcess(phase)
 
                 result shouldBe consignment
               }
@@ -1723,7 +1726,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(phase)
 
             result shouldBe consignment
           }
@@ -1773,7 +1776,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(phase)
 
             result shouldBe consignment
           }
@@ -1812,7 +1815,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(phase)
 
             result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
@@ -1883,7 +1886,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(phase)
 
             result shouldBe consignment
           }
@@ -1927,7 +1930,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(phase)
 
             result shouldBe consignment
           }
@@ -1966,7 +1969,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(phase)
 
             result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
@@ -2037,7 +2040,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(phase)
 
             result shouldBe consignment
           }
@@ -2081,7 +2084,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(phase)
 
             result shouldBe consignment
           }
@@ -2120,7 +2123,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(phase)
 
             result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
@@ -2191,7 +2194,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(phase)
 
             result shouldBe consignment
           }
@@ -2235,19 +2238,21 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             )
 
-            val result = consignment.postProcess
+            val result = consignment.postProcess(phase)
 
             result shouldBe consignment
           }
         }
       }
 
-      "rollUpAdditionalInformation" when {
+      "rollUpConsignee" when {
 
         "during post-transition" when {
 
-          "every item has a common additional information" must {
-            "roll up each common additional information to consignment level and remove them from each item" in {
+          val phase = Phase.PostTransition
+
+          "every item has a common consignee" must {
+            "not roll up" in {
               val consignment = ConsignmentType20(
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
@@ -2261,16 +2266,18 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 1"
                         ),
-                        AdditionalInformation = Seq(
-                          AdditionalInformationType03(
-                            sequenceNumber = 1,
-                            code = "adi1",
-                            text = Some("ADI 1")
-                          ),
-                          AdditionalInformationType03(
-                            sequenceNumber = 2,
-                            code = "adi2",
-                            text = Some("ADI 2")
+                        Consignee = Some(
+                          ConsigneeType02(
+                            identificationNumber = Some("consignee identification number"),
+                            name = Some("consignee name"),
+                            Address = Some(
+                              AddressType12(
+                                streetAndNumber = "consignee address street and number",
+                                postcode = Some("consignee address postcode"),
+                                city = "consignee address city",
+                                country = "consignee address country"
+                              )
+                            )
                           )
                         )
                       ),
@@ -2280,11 +2287,18 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
                         ),
-                        AdditionalInformation = Seq(
-                          AdditionalInformationType03(
-                            sequenceNumber = 1,
-                            code = "adi1",
-                            text = Some("ADI 1")
+                        Consignee = Some(
+                          ConsigneeType02(
+                            identificationNumber = Some("consignee identification number"),
+                            name = Some("consignee name"),
+                            Address = Some(
+                              AddressType12(
+                                streetAndNumber = "consignee address street and number",
+                                postcode = Some("consignee address postcode"),
+                                city = "consignee address city",
+                                country = "consignee address country"
+                              )
+                            )
                           )
                         )
                       )
@@ -2293,192 +2307,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess
-
-              val expected = ConsignmentType20(
-                grossMass = BigDecimal(1),
-                AdditionalInformation = Seq.empty,
-                HouseConsignment = Seq(
-                  HouseConsignmentType10(
-                    sequenceNumber = 1,
-                    grossMass = BigDecimal(1),
-                    ConsignmentItem = Seq(
-                      ConsignmentItemType09(
-                        goodsItemNumber = 1,
-                        declarationGoodsItemNumber = BigInt(1),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 1"
-                        ),
-                        AdditionalInformation = Seq(
-                          AdditionalInformationType03(
-                            sequenceNumber = 1,
-                            code = "adi1",
-                            text = Some("ADI 1")
-                          ),
-                          AdditionalInformationType03(
-                            sequenceNumber = 2,
-                            code = "adi2",
-                            text = Some("ADI 2")
-                          )
-                        )
-                      ),
-                      ConsignmentItemType09(
-                        goodsItemNumber = 2,
-                        declarationGoodsItemNumber = BigInt(2),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 2"
-                        ),
-                        AdditionalInformation = Seq(
-                          AdditionalInformationType03(
-                            sequenceNumber = 1,
-                            code = "adi1",
-                            text = Some("ADI 1")
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-
-              result shouldBe expected
-
-            }
-          }
-
-          "some items have common additional information" must {
-            "not roll up additional information to consignment level" in {
-              val consignment = ConsignmentType20(
-                grossMass = BigDecimal(1),
-                HouseConsignment = Seq(
-                  HouseConsignmentType10(
-                    sequenceNumber = 1,
-                    grossMass = BigDecimal(1),
-                    ConsignmentItem = Seq(
-                      ConsignmentItemType09(
-                        goodsItemNumber = 1,
-                        declarationGoodsItemNumber = BigInt(1),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 1"
-                        ),
-                        AdditionalInformation = Seq(
-                          AdditionalInformationType03(
-                            sequenceNumber = 1,
-                            code = "adi1",
-                            text = Some("ADI 1")
-                          )
-                        )
-                      ),
-                      ConsignmentItemType09(
-                        goodsItemNumber = 2,
-                        declarationGoodsItemNumber = BigInt(2),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 2"
-                        ),
-                        AdditionalInformation = Seq(
-                          AdditionalInformationType03(
-                            sequenceNumber = 1,
-                            code = "adi1",
-                            text = Some("ADI 1")
-                          )
-                        )
-                      ),
-                      ConsignmentItemType09(
-                        goodsItemNumber = 3,
-                        declarationGoodsItemNumber = BigInt(3),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 3"
-                        ),
-                        AdditionalInformation = Nil
-                      )
-                    )
-                  )
-                )
-              )
-
-              val result = consignment.postProcess
-
-              result shouldBe consignment
-            }
-          }
-
-          "no items have common additional information" must {
-            "not roll up additional information to consignment level" in {
-              val consignment = ConsignmentType20(
-                grossMass = BigDecimal(1),
-                HouseConsignment = Seq(
-                  HouseConsignmentType10(
-                    sequenceNumber = 1,
-                    grossMass = BigDecimal(1),
-                    ConsignmentItem = Seq(
-                      ConsignmentItemType09(
-                        goodsItemNumber = 1,
-                        declarationGoodsItemNumber = BigInt(1),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 1"
-                        ),
-                        AdditionalInformation = Seq(
-                          AdditionalInformationType03(
-                            sequenceNumber = 1,
-                            code = "adi1",
-                            text = Some("ADI 1")
-                          )
-                        )
-                      ),
-                      ConsignmentItemType09(
-                        goodsItemNumber = 2,
-                        declarationGoodsItemNumber = BigInt(2),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 2"
-                        ),
-                        AdditionalInformation = Seq(
-                          AdditionalInformationType03(
-                            sequenceNumber = 1,
-                            code = "adi2",
-                            text = Some("ADI 2")
-                          )
-                        )
-                      ),
-                      ConsignmentItemType09(
-                        goodsItemNumber = 3,
-                        declarationGoodsItemNumber = BigInt(3),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 3"
-                        ),
-                        AdditionalInformation = Seq(
-                          AdditionalInformationType03(
-                            sequenceNumber = 1,
-                            code = "adi3",
-                            text = Some("ADI 3")
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-
-              val result = consignment.postProcess
-
-              result shouldBe consignment
-            }
-          }
-
-          // This should never happen, but need to be wary of empty.reduceLeft Exception
-          "no items" must {
-            "not roll up additional information to consignment level" in {
-              val consignment = ConsignmentType20(
-                grossMass = BigDecimal(1),
-                HouseConsignment = Seq(
-                  HouseConsignmentType10(
-                    sequenceNumber = 1,
-                    grossMass = BigDecimal(1),
-                    ConsignmentItem = Nil
-                  )
-                )
-              )
-
-              val result = consignment.postProcess
+              val result = consignment.postProcess(phase)
 
               result shouldBe consignment
             }
@@ -2486,8 +2315,11 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
         }
 
         "during transition" when {
-          "every item has a common additional information" must {
-            "not roll up additional information to consignment level" in {
+
+          val phase = Phase.Transition
+
+          "every item has a common consignee" must {
+            "roll up consignee to consignment level" in {
               val consignment = ConsignmentType20(
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
@@ -2501,16 +2333,18 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 1"
                         ),
-                        AdditionalInformation = Seq(
-                          AdditionalInformationType03(
-                            sequenceNumber = 1,
-                            code = "adi1",
-                            text = Some("ADI 1")
-                          ),
-                          AdditionalInformationType03(
-                            sequenceNumber = 2,
-                            code = "adi2",
-                            text = Some("ADI 2")
+                        Consignee = Some(
+                          ConsigneeType02(
+                            identificationNumber = Some("consignee identification number"),
+                            name = Some("consignee name"),
+                            Address = Some(
+                              AddressType12(
+                                streetAndNumber = "consignee address street and number",
+                                postcode = Some("consignee address postcode"),
+                                city = "consignee address city",
+                                country = "consignee address country"
+                              )
+                            )
                           )
                         )
                       ),
@@ -2520,11 +2354,18 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
                         ),
-                        AdditionalInformation = Seq(
-                          AdditionalInformationType03(
-                            sequenceNumber = 1,
-                            code = "adi1",
-                            text = Some("ADI 1")
+                        Consignee = Some(
+                          ConsigneeType02(
+                            identificationNumber = Some("consignee identification number"),
+                            name = Some("consignee name"),
+                            Address = Some(
+                              AddressType12(
+                                streetAndNumber = "consignee address street and number",
+                                postcode = Some("consignee address postcode"),
+                                city = "consignee address city",
+                                country = "consignee address country"
+                              )
+                            )
                           )
                         )
                       )
@@ -2533,70 +2374,24 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess
-
-              result shouldBe consignment
-            }
-          }
-        }
-      }
-
-      "rollUpAdditionalReference" when {
-
-        "during post-transition" when {
-
-          "every item has a common additional reference" must {
-            "roll up each common additional reference to consignment level and remove them from each item" in {
-              val consignment = ConsignmentType20(
-                grossMass = BigDecimal(1),
-                HouseConsignment = Seq(
-                  HouseConsignmentType10(
-                    sequenceNumber = 1,
-                    grossMass = BigDecimal(1),
-                    ConsignmentItem = Seq(
-                      ConsignmentItemType09(
-                        goodsItemNumber = 1,
-                        declarationGoodsItemNumber = BigInt(1),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 1"
-                        ),
-                        AdditionalReference = Seq(
-                          AdditionalReferenceType04(
-                            sequenceNumber = 1,
-                            typeValue = "adi1",
-                            referenceNumber = Some("ADI 1")
-                          ),
-                          AdditionalReferenceType04(
-                            sequenceNumber = 2,
-                            typeValue = "adi2",
-                            referenceNumber = Some("ADI 2")
-                          )
-                        )
-                      ),
-                      ConsignmentItemType09(
-                        goodsItemNumber = 2,
-                        declarationGoodsItemNumber = BigInt(2),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 2"
-                        ),
-                        AdditionalReference = Seq(
-                          AdditionalReferenceType04(
-                            sequenceNumber = 1,
-                            typeValue = "adi1",
-                            referenceNumber = Some("ADI 1")
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-
-              val result = consignment.postProcess
+              val result = consignment.postProcess(phase)
 
               result shouldBe ConsignmentType20(
                 grossMass = BigDecimal(1),
-                AdditionalReference = Nil,
+                Consignee = Some(
+                  ConsigneeType05(
+                    identificationNumber = Some("consignee identification number"),
+                    name = Some("consignee name"),
+                    Address = Some(
+                      AddressType17(
+                        streetAndNumber = "consignee address street and number",
+                        postcode = Some("consignee address postcode"),
+                        city = "consignee address city",
+                        country = "consignee address country"
+                      )
+                    )
+                  )
+                ),
                 HouseConsignment = Seq(
                   HouseConsignmentType10(
                     sequenceNumber = 1,
@@ -2608,18 +2403,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 1"
                         ),
-                        AdditionalReference = Seq(
-                          AdditionalReferenceType04(
-                            sequenceNumber = 1,
-                            typeValue = "adi1",
-                            referenceNumber = Some("ADI 1")
-                          ),
-                          AdditionalReferenceType04(
-                            sequenceNumber = 2,
-                            typeValue = "adi2",
-                            referenceNumber = Some("ADI 2")
-                          )
-                        )
+                        Consignee = None
                       ),
                       ConsignmentItemType09(
                         goodsItemNumber = 2,
@@ -2627,13 +2411,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
                         ),
-                        AdditionalReference = Seq(
-                          AdditionalReferenceType04(
-                            sequenceNumber = 1,
-                            typeValue = "adi1",
-                            referenceNumber = Some("ADI 1")
-                          )
-                        )
+                        Consignee = None
                       )
                     )
                   )
@@ -2642,8 +2420,8 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             }
           }
 
-          "some items have common additional reference" must {
-            "not roll up additional reference to consignment level" in {
+          "some items have common consignee" must {
+            "not roll up" in {
               val consignment = ConsignmentType20(
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
@@ -2657,11 +2435,18 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 1"
                         ),
-                        AdditionalReference = Seq(
-                          AdditionalReferenceType04(
-                            sequenceNumber = 1,
-                            typeValue = "adi1",
-                            referenceNumber = Some("ADI 1")
+                        Consignee = Some(
+                          ConsigneeType02(
+                            identificationNumber = Some("consignee identification number"),
+                            name = Some("consignee name"),
+                            Address = Some(
+                              AddressType12(
+                                streetAndNumber = "consignee address street and number",
+                                postcode = Some("consignee address postcode"),
+                                city = "consignee address city",
+                                country = "consignee address country"
+                              )
+                            )
                           )
                         )
                       ),
@@ -2671,11 +2456,18 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
                         ),
-                        AdditionalReference = Seq(
-                          AdditionalReferenceType04(
-                            sequenceNumber = 1,
-                            typeValue = "adi1",
-                            referenceNumber = Some("ADI 1")
+                        Consignee = Some(
+                          ConsigneeType02(
+                            identificationNumber = Some("consignee identification number"),
+                            name = Some("consignee name"),
+                            Address = Some(
+                              AddressType12(
+                                streetAndNumber = "consignee address street and number",
+                                postcode = Some("consignee address postcode"),
+                                city = "consignee address city",
+                                country = "consignee address country"
+                              )
+                            )
                           )
                         )
                       ),
@@ -2685,21 +2477,21 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 3"
                         ),
-                        AdditionalReference = Nil
+                        Consignee = None
                       )
                     )
                   )
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess(phase)
 
               result shouldBe consignment
             }
           }
 
-          "no items have common additional reference" must {
-            "not roll up additional reference to consignment level" in {
+          "no items have common consignee" must {
+            "not roll up" in {
               val consignment = ConsignmentType20(
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
@@ -2713,11 +2505,18 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 1"
                         ),
-                        AdditionalReference = Seq(
-                          AdditionalReferenceType04(
-                            sequenceNumber = 1,
-                            typeValue = "adi1",
-                            referenceNumber = Some("ADI 1")
+                        Consignee = Some(
+                          ConsigneeType02(
+                            identificationNumber = Some("consignee identification number"),
+                            name = Some("consignee name"),
+                            Address = Some(
+                              AddressType12(
+                                streetAndNumber = "consignee address street and number",
+                                postcode = Some("consignee address postcode"),
+                                city = "consignee address city",
+                                country = "consignee address country"
+                              )
+                            )
                           )
                         )
                       ),
@@ -2727,25 +2526,18 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                         Commodity = CommodityType07(
                           descriptionOfGoods = "Item 2"
                         ),
-                        AdditionalReference = Seq(
-                          AdditionalReferenceType04(
-                            sequenceNumber = 1,
-                            typeValue = "adi2",
-                            referenceNumber = Some("ADI 2")
-                          )
-                        )
-                      ),
-                      ConsignmentItemType09(
-                        goodsItemNumber = 3,
-                        declarationGoodsItemNumber = BigInt(3),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 3"
-                        ),
-                        AdditionalReference = Seq(
-                          AdditionalReferenceType04(
-                            sequenceNumber = 1,
-                            typeValue = "adi3",
-                            referenceNumber = Some("ADI 3")
+                        Consignee = Some(
+                          ConsigneeType02(
+                            identificationNumber = Some("another consignee identification number"),
+                            name = Some("consignee name"),
+                            Address = Some(
+                              AddressType12(
+                                streetAndNumber = "consignee address street and number",
+                                postcode = Some("consignee address postcode"),
+                                city = "consignee address city",
+                                country = "consignee address country"
+                              )
+                            )
                           )
                         )
                       )
@@ -2754,7 +2546,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess
+              val result = consignment.postProcess(phase)
 
               result shouldBe consignment
             }
@@ -2762,7 +2554,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
           // This should never happen, but need to be wary of empty.reduceLeft Exception
           "no items" must {
-            "not roll up additional reference to consignment level" in {
+            "not roll up" in {
               val consignment = ConsignmentType20(
                 grossMass = BigDecimal(1),
                 HouseConsignment = Seq(
@@ -2774,62 +2566,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               )
 
-              val result = consignment.postProcess
-
-              result shouldBe consignment
-            }
-          }
-        }
-
-        "during transition" when {
-          "every item has a common additional reference" must {
-            "not roll up additional reference to consignment level" in {
-              val consignment = ConsignmentType20(
-                grossMass = BigDecimal(1),
-                HouseConsignment = Seq(
-                  HouseConsignmentType10(
-                    sequenceNumber = 1,
-                    grossMass = BigDecimal(1),
-                    ConsignmentItem = Seq(
-                      ConsignmentItemType09(
-                        goodsItemNumber = 1,
-                        declarationGoodsItemNumber = BigInt(1),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 1"
-                        ),
-                        AdditionalReference = Seq(
-                          AdditionalReferenceType04(
-                            sequenceNumber = 1,
-                            typeValue = "adi1",
-                            referenceNumber = Some("ADI 1")
-                          ),
-                          AdditionalReferenceType04(
-                            sequenceNumber = 2,
-                            typeValue = "adi2",
-                            referenceNumber = Some("ADI 2")
-                          )
-                        )
-                      ),
-                      ConsignmentItemType09(
-                        goodsItemNumber = 2,
-                        declarationGoodsItemNumber = BigInt(2),
-                        Commodity = CommodityType07(
-                          descriptionOfGoods = "Item 2"
-                        ),
-                        AdditionalReference = Seq(
-                          AdditionalReferenceType04(
-                            sequenceNumber = 1,
-                            typeValue = "adi1",
-                            referenceNumber = Some("ADI 1")
-                          )
-                        )
-                      )
-                    )
-                  )
-                )
-              )
-
-              val result = consignment.postProcess
+              val result = consignment.postProcess(phase)
 
               result shouldBe consignment
             }
