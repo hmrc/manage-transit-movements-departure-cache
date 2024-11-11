@@ -17,6 +17,8 @@
 package api.submission
 
 import api.submission.Level.*
+import api.submission.transportEquipmentType06.RichTransportEquipmentJsValue
+
 import api.submission.documentType.RichDocumentJsValue
 import api.submission.houseConsignmentType10.RichHouseConsignmentType10
 import config.Constants.ModeOfTransport.Rail
@@ -192,7 +194,9 @@ object consignmentType20 {
   def transportEquipmentReads: Reads[Seq[TransportEquipmentType06]] =
     itemsPath.read[Seq[JsValue]].flatMap {
       items =>
-        equipmentsPath.readArray[TransportEquipmentType06](transportEquipmentType06.reads(_, items))
+        equipmentsPath.readFilteredArray[TransportEquipmentType06](
+          _.hasBeenAddedToItem(items)
+        )(transportEquipmentType06.reads(_, items))
     }
 
   def departureTransportMeansReads: Reads[Seq[DepartureTransportMeansType03]] =
@@ -280,6 +284,18 @@ object additionalSupplyChainActorType {
 
 object transportEquipmentType06 {
 
+  private def uuidReads: Reads[UUID] =
+    (__ \ "transportEquipment").read[UUID] orElse (__ \ "inferredTransportEquipment").read[UUID]
+
+  implicit class RichTransportEquipmentJsValue(transportEquipment: JsValue) {
+
+    def hasBeenAddedToItem(items: Seq[JsValue]): Boolean = {
+      val uuids = items.flatMap(_.asOpt(uuidReads))
+      val uuid  = transportEquipment.asOpt((__ \ "uuid").read[UUID])
+      uuid.exists(uuids.contains)
+    }
+  }
+
   def apply(
     sequenceNumber: BigInt,
     containerIdentificationNumber: Option[String],
@@ -293,8 +309,7 @@ object transportEquipmentType06 {
       items.zipWithSequenceNumber
         .foldLeft[Seq[Int]](Nil) {
           case (acc, (value, itemIndex)) =>
-            val reads = (__ \ "transportEquipment").read[UUID] orElse (__ \ "inferredTransportEquipment").read[UUID]
-            value.validate(reads) match {
+            value.validate(uuidReads) match {
               case JsSuccess(`transportEquipmentUuid`, _) => acc :+ itemIndex
               case _                                      => acc
             }
