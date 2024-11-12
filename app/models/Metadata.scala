@@ -16,18 +16,22 @@
 
 package models
 
-import play.api.libs.functional.syntax._
-import play.api.libs.json._
+import play.api.libs.functional.syntax.*
+import play.api.libs.json.*
 
 case class Metadata(
   lrn: String,
   eoriNumber: String,
+  isSubmitted: SubmissionState = SubmissionState.NotSubmitted,
   data: JsObject = Json.obj(),
   tasks: Map[String, Status.Value] = Map()
 ) {
 
   def updateTasks(tasks: Map[String, Status.Value]): Metadata =
     this.copy(tasks = tasks)
+
+  def updateStatus(status: SubmissionState): Metadata =
+    this.copy(isSubmitted = status)
 }
 
 object Metadata {
@@ -40,6 +44,7 @@ object Metadata {
     (
       (__ \ "lrn").read[String] and
         (__ \ "eoriNumber").read[String] and
+        (__ \ "isSubmitted").read[SubmissionState] and
         (__ \ "data").read[JsObject](sensitiveFormats.jsObjectReads) and
         (__ \ "tasks").read[Map[String, Status.Value]]
     )(Metadata.apply)
@@ -48,6 +53,7 @@ object Metadata {
     (
       (__ \ "lrn").write[String] and
         (__ \ "eoriNumber").write[String] and
+        (__ \ "isSubmitted").write[SubmissionState] and
         (__ \ "data").write[JsObject](sensitiveFormats.jsObjectWrites) and
         (__ \ "tasks").write[Map[String, Status.Value]]
     )(

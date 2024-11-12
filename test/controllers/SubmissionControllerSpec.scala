@@ -51,14 +51,17 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
     reset(mockApiService)
     reset(mockAuditService)
 
-    when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState, any(): Option[String], any(): Phase)).thenReturn(Future.successful(true))
+    when(mockCacheRepository.set(any(): UserAnswers, any(): Option[String], any(): Phase))
+      .thenReturn(Future.successful(true))
   }
 
   "post" should {
 
     "return 200" when {
       "submission is successful" in {
-        val userAnswers = emptyUserAnswers
+        val userAnswers        = emptyUserAnswers
+        val updatedUserAnswers = userAnswers.updateStatus(SubmissionState.Submitted)
+
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
         val body = Json.toJson("foo")
@@ -75,9 +78,9 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         contentAsJson(result) shouldBe body
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.Submitted), eqTo(None), eqTo(Phase.Transition))
+        verify(mockCacheRepository).set(eqTo(updatedUserAnswers), eqTo(None), eqTo(Phase.Transition))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Phase.Transition))(any())
-        verify(mockAuditService).audit(eqTo(DeclarationData), eqTo(userAnswers.copy(status = SubmissionState.Submitted)))(any())
+        verify(mockAuditService).audit(eqTo(DeclarationData), eqTo(updatedUserAnswers))(any())
       }
     }
 
@@ -137,7 +140,9 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
     "return 200" when {
       "submission is successful" in {
-        val userAnswers = emptyUserAnswersWithDepartureId
+        val userAnswers        = emptyUserAnswersWithDepartureId
+        val updatedUserAnswers = userAnswers.updateStatus(SubmissionState.Submitted)
+
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
         val body = Json.toJson("foo")
@@ -154,9 +159,9 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         contentAsJson(result) shouldBe body
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.Submitted), eqTo(Some("departureId123")), eqTo(Phase.Transition))
+        verify(mockCacheRepository).set(eqTo(updatedUserAnswers), eqTo(Some("departureId123")), eqTo(Phase.Transition))
         verify(mockApiService).submitAmendment(eqTo(userAnswers), eqTo(departureId), eqTo(Phase.Transition))(any())
-        verify(mockAuditService).audit(eqTo(DeclarationAmendment), eqTo(userAnswers.copy(status = SubmissionState.Submitted)))(any())
+        verify(mockAuditService).audit(eqTo(DeclarationAmendment), eqTo(updatedUserAnswers))(any())
       }
     }
 

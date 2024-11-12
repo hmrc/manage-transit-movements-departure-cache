@@ -27,7 +27,6 @@ final case class UserAnswers(
   createdAt: Instant,
   lastUpdated: Instant,
   id: UUID,
-  status: SubmissionState,
   departureId: Option[String] = None,
   isTransitional: Boolean = true
 ) {
@@ -40,6 +39,12 @@ final case class UserAnswers(
 
   def updateTasks(tasks: Map[String, Status.Value]): UserAnswers =
     this.copy(metadata = metadata.updateTasks(tasks))
+
+  def updateStatus(status: SubmissionState): UserAnswers =
+    this.copy(metadata = metadata.updateStatus(status))
+
+  def updateDepartureId(departureId: String): UserAnswers =
+    this.copy(departureId = Some(departureId))
 }
 
 object UserAnswers {
@@ -64,7 +69,6 @@ object UserAnswers {
         (__ \ "createdAt").read[Instant] and
         (__ \ "lastUpdated").read[Instant] and
         (__ \ "_id").read[UUID] and
-        (__ \ "isSubmitted").read[SubmissionState] and
         (__ \ "departureId").readNullable[String] and
         (__ \ "isTransitional").readWithDefault[Boolean](true)
     )(UserAnswers.apply)
@@ -75,7 +79,6 @@ object UserAnswers {
         (__ \ "createdAt").write[Instant] and
         (__ \ "lastUpdated").write[Instant] and
         (__ \ "_id").write[UUID] and
-        (__ \ "isSubmitted").write[SubmissionState] and
         (__ \ "departureId").writeNullable[String] and
         (__ \ "isTransitional").write[Boolean]
     )(

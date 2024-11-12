@@ -38,7 +38,7 @@ case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers],
             "lastUpdated"    -> userAnswer.lastUpdated,
             "expiresInDays"  -> expiresInDays(userAnswer.createdAt),
             "_id"            -> userAnswer.id,
-            "isSubmitted"    -> userAnswer.status,
+            "isSubmitted"    -> userAnswer.metadata.isSubmitted,
             "isTransitional" -> userAnswer.isTransitional
           )
       }

@@ -30,7 +30,7 @@ class Declaration @Inject() (header: Header) {
   private val scope: NamespaceBinding = scalaxb.toScope(Some("ncts") -> "http://ncts.dgtaxud.ec")
 
   def transform(uA: UserAnswers, mrn: MovementReferenceNumber, phase: Phase): NodeSeq =
-    uA.status match {
+    uA.metadata.isSubmitted match {
       case Amendment          => toXML(IE013(uA, mrn.value, amendmentTypeFlag = false, phase), s"ncts:$CC013C", scope)
       case GuaranteeAmendment => toXML(IE013(uA, mrn.value, amendmentTypeFlag = true, phase), s"ncts:$CC013C", scope)
       case _                  => toXML(IE015(uA, phase), s"ncts:${CC015C.toString}", scope)

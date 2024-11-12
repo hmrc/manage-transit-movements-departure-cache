@@ -220,16 +220,14 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
           metadata = Metadata("AB123", eoriNumber),
           createdAt = Instant.now(),
           lastUpdated = Instant.now(),
-          id = UUID.randomUUID(),
-          status = SubmissionState.NotSubmitted
+          id = UUID.randomUUID()
         )
 
         val userAnswers2 = UserAnswers(
           metadata = Metadata("CD123", eoriNumber),
           createdAt = Instant.now().minus(1, DAYS),
           lastUpdated = Instant.now().minus(1, DAYS),
-          id = UUID.randomUUID(),
-          status = SubmissionState.NotSubmitted
+          id = UUID.randomUUID()
         )
 
         insert(userAnswers1).futureValue

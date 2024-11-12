@@ -31,6 +31,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
     metadata = Metadata(
       lrn = lrn,
       eoriNumber = eoriNumber,
+      isSubmitted = SubmissionState.NotSubmitted,
       data = Json.obj(),
       tasks = Map(
         "task1" -> Status.Completed,
@@ -42,7 +43,6 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
     createdAt = Instant.ofEpochMilli(1662393524188L),
     lastUpdated = Instant.ofEpochMilli(1662546803472L),
     id = UUID.fromString(uuid),
-    status = SubmissionState.NotSubmitted,
     departureId = Some(departureId),
     isTransitional = true
   )

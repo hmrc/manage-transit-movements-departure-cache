@@ -16,9 +16,9 @@
 
 package services
 
+import models.*
 import models.Rejection.BusinessRejectionType
-import models.Task._
-import models._
+import models.Task.*
 import play.api.Logging
 import repositories.CacheRepository
 
@@ -42,10 +42,8 @@ class XPathService @Inject() (
         }
         userAnswers
           .updateTasks(tasks)
-          .copy(
-            status = SubmissionState.GuaranteeAmendment,
-            departureId = Some(departureId)
-          )
+          .updateStatus(SubmissionState.GuaranteeAmendment)
+          .updateDepartureId(departureId)
       case Rejection.IE056Rejection(departureId, businessRejectionType, errorPointers) =>
         val tasks = userAnswers.metadata.tasks ++ errorPointers.toList.flatMap(_.taskError).toMap
         businessRejectionType match {
@@ -54,16 +52,12 @@ class XPathService @Inject() (
           case BusinessRejectionType.DeclarationRejection =>
             userAnswers
               .updateTasks(tasks)
-              .copy(
-                status = SubmissionState.RejectedPendingChanges
-              )
+              .updateStatus(SubmissionState.RejectedPendingChanges)
         }
     }
 
   def prepareForAmendment(userAnswers: UserAnswers, departureId: String): UserAnswers =
     userAnswers
-      .copy(
-        status = SubmissionState.Amendment,
-        departureId = Some(departureId)
-      )
+      .updateStatus(SubmissionState.Amendment)
+      .updateDepartureId(departureId)
 }

@@ -16,16 +16,17 @@
 
 package repositories
 
-import com.mongodb.client.model.Filters.{and => mAnd, eq => mEq, regex}
+import com.mongodb.client.model.Filters.{and as mAnd, eq as mEq, regex}
 import config.AppConfig
-import models._
+import models.*
 import org.bson.conversions.Bson
+import org.mongodb.scala.*
+import org.mongodb.scala.model.*
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
-import org.mongodb.scala.model._
+import play.api.libs.json.{JsObject, Writes}
 import services.DateTimeService
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.{Codecs, PlayMongoRepository}
-import org.mongodb.scala._
 
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -58,37 +59,28 @@ class CacheRepository @Inject() (
       .toFutureOption()
   }
 
-  def set(data: Metadata, status: Option[SubmissionState], departureId: Option[String], phase: Phase): Future[Boolean] =
-    set(data, Updates.set("isSubmitted", status.getOrElse(SubmissionState.NotSubmitted).asString), departureId, phase)
+  def set(userAnswers: UserAnswers, departureId: Option[String], phase: Phase): Future[Boolean] =
+    set(userAnswers.metadata, departureId, Some(phase))
 
-  def set(userAnswers: UserAnswers, status: SubmissionState, departureId: Option[String], phase: Phase): Future[Boolean] =
-    set(userAnswers.metadata, Updates.set("isSubmitted", status.asString), departureId, phase)
-
-  private def set(data: Metadata, statusUpdate: Bson, departureId: Option[String], phase: Phase): Future[Boolean] = {
+  def set(data: Metadata, departureId: Option[String], phase: Option[Phase]): Future[Boolean] = {
     val now = dateTimeService.timestamp
     val filter = Filters.and(
       Filters.eq("lrn", data.lrn),
       Filters.eq("eoriNumber", data.eoriNumber)
     )
 
+    implicit val dataWrites: Writes[JsObject] = sensitiveFormats.jsObjectWrites
+
     val updates: Seq[Bson] = Seq(
       Some(Updates.setOnInsert("lrn", data.lrn)),
       Some(Updates.setOnInsert("eoriNumber", data.eoriNumber)),
-      // format: off
-      Some(
-        Updates.set("data",
-                    Codecs.toBson(data.data)(using {
-                      sensitiveFormats.jsObjectWrites
-                    })
-        )
-      ),
-      // format: on
+      Some(Updates.set("data", Codecs.toBson(data.data))),
       Some(Updates.set("tasks", Codecs.toBson(data.tasks))),
       Some(Updates.setOnInsert("createdAt", now)),
-      Some(Updates.setOnInsert("isTransitional", phase.isTransitional)),
+      phase.map(_.isTransitional).map(Updates.setOnInsert("isTransitional", _)),
       Some(Updates.set("lastUpdated", now)),
       Some(Updates.setOnInsert("_id", Codecs.toBson(UUID.randomUUID()))),
-      Some(statusUpdate),
+      Some(Updates.set("isSubmitted", data.isSubmitted.asString)),
       departureId.map(Updates.set("departureId", _))
     ).flatten
 

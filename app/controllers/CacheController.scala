@@ -47,14 +47,12 @@ class CacheController @Inject() (
   def get(lrn: String): Action[AnyContent] =
     getUserAnswers[UserAnswers](lrn)(identity)
 
-  def post(lrn: String): Action[JsValue] = (authenticateAndLock(lrn) andThen getVersion).async(parse.json) {
+  def post(lrn: String): Action[JsValue] = authenticateAndLock(lrn).async(parse.json) {
     implicit request =>
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
           if (request.eoriNumber == data.eoriNumber) {
-            val status: Option[SubmissionState] = (request.body \ "isSubmitted").asOpt[SubmissionState]
-            val departureId: Option[String]     = (request.body \ "departureId").asOpt[String]
-            set(data, status, departureId, request.phase)()
+            set(data, None, None)()
           } else {
             logger.warn(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
             Future.successful(Forbidden)
@@ -69,7 +67,7 @@ class CacheController @Inject() (
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(lrn, _) =>
-          set(Metadata(lrn, request.eoriNumber), phase = request.phase) {
+          set(Metadata(lrn, request.eoriNumber, SubmissionState.NotSubmitted), None, Some(request.phase)) {
             val auditType = DepartureDraftStarted
             auditService.audit(auditType, lrn, request.eoriNumber)
             metricsService.increment(auditType.name)
@@ -82,12 +80,11 @@ class CacheController @Inject() (
 
   private def set(
     data: Metadata,
-    status: Option[SubmissionState] = None,
-    departureId: Option[String] = None,
-    phase: Phase
+    departureId: Option[String],
+    phase: Option[Phase]
   )(block: => Unit = ()): Future[Status] =
     cacheRepository
-      .set(data, status, departureId, phase)
+      .set(data, departureId, phase)
       .map {
         case true =>
           block
@@ -168,14 +165,14 @@ class CacheController @Inject() (
           }
     }
 
-  def handleErrors(lrn: String): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
+  def handleErrors(lrn: String): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[Rejection] match {
         case JsSuccess(rejection, _) =>
           cacheRepository.get(lrn, request.eoriNumber).flatMap {
             case Some(userAnswers) =>
               val updatedUserAnswers = xPathService.handleRejection(userAnswers, rejection)
-              set(updatedUserAnswers.metadata, Some(updatedUserAnswers.status), updatedUserAnswers.departureId, request.phase)()
+              set(updatedUserAnswers.metadata, updatedUserAnswers.departureId, None)()
             case None =>
               Future.successful(NotFound)
           }
@@ -196,14 +193,14 @@ class CacheController @Inject() (
       }
   }
 
-  def prepareForAmendment(lrn: String): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
+  def prepareForAmendment(lrn: String): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(departureId, _) =>
           cacheRepository.get(lrn, request.eoriNumber).flatMap {
             case Some(userAnswers) =>
               val updatedUserAnswers = xPathService.prepareForAmendment(userAnswers, departureId)
-              set(updatedUserAnswers.metadata, Some(updatedUserAnswers.status), updatedUserAnswers.departureId, request.phase)()
+              set(updatedUserAnswers.metadata, updatedUserAnswers.departureId, None)()
             case None =>
               Future.successful(NotFound)
           }

@@ -104,7 +104,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val result = service.handleRejection(userAnswers, rejection)
 
-        result.status shouldBe SubmissionState.GuaranteeAmendment
+        result.metadata.isSubmitted shouldBe SubmissionState.GuaranteeAmendment
         result.metadata.tasks shouldBe Map(
           PreTaskList.taskName      -> Status.Unavailable,
           TraderDetails.taskName    -> Status.Unavailable,
@@ -131,7 +131,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val result = service.handleRejection(userAnswers, rejection)
 
-          result.status shouldBe SubmissionState.Amendment
+          result.metadata.isSubmitted shouldBe SubmissionState.Amendment
           result.metadata.tasks shouldBe Map(
             PreTaskList.taskName      -> Status.Completed,
             TraderDetails.taskName    -> Status.Error,
@@ -157,7 +157,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val result = service.handleRejection(userAnswers, rejection)
 
-          result.status shouldBe SubmissionState.RejectedPendingChanges
+          result.metadata.isSubmitted shouldBe SubmissionState.RejectedPendingChanges
           result.metadata.tasks shouldBe Map(
             PreTaskList.taskName      -> Status.Completed,
             TraderDetails.taskName    -> Status.Error,
@@ -179,7 +179,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       val result = service.prepareForAmendment(userAnswers, departureId)
 
-      result.status shouldBe SubmissionState.Amendment
+      result.metadata.isSubmitted shouldBe SubmissionState.Amendment
       result.departureId shouldBe Some(departureId)
     }
   }
