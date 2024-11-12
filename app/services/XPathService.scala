@@ -16,9 +16,9 @@
 
 package services
 
+import models.*
 import models.Rejection.BusinessRejectionType
-import models.Task._
-import models._
+import models.Task.*
 import play.api.Logging
 import repositories.CacheRepository
 
@@ -31,7 +31,11 @@ class XPathService @Inject() (
     extends Logging {
 
   def isDeclarationAmendable(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
-    cacheRepository.get(lrn, eoriNumber).map(_.isDefined && xPaths.exists(_.isAmendable))
+    cacheRepository.get(lrn, eoriNumber).map {
+      _.exists {
+        _.status != SubmissionState.NotSubmitted && xPaths.exists(_.isAmendable)
+      }
+    }
 
   def handleRejection(userAnswers: UserAnswers, rejection: Rejection): UserAnswers =
     rejection match {
