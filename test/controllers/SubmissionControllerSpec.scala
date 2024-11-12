@@ -17,15 +17,15 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import models.*
 import models.AuditType.{DeclarationAmendment, DeclarationData}
-import models._
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import services.{ApiService, AuditService}
 import uk.gov.hmrc.http.HttpResponse
 
@@ -51,7 +51,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
     reset(mockApiService)
     reset(mockAuditService)
 
-    when(mockCacheRepository.set(any(): UserAnswers, any(): Option[String], any(): Phase))
+    when(mockCacheRepository.set(any(): Metadata, any(): Option[String], any(): Option[Phase]))
       .thenReturn(Future.successful(true))
   }
 
@@ -78,7 +78,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         contentAsJson(result) shouldBe body
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockCacheRepository).set(eqTo(updatedUserAnswers), eqTo(None), eqTo(Phase.Transition))
+        verify(mockCacheRepository).set(eqTo(updatedUserAnswers.metadata), eqTo(None), eqTo(None))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Phase.Transition))(any())
         verify(mockAuditService).audit(eqTo(DeclarationData), eqTo(updatedUserAnswers))(any())
       }
@@ -159,7 +159,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         contentAsJson(result) shouldBe body
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockCacheRepository).set(eqTo(updatedUserAnswers), eqTo(Some("departureId123")), eqTo(Phase.Transition))
+        verify(mockCacheRepository).set(eqTo(updatedUserAnswers.metadata), eqTo(Some("departureId123")), eqTo(None))
         verify(mockApiService).submitAmendment(eqTo(userAnswers), eqTo(departureId), eqTo(Phase.Transition))(any())
         verify(mockAuditService).audit(eqTo(DeclarationAmendment), eqTo(updatedUserAnswers))(any())
       }

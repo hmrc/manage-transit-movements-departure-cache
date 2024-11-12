@@ -59,9 +59,6 @@ class CacheRepository @Inject() (
       .toFutureOption()
   }
 
-  def set(userAnswers: UserAnswers, departureId: Option[String], phase: Phase): Future[Boolean] =
-    set(userAnswers.metadata, departureId, Some(phase))
-
   def set(data: Metadata, departureId: Option[String], phase: Option[Phase]): Future[Boolean] = {
     val now = dateTimeService.timestamp
     val filter = Filters.and(

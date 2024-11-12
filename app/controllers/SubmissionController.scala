@@ -20,8 +20,7 @@ import cats.data.OptionT
 import cats.implicits.*
 import controllers.actions.{AuthenticateActionProvider, VersionedAction}
 import models.AuditType.*
-import models.SubmissionState.*
-import models.{AuditType, Messages, Phase, UserAnswers}
+import models.{AuditType, Messages, SubmissionState, UserAnswers}
 import play.api.Logging
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
@@ -58,7 +57,7 @@ class SubmissionController @Inject() (
               result <- OptionT.liftF {
                 apiService
                   .submitDeclaration(userAnswers, request.phase)
-                  .flatMap(responseToResult(userAnswers, _, None, DeclarationData, request.phase))
+                  .flatMap(responseToResult(userAnswers, _, None, DeclarationData))
               }
             } yield result
 
@@ -86,7 +85,7 @@ class SubmissionController @Inject() (
               result <- OptionT.liftF {
                 apiService
                   .submitAmendment(userAnswers, departureId, request.phase)
-                  .flatMap(responseToResult(userAnswers, _, Some(departureId), auditType, request.phase))
+                  .flatMap(responseToResult(userAnswers, _, Some(departureId), auditType))
               }
             } yield result
 
@@ -106,15 +105,14 @@ class SubmissionController @Inject() (
     userAnswers: UserAnswers,
     response: HttpResponse,
     departureId: Option[String],
-    auditType: AuditType,
-    phase: Phase
+    auditType: AuditType
   )(implicit hc: HeaderCarrier): Future[Result] = {
-    val updatedUserAnswers = userAnswers.updateStatus(Submitted)
+    val updatedUserAnswers = userAnswers.updateStatus(SubmissionState.Submitted)
     metricsService.increment(auditType.name, response)
     response.status match {
       case status if is2xx(status) =>
         cacheRepository
-          .set(updatedUserAnswers, departureId, phase)
+          .set(updatedUserAnswers.metadata, departureId, None)
           .map {
             _ =>
               auditService.audit(auditType, updatedUserAnswers)
