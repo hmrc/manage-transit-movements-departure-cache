@@ -411,6 +411,9 @@
 * A call is made to the `GET` endpoint with:
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
+  * an `APIVersion` header with either:
+    * `2.0` for transition rules
+    * `2.1` for final rules
 * A document is found in the `user-answers` collection for the given LRN (the EORI number is extracted from the enrolment)
 * The response JSON provides the number of days until the document expires
 
