@@ -94,6 +94,9 @@
 * A call is made to the `GET` endpoint with:
   * a valid bearer token 
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
+  * an `APIVersion` header with either:
+    * `2.0` for transition rules
+    * `2.1` for final rules
 * A document is found in the `user-answers` collection for the given LRN (the EORI number is extracted from the enrolment)
 * The response JSON has the following fields:
   * `lrn` - The local reference number associated with the departure application
@@ -104,6 +107,9 @@
   * `id` - a UUID
 
 ### Unsuccessful responses (with possible causes)
+
+#### 400 BAD_REQUEST
+* `APIVersion` header was missing or did not align with saved answers
 
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
@@ -194,12 +200,16 @@
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
   * a valid `String` request body representing the LRN
+  * an `APIVersion` header with either:
+    * `2.0` for transition rules
+    * `2.1` for final rules
 * Then, for the given LRN in the request body and EORI number in the enrolment, a new document gets created with an empty user answers
 
 ### Unsuccessful responses (with possible causes)
 
 #### 400 BAD_REQUEST
 * Request body could not be validated as a `String`
+* `APIVersion` header was missing
 
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
@@ -310,6 +320,7 @@
 
 #### 400 BAD_REQUEST
 * Request body could not be validated as a `String`
+* `APIVersion` header was missing
 
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
@@ -341,6 +352,7 @@
 
 #### 400 BAD_REQUEST
 * Request body could not be validated as a `String`
+* `APIVersion` header was missing
 
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
@@ -373,6 +385,9 @@
 #### 204 NO_CONTENT
 * The departure was found, but it contained no messages
 
+#### 400 BAD_REQUEST
+* `APIVersion` header was missing
+
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
 
@@ -400,6 +415,9 @@
 * The response JSON provides the number of days until the document expires
 
 ### Unsuccessful responses (with possible causes)
+
+#### 400 BAD_REQUEST
+* `APIVersion` header was missing or did not align with saved answers
 
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.

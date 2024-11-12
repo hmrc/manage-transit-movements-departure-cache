@@ -17,7 +17,7 @@
 package controllers
 
 import itbase.CacheRepositorySpecBase
-import models.{Metadata, SubmissionState, UserAnswers}
+import models.{Metadata, UserAnswers}
 import org.mongodb.scala.model.Filters
 import play.api.libs.json.{JsObject, JsString, Json}
 import play.api.libs.ws.JsonBodyWritables.*
@@ -44,28 +44,45 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
       }
     }
 
-    "document does exist" should {
-      "respond with 200 status" in {
-        val userAnswers = emptyUserAnswers
-        insert(userAnswers).futureValue
+    "document does exist" when {
+      "phase aligns with saved answers" should {
+        "respond with 200 status" in {
+          val userAnswers = emptyUserAnswers
+          insert(userAnswers).futureValue
 
-        val response = wsClient
-          .url(url)
-          .addHttpHeaders(("APIVersion", "2.0"))
-          .get()
-          .futureValue
+          val response = wsClient
+            .url(url)
+            .addHttpHeaders(("APIVersion", "2.0"))
+            .get()
+            .futureValue
 
-        response.status shouldBe 200
+          response.status shouldBe 200
 
-        response.json.as[UserAnswers].metadata shouldBe userAnswers.metadata
+          response.json.as[UserAnswers].metadata shouldBe userAnswers.metadata
 
-        response.json.as[UserAnswers].createdAt shouldBe userAnswers.createdAt.truncatedTo(
-          java.time.temporal.ChronoUnit.MILLIS
-        )
+          response.json.as[UserAnswers].createdAt shouldBe userAnswers.createdAt.truncatedTo(
+            java.time.temporal.ChronoUnit.MILLIS
+          )
 
-        response.json.as[UserAnswers].lastUpdated shouldBe userAnswers.lastUpdated.truncatedTo(
-          java.time.temporal.ChronoUnit.MILLIS
-        )
+          response.json.as[UserAnswers].lastUpdated shouldBe userAnswers.lastUpdated.truncatedTo(
+            java.time.temporal.ChronoUnit.MILLIS
+          )
+        }
+      }
+
+      "phase does not align with saved answers" should {
+        "respond with 400 status" in {
+          val userAnswers = emptyUserAnswers.copy(isTransitional = true)
+          insert(userAnswers).futureValue
+
+          val response = wsClient
+            .url(url)
+            .addHttpHeaders(("APIVersion", "2.1"))
+            .get()
+            .futureValue
+
+          response.status shouldBe 400
+        }
       }
     }
   }

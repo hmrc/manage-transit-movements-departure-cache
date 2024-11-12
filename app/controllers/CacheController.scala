@@ -153,7 +153,7 @@ class CacheController @Inject() (
             case Some(userAnswers) if request.phase.isTransitional == userAnswers.isTransitional =>
               Ok(Json.toJson(f(userAnswers)))
             case Some(userAnswers) =>
-              NotAcceptable
+              BadRequest
             case None =>
               logger.warn(s"No document found for LRN '$lrn' and EORI '$eoriNumber'")
               NotFound

@@ -94,7 +94,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
       }
     }
 
-    "return 406" when {
+    "return 400" when {
       "request phase doesn't match user answers - transitional" in {
         val transitionalUserAnswers = emptyUserAnswers.copy(isTransitional = true)
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(transitionalUserAnswers)))
@@ -102,7 +102,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         val finalRequest = FakeRequest(GET, routes.CacheController.get(lrn).url).withHeaders(("APIVersion", "2.1"))
         val result       = route(app, finalRequest).value
 
-        status(result) shouldBe NOT_ACCEPTABLE
+        status(result) shouldBe BAD_REQUEST
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
       }
 
@@ -113,7 +113,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         val transitionalRequest = FakeRequest(GET, routes.CacheController.get(lrn).url).withHeaders(("APIVersion", "2.0"))
         val result              = route(app, transitionalRequest).value
 
-        status(result) shouldBe NOT_ACCEPTABLE
+        status(result) shouldBe BAD_REQUEST
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
       }
     }
