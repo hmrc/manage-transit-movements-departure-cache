@@ -18,10 +18,10 @@ package services
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import cats.data.NonEmptyList
-import models.Rejection._
-import models.Task._
-import models._
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import models.*
+import models.Rejection.*
+import models.Task.*
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{verify, when}
 
 import scala.concurrent.Future
@@ -33,6 +33,94 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
   private val unamendableXPath = XPath("/CC014C")
 
   private val amendableXPath = XPath("/CC015C/Authorisation[1]/referenceNumber")
+
+  "isRejectionAmendable" must {
+
+    "return true" when {
+      "IE055 rejection" when {
+        "a document exists in the cache for the given LRN and EORI" in {
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+
+          val rejection = IE055Rejection(departureId)
+
+          val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
+
+          result shouldBe true
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        }
+      }
+
+      "IE056 rejection" when {
+        "a document exists in the cache for the given LRN and EORI" when {
+          "at least one of the errors is amendable" in {
+
+            when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+
+            val rejection = IE056Rejection(
+              departureId,
+              BusinessRejectionType.AmendmentRejection,
+              NonEmptyList.of(amendableXPath)
+            )
+
+            val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
+
+            result shouldBe true
+
+            verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+          }
+        }
+      }
+    }
+
+    "return false" when {
+      "IE055 rejection" when {
+        "a document doesn't exist in the cache for the given LRN and EORI" in {
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
+
+          val rejection = IE055Rejection(departureId)
+
+          val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
+
+          result shouldBe false
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        }
+      }
+
+      "IE056 rejection" when {
+        "a document exists in the cache for the given LRN and EORI" when {
+          "no errors are amendable" in {
+            when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
+
+            val rejection = IE056Rejection(
+              departureId,
+              BusinessRejectionType.AmendmentRejection,
+              NonEmptyList.of(unamendableXPath)
+            )
+
+            val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
+
+            result shouldBe false
+
+            verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+          }
+        }
+
+        "a document doesn't exist in the cache for the given LRN and EORI" in {
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
+
+          val rejection = IE055Rejection(departureId)
+
+          val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
+
+          result shouldBe false
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        }
+      }
+    }
+  }
 
   "isDeclarationAmendable" must {
 

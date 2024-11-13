@@ -270,6 +270,36 @@
 
 ---
 
+## `POST /user-answers/:lrn/amendable`
+
+### Successful response
+
+#### 200 OK
+
+* A call is made to the `POST` endpoint with:
+  * a valid bearer token
+  * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
+  * a valid `Rejection`, containing information about the rejection. In the case of an IE056 this should contain a business rejection type and some error pointers
+* Then, we check whether:
+  * there is a document in the cache for the given LRN and;
+  * in the case of an IE056, there is at least one error pointer that is amendable
+
+### Unsuccessful responses (with possible causes)
+
+#### 400 BAD_REQUEST
+* Request body could not be validated as a series of `String` X-paths
+
+#### 401 UNAUTHORIZED
+* A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
+
+#### 403 FORBIDDEN
+* User has insufficient enrolments
+
+#### 500 INTERNAL_SERVER_ERROR
+* An error occurred in the mongo client
+
+---
+
 ## `POST /user-answers/:lrn/errors`
 
 ### Successful response

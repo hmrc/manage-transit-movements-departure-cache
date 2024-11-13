@@ -30,8 +30,19 @@ class XPathService @Inject() (
 )(implicit ec: ExecutionContext)
     extends Logging {
 
+  def isRejectionAmendable(lrn: String, eoriNumber: String, rejection: Rejection): Future[Boolean] =
+    rejection match {
+      case Rejection.IE055Rejection(departureId) =>
+        isDeclarationCached(lrn, eoriNumber)
+      case Rejection.IE056Rejection(departureId, businessRejectionType, errorPointers) =>
+        isDeclarationAmendable(lrn, eoriNumber, errorPointers.toList)
+    }
+
+  private def isDeclarationCached(lrn: String, eoriNumber: String): Future[Boolean] =
+    cacheRepository.get(lrn, eoriNumber).map(_.isDefined)
+
   def isDeclarationAmendable(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
-    cacheRepository.get(lrn, eoriNumber).map(_.isDefined && xPaths.exists(_.isAmendable))
+    isDeclarationCached(lrn, eoriNumber).map(_ && xPaths.exists(_.isAmendable))
 
   def handleRejection(userAnswers: UserAnswers, rejection: Rejection): UserAnswers =
     rejection match {
