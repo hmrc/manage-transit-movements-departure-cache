@@ -279,7 +279,7 @@
 * A call is made to the `POST` endpoint with:
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
-  * a valid `Rejection`, containing information about the rejection. In the case of an IE056 this should contain a business rejection type and some error pointers
+  * a valid `Rejection`, containing information about the rejection. In the case of an IE056 this should contain a business rejection type and some error pointers.
 * Then, we check whether:
   * there is a document in the cache for the given LRN and;
   * in the case of an IE056, there is at least one error pointer that is amendable
@@ -309,7 +309,7 @@
 * A call is made to the `POST` endpoint with:
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
-  * a valid `Rejection`, containing information about the rejection. In the case of an IE056 this should contain a business rejection type and some error pointers
+  * a valid `Rejection`, containing information about the rejection. In the case of an IE056 this should contain a business rejection type and some error pointers.
 * Then, we check whether:
   * at least one of the error pointers is amendable AND;
   * there is a document in the cache for the given LRN

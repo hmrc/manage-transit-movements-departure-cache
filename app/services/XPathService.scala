@@ -35,7 +35,7 @@ class XPathService @Inject() (
       case Rejection.IE055Rejection(departureId) =>
         isDeclarationCached(lrn, eoriNumber)
       case Rejection.IE056Rejection(departureId, businessRejectionType, errorPointers) =>
-        isDeclarationAmendable(lrn, eoriNumber, errorPointers.toList)
+        isDeclarationAmendable(lrn, eoriNumber, errorPointers)
     }
 
   private def isDeclarationCached(lrn: String, eoriNumber: String): Future[Boolean] =

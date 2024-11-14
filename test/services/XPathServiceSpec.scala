@@ -17,7 +17,6 @@
 package services
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import cats.data.NonEmptyList
 import models.*
 import models.Rejection.*
 import models.Task.*
@@ -60,7 +59,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
             val rejection = IE056Rejection(
               departureId,
               BusinessRejectionType.AmendmentRejection,
-              NonEmptyList.of(amendableXPath)
+              Seq(amendableXPath)
             )
 
             val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
@@ -96,7 +95,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
             val rejection = IE056Rejection(
               departureId,
               BusinessRejectionType.AmendmentRejection,
-              NonEmptyList.of(unamendableXPath)
+              Seq(unamendableXPath)
             )
 
             val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
@@ -212,7 +211,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
           val rejection = IE056Rejection(
             departureId,
             BusinessRejectionType.AmendmentRejection,
-            NonEmptyList.of(
+            Seq(
               XPath("/CC015C/Representative/status")
             )
           )
@@ -238,7 +237,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
           val rejection = IE056Rejection(
             departureId,
             BusinessRejectionType.DeclarationRejection,
-            NonEmptyList.of(
+            Seq(
               XPath("/CC015C/Representative/status")
             )
           )
