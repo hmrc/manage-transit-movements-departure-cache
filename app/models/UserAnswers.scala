@@ -45,6 +45,9 @@ final case class UserAnswers(
 
   def updateDepartureId(departureId: String): UserAnswers =
     this.copy(departureId = Some(departureId))
+
+  def updateLrn(lrn: String): UserAnswers =
+    this.copy(metadata = metadata.updateLrn(lrn))
 }
 
 object UserAnswers {

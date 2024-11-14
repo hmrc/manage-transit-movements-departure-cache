@@ -32,6 +32,9 @@ case class Metadata(
 
   def updateStatus(status: SubmissionState): Metadata =
     this.copy(isSubmitted = status)
+
+  def updateLrn(lrn: String): Metadata =
+    this.copy(lrn = lrn)
 }
 
 object Metadata {

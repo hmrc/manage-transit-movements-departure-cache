@@ -466,6 +466,41 @@
 
 ---
 
+## `POST /user-answers/:lrn/copy`
+
+### Successful response
+
+#### 200 OK
+
+* A call is made to the `POST` endpoint with:
+  * a valid bearer token
+  * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
+  * a valid `String` request body containing the new LRN
+  * an `APIVersion` header with either:
+    * `2.0` for transition rules
+    * `2.1` for final rules
+* Then, a copy is made of the existing document with the new LRN
+
+### Unsuccessful responses (with possible causes)
+
+#### 400 BAD_REQUEST
+* Request body could not be validated as a `String`
+* `APIVersion` header was missing or did not align with saved answers
+
+#### 401 UNAUTHORIZED
+* A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
+
+#### 403 FORBIDDEN
+* User has insufficient enrolments
+
+#### 404 NOT_FOUND
+* No document was found for the given LRN
+
+#### 500 INTERNAL_SERVER_ERROR
+* An error occurred in the mongo client
+
+---
+
 # Running the Service
 * Start the service locally with `sbt run` in the root directory
 * The service can be started via service manager, depending on the version of service manager you are using, with either:

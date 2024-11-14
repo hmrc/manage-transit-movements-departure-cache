@@ -222,4 +222,21 @@ class CacheController @Inject() (
           Future.successful(BadRequest)
       }
   }
+
+  def copy(lrn: String): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
+    implicit request =>
+      request.body.validate[String] match {
+        case JsSuccess(newLrn, _) =>
+          cacheRepository.get(lrn, request.eoriNumber).flatMap {
+            case Some(userAnswers) =>
+              val updatedUserAnswers = userAnswers.updateLrn(newLrn)
+              set(updatedUserAnswers.metadata, None, Some(request.phase))()
+            case None =>
+              Future.successful(NotFound)
+          }
+        case JsError(errors) =>
+          logger.warn(s"Failed to validate request body as LRN: $errors")
+          Future.successful(BadRequest)
+      }
+  }
 }
