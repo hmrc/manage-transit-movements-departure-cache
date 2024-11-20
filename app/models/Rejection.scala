@@ -16,8 +16,7 @@
 
 package models
 
-import cats.data.NonEmptyList
-import play.api.libs.functional.syntax._
+import play.api.libs.functional.syntax.*
 import play.api.libs.json.{__, Reads}
 
 sealed trait Rejection {
@@ -42,7 +41,7 @@ object Rejection {
 
   case class IE055Rejection(departureId: String) extends Rejection
 
-  case class IE056Rejection(departureId: String, businessRejectionType: BusinessRejectionType, errorPointers: NonEmptyList[XPath]) extends Rejection
+  case class IE056Rejection(departureId: String, businessRejectionType: BusinessRejectionType, errorPointers: Seq[XPath]) extends Rejection
 
   implicit val reads: Reads[Rejection] =
     (__ \ "type").read[String].flatMap {
@@ -52,7 +51,7 @@ object Rejection {
         (
           (__ \ "departureId").read[String] and
             (__ \ "businessRejectionType").read[BusinessRejectionType] and
-            (__ \ "errorPointers").read[NonEmptyList[XPath]]
+            (__ \ "errorPointers").read[Seq[XPath]]
         )(IE056Rejection.apply)
       case value => Reads.failed(s"Unexpected rejection type: $value")
     }

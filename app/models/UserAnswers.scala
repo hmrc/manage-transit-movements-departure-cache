@@ -27,8 +27,8 @@ final case class UserAnswers(
   createdAt: Instant,
   lastUpdated: Instant,
   id: UUID,
-  status: SubmissionState,
-  departureId: Option[String] = None
+  departureId: Option[String] = None,
+  isTransitional: Boolean = true
 ) {
 
   val lrn: String        = metadata.lrn
@@ -39,6 +39,15 @@ final case class UserAnswers(
 
   def updateTasks(tasks: Map[String, Status.Value]): UserAnswers =
     this.copy(metadata = metadata.updateTasks(tasks))
+
+  def updateStatus(status: SubmissionState): UserAnswers =
+    this.copy(metadata = metadata.updateStatus(status))
+
+  def updateDepartureId(departureId: String): UserAnswers =
+    this.copy(departureId = Some(departureId))
+
+  def updateLrn(lrn: String): UserAnswers =
+    this.copy(metadata = metadata.updateLrn(lrn))
 }
 
 object UserAnswers {
@@ -63,8 +72,8 @@ object UserAnswers {
         (__ \ "createdAt").read[Instant] and
         (__ \ "lastUpdated").read[Instant] and
         (__ \ "_id").read[UUID] and
-        (__ \ "isSubmitted").read[SubmissionState] and
-        (__ \ "departureId").readNullable[String]
+        (__ \ "departureId").readNullable[String] and
+        (__ \ "isTransitional").readWithDefault[Boolean](true)
     )(UserAnswers.apply)
 
   private def writes(implicit instantWrites: Writes[Instant], metaDataWrites: Writes[Metadata]): Writes[UserAnswers] =
@@ -73,8 +82,8 @@ object UserAnswers {
         (__ \ "createdAt").write[Instant] and
         (__ \ "lastUpdated").write[Instant] and
         (__ \ "_id").write[UUID] and
-        (__ \ "isSubmitted").write[SubmissionState] and
-        (__ \ "departureId").writeNullable[String]
+        (__ \ "departureId").writeNullable[String] and
+        (__ \ "isTransitional").write[Boolean]
     )(
       ua => Tuple.fromProductTyped(ua)
     )

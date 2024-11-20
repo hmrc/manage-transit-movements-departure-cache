@@ -17,19 +17,26 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import controllers.actions.{
+  AuthenticateActionProvider,
+  AuthenticateAndLockActionProvider,
+  FakeAuthenticateActionProvider,
+  FakeAuthenticateAndLockActionProvider
+}
 import generators.Generators
-import models.AuditType._
+import models.AuditType.*
 import models.Rejection.IE055Rejection
-import models.{Metadata, SubmissionState, UserAnswersSummary, XPath}
+import models.{Metadata, Phase, SubmissionState, UserAnswersSummary, XPath}
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito._
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.Mockito.*
 import org.scalacheck.Arbitrary.arbitrary
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsArray, JsBoolean, JsString, Json}
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
+import repositories.{CacheRepository, DefaultLockRepository}
 import services.{AuditService, MetricsService, XPathService}
 
 import scala.concurrent.Future
@@ -41,9 +48,12 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
   private lazy val mockXPathService   = mock[XPathService]
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
-    super
-      .guiceApplicationBuilder()
+    new GuiceApplicationBuilder()
       .overrides(
+        bind[AuthenticateActionProvider].to[FakeAuthenticateActionProvider],
+        bind[AuthenticateAndLockActionProvider].to[FakeAuthenticateAndLockActionProvider],
+        bind[CacheRepository].toInstance(mockCacheRepository),
+        bind[DefaultLockRepository].toInstance(mockLockRepository),
         bind[AuditService].toInstance(mockAuditService),
         bind[MetricsService].toInstance(mockMetricsService),
         bind[XPathService].toInstance(mockXPathService)
@@ -64,7 +74,8 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
         val request = FakeRequest(GET, routes.CacheController.get(lrn).url)
-        val result  = route(app, request).value
+          .withHeaders(("APIVersion", "2.0"))
+        val result = route(app, request).value
 
         status(result) shouldBe OK
         contentAsJson(result) shouldBe Json.toJson(userAnswers)
@@ -77,9 +88,36 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
 
         val request = FakeRequest(GET, routes.CacheController.get(lrn).url)
-        val result  = route(app, request).value
+          .withHeaders(("APIVersion", "2.0"))
+        val result = route(app, request).value
 
         status(result) shouldBe NOT_FOUND
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+      }
+    }
+
+    "return 400" when {
+      "request phase doesn't match user answers - transitional" in {
+        val transitionalUserAnswers = emptyUserAnswers.copy(isTransitional = true)
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(transitionalUserAnswers)))
+
+        val finalRequest = FakeRequest(GET, routes.CacheController.get(lrn).url)
+          .withHeaders(("APIVersion", "2.1"))
+        val result = route(app, finalRequest).value
+
+        status(result) shouldBe BAD_REQUEST
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+      }
+
+      "request phase doesn't match user answers - final" in {
+        val finalUserAnswers = emptyUserAnswers.copy(isTransitional = false)
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(finalUserAnswers)))
+
+        val transitionalRequest = FakeRequest(GET, routes.CacheController.get(lrn).url)
+          .withHeaders(("APIVersion", "2.0"))
+        val result = route(app, transitionalRequest).value
+
+        status(result) shouldBe BAD_REQUEST
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
       }
     }
@@ -89,7 +127,8 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.failed(new Throwable()))
 
         val request = FakeRequest(GET, routes.CacheController.get(lrn).url)
-        val result  = route(app, request).value
+          .withHeaders(("APIVersion", "2.0"))
+        val result = route(app, request).value
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
@@ -100,39 +139,24 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
   "post" should {
 
     "return 200" when {
-      "write to mongo was acknowledged" when {
-        "when submission state not in body" in {
-          val metaData = emptyMetadata
-          when(mockCacheRepository.set(any(): Metadata, any(): Option[SubmissionState], any(): Option[String]))
-            .thenReturn(Future.successful(true))
+      "write to mongo was acknowledged" in {
+        val metaData = emptyMetadata
+        when(mockCacheRepository.set(any(): Metadata, any(): Option[String], any(): Option[Phase]))
+          .thenReturn(Future.successful(true))
 
-          val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-            .withBody(Json.toJson(metaData))
-          val result = route(app, request).value
+        val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
+          .withJsonBody(Json.toJson(metaData))
+        val result = route(app, request).value
 
-          status(result) shouldBe OK
-          verify(mockCacheRepository).set(eqTo(metaData), eqTo(None), eqTo(None))
-        }
-
-        "when submission state in body" in {
-          val userAnswers = emptyUserAnswers
-          when(mockCacheRepository.set(any(): Metadata, any(): Option[SubmissionState], any(): Option[String]))
-            .thenReturn(Future.successful(true))
-
-          val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-            .withBody(Json.toJson(userAnswers.copy(status = SubmissionState.RejectedPendingChanges)))
-          val result = route(app, request).value
-
-          status(result) shouldBe OK
-          verify(mockCacheRepository).set(eqTo(userAnswers.metadata), eqTo(Some(SubmissionState.RejectedPendingChanges)), eqTo(None))
-        }
+        status(result) shouldBe OK
+        verify(mockCacheRepository).set(eqTo(metaData), eqTo(None), eqTo(None))
       }
     }
 
     "return 400" when {
       "request body is invalid" in {
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(JsString("foo"))
+          .withJsonBody(JsString("foo"))
 
         val result = route(app, request).value
 
@@ -142,7 +166,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
 
       "request body is empty" in {
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.obj())
+          .withJsonBody(Json.obj())
 
         val result = route(app, request).value
 
@@ -157,7 +181,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         val userAnswers = emptyUserAnswers.copy(metadata = metadata)
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.toJson(userAnswers))
+          .withJsonBody(Json.toJson(userAnswers))
 
         val result = route(app, request).value
 
@@ -170,11 +194,11 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
       "write to mongo was not acknowledged on set" in {
         val metaData = emptyMetadata
 
-        when(mockCacheRepository.set(any(): Metadata, any(): Option[SubmissionState], any(): Option[String]))
+        when(mockCacheRepository.set(any(): Metadata, any(): Option[String], any(): Option[Phase]))
           .thenReturn(Future.successful(false))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.toJson(metaData))
+          .withJsonBody(Json.toJson(metaData))
 
         val result = route(app, request).value
 
@@ -184,11 +208,11 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
 
       "write to mongo fails on set" in {
         val metaData = emptyMetadata
-        when(mockCacheRepository.set(any(): Metadata, any(): Option[SubmissionState], any(): Option[String]))
+        when(mockCacheRepository.set(any(): Metadata, any(): Option[String], any(): Option[Phase]))
           .thenReturn(Future.failed(new Throwable()))
 
         val request = FakeRequest(POST, routes.CacheController.post("AB123").url)
-          .withBody(Json.toJson(metaData))
+          .withJsonBody(Json.toJson(metaData))
 
         val result = route(app, request).value
         status(result) shouldBe INTERNAL_SERVER_ERROR
@@ -202,18 +226,20 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
 
     "return 200" when {
       "write to mongo was acknowledged" in {
-        when(mockCacheRepository.set(any(): Metadata, any(): Option[SubmissionState], any(): Option[String]))
+        when(mockCacheRepository.set(any(): Metadata, any(): Option[String], any(): Option[Phase]))
           .thenReturn(Future.successful(true))
 
         val request = FakeRequest(PUT, routes.CacheController.put().url)
-          .withBody(JsString(lrn))
+          .withHeaders(("APIVersion", "2.0"))
+          .withJsonBody(JsString(lrn))
 
         val result                                   = route(app, request).value
         val metadataCaptor: ArgumentCaptor[Metadata] = ArgumentCaptor.forClass(classOf[Metadata])
 
         status(result) shouldBe OK
-        verify(mockCacheRepository).set(metadataCaptor.capture(), eqTo(None), eqTo(None))
+        verify(mockCacheRepository).set(metadataCaptor.capture(), eqTo(None), eqTo(Some(Phase.Transition)))
         metadataCaptor.getValue.lrn shouldBe lrn
+        metadataCaptor.getValue.isSubmitted shouldBe SubmissionState.NotSubmitted
 
         verify(mockAuditService).audit(eqTo(auditType), eqTo(lrn), eqTo(eoriNumber))(any())
         verify(mockMetricsService).increment(auditType.name)
@@ -223,7 +249,8 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
     "return 400" when {
       "request body is invalid" in {
         val request = FakeRequest(PUT, routes.CacheController.put().url)
-          .withBody(Json.obj("foo" -> "bar"))
+          .withHeaders(("APIVersion", "2.0"))
+          .withJsonBody(Json.obj("foo" -> "bar"))
 
         val result = route(app, request).value
 
@@ -236,7 +263,8 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
 
       "request body is empty" in {
         val request = FakeRequest(PUT, routes.CacheController.put().url)
-          .withBody(Json.obj())
+          .withHeaders(("APIVersion", "2.0"))
+          .withJsonBody(Json.obj())
 
         val result = route(app, request).value
 
@@ -250,41 +278,45 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
 
     "return 500" when {
       "write to mongo was not acknowledged" in {
-        when(mockCacheRepository.set(any(): Metadata, any(): Option[SubmissionState], any(): Option[String]))
+        when(mockCacheRepository.set(any(): Metadata, any(): Option[String], any(): Option[Phase]))
           .thenReturn(Future.successful(false))
 
         val request = FakeRequest(PUT, routes.CacheController.put().url)
-          .withBody(JsString(lrn))
+          .withHeaders(("APIVersion", "2.0"))
+          .withJsonBody(JsString(lrn))
 
         val result                                   = route(app, request).value
         val metadataCaptor: ArgumentCaptor[Metadata] = ArgumentCaptor.forClass(classOf[Metadata])
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
 
-        verify(mockCacheRepository).set(metadataCaptor.capture(), eqTo(None), eqTo(None))
+        verify(mockCacheRepository).set(metadataCaptor.capture(), eqTo(None), eqTo(Some(Phase.Transition)))
         verifyNoInteractions(mockAuditService)
         verifyNoInteractions(mockMetricsService)
 
         metadataCaptor.getValue.lrn shouldBe lrn
+        metadataCaptor.getValue.isSubmitted shouldBe SubmissionState.NotSubmitted
       }
 
       "write to mongo fails" in {
-        when(mockCacheRepository.set(any(): Metadata, any(): Option[SubmissionState], any(): Option[String]))
+        when(mockCacheRepository.set(any(): Metadata, any(): Option[String], any(): Option[Phase]))
           .thenReturn(Future.failed(new Throwable()))
 
         val request = FakeRequest(PUT, routes.CacheController.put().url)
-          .withBody(JsString(lrn))
+          .withHeaders(("APIVersion", "2.0"))
+          .withJsonBody(JsString(lrn))
 
         val result                                   = route(app, request).value
         val metadataCaptor: ArgumentCaptor[Metadata] = ArgumentCaptor.forClass(classOf[Metadata])
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
 
-        verify(mockCacheRepository).set(metadataCaptor.capture(), eqTo(None), eqTo(None))
+        verify(mockCacheRepository).set(metadataCaptor.capture(), eqTo(None), eqTo(Some(Phase.Transition)))
         verifyNoInteractions(mockAuditService)
         verifyNoInteractions(mockMetricsService)
 
         metadataCaptor.getValue.lrn shouldBe lrn
+        metadataCaptor.getValue.isSubmitted shouldBe SubmissionState.NotSubmitted
       }
     }
   }
@@ -296,7 +328,8 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockCacheRepository.remove(any(), any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest(DELETE, routes.CacheController.delete(lrn).url)
-        val result  = route(app, request).value
+          .withHeaders(("APIVersion", "2.0"))
+        val result = route(app, request).value
 
         status(result) shouldBe OK
 
@@ -311,7 +344,8 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockCacheRepository.remove(any(), any())).thenReturn(Future.failed(new Throwable()))
 
         val request = FakeRequest(DELETE, routes.CacheController.delete(lrn).url)
-        val result  = route(app, request).value
+          .withHeaders(("APIVersion", "2.0"))
+        val result = route(app, request).value
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
 
@@ -326,15 +360,16 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
     "return 200" when {
 
       "read from mongo is successful" in {
-        val userAnswer1 = emptyUserAnswers.copy(metadata = Metadata("AB123", eoriNumber))
-        val userAnswer2 = emptyUserAnswers.copy(metadata = Metadata("CD123", eoriNumber))
+        val userAnswer1 = emptyUserAnswers.copy(metadata = Metadata("AB123", eoriNumber, SubmissionState.NotSubmitted))
+        val userAnswer2 = emptyUserAnswers.copy(metadata = Metadata("CD123", eoriNumber, SubmissionState.NotSubmitted), isTransitional = false)
         val userAnswers = Seq(userAnswer1, userAnswer2)
 
         when(mockCacheRepository.getAll(any(), any(), any(), any(), any(), any()))
           .thenReturn(Future.successful(UserAnswersSummary(eoriNumber, userAnswers, 2, 2)))
 
         val request = FakeRequest(GET, routes.CacheController.getAll().url)
-        val result  = route(app, request).value
+          .withHeaders(("APIVersion", "2.0"))
+        val result = route(app, request).value
 
         status(result) shouldBe OK
         contentAsJson(result) shouldBe Json.parse(s"""
@@ -354,7 +389,8 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
             |      "lastUpdated": "${userAnswer1.lastUpdated}",
             |      "expiresInDays": 30,
             |      "_id": "${userAnswer1.id}",
-            |      "isSubmitted": "${userAnswer1.status.asString}"
+            |      "isSubmitted": "${userAnswer1.metadata.isSubmitted.asString}",
+            |      "isTransitional": true
             |    },
             |    {
             |      "lrn": "${userAnswer2.lrn}",
@@ -367,7 +403,8 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
             |      "lastUpdated": "${userAnswer2.lastUpdated}",
             |      "expiresInDays": 30,
             |      "_id": "${userAnswer2.id}",
-            |      "isSubmitted": "${userAnswer2.status.asString}"
+            |      "isSubmitted": "${userAnswer2.metadata.isSubmitted.asString}",
+            |      "isTransitional": false
             |    }
             |  ]
             |}
@@ -381,7 +418,8 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockCacheRepository.getAll(any(), any(), any(), any(), any(), any())).thenReturn(Future.failed(new Throwable()))
 
         val request = FakeRequest(GET, routes.CacheController.getAll().url)
-        val result  = route(app, request).value
+          .withHeaders(("APIVersion", "2.0"))
+        val result = route(app, request).value
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
         verify(mockCacheRepository).getAll(eqTo(eoriNumber), any(), any(), any(), any(), any())
@@ -396,7 +434,8 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
 
         val request = FakeRequest(GET, routes.CacheController.getExpiry(lrn).url)
-        val result  = route(app, request).value
+          .withHeaders(("APIVersion", "2.0"))
+        val result = route(app, request).value
 
         status(result) shouldBe OK
         contentAsJson(result) shouldBe Json.toJson(30)
@@ -409,7 +448,8 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
 
         val request = FakeRequest(GET, routes.CacheController.getExpiry(lrn).url)
-        val result  = route(app, request).value
+          .withHeaders(("APIVersion", "2.0"))
+        val result = route(app, request).value
 
         status(result) shouldBe NOT_FOUND
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
@@ -421,7 +461,8 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.failed(new Throwable()))
 
         val request = FakeRequest(GET, routes.CacheController.getExpiry(lrn).url)
-        val result  = route(app, request).value
+          .withHeaders(("APIVersion", "2.0"))
+        val result = route(app, request).value
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
@@ -441,7 +482,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockXPathService.handleRejection(any(), any()))
           .thenReturn(userAnswers)
 
-        when(mockCacheRepository.set(any(): Metadata, any(): Option[SubmissionState], any(): Option[String]))
+        when(mockCacheRepository.set(any(): Metadata, any(): Option[String], any(): Option[Phase]))
           .thenReturn(Future.successful(true))
 
         val json = Json.parse(s"""
@@ -452,6 +493,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
             |""".stripMargin)
 
         val request = FakeRequest(POST, routes.CacheController.handleErrors(lrn).url)
+          .withHeaders(("APIVersion", "2.0"))
           .withJsonBody(json)
 
         val result = route(app, request).value
@@ -459,7 +501,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         status(result) shouldBe OK
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockXPathService).handleRejection(eqTo(userAnswers), eqTo(IE055Rejection(departureId)))
-        verify(mockCacheRepository).set(eqTo(userAnswers.metadata), eqTo(Some(userAnswers.status)), eqTo(userAnswers.departureId))
+        verify(mockCacheRepository).set(eqTo(userAnswers.metadata), eqTo(userAnswers.departureId), eqTo(None))
       }
     }
 
@@ -476,6 +518,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
             |""".stripMargin)
 
         val request = FakeRequest(POST, routes.CacheController.handleErrors(lrn).url)
+          .withHeaders(("APIVersion", "2.0"))
           .withJsonBody(json)
 
         val result = route(app, request).value
@@ -483,7 +526,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         status(result) shouldBe NOT_FOUND
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verifyNoInteractions(mockXPathService)
-        verify(mockCacheRepository, never()).set(any(): Metadata, any(): Option[SubmissionState], any(): Option[String])
+        verify(mockCacheRepository, never()).set(any(): Metadata, any(): Option[String], any(): Option[Phase])
       }
     }
 
@@ -496,6 +539,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
             |""".stripMargin)
 
         val request = FakeRequest(POST, routes.CacheController.handleErrors(lrn).url)
+          .withHeaders(("APIVersion", "2.0"))
           .withJsonBody(json)
 
         val result = route(app, request).value
@@ -516,7 +560,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockXPathService.handleRejection(any(), any()))
           .thenReturn(userAnswers)
 
-        when(mockCacheRepository.set(any(): Metadata, any(): Option[SubmissionState], any(): Option[String]))
+        when(mockCacheRepository.set(any(): Metadata, any(): Option[String], any(): Option[Phase]))
           .thenReturn(Future.successful(false))
 
         val json = Json.parse(s"""
@@ -527,6 +571,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
              |""".stripMargin)
 
         val request = FakeRequest(POST, routes.CacheController.handleErrors(lrn).url)
+          .withHeaders(("APIVersion", "2.0"))
           .withJsonBody(json)
 
         val result = route(app, request).value
@@ -534,7 +579,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         status(result) shouldBe INTERNAL_SERVER_ERROR
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockXPathService).handleRejection(eqTo(userAnswers), eqTo(IE055Rejection(departureId)))
-        verify(mockCacheRepository).set(eqTo(userAnswers.metadata), eqTo(Some(userAnswers.status)), eqTo(userAnswers.departureId))
+        verify(mockCacheRepository).set(eqTo(userAnswers.metadata), eqTo(userAnswers.departureId), eqTo(None))
       }
     }
   }
@@ -548,7 +593,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockXPathService.isDeclarationAmendable(any(), any(), any())).thenReturn(Future.successful(true))
 
         val request = FakeRequest(POST, routes.CacheController.isDeclarationAmendable(lrn).url)
-          .withBody(JsArray(xPaths.map(_.value).map(JsString.apply)))
+          .withJsonBody(JsArray(xPaths.map(_.value).map(JsString.apply)))
 
         val result = route(app, request).value
 
@@ -563,7 +608,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockXPathService.isDeclarationAmendable(any(), any(), any())).thenReturn(Future.successful(false))
 
         val request = FakeRequest(POST, routes.CacheController.isDeclarationAmendable(lrn).url)
-          .withBody(JsArray(xPaths.map(_.value).map(JsString.apply)))
+          .withJsonBody(JsArray(xPaths.map(_.value).map(JsString.apply)))
 
         val result = route(app, request).value
 
@@ -576,12 +621,67 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
     "return 400" when {
       "request body is not an array of xpaths" in {
         val request = FakeRequest(POST, routes.CacheController.isDeclarationAmendable(lrn).url)
-          .withBody(Json.obj("foo" -> "bar"))
+          .withJsonBody(Json.obj("foo" -> "bar"))
 
         val result = route(app, request).value
 
         status(result) shouldBe BAD_REQUEST
         verify(mockXPathService, never()).isDeclarationAmendable(any(), any(), any())
+      }
+    }
+  }
+
+  "isRejectionAmendable" should {
+
+    val json = Json.parse(s"""
+         |{
+         |  "departureId" : "$departureId",
+         |  "type" : "IE055"
+         |}
+         |""".stripMargin)
+
+    "return 200 with true" when {
+
+      "rejection is amendable" in {
+        when(mockXPathService.isRejectionAmendable(any(), any(), any()))
+          .thenReturn(Future.successful(true))
+
+        val request = FakeRequest(POST, routes.CacheController.isRejectionAmendable(lrn).url)
+          .withJsonBody(json)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe JsBoolean(true)
+        verify(mockXPathService).isRejectionAmendable(eqTo(lrn), eqTo(eoriNumber), eqTo(IE055Rejection(departureId)))
+      }
+    }
+
+    "return 200 with false" when {
+      "rejection is not amendable" in {
+        when(mockXPathService.isRejectionAmendable(any(), any(), any()))
+          .thenReturn(Future.successful(false))
+
+        val request = FakeRequest(POST, routes.CacheController.isRejectionAmendable(lrn).url)
+          .withJsonBody(json)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe JsBoolean(false)
+        verify(mockXPathService).isRejectionAmendable(eqTo(lrn), eqTo(eoriNumber), eqTo(IE055Rejection(departureId)))
+      }
+    }
+
+    "return 400" when {
+      "request body is not a rejection" in {
+        val request = FakeRequest(POST, routes.CacheController.isRejectionAmendable(lrn).url)
+          .withJsonBody(Json.obj("foo" -> "bar"))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe BAD_REQUEST
+        verify(mockXPathService, never()).isRejectionAmendable(any(), any(), any())
       }
     }
   }
@@ -598,7 +698,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockXPathService.prepareForAmendment(any(), any()))
           .thenReturn(userAnswers)
 
-        when(mockCacheRepository.set(any(): Metadata, any(): Option[SubmissionState], any(): Option[String]))
+        when(mockCacheRepository.set(any(): Metadata, any(): Option[String], any(): Option[Phase]))
           .thenReturn(Future.successful(true))
 
         val json = JsString(departureId)
@@ -611,7 +711,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         status(result) shouldBe OK
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockXPathService).prepareForAmendment(eqTo(userAnswers), eqTo(departureId))
-        verify(mockCacheRepository).set(eqTo(userAnswers.metadata), eqTo(Some(userAnswers.status)), eqTo(userAnswers.departureId))
+        verify(mockCacheRepository).set(eqTo(userAnswers.metadata), eqTo(userAnswers.departureId), eqTo(None))
       }
     }
 
@@ -630,7 +730,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         status(result) shouldBe NOT_FOUND
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verifyNoInteractions(mockXPathService)
-        verify(mockCacheRepository, never()).set(any(): Metadata, any(): Option[SubmissionState], any(): Option[String])
+        verify(mockCacheRepository, never()).set(any(): Metadata, any(): Option[String], any(): Option[Phase])
       }
     }
 
@@ -663,7 +763,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         when(mockXPathService.prepareForAmendment(any(), any()))
           .thenReturn(userAnswers)
 
-        when(mockCacheRepository.set(any(): Metadata, any(): Option[SubmissionState], any(): Option[String]))
+        when(mockCacheRepository.set(any(): Metadata, any(): Option[String], any(): Option[Phase]))
           .thenReturn(Future.successful(false))
 
         val json = JsString(departureId)
@@ -676,7 +776,82 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         status(result) shouldBe INTERNAL_SERVER_ERROR
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockXPathService).prepareForAmendment(eqTo(userAnswers), eqTo(departureId))
-        verify(mockCacheRepository).set(eqTo(userAnswers.metadata), eqTo(Some(userAnswers.status)), eqTo(userAnswers.departureId))
+        verify(mockCacheRepository).set(eqTo(userAnswers.metadata), eqTo(userAnswers.departureId), eqTo(None))
+      }
+    }
+  }
+
+  "copy" should {
+
+    val oldLrn         = "oldLrn"
+    val newLrn         = "newLrn"
+    val oldUserAnswers = emptyUserAnswers.updateLrn(oldLrn)
+    val newUserAnswers = oldUserAnswers.updateLrn(newLrn)
+
+    "return 200" when {
+      "new user answers successfully created" in {
+        when(mockCacheRepository.get(any(), any()))
+          .thenReturn(Future.successful(Some(oldUserAnswers)))
+
+        when(mockCacheRepository.set(any(): Metadata, any(): Option[String], any(): Option[Phase]))
+          .thenReturn(Future.successful(true))
+
+        val json = JsString(newLrn)
+
+        val request = FakeRequest(POST, routes.CacheController.copy(oldLrn).url)
+          .withHeaders(("APIVersion", "2.1"))
+          .withJsonBody(json)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe OK
+        verify(mockCacheRepository).get(eqTo(oldLrn), eqTo(eoriNumber))
+        verify(mockCacheRepository).set(eqTo(newUserAnswers.metadata), eqTo(None), eqTo(Some(Phase.PostTransition)))
+      }
+    }
+
+    "return 400" when {
+      "API version header is missing" in {
+        val json = JsString(newLrn)
+
+        val request = FakeRequest(POST, routes.CacheController.copy(oldLrn).url)
+          .withJsonBody(json)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe BAD_REQUEST
+      }
+
+      "request body does not contain the new LRN" in {
+        val request = FakeRequest(POST, routes.CacheController.copy(oldLrn).url)
+          .withHeaders(("APIVersion", "2.1"))
+          .withJsonBody(Json.obj("foo" -> "bar"))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe BAD_REQUEST
+      }
+    }
+
+    "return 500" when {
+      "write to mongo is unsuccessful" in {
+        when(mockCacheRepository.get(any(), any()))
+          .thenReturn(Future.successful(Some(oldUserAnswers)))
+
+        when(mockCacheRepository.set(any(): Metadata, any(): Option[String], any(): Option[Phase]))
+          .thenReturn(Future.successful(false))
+
+        val json = JsString(newLrn)
+
+        val request = FakeRequest(POST, routes.CacheController.copy(oldLrn).url)
+          .withHeaders(("APIVersion", "2.1"))
+          .withJsonBody(json)
+
+        val result = route(app, request).value
+
+        status(result) shouldBe INTERNAL_SERVER_ERROR
+        verify(mockCacheRepository).get(eqTo(oldLrn), eqTo(eoriNumber))
+        verify(mockCacheRepository).set(eqTo(newUserAnswers.metadata), eqTo(None), eqTo(Some(Phase.PostTransition)))
       }
     }
   }

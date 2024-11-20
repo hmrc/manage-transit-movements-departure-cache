@@ -17,9 +17,8 @@
 package models
 
 import base.SpecBase
-import cats.data.NonEmptyList
-import models.Rejection.BusinessRejectionType._
-import models.Rejection._
+import models.Rejection.*
+import models.Rejection.BusinessRejectionType.*
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.{JsError, Json}
@@ -48,59 +47,107 @@ class RejectionSpec extends SpecBase with ScalaCheckPropertyChecks {
 
       "IE056 rejection" when {
 
-        "013 business rejection type" in {
-          forAll(Gen.alphaNumStr) {
-            departureId =>
-              val json = Json.parse(s"""
-                   |{
-                   |  "departureId" : "$departureId",
-                   |  "type" : "IE056",
-                   |  "businessRejectionType" : "013",
-                   |  "errorPointers" : [
-                   |    "foo",
-                   |    "bar"
-                   |  ]
-                   |}
-                   |""".stripMargin)
+        "013 business rejection type" when {
+          "error pointers is not empty" in {
+            forAll(Gen.alphaNumStr) {
+              departureId =>
+                val json = Json.parse(s"""
+                     |{
+                     |  "departureId" : "$departureId",
+                     |  "type" : "IE056",
+                     |  "businessRejectionType" : "013",
+                     |  "errorPointers" : [
+                     |    "foo",
+                     |    "bar"
+                     |  ]
+                     |}
+                     |""".stripMargin)
 
-              val result = json.validate[Rejection].get
+                val result = json.validate[Rejection].get
 
-              result shouldBe IE056Rejection(
-                departureId,
-                AmendmentRejection,
-                NonEmptyList.of(
-                  XPath("foo"),
-                  XPath("bar")
+                result shouldBe IE056Rejection(
+                  departureId,
+                  AmendmentRejection,
+                  Seq(
+                    XPath("foo"),
+                    XPath("bar")
+                  )
                 )
-              )
+            }
+          }
+
+          "error pointers is empty" in {
+            forAll(Gen.alphaNumStr) {
+              departureId =>
+                val json = Json.parse(s"""
+                     |{
+                     |  "departureId" : "$departureId",
+                     |  "type" : "IE056",
+                     |  "businessRejectionType" : "013",
+                     |  "errorPointers" : []
+                     |}
+                     |""".stripMargin)
+
+                val result = json.validate[Rejection].get
+
+                result shouldBe IE056Rejection(
+                  departureId,
+                  AmendmentRejection,
+                  Seq()
+                )
+            }
           }
         }
 
-        "015 business rejection type" in {
-          forAll(Gen.alphaNumStr) {
-            departureId =>
-              val json = Json.parse(s"""
-                   |{
-                   |  "departureId" : "$departureId",
-                   |  "type" : "IE056",
-                   |  "businessRejectionType" : "015",
-                   |  "errorPointers" : [
-                   |    "foo",
-                   |    "bar"
-                   |  ]
-                   |}
-                   |""".stripMargin)
+        "015 business rejection type" when {
+          "error pointers is not empty" in {
+            forAll(Gen.alphaNumStr) {
+              departureId =>
+                val json = Json.parse(s"""
+                     |{
+                     |  "departureId" : "$departureId",
+                     |  "type" : "IE056",
+                     |  "businessRejectionType" : "015",
+                     |  "errorPointers" : [
+                     |    "foo",
+                     |    "bar"
+                     |  ]
+                     |}
+                     |""".stripMargin)
 
-              val result = json.validate[Rejection].get
+                val result = json.validate[Rejection].get
 
-              result shouldBe IE056Rejection(
-                departureId,
-                DeclarationRejection,
-                NonEmptyList.of(
-                  XPath("foo"),
-                  XPath("bar")
+                result shouldBe IE056Rejection(
+                  departureId,
+                  DeclarationRejection,
+                  Seq(
+                    XPath("foo"),
+                    XPath("bar")
+                  )
                 )
-              )
+            }
+          }
+
+          "error pointers is empty" in {
+            forAll(Gen.alphaNumStr) {
+              departureId =>
+                val json = Json.parse(s"""
+                     |{
+                     |  "departureId" : "$departureId",
+                     |  "type" : "IE056",
+                     |  "businessRejectionType" : "015",
+                     |  "errorPointers" : []
+                     |}
+                     |""".stripMargin)
+
+                val result = json.validate[Rejection].get
+
+                result shouldBe IE056Rejection(
+                  departureId,
+                  DeclarationRejection,
+                  Seq()
+                )
+            }
           }
         }
       }
@@ -140,24 +187,6 @@ class RejectionSpec extends SpecBase with ScalaCheckPropertyChecks {
                  |    "foo",
                  |    "bar"
                  |  ]
-                 |}
-                 |""".stripMargin)
-
-            val result = json.validate[Rejection]
-
-            result shouldBe a[JsError]
-        }
-      }
-
-      "error pointers is empty" in {
-        forAll(Gen.alphaNumStr, Gen.oneOf("013", "015")) {
-          (departureId, businessRejectionType) =>
-            val json = Json.parse(s"""
-                 |{
-                 |  "departureId" : "$departureId",
-                 |  "type" : "IE056",
-                 |  "businessRejectionType" : "$businessRejectionType",
-                 |  "errorPointers" : []
                  |}
                  |""".stripMargin)
 

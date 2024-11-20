@@ -16,11 +16,12 @@
 
 package controllers
 
-import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
-import models.AuditType._
-import models.{Metadata, Rejection, SubmissionState, UserAnswers, XPath}
+import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider, VersionedAction}
+import models.AuditType.*
+import models.{Metadata, Phase, Rejection, SubmissionState, UserAnswers, XPath}
+import models.Rejection.*
 import play.api.Logging
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
 import services.{AuditService, DateTimeService, MetricsService, XPathService}
@@ -34,6 +35,7 @@ class CacheController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
   authenticateAndLock: AuthenticateAndLockActionProvider,
+  getVersion: VersionedAction,
   cacheRepository: CacheRepository,
   auditService: AuditService,
   metricsService: MetricsService,
@@ -51,9 +53,7 @@ class CacheController @Inject() (
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
           if (request.eoriNumber == data.eoriNumber) {
-            val status: Option[SubmissionState] = (request.body \ "isSubmitted").asOpt[SubmissionState]
-            val departureId: Option[String]     = (request.body \ "departureId").asOpt[String]
-            set(data, status, departureId)()
+            set(data, None, None)()
           } else {
             logger.warn(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
             Future.successful(Forbidden)
@@ -64,11 +64,11 @@ class CacheController @Inject() (
       }
   }
 
-  def put(): Action[JsValue] = authenticate().async(parse.json) {
+  def put(): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(lrn, _) =>
-          set(Metadata(lrn, request.eoriNumber)) {
+          set(Metadata(lrn, request.eoriNumber, SubmissionState.NotSubmitted), None, Some(request.phase)) {
             val auditType = DepartureDraftStarted
             auditService.audit(auditType, lrn, request.eoriNumber)
             metricsService.increment(auditType.name)
@@ -81,11 +81,11 @@ class CacheController @Inject() (
 
   private def set(
     data: Metadata,
-    status: Option[SubmissionState] = None,
-    departureId: Option[String] = None
+    departureId: Option[String],
+    phase: Option[Phase]
   )(block: => Unit = ()): Future[Status] =
     cacheRepository
-      .set(data, status, departureId)
+      .set(data, departureId, phase)
       .map {
         case true =>
           block
@@ -145,14 +145,16 @@ class CacheController @Inject() (
     }
 
   private def getUserAnswers[T](lrn: String)(f: UserAnswers => T)(implicit writes: Writes[T]): Action[AnyContent] =
-    authenticate().async {
+    (authenticate() andThen getVersion).async {
       implicit request =>
         val eoriNumber = request.eoriNumber
         cacheRepository
           .get(lrn, eoriNumber)
           .map {
-            case Some(userAnswers) =>
+            case Some(userAnswers) if request.phase.isTransitional == userAnswers.isTransitional =>
               Ok(Json.toJson(f(userAnswers)))
+            case Some(userAnswers) =>
+              BadRequest
             case None =>
               logger.warn(s"No document found for LRN '$lrn' and EORI '$eoriNumber'")
               NotFound
@@ -171,7 +173,7 @@ class CacheController @Inject() (
           cacheRepository.get(lrn, request.eoriNumber).flatMap {
             case Some(userAnswers) =>
               val updatedUserAnswers = xPathService.handleRejection(userAnswers, rejection)
-              set(updatedUserAnswers.metadata, Some(updatedUserAnswers.status), updatedUserAnswers.departureId)()
+              set(updatedUserAnswers.metadata, updatedUserAnswers.departureId, None)()
             case None =>
               Future.successful(NotFound)
           }
@@ -192,6 +194,18 @@ class CacheController @Inject() (
       }
   }
 
+  // TODO - remove isDeclarationAmendable after deployment of CTCP-5975
+  def isRejectionAmendable(lrn: String): Action[JsValue] = authenticate().async(parse.json) {
+    implicit request =>
+      request.body.validate[Rejection] match {
+        case JsSuccess(rejection, _) =>
+          xPathService.isRejectionAmendable(lrn, request.eoriNumber, rejection).map(JsBoolean).map(Ok(_))
+        case JsError(errors) =>
+          logger.warn(s"Failed to validate request body as Rejection: $errors")
+          Future.successful(BadRequest)
+      }
+  }
+
   def prepareForAmendment(lrn: String): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
@@ -199,12 +213,29 @@ class CacheController @Inject() (
           cacheRepository.get(lrn, request.eoriNumber).flatMap {
             case Some(userAnswers) =>
               val updatedUserAnswers = xPathService.prepareForAmendment(userAnswers, departureId)
-              set(updatedUserAnswers.metadata, Some(updatedUserAnswers.status), updatedUserAnswers.departureId)()
+              set(updatedUserAnswers.metadata, updatedUserAnswers.departureId, None)()
             case None =>
               Future.successful(NotFound)
           }
         case JsError(errors) =>
           logger.warn(s"Failed to validate request body as departure ID: $errors")
+          Future.successful(BadRequest)
+      }
+  }
+
+  def copy(lrn: String): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
+    implicit request =>
+      request.body.validate[String] match {
+        case JsSuccess(newLrn, _) =>
+          cacheRepository.get(lrn, request.eoriNumber).flatMap {
+            case Some(userAnswers) =>
+              val updatedUserAnswers = userAnswers.updateLrn(newLrn)
+              set(updatedUserAnswers.metadata, None, Some(request.phase))()
+            case None =>
+              Future.successful(NotFound)
+          }
+        case JsError(errors) =>
+          logger.warn(s"Failed to validate request body as LRN: $errors")
           Future.successful(BadRequest)
       }
   }

@@ -17,15 +17,15 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
+import models.*
 import models.AuditType.{DeclarationAmendment, DeclarationData}
-import models._
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.Json
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import services.{ApiService, AuditService}
 import uk.gov.hmrc.http.HttpResponse
 
@@ -51,14 +51,17 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
     reset(mockApiService)
     reset(mockAuditService)
 
-    when(mockCacheRepository.set(any(): UserAnswers, any(): SubmissionState, any(): Option[String])).thenReturn(Future.successful(true))
+    when(mockCacheRepository.set(any(): Metadata, any(): Option[String], any(): Option[Phase]))
+      .thenReturn(Future.successful(true))
   }
 
   "post" should {
 
     "return 200" when {
       "submission is successful" in {
-        val userAnswers = emptyUserAnswers
+        val userAnswers        = emptyUserAnswers
+        val updatedUserAnswers = userAnswers.updateStatus(SubmissionState.Submitted)
+
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
         val body = Json.toJson("foo")
@@ -75,9 +78,9 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         contentAsJson(result) shouldBe body
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.Submitted), eqTo(None))
+        verify(mockCacheRepository).set(eqTo(updatedUserAnswers.metadata), eqTo(None), eqTo(None))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Phase.Transition))(any())
-        verify(mockAuditService).audit(eqTo(DeclarationData), eqTo(userAnswers.copy(status = SubmissionState.Submitted)))(any())
+        verify(mockAuditService).audit(eqTo(DeclarationData), eqTo(updatedUserAnswers))(any())
       }
     }
 
@@ -137,7 +140,9 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
     "return 200" when {
       "submission is successful" in {
-        val userAnswers = emptyUserAnswersWithDepartureId
+        val userAnswers        = emptyUserAnswersWithDepartureId
+        val updatedUserAnswers = userAnswers.updateStatus(SubmissionState.Submitted)
+
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
         val body = Json.toJson("foo")
@@ -154,9 +159,9 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         contentAsJson(result) shouldBe body
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-        verify(mockCacheRepository).set(eqTo(userAnswers), eqTo(SubmissionState.Submitted), eqTo(Some("departureId123")))
+        verify(mockCacheRepository).set(eqTo(updatedUserAnswers.metadata), eqTo(Some("departureId123")), eqTo(None))
         verify(mockApiService).submitAmendment(eqTo(userAnswers), eqTo(departureId), eqTo(Phase.Transition))(any())
-        verify(mockAuditService).audit(eqTo(DeclarationAmendment), eqTo(userAnswers.copy(status = SubmissionState.Submitted)))(any())
+        verify(mockAuditService).audit(eqTo(DeclarationAmendment), eqTo(updatedUserAnswers))(any())
       }
     }
 

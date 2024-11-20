@@ -47,8 +47,8 @@ trait SpecBase
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val emptyMetadata: Metadata         = Metadata(lrn, eoriNumber)
-  val emptyUserAnswers: UserAnswers   = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID(), SubmissionState.NotSubmitted)
+  val emptyMetadata: Metadata         = Metadata(lrn, eoriNumber, SubmissionState.NotSubmitted)
+  val emptyUserAnswers: UserAnswers   = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
   val departureId                     = "departureId123"
   val emptyUserAnswersWithDepartureId = emptyUserAnswers.copy(departureId = Some(departureId))
 

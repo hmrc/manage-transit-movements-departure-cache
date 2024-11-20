@@ -14,17 +14,22 @@
  * limitations under the License.
  */
 
-import cats.data.NonEmptyList
-import play.api.libs.json.{JsonValidationError, Reads}
+package models
 
-package object models {
+import models.Phase.*
+import org.scalatest.freespec.AnyFreeSpec
+import org.scalatest.matchers.must.Matchers
 
-  implicit def nonEmptyListReads[A](implicit rds: Reads[List[A]]): Reads[NonEmptyList[A]] =
-    Reads
-      .of[List[A]]
-      .collect(
-        JsonValidationError("Expected a NonEmptyList but the list was empty")
-      ) {
-        case head :: tail => NonEmptyList(head, tail)
-      }
+class PhaseSpec extends AnyFreeSpec with Matchers {
+
+  "Phase" - {
+
+    "Transition" in {
+      Transition.isTransitional mustEqual true
+    }
+
+    "PostTransition" in {
+      PostTransition.isTransitional mustEqual false
+    }
+  }
 }

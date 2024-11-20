@@ -8,8 +8,10 @@ DELETE     /user-answers/:lrn                                   controllers.Cach
 GET        /user-answers/:lrn/expiry                            controllers.CacheController.getExpiry(lrn: String)
 
 POST       /user-answers/:lrn/is-amendable                      controllers.CacheController.isDeclarationAmendable(lrn: String)
+POST       /user-answers/:lrn/amendable                         controllers.CacheController.isRejectionAmendable(lrn: String)
 POST       /user-answers/:lrn/errors                            controllers.CacheController.handleErrors(lrn: String)
 PATCH      /user-answers/:lrn                                   controllers.CacheController.prepareForAmendment(lrn: String)
+POST       /user-answers/:lrn/copy                              controllers.CacheController.copy(lrn: String)
 
 POST       /declaration/submit                                  controllers.SubmissionController.post()
 POST       /declaration/submit-amendment                        controllers.SubmissionController.postAmendment()

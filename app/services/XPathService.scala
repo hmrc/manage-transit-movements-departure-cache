@@ -30,10 +30,23 @@ class XPathService @Inject() (
 )(implicit ec: ExecutionContext)
     extends Logging {
 
+  def isRejectionAmendable(lrn: String, eoriNumber: String, rejection: Rejection): Future[Boolean] =
+    rejection match {
+      case Rejection.IE055Rejection(departureId) =>
+        isDeclarationCached(lrn, eoriNumber)
+      case Rejection.IE056Rejection(departureId, businessRejectionType, errorPointers) =>
+        isDeclarationAmendable(lrn, eoriNumber, errorPointers)
+    }
+
   def isDeclarationAmendable(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
+    isDeclarationCached(lrn, eoriNumber).map {
+      _ && xPaths.exists(_.isAmendable)
+    }
+
+  private def isDeclarationCached(lrn: String, eoriNumber: String): Future[Boolean] =
     cacheRepository.get(lrn, eoriNumber).map {
       _.exists {
-        _.status != SubmissionState.NotSubmitted && xPaths.exists(_.isAmendable)
+        _.metadata.isSubmitted != SubmissionState.NotSubmitted
       }
     }
 
@@ -46,10 +59,8 @@ class XPathService @Inject() (
         }
         userAnswers
           .updateTasks(tasks)
-          .copy(
-            status = SubmissionState.GuaranteeAmendment,
-            departureId = Some(departureId)
-          )
+          .updateStatus(SubmissionState.GuaranteeAmendment)
+          .updateDepartureId(departureId)
       case Rejection.IE056Rejection(departureId, businessRejectionType, errorPointers) =>
         val tasks = userAnswers.metadata.tasks ++ errorPointers.toList.flatMap(_.taskError).toMap
         businessRejectionType match {
@@ -58,16 +69,12 @@ class XPathService @Inject() (
           case BusinessRejectionType.DeclarationRejection =>
             userAnswers
               .updateTasks(tasks)
-              .copy(
-                status = SubmissionState.RejectedPendingChanges
-              )
+              .updateStatus(SubmissionState.RejectedPendingChanges)
         }
     }
 
   def prepareForAmendment(userAnswers: UserAnswers, departureId: String): UserAnswers =
     userAnswers
-      .copy(
-        status = SubmissionState.Amendment,
-        departureId = Some(departureId)
-      )
+      .updateStatus(SubmissionState.Amendment)
+      .updateDepartureId(departureId)
 }

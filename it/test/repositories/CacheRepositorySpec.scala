@@ -17,15 +17,15 @@
 package repositories
 
 import itbase.CacheRepositorySpecBase
+import models.*
 import models.Sort.{SortByCreatedAtAsc, SortByCreatedAtDesc, SortByLRNAsc, SortByLRNDesc}
-import models._
+import org.mongodb.scala.*
 import org.mongodb.scala.bson.{BsonDocument, BsonString}
 import org.mongodb.scala.model.Filters
 import play.api.libs.json.Json
-import org.mongodb.scala._
 
 import java.time.Instant
-import java.time.temporal.ChronoUnit._
+import java.time.temporal.ChronoUnit.*
 
 class CacheRepositorySpec extends CacheRepositorySpecBase {
 
@@ -45,8 +45,8 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
   private val userAnswers4 = emptyUserAnswers.copy(metadata = Metadata(lrn1, eori4), createdAt = Instant.now())
   private val userAnswers5 = emptyUserAnswers.copy(metadata = Metadata(lrn2, eori4), createdAt = Instant.now().minus(1, HOURS))
   private val userAnswers6 = emptyUserAnswers.copy(metadata = Metadata(lrn4, eori4))
-  private val userAnswers7 = emptyUserAnswers.copy(metadata = Metadata(lrn1, eori1), status = SubmissionState.Submitted)
-  private val userAnswers8 = emptyUserAnswers.copy(metadata = Metadata(lrn1, eori1), status = SubmissionState.RejectedPendingChanges)
+  private val userAnswers7 = emptyUserAnswers.copy(metadata = Metadata(lrn1, eori1, SubmissionState.Submitted))
+  private val userAnswers8 = emptyUserAnswers.copy(metadata = Metadata(lrn1, eori1, SubmissionState.RejectedPendingChanges))
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -73,6 +73,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       result.value.lrn shouldBe userAnswers1.lrn
       result.value.eoriNumber shouldBe userAnswers1.eoriNumber
       result.value.metadata shouldBe userAnswers1.metadata
+      result.value.isTransitional shouldBe userAnswers1.isTransitional
     }
 
     "return None when no UserAnswers match LocalReferenceNumber" in {
@@ -96,7 +97,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       findOne(userAnswers3.lrn, userAnswers3.eoriNumber) should not be defined
 
-      val setResult = repository.set(userAnswers3.metadata, None, None).futureValue
+      val setResult = repository.set(userAnswers3.metadata, None, Some(Phase.Transition)).futureValue
 
       setResult shouldBe true
 
@@ -105,7 +106,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       getResult.lrn shouldBe userAnswers3.lrn
       getResult.eoriNumber shouldBe userAnswers3.eoriNumber
       getResult.metadata shouldBe userAnswers3.metadata
-      getResult.status shouldBe SubmissionState.NotSubmitted
+      getResult.isTransitional shouldBe true
     }
 
     "create new document when given valid UserAnswers with departureId" in {
@@ -113,7 +114,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       findOne(userAnswers3.lrn, userAnswers3.eoriNumber) should not be defined
       val depId = "departureId123"
 
-      val setResult = repository.set(userAnswers3.metadata, None, Some(depId)).futureValue
+      val setResult = repository.set(userAnswers3.metadata, Some(depId), Some(Phase.PostTransition)).futureValue
 
       setResult shouldBe true
 
@@ -122,24 +123,8 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       getResult.lrn shouldBe userAnswers3.lrn
       getResult.eoriNumber shouldBe userAnswers3.eoriNumber
       getResult.metadata shouldBe userAnswers3.metadata
-      getResult.status shouldBe SubmissionState.NotSubmitted
       getResult.departureId.get shouldBe depId
-    }
-
-    "create new document when given valid UserAnswers and stats" in {
-
-      findOne(userAnswers3.lrn, userAnswers3.eoriNumber) should not be defined
-
-      val setResult = repository.set(userAnswers3.metadata, Some(SubmissionState.RejectedPendingChanges), None).futureValue
-
-      setResult shouldBe true
-
-      val getResult = findOne(userAnswers3.lrn, userAnswers3.eoriNumber).get
-
-      getResult.lrn shouldBe userAnswers3.lrn
-      getResult.eoriNumber shouldBe userAnswers3.eoriNumber
-      getResult.metadata shouldBe userAnswers3.metadata
-      getResult.status shouldBe SubmissionState.RejectedPendingChanges
+      getResult.isTransitional shouldBe false
     }
 
     "update document when it already exists" in {
@@ -150,7 +135,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         data = Json.obj("foo" -> "bar"),
         tasks = Map(".task" -> Status.InProgress)
       )
-      val setResult = repository.set(metadata, None, None).futureValue
+      val setResult = repository.set(metadata, None, Some(Phase.Transition)).futureValue
 
       setResult shouldBe true
 
@@ -161,28 +146,8 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       firstGet.eoriNumber shouldBe secondGet.eoriNumber
       firstGet.metadata shouldNot equal(secondGet.metadata)
       firstGet.createdAt shouldBe secondGet.createdAt
+      firstGet.isTransitional shouldBe secondGet.isTransitional
       firstGet.lastUpdated `isBefore` secondGet.lastUpdated shouldBe true
-      firstGet.status shouldBe secondGet.status
-    }
-
-    "update document when it already exists with new status" in {
-
-      val firstGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
-
-      val setResult = repository.set(userAnswers1, SubmissionState.RejectedPendingChanges, None).futureValue
-
-      setResult shouldBe true
-
-      val secondGet = findOne(userAnswers1.lrn, userAnswers1.eoriNumber).get
-
-      firstGet.id shouldBe secondGet.id
-      firstGet.lrn shouldBe secondGet.lrn
-      firstGet.eoriNumber shouldBe secondGet.eoriNumber
-      firstGet.metadata shouldBe secondGet.metadata
-      firstGet.createdAt shouldBe secondGet.createdAt
-      firstGet.lastUpdated `isBefore` secondGet.lastUpdated shouldBe true
-      firstGet.status shouldBe SubmissionState.NotSubmitted
-      secondGet.status shouldBe SubmissionState.RejectedPendingChanges
     }
   }
 
