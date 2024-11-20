@@ -38,11 +38,17 @@ class XPathService @Inject() (
         isDeclarationAmendable(lrn, eoriNumber, errorPointers)
     }
 
-  private def isDeclarationCached(lrn: String, eoriNumber: String): Future[Boolean] =
-    cacheRepository.get(lrn, eoriNumber).map(_.isDefined)
-
   def isDeclarationAmendable(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
-    isDeclarationCached(lrn, eoriNumber).map(_ && xPaths.exists(_.isAmendable))
+    isDeclarationCached(lrn, eoriNumber).map {
+      _ && xPaths.exists(_.isAmendable)
+    }
+
+  private def isDeclarationCached(lrn: String, eoriNumber: String): Future[Boolean] =
+    cacheRepository.get(lrn, eoriNumber).map {
+      _.exists {
+        _.metadata.isSubmitted != SubmissionState.NotSubmitted
+      }
+    }
 
   def handleRejection(userAnswers: UserAnswers, rejection: Rejection): UserAnswers =
     rejection match {

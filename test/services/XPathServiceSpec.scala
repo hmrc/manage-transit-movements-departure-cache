@@ -38,7 +38,9 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
     "return true" when {
       "IE055 rejection" when {
         "a document exists in the cache for the given LRN and EORI" in {
-          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+          val userAnswers = emptyUserAnswers.updateStatus(SubmissionState.Submitted)
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
           val rejection = IE055Rejection(departureId)
 
@@ -53,8 +55,9 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
       "IE056 rejection" when {
         "a document exists in the cache for the given LRN and EORI" when {
           "at least one of the errors is amendable" in {
+            val userAnswers = emptyUserAnswers.updateStatus(SubmissionState.Submitted)
 
-            when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+            when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
             val rejection = IE056Rejection(
               departureId,
@@ -76,6 +79,20 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
       "IE055 rejection" when {
         "a document doesn't exist in the cache for the given LRN and EORI" in {
           when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
+
+          val rejection = IE055Rejection(departureId)
+
+          val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
+
+          result shouldBe false
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        }
+
+        "a document exists in the cache with status NotSubmitted" in {
+          val userAnswers = emptyUserAnswers.updateStatus(SubmissionState.NotSubmitted)
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
           val rejection = IE055Rejection(departureId)
 
@@ -109,7 +126,29 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
         "a document doesn't exist in the cache for the given LRN and EORI" in {
           when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
 
-          val rejection = IE055Rejection(departureId)
+          val rejection = IE056Rejection(
+            departureId,
+            BusinessRejectionType.AmendmentRejection,
+            Seq(amendableXPath)
+          )
+
+          val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
+
+          result shouldBe false
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        }
+
+        "a document exists in the cache with status NotSubmitted" in {
+          val userAnswers = emptyUserAnswers.updateStatus(SubmissionState.NotSubmitted)
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
+
+          val rejection = IE056Rejection(
+            departureId,
+            BusinessRejectionType.AmendmentRejection,
+            Seq(amendableXPath)
+          )
 
           val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
 
@@ -124,10 +163,12 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
   "isDeclarationAmendable" must {
 
     "return true" when {
-      "a document exists in the cache for the given LRN and EORI " +
-        "and at least one of the errors is amendable" in {
+      "a document exists in the cache for the given LRN and EORI" when {
+        "at least one of the errors is amendable" in {
 
-          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+          val userAnswers = emptyUserAnswers.updateStatus(SubmissionState.Submitted)
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
           val xPaths = Seq.fill(9)(unamendableXPath) :+ amendableXPath
 
@@ -137,28 +178,33 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         }
+      }
     }
 
     "return false" when {
-      "a document doesn't exist in the cache for the given LRN and EORI " +
-        "and there are 10 or fewer errors " +
-        "and at least one of the errors is amendable" in {
+      "a document doesn't exist in the cache for the given LRN and EORI" when {
+        "there are 10 or fewer errors" when {
+          "at least one of the errors is amendable" in {
 
-          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
+            when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
 
-          val xPaths = Seq.fill(9)(unamendableXPath) :+ amendableXPath
+            val xPaths = Seq.fill(9)(unamendableXPath) :+ amendableXPath
 
-          val result = service.isDeclarationAmendable(lrn, eoriNumber, xPaths).futureValue
+            val result = service.isDeclarationAmendable(lrn, eoriNumber, xPaths).futureValue
 
-          result shouldBe false
+            result shouldBe false
 
-          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+            verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+          }
         }
+      }
 
-      "a document exists in the cache for the given LRN and EORI " +
-        "and none of the errors are amendable" in {
+      "a document exists in the cache for the given LRN and EORI" when {
+        "none of the errors are amendable" in {
 
-          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
+          val userAnswers = emptyUserAnswers.updateStatus(SubmissionState.Submitted)
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
           val xPaths = Seq.fill(10)(unamendableXPath)
 
@@ -168,6 +214,24 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         }
+
+        "the errors are amendable" when {
+          "the submission status is NotSubmitted" in {
+
+            val userAnswers = emptyUserAnswers.updateStatus(SubmissionState.NotSubmitted)
+
+            when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
+
+            val xPaths = Seq.fill(10)(amendableXPath)
+
+            val result = service.isDeclarationAmendable(lrn, eoriNumber, xPaths).futureValue
+
+            result shouldBe false
+
+            verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+          }
+        }
+      }
     }
   }
 
