@@ -18,8 +18,8 @@ package controllers
 
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider, VersionedAction}
 import models.AuditType.*
-import models.{Metadata, Phase, Rejection, SubmissionState, UserAnswers, XPath}
 import models.Rejection.*
+import models.*
 import play.api.Logging
 import play.api.libs.json.*
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -183,18 +183,6 @@ class CacheController @Inject() (
       }
   }
 
-  def isDeclarationAmendable(lrn: String): Action[JsValue] = authenticate().async(parse.json) {
-    implicit request =>
-      request.body.validate[Seq[XPath]] match {
-        case JsSuccess(xPaths, _) =>
-          xPathService.isDeclarationAmendable(lrn, request.eoriNumber, xPaths).map(JsBoolean).map(Ok(_))
-        case JsError(errors) =>
-          logger.warn(s"Failed to validate request body as sequence of xPaths: $errors")
-          Future.successful(BadRequest)
-      }
-  }
-
-  // TODO - remove isDeclarationAmendable after deployment of CTCP-5975
   def isRejectionAmendable(lrn: String): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[Rejection] match {
