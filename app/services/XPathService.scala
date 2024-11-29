@@ -38,7 +38,7 @@ class XPathService @Inject() (
         isDeclarationAmendable(lrn, eoriNumber, errorPointers)
     }
 
-  def isDeclarationAmendable(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
+  private def isDeclarationAmendable(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
     isDeclarationCached(lrn, eoriNumber).map {
       _ && xPaths.exists(_.isAmendable)
     }

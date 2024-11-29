@@ -26,14 +26,13 @@ import controllers.actions.{
 import generators.Generators
 import models.AuditType.*
 import models.Rejection.IE055Rejection
-import models.{Metadata, Phase, SubmissionState, UserAnswersSummary, XPath}
+import models.{Metadata, Phase, SubmissionState, UserAnswersSummary}
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.*
-import org.scalacheck.Arbitrary.arbitrary
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.{JsArray, JsBoolean, JsString, Json}
+import play.api.libs.json.{JsBoolean, JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import repositories.{CacheRepository, DefaultLockRepository}
@@ -580,53 +579,6 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockXPathService).handleRejection(eqTo(userAnswers), eqTo(IE055Rejection(departureId)))
         verify(mockCacheRepository).set(eqTo(userAnswers.metadata), eqTo(userAnswers.departureId), eqTo(None))
-      }
-    }
-  }
-
-  "isDeclarationAmendable" should {
-
-    val xPaths = arbitrary[Seq[XPath]].sample.value
-
-    "return 200 with true" when {
-      "declaration is amendable" in {
-        when(mockXPathService.isDeclarationAmendable(any(), any(), any())).thenReturn(Future.successful(true))
-
-        val request = FakeRequest(POST, routes.CacheController.isDeclarationAmendable(lrn).url)
-          .withJsonBody(JsArray(xPaths.map(_.value).map(JsString.apply)))
-
-        val result = route(app, request).value
-
-        status(result) shouldBe OK
-        contentAsJson(result) shouldBe JsBoolean(true)
-        verify(mockXPathService).isDeclarationAmendable(eqTo(lrn), eqTo(eoriNumber), eqTo(xPaths))
-      }
-    }
-
-    "return 200 with false" when {
-      "declaration is not amendable" in {
-        when(mockXPathService.isDeclarationAmendable(any(), any(), any())).thenReturn(Future.successful(false))
-
-        val request = FakeRequest(POST, routes.CacheController.isDeclarationAmendable(lrn).url)
-          .withJsonBody(JsArray(xPaths.map(_.value).map(JsString.apply)))
-
-        val result = route(app, request).value
-
-        status(result) shouldBe OK
-        contentAsJson(result) shouldBe JsBoolean(false)
-        verify(mockXPathService).isDeclarationAmendable(eqTo(lrn), eqTo(eoriNumber), eqTo(xPaths))
-      }
-    }
-
-    "return 400" when {
-      "request body is not an array of xpaths" in {
-        val request = FakeRequest(POST, routes.CacheController.isDeclarationAmendable(lrn).url)
-          .withJsonBody(Json.obj("foo" -> "bar"))
-
-        val result = route(app, request).value
-
-        status(result) shouldBe BAD_REQUEST
-        verify(mockXPathService, never()).isDeclarationAmendable(any(), any(), any())
       }
     }
   }
