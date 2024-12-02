@@ -18,6 +18,9 @@ package models
 
 sealed trait Task {
   val taskName: String
+
+  def taskError: (String, Status.Value) =
+    taskName -> Status.Error
 }
 
 object Task {
@@ -28,25 +31,37 @@ object Task {
 
   case object TraderDetails extends Task {
     override val taskName: String = ".traderDetails"
+
+    override def toString: String = "Trader details"
   }
 
   case object RouteDetails extends Task {
     override val taskName: String = ".routeDetails"
+
+    override def toString: String = "Route details"
   }
 
   case object TransportDetails extends Task {
     override val taskName: String = ".transportDetails"
+
+    override def toString: String = "Transport details"
   }
 
   case object Documents extends Task {
     override val taskName: String = ".documents"
+
+    override def toString: String = "Documents"
   }
 
   case object Items extends Task {
     override val taskName: String = ".items"
+
+    override def toString: String = "Items"
   }
 
   case object GuaranteeDetails extends Task {
     override val taskName: String = ".guaranteeDetails"
+
+    override def toString: String = "Guarantee details"
   }
 }

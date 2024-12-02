@@ -16,7 +16,8 @@
 
 package generators
 
-import models.{MovementReferenceNumber, Phase, SubmissionState, XPath}
+import models.*
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
 
 trait ModelGenerators {
@@ -94,4 +95,13 @@ trait ModelGenerators {
     } yield XPath(value)
   }
 
+  implicit lazy val arbitraryFunctionalError: Arbitrary[FunctionalError] =
+    Arbitrary {
+      for {
+        errorPointer           <- arbitrary[XPath]
+        errorCode              <- Gen.alphaNumStr
+        errorReason            <- Gen.alphaNumStr
+        originalAttributeValue <- Gen.option(Gen.alphaNumStr)
+      } yield FunctionalError(errorPointer, errorCode, errorReason, originalAttributeValue)
+    }
 }
