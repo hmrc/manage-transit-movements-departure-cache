@@ -50,14 +50,10 @@ trait ModelGenerators {
 
   implicit lazy val arbitraryXPath: Arbitrary[XPath] = Arbitrary {
     val validXPaths = Seq(
-      "/CC015C/TransitOperation/declarationType",
-      "/CC015C/TransitOperation/TIRCarnetNumber",
-      "/CC015C/TransitOperation/security",
       "/CC015C/TransitOperation/bindingItinerary",
       "/CC015C/TransitOperation/reducedDatasetIndicator",
       "/CC015C/TransitOperation/limitDate",
       "/CC015C/Authorisation[1]/referenceNumber",
-      "/CC015C/CustomsOfficeOfDeparture[1]/country",
       "/CC015C/CustomsOfficeOfDestinationDeclared[1]/country",
       "/CC015C/CustomsOfficeOfTransitDeclared[1]/country",
       "/CC015C/CustomsOfficeOfExitForTransitDeclared[1]/country",
