@@ -402,6 +402,31 @@
 
 ---
 
+## `POST /messages/rejection`
+
+### Successful response
+
+#### 200 OK
+
+* A call is made to the `POST` endpoint with:
+  * a valid bearer token
+  * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
+  * a valid list of functional errors
+* The functional errors are converted to a separate list with the error pointers mapped to a section
+
+### Unsuccessful responses (with possible causes)
+
+#### 400 BAD_REQUEST
+* Request body could not be validated as a `Seq[FunctionalError]`
+
+#### 401 UNAUTHORIZED
+* A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
+
+#### 403 FORBIDDEN
+* User has insufficient enrolments
+
+---
+
 ## `GET /user-answers/:lrn/expiry`
 
 ### Successful response

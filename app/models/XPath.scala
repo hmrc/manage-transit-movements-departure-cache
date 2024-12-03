@@ -16,7 +16,7 @@
 
 package models
 
-import models.Task._
+import models.Task.*
 import play.api.libs.json.{__, Reads}
 
 import scala.util.Try
@@ -26,18 +26,9 @@ case class XPath(value: String) {
   def isAmendable: Boolean = this.task.isDefined
 
   def taskError: Option[(String, Status.Value)] =
-    this.task.map {
-      task => task.taskName -> Status.Error
-    }
+    this.task.map(_.taskError)
 
   def task: Option[Task] = {
-    val preTaskList: PartialFunction[String, Task] = {
-      case x if x.matches("^(.*)/TransitOperation/declarationType$") => PreTaskList
-      case x if x.matches("^(.*)/TransitOperation/TIRCarnetNumber$") => PreTaskList
-      case x if x.matches("^(.*)/TransitOperation/security$")        => PreTaskList
-      case x if x.matches("^(.*)/CustomsOfficeOfDeparture(.*)$")     => PreTaskList
-    }
-
     val traderDetails: PartialFunction[String, Task] = {
       case x if x.matches("^(.*)/TransitOperation/reducedDatasetIndicator$") => TraderDetails
       case x if x.matches("^(.*)/HolderOfTheTransitProcedure(.*)$")          => TraderDetails
@@ -97,7 +88,6 @@ case class XPath(value: String) {
     val pf: PartialFunction[String, Task] =
       documents orElse
         items orElse
-        preTaskList orElse
         traderDetails orElse
         routeDetails orElse
         transportDetails orElse
