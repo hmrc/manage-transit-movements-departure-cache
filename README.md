@@ -412,7 +412,7 @@
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
   * a valid list of functional errors
-* The functional errors are converted to a separate list with the error pointers mapped to a section and invalid data item
+* The functional errors are converted to a separate list with the error pointers mapped to a section
 
 ### Unsuccessful responses (with possible causes)
 

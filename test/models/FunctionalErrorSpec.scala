@@ -18,7 +18,6 @@ package models
 
 import base.SpecBase
 import generators.Generators
-import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.Json
 
@@ -88,74 +87,12 @@ class FunctionalErrorSpec extends SpecBase with ScalaCheckPropertyChecks with Ge
             |  "error" : "12",
             |  "businessRuleId" : "BR20004",
             |  "section" : "Trader details",
-            |  "invalidDataItem" : "Holder of the transit procedure: Identification number",
+            |  "invalidDataItem" : "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
             |  "invalidAnswer" : "GB635733627000"
             |}
             |""".stripMargin)
 
         result.shouldBe(expectedResult)
-      }
-    }
-  }
-
-  "invalidDataItem" when {
-    "/CC015C/HolderOfTheTransitProcedure/identificationNumber" must {
-      "return Holder of the transit procedure identification number" in {
-        forAll(arbitrary[FunctionalError]) {
-          functionalError =>
-            val errorPointer   = XPath("/CC015C/HolderOfTheTransitProcedure/identificationNumber")
-            val result         = functionalError.copy(errorPointer = errorPointer).invalidDataItem
-            val expectedResult = "Holder of the transit procedure: Identification number"
-            result.shouldBe(expectedResult)
-        }
-      }
-    }
-
-    "/CC015C/Consignment/HouseConsignment[50]/ConsignmentItem[10]/consignor" must {
-      "return Consignment item 10: Consignor" in {
-        forAll(arbitrary[FunctionalError]) {
-          functionalError =>
-            val errorPointer   = XPath("/CC015C/Consignment/HouseConsignment[50]/ConsignmentItem[10]/consignor")
-            val result         = functionalError.copy(errorPointer = errorPointer).invalidDataItem
-            val expectedResult = "Consignment item 10: Consignor"
-            result.shouldBe(expectedResult)
-        }
-      }
-    }
-
-    "/CC015C/Consignment/HouseConsignment[5]/ConsignmentItem[10]/SupportingDocument[22]/type" must {
-      "return Consignment item 10: Supporting document 22: Type" in {
-        forAll(arbitrary[FunctionalError]) {
-          functionalError =>
-            val errorPointer   = XPath("/CC015C/Consignment/HouseConsignment[5]/ConsignmentItem[10]/SupportingDocument[22]/type")
-            val result         = functionalError.copy(errorPointer = errorPointer).invalidDataItem
-            val expectedResult = "Consignment item 10: Supporting document 22: Type"
-            result.shouldBe(expectedResult)
-        }
-      }
-    }
-
-    "//Consignment/LocationOfGoods" must {
-      "return Location of goods" in {
-        forAll(arbitrary[FunctionalError]) {
-          functionalError =>
-            val errorPointer   = XPath("//Consignment/LocationOfGoods")
-            val result         = functionalError.copy(errorPointer = errorPointer).invalidDataItem
-            val expectedResult = "Location of goods"
-            result.shouldBe(expectedResult)
-        }
-      }
-    }
-
-    "/CC015C/Consignment/referenceNumberUCR" must {
-      "return Reference number UCR" in {
-        forAll(arbitrary[FunctionalError]) {
-          functionalError =>
-            val errorPointer   = XPath("/CC015C/Consignment/referenceNumberUCR")
-            val result         = functionalError.copy(errorPointer = errorPointer).invalidDataItem
-            val expectedResult = "Reference number UCR"
-            result.shouldBe(expectedResult)
-        }
       }
     }
   }

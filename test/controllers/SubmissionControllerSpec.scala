@@ -315,13 +315,13 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
             |    "error" : "12",
             |    "businessRuleId" : "BR20005",
             |    "section" : "Trader details",
-            |    "invalidDataItem" : "Holder of the transit procedure: Identification number"
+            |    "invalidDataItem" : "/CC015C/HolderOfTheTransitProcedure/identificationNumber"
             |  },
             |  {
             |    "error" : "12",
             |    "businessRuleId" : "BR20004",
             |    "section" : "Trader details",
-            |    "invalidDataItem" : "Holder of the transit procedure: Identification number",
+            |    "invalidDataItem" : "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
             |    "invalidAnswer" : "GB635733627000"
             |  }
             |]

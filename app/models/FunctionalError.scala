@@ -29,41 +29,6 @@ case class FunctionalError(
 ) {
 
   def section: Option[String] = errorPointer.task.map(_.toString)
-
-  def invalidDataItem: String = {
-    @tailrec
-    def rec(path: List[String], acc: String = ""): String = path match {
-      case Nil                                                        => acc
-      case ("" | "CC015C" | "Consignment") :: tail                    => rec(tail, acc)
-      case head :: tail if head.matches("""HouseConsignment\[\d*]""") => rec(tail, acc)
-      case head :: tail =>
-        val indexedPattern = "(.*)\\[(\\d*)]".r
-        val path = head match {
-          case indexedPattern(group, index) => s"$group $index:"
-          case _                            => if (tail.isEmpty) head else s"$head:"
-        }
-        rec(tail, combine(acc, separate(path)))
-    }
-
-    def combine(str1: String, str2: String): String =
-      if (str1.isEmpty) str2 else s"$str1 $str2"
-
-    def separate(str: String): String = {
-      @tailrec
-      def rec(chars: List[Char], acc: String = ""): String = chars match {
-        case Nil                         => acc
-        case head :: tail if acc.isEmpty => rec(tail, head.toUpper.toString)
-        case head :: next :: tail if head.isUpper && next.isUpper =>
-          val f: Char => Boolean = _.isUpper
-          rec(tail.dropWhile(f), acc + " " + head + next + tail.takeWhile(f).mkString)
-        case head :: tail if head.isUpper => rec(tail, acc + " " + head.toLower)
-        case head :: tail                 => rec(tail, acc + head)
-      }
-      rec(str.toList)
-    }
-
-    rec(errorPointer.value.split('/').toList).trim
-  }
 }
 
 object FunctionalError {
@@ -78,6 +43,11 @@ object FunctionalError {
       (__ \ "invalidAnswer").writeNullable[String]
   )(
     functionalError =>
-      (functionalError.errorCode, functionalError.errorReason, functionalError.section, functionalError.invalidDataItem, functionalError.originalAttributeValue)
+      (functionalError.errorCode,
+       functionalError.errorReason,
+       functionalError.section,
+       functionalError.errorPointer.value,
+       functionalError.originalAttributeValue
+      )
   )
 }
