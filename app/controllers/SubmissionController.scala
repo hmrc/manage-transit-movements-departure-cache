@@ -20,9 +20,9 @@ import cats.data.OptionT
 import cats.implicits.*
 import controllers.actions.{AuthenticateActionProvider, VersionedAction}
 import models.AuditType.*
-import models.{AuditType, Messages, SubmissionState, UserAnswers}
+import models.{AuditType, FunctionalError, Messages, SubmissionState, UserAnswers}
 import play.api.Logging
-import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
+import play.api.libs.json.{JsArray, JsError, JsSuccess, JsValue, Json}
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.CacheRepository
 import services.{ApiService, AuditService, MetricsService}
@@ -138,6 +138,18 @@ class SubmissionController @Inject() (
         case None =>
           logger.warn(s"No departure found for LRN $lrn")
           NotFound
+      }
+  }
+
+  def rejection(): Action[JsValue] = authenticate()(parse.json) {
+    implicit request =>
+      request.body.validate[Seq[FunctionalError]] match {
+        case JsSuccess(value, _) =>
+          val json = value.map(Json.toJson(_))
+          Ok(JsArray(json))
+        case JsError(errors) =>
+          logger.warn(s"Failed to validate request body as functional errors: $errors")
+          BadRequest
       }
   }
 }

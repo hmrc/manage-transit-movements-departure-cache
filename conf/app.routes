@@ -17,5 +17,7 @@ POST       /declaration/submit-amendment                        controllers.Subm
 
 GET        /messages/:lrn                                       controllers.SubmissionController.get(lrn: String)
 
+POST       /messages/rejection                                  controllers.SubmissionController.rejection()
+
 GET        /user-answers/:lrn/lock                              controllers.LockController.checkLock(lrn: String)
 DELETE     /user-answers/:lrn/lock                              controllers.LockController.deleteLock(lrn: String)
