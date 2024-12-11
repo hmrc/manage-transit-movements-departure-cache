@@ -17,12 +17,7 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import controllers.actions.{
-  AuthenticateActionProvider,
-  AuthenticateAndLockActionProvider,
-  FakeAuthenticateActionProvider,
-  FakeAuthenticateAndLockActionProvider
-}
+import controllers.actions.*
 import generators.Generators
 import models.AuditType.*
 import models.Rejection.IE055Rejection

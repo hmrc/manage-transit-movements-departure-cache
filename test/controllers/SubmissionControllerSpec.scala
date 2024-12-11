@@ -23,7 +23,7 @@ import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.libs.json.Json
+import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
 import services.{ApiService, AuditService}
@@ -281,6 +281,74 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         status(result) shouldBe NOT_FOUND
 
         verify(mockApiService).get(eqTo(lrn), eqTo(Phase.Transition))(any())
+      }
+    }
+  }
+
+  "rejection" should {
+    "return 200" when {
+      "functional error conversion is successful" in {
+        val functionalErrors = Json.parse("""
+            |[
+            |  {
+            |    "errorPointer" : "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
+            |    "errorCode" : "12",
+            |    "errorReason" : "BR20005"
+            |  },
+            |  {
+            |    "errorPointer" : "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
+            |    "errorCode" : "12",
+            |    "errorReason" : "BR20004",
+            |    "originalAttributeValue" : "GB635733627000"
+            |  }
+            |]
+            |""".stripMargin)
+
+        val request = FakeRequest(POST, routes.SubmissionController.rejection().url)
+          .withJsonBody(functionalErrors)
+
+        val result = route(app, request).value
+
+        val expectedResult = Json.parse("""
+            |[
+            |  {
+            |    "error" : "12",
+            |    "businessRuleId" : "BR20005",
+            |    "section" : "Trader details",
+            |    "invalidDataItem" : "/CC015C/HolderOfTheTransitProcedure/identificationNumber"
+            |  },
+            |  {
+            |    "error" : "12",
+            |    "businessRuleId" : "BR20004",
+            |    "section" : "Trader details",
+            |    "invalidDataItem" : "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
+            |    "invalidAnswer" : "GB635733627000"
+            |  }
+            |]
+            |""".stripMargin)
+
+        status(result) shouldBe OK
+        contentAsJson(result) shouldBe expectedResult
+      }
+    }
+
+    "return 400" when {
+      "request body is invalid" in {
+        val request = FakeRequest(POST, routes.SubmissionController.rejection().url)
+          .withJsonBody(JsString("foo"))
+
+        val result = route(app, request).value
+
+        status(result) shouldBe BAD_REQUEST
+      }
+
+      "request body is empty" in {
+        val request = FakeRequest(POST, routes.SubmissionController.rejection().url)
+          .withJsonBody(Json.obj())
+
+        val result = route(app, request).value
+
+        status(result) shouldBe BAD_REQUEST
       }
     }
   }

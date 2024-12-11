@@ -18,10 +18,10 @@ package models
 
 import base.SpecBase
 import generators.Generators
-import models.Task._
+import models.Task.*
+import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import org.scalacheck.Arbitrary.arbitrary
 import play.api.libs.json.JsString
 
 class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
@@ -65,27 +65,6 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
   }
 
   "task" when {
-    "when /CC015C/TransitOperation/declarationType" must {
-      "return PreTaskList" in {
-        val xPath = XPath("/CC015C/TransitOperation/declarationType")
-        xPath.task.value shouldBe PreTaskList
-      }
-    }
-
-    "when /CC015C/TransitOperation/TIRCarnetNumber" must {
-      "return PreTaskList" in {
-        val xPath = XPath("/CC015C/TransitOperation/TIRCarnetNumber")
-        xPath.task.value shouldBe PreTaskList
-      }
-    }
-
-    "when /CC015C/TransitOperation/security" must {
-      "return PreTaskList" in {
-        val xPath = XPath("/CC015C/TransitOperation/security")
-        xPath.task.value shouldBe PreTaskList
-      }
-    }
-
     "when /CC015C/TransitOperation/reducedDatasetIndicator" must {
       "return TraderDetails" in {
         val xPath = XPath("/CC015C/TransitOperation/reducedDatasetIndicator")
@@ -111,13 +90,6 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
       "return TransportDetails" in {
         val xPath = XPath("/CC015C/Authorisation[1]/referenceNumber")
         xPath.task.value shouldBe TransportDetails
-      }
-    }
-
-    "when /CC015C/CustomsOfficeOfDeparture/" must {
-      "return PreTaskList" in {
-        val xPath = XPath("/CC015C/CustomsOfficeOfDeparture/")
-        xPath.task.value shouldBe PreTaskList
       }
     }
 
@@ -200,14 +172,14 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
 
     "when /CC015C/Consignment/TransportEquipment/paymentMethod" must {
       "return TransportDetails" in {
-        val xPath = XPath("/CC015C/Consignment/TransportEquipment/paymentMethod")
+        val xPath = XPath("/CC015C/Consignment/TransportEquipment[1]/paymentMethod")
         xPath.task.value shouldBe TransportDetails
       }
     }
 
     "when /CC015C/Consignment/ActiveBorderTransportMeans/identificationNumber" must {
       "return TransportDetails" in {
-        val xPath = XPath("/CC015C/Consignment/ActiveBorderTransportMeans/identificationNumber")
+        val xPath = XPath("/CC015C/Consignment/ActiveBorderTransportMeans[1]/identificationNumber")
         xPath.task.value shouldBe TransportDetails
       }
     }
@@ -383,47 +355,39 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
 
   "taskError" must {
 
-    "return Some((.preTaskList, Status.Value.Error))" when {
-      "xPath.task returns PreTaskList" in {
-        val xPath = s"/CC015C/TransitOperation/declarationType"
-        XPath(xPath).taskError shouldBe Some((".preTaskList", Status(Status.Error.id)))
-      }
-    }
-
     "return Some((.traderDetails, Status.Value.Error))" when {
       "xPath.task returns TraderDetails" in {
         val xPath = s"/CC015C/Consignment/Consignor/name"
-        XPath(xPath).taskError shouldBe Some((".traderDetails", Status(Status.Error.id)))
+        XPath(xPath).taskError shouldBe Some((".traderDetails", Status.Error))
       }
     }
 
     "return Some((.routeDetails, Status.Value.Error))" when {
       "xPath.task returns RouteDetails" in {
         val xPath = s"/CC015C/Consignment/PlaceOfLoading/country"
-        XPath(xPath).taskError shouldBe Some((".routeDetails", Status(Status.Error.id)))
+        XPath(xPath).taskError shouldBe Some((".routeDetails", Status.Error))
       }
     }
 
     "return Some((.transportDetails, Status.Value.Error))" when {
       "xPath.task returns TransportDetails" in {
         val xPath = s"/CC015C/Authorisation[1]/referenceNumber"
-        XPath(xPath).taskError shouldBe Some((".transportDetails", Status(Status.Error.id)))
+        XPath(xPath).taskError shouldBe Some((".transportDetails", Status.Error))
       }
     }
 
     "return Some((.documents, Status.Value.Error))" when {
       "xPath.task returns Documents" in {
         val xPath = s"/CC015C/Consignment/PreviousDocument[1]/type"
-        XPath(xPath).taskError shouldBe Some((".documents", Status(Status.Error.id)))
+        XPath(xPath).taskError shouldBe Some((".documents", Status.Error))
       }
     }
 
     "return Some((.items, Status.Value.Error))" when {
       "xPath.task returns Items" in {
         val xPath = s"/CC015C/Consignment/HouseConsignment[2]/ConsignmentItem[99]/additionalInformation"
-        XPath(xPath).taskError shouldBe Some((".items", Status(Status.Error.id)))
+        XPath(xPath).taskError shouldBe Some((".items", Status.Error))
       }
     }
   }
-
 }
