@@ -19,10 +19,10 @@ package controllers
 import cats.data.OptionT
 import cats.implicits.*
 import controllers.actions.{AuthenticateActionProvider, VersionedAction}
+import models.*
 import models.AuditType.*
-import models.{AuditType, FunctionalError, Messages, SubmissionState, UserAnswers}
 import play.api.Logging
-import play.api.libs.json.{JsArray, JsError, JsSuccess, JsValue, Json}
+import play.api.libs.json.*
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
 import repositories.CacheRepository
 import services.{ApiService, AuditService, MetricsService}
@@ -46,29 +46,33 @@ class SubmissionController @Inject() (
     extends BackendController(cc)
     with Logging {
 
+  private def log(method: String, message: String, args: String*): String =
+    s"SubmissionController:$method:${args.mkString(":")} - $message"
+
   def post(): Action[JsValue] =
     (authenticate() andThen getVersion).async(parse.json) {
       implicit request =>
+        import request.*
         val auditType = DeclarationData
-        request.body.validate[String] match {
+        body.validate[String] match {
           case JsSuccess(lrn, _) =>
             val result = for {
-              userAnswers <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
+              userAnswers <- OptionT(cacheRepository.get(lrn, eoriNumber))
               result <- OptionT.liftF {
                 apiService
-                  .submitDeclaration(userAnswers, request.phase)
+                  .submitDeclaration(userAnswers, phase)
                   .flatMap(responseToResult(userAnswers, _, None, DeclarationData))
               }
             } yield result
 
             result.value.map(_.getOrElse {
               metricsService.increment(auditType.name, NOT_FOUND)
-              logger.error(s"SubmissionController:post:$auditType: Could not find user answers")
+              logger.error(log("post", "Could not find user answers", eoriNumber, lrn))
               NotFound
             })
           case JsError(errors) =>
             metricsService.increment(auditType.name, BAD_REQUEST)
-            logger.warn(s"SubmissionController:post:$auditType: Failed to validate request body as String: $errors")
+            logger.warn(log("post", "Failed to validate request body as String", eoriNumber))
             Future.successful(BadRequest)
         }
     }
@@ -76,27 +80,28 @@ class SubmissionController @Inject() (
   def postAmendment(): Action[JsValue] =
     (authenticate() andThen getVersion).async(parse.json) {
       implicit request =>
+        import request.*
         val auditType = DeclarationAmendment
-        request.body.validate[String] match {
+        body.validate[String] match {
           case JsSuccess(lrn, _) =>
             val result = for {
-              userAnswers <- OptionT(cacheRepository.get(lrn, request.eoriNumber))
+              userAnswers <- OptionT(cacheRepository.get(lrn, eoriNumber))
               departureId <- OptionT.fromOption[Future](userAnswers.departureId)
               result <- OptionT.liftF {
                 apiService
-                  .submitAmendment(userAnswers, departureId, request.phase)
+                  .submitAmendment(userAnswers, departureId, phase)
                   .flatMap(responseToResult(userAnswers, _, Some(departureId), auditType))
               }
             } yield result
 
             result.value.map(_.getOrElse {
               metricsService.increment(auditType.name, NOT_FOUND)
-              logger.error(s"SubmissionController:post:$auditType: Could not find user answers, or they did not contain a departure ID")
+              logger.error(log("postAmendment", "Could not find user answers, or they did not contain a departure ID", eoriNumber, lrn))
               NotFound
             })
           case JsError(errors) =>
             metricsService.increment(auditType.name, BAD_REQUEST)
-            logger.warn(s"SubmissionController:post:$auditType: Failed to validate request body as String: $errors")
+            logger.warn(log("postAmendment", s"Failed to validate request body as String: $errors", eoriNumber))
             Future.successful(BadRequest)
         }
     }
@@ -108,47 +113,50 @@ class SubmissionController @Inject() (
     auditType: AuditType
   )(implicit hc: HeaderCarrier): Future[Result] = {
     val updatedUserAnswers = userAnswers.updateStatus(SubmissionState.Submitted)
+    import updatedUserAnswers.{eoriNumber, lrn, metadata}
     metricsService.increment(auditType.name, response)
     response.status match {
       case status if is2xx(status) =>
         cacheRepository
-          .set(updatedUserAnswers.metadata, departureId, None)
+          .set(metadata, departureId, None)
           .map {
             _ =>
               auditService.audit(auditType, updatedUserAnswers)
               Ok(response.body)
           }
       case BAD_REQUEST =>
-        logger.warn(s"SubmissionController:post:$auditType: Bad request")
+        logger.warn(log("responseToResult", "Bad request", auditType.toString, eoriNumber, lrn))
         Future.successful(BadRequest)
       case e =>
-        logger.error(s"SubmissionController:post:$auditType: Something went wrong: $e")
+        logger.error(log("responseToResult", s"Something went wrong: $e", auditType.toString, eoriNumber, lrn))
         Future.successful(InternalServerError)
     }
   }
 
   def get(lrn: String): Action[AnyContent] = (authenticate() andThen getVersion).async {
     implicit request =>
-      apiService.get(lrn, request.phase).map {
+      import request.*
+      apiService.get(lrn, phase).map {
         case Some(Messages(Nil)) =>
-          logger.info(s"No messages found for LRN $lrn")
+          logger.warn(log("get", "No messages found for LRN", eoriNumber, lrn))
           NoContent
         case Some(messages) =>
           Ok(Json.toJson(messages))
         case None =>
-          logger.warn(s"No departure found for LRN $lrn")
+          logger.warn(log("get", "No departure found", eoriNumber, lrn))
           NotFound
       }
   }
 
   def rejection(): Action[JsValue] = authenticate()(parse.json) {
     implicit request =>
-      request.body.validate[Seq[FunctionalError]] match {
+      import request.*
+      body.validate[Seq[FunctionalError]] match {
         case JsSuccess(value, _) =>
           val json = value.map(Json.toJson(_))
           Ok(JsArray(json))
         case JsError(errors) =>
-          logger.warn(s"Failed to validate request body as functional errors: $errors")
+          logger.warn(log("rejection", s"Failed to validate request body as functional errors: $errors", eoriNumber))
           BadRequest
       }
   }
