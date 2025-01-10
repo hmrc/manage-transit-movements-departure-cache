@@ -40,11 +40,11 @@ object transitOperationType04 {
           declarationType = readsData.declarationType,
           additionalDeclarationType = readsData.additionalDeclarationType,
           TIRCarnetNumber = readsData.TIRCarnetNumber,
-          presentationOfTheGoodsDateAndTime = None, // TODO - do we collect this?
+          presentationOfTheGoodsDateAndTime = None,
           security = readsData.security,
           reducedDatasetIndicator = readsData.reducedDatasetIndicator,
           specificCircumstanceIndicator = readsData.specificCircumstanceIndicator,
-          communicationLanguageAtDeparture = None, // TODO - do we collect this?
+          communicationLanguageAtDeparture = None,
           bindingItinerary = readsData.bindingItinerary,
           amendmentTypeFlag = amendmentTypeFlag,
           limitDate = readsData.limitDate
@@ -62,11 +62,11 @@ object transitOperationType06 {
           declarationType = readsData.declarationType,
           additionalDeclarationType = readsData.additionalDeclarationType,
           TIRCarnetNumber = readsData.TIRCarnetNumber,
-          presentationOfTheGoodsDateAndTime = None, // TODO - do we collect this?
+          presentationOfTheGoodsDateAndTime = None,
           security = readsData.security,
           reducedDatasetIndicator = readsData.reducedDatasetIndicator,
           specificCircumstanceIndicator = readsData.specificCircumstanceIndicator,
-          communicationLanguageAtDeparture = None, // TODO - do we collect this?
+          communicationLanguageAtDeparture = None,
           bindingItinerary = readsData.bindingItinerary,
           limitDate = readsData.limitDate
         )

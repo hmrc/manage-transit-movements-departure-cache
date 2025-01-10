@@ -285,7 +285,7 @@ object additionalSupplyChainActorType {
 object transportEquipmentType06 {
 
   private def uuidReads: Reads[UUID] =
-    (__ \ "transportEquipment").read[UUID] orElse (__ \ "inferredTransportEquipment").read[UUID]
+    (__ \ "transportEquipment").read[UUID]
 
   implicit class RichTransportEquipmentJsValue(transportEquipment: JsValue) {
 
