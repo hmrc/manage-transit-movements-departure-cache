@@ -2866,13 +2866,13 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             |  },
             |  "items" : [
             |    {
-            |      "inferredTransportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+            |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |    },
             |    {
-            |      "inferredTransportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+            |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |    },
             |    {
-            |      "inferredTransportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+            |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
             |    }
             |  ]
             |}
