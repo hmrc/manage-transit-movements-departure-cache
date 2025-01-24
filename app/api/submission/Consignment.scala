@@ -17,10 +17,9 @@
 package api.submission
 
 import api.submission.Level.*
-import api.submission.transportEquipmentType06.RichTransportEquipmentJsValue
-
 import api.submission.documentType.RichDocumentJsValue
 import api.submission.houseConsignmentType10.RichHouseConsignmentType10
+import api.submission.transportEquipmentType06.RichTransportEquipmentJsValue
 import config.Constants.ModeOfTransport.Rail
 import generated.*
 import models.Phase.Transition
@@ -357,7 +356,9 @@ object locationOfGoodsType05 {
       (__ \ "identifier" \ "coordinates").readNullable[GNSSType](gnssType.reads) and
       (__ \ "identifier" \ "eori").readNullable[EconomicOperatorType03](economicOperatorType03.reads) and
       (__ \ "identifier").read[Option[AddressType14]](addressType14.optionalReads) and
-      (__ \ "identifier" \ "postalCode").readNullable[PostcodeAddressType02](postcodeAddressType02.reads) and
+      Reads[Option[PostcodeAddressType02]] {
+        _ => JsSuccess(None)
+      } and
       (__ \ "contact").readNullable[ContactPersonType06](contactPersonType06.reads)
   )(LocationOfGoodsType05.apply)
 }

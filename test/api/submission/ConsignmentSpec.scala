@@ -174,13 +174,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 country = "ES"
               )
             ),
-            PostcodeAddress = Some(
-              PostcodeAddressType02(
-                houseNumber = Some("21"),
-                postcode = "DE1 1DE",
-                country = "DE"
-              )
-            ),
+            PostcodeAddress = None,
             ContactPerson = Some(
               ContactPersonType06(
                 name = "Location of goods Contact",
@@ -1149,13 +1143,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 country = "ES"
               )
             ),
-            PostcodeAddress = Some(
-              PostcodeAddressType02(
-                houseNumber = Some("21"),
-                postcode = "DE1 1DE",
-                country = "DE"
-              )
-            ),
+            PostcodeAddress = None,
             ContactPerson = Some(
               ContactPersonType06(
                 name = "Location of goods Contact",
