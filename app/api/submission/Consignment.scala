@@ -356,9 +356,7 @@ object locationOfGoodsType05 {
       (__ \ "identifier" \ "coordinates").readNullable[GNSSType](gnssType.reads) and
       (__ \ "identifier" \ "eori").readNullable[EconomicOperatorType03](economicOperatorType03.reads) and
       (__ \ "identifier").read[Option[AddressType14]](addressType14.optionalReads) and
-      Reads[Option[PostcodeAddressType02]] {
-        _ => JsSuccess(None)
-      } and
+      Reads.pure[Option[PostcodeAddressType02]](None) and
       (__ \ "contact").readNullable[ContactPersonType06](contactPersonType06.reads)
   )(LocationOfGoodsType05.apply)
 }
