@@ -18,7 +18,7 @@ package controllers
 
 import cats.data.OptionT
 import cats.implicits.*
-import controllers.actions.{AuthenticateActionProvider, VersionedAction}
+import controllers.actions.AuthenticateActionProvider
 import models.*
 import models.AuditType.*
 import play.api.Logging
@@ -37,7 +37,6 @@ import scala.concurrent.{ExecutionContext, Future}
 class SubmissionController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
-  getVersion: VersionedAction,
   apiService: ApiService,
   cacheRepository: CacheRepository,
   auditService: AuditService,
@@ -50,7 +49,7 @@ class SubmissionController @Inject() (
     s"SubmissionController:$method:${args.mkString(":")} - $message"
 
   def post(): Action[JsValue] =
-    (authenticate() andThen getVersion).async(parse.json) {
+    authenticate().async(parse.json) {
       implicit request =>
         import request.*
         val auditType = DeclarationData
@@ -60,7 +59,7 @@ class SubmissionController @Inject() (
               userAnswers <- OptionT(cacheRepository.get(lrn, eoriNumber))
               result <- OptionT.liftF {
                 apiService
-                  .submitDeclaration(userAnswers, phase)
+                  .submitDeclaration(userAnswers)
                   .flatMap(responseToResult(userAnswers, _, None, DeclarationData))
               }
             } yield result
@@ -78,7 +77,7 @@ class SubmissionController @Inject() (
     }
 
   def postAmendment(): Action[JsValue] =
-    (authenticate() andThen getVersion).async(parse.json) {
+    authenticate().async(parse.json) {
       implicit request =>
         import request.*
         val auditType = DeclarationAmendment
@@ -89,7 +88,7 @@ class SubmissionController @Inject() (
               departureId <- OptionT.fromOption[Future](userAnswers.departureId)
               result <- OptionT.liftF {
                 apiService
-                  .submitAmendment(userAnswers, departureId, phase)
+                  .submitAmendment(userAnswers, departureId)
                   .flatMap(responseToResult(userAnswers, _, Some(departureId), auditType))
               }
             } yield result
@@ -118,7 +117,7 @@ class SubmissionController @Inject() (
     response.status match {
       case status if is2xx(status) =>
         cacheRepository
-          .set(metadata, departureId, None)
+          .set(metadata, departureId)
           .map {
             _ =>
               auditService.audit(auditType, updatedUserAnswers)
@@ -133,10 +132,10 @@ class SubmissionController @Inject() (
     }
   }
 
-  def get(lrn: String): Action[AnyContent] = (authenticate() andThen getVersion).async {
+  def get(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
       import request.*
-      apiService.get(lrn, phase).map {
+      apiService.get(lrn).map {
         case Some(Messages(Nil)) =>
           logger.warn(log("get", "No messages found for LRN", eoriNumber, lrn))
           NoContent

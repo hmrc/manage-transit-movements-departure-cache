@@ -46,7 +46,6 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach {
       .overrides(
         bind[AuthenticateActionProvider].to[FakeAuthenticateActionProvider],
         bind[AuthenticateAndLockActionProvider].to[FakeAuthenticateAndLockActionProvider],
-        bind[VersionedAction].to[FakeVersionedAction],
         bind[CacheRepository].toInstance(mockCacheRepository),
         bind[DefaultLockRepository].toInstance(mockLockRepository)
       )

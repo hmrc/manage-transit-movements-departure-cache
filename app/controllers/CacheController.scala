@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider, VersionedAction}
+import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider}
 import models.AuditType.*
 import models.Rejection.*
 import models.*
@@ -35,7 +35,6 @@ class CacheController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
   authenticateAndLock: AuthenticateAndLockActionProvider,
-  getVersion: VersionedAction,
   cacheRepository: CacheRepository,
   auditService: AuditService,
   metricsService: MetricsService,
@@ -53,7 +52,7 @@ class CacheController @Inject() (
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
           if (request.eoriNumber == data.eoriNumber) {
-            set(data, None, None)()
+            set(data, None)()
           } else {
             logger.warn(s"Enrolment EORI (${request.eoriNumber}) does not match EORI in user answers (${data.eoriNumber})")
             Future.successful(Forbidden)
@@ -64,11 +63,11 @@ class CacheController @Inject() (
       }
   }
 
-  def put(): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
+  def put(): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(lrn, _) =>
-          set(Metadata(lrn, request.eoriNumber, SubmissionState.NotSubmitted), None, Some(request.phase)) {
+          set(Metadata(lrn, request.eoriNumber, SubmissionState.NotSubmitted), None) {
             val auditType = DepartureDraftStarted
             auditService.audit(auditType, lrn, request.eoriNumber)
             metricsService.increment(auditType.name)
@@ -81,11 +80,10 @@ class CacheController @Inject() (
 
   private def set(
     data: Metadata,
-    departureId: Option[String],
-    phase: Option[Phase]
+    departureId: Option[String]
   )(block: => Unit = ()): Future[Status] =
     cacheRepository
-      .set(data, departureId, phase)
+      .set(data, departureId)
       .map {
         case true =>
           block
@@ -145,16 +143,14 @@ class CacheController @Inject() (
     }
 
   private def getUserAnswers[T](lrn: String)(f: UserAnswers => T)(implicit writes: Writes[T]): Action[AnyContent] =
-    (authenticate() andThen getVersion).async {
+    authenticate().async {
       implicit request =>
         val eoriNumber = request.eoriNumber
         cacheRepository
           .get(lrn, eoriNumber)
           .map {
-            case Some(userAnswers) if request.phase.isTransitional == userAnswers.isTransitional =>
-              Ok(Json.toJson(f(userAnswers)))
             case Some(userAnswers) =>
-              BadRequest
+              Ok(Json.toJson(f(userAnswers)))
             case None =>
               logger.warn(s"No document found for LRN '$lrn' and EORI '$eoriNumber'")
               NotFound
@@ -173,7 +169,7 @@ class CacheController @Inject() (
           cacheRepository.get(lrn, request.eoriNumber).flatMap {
             case Some(userAnswers) =>
               val updatedUserAnswers = xPathService.handleRejection(userAnswers, rejection)
-              set(updatedUserAnswers.metadata, updatedUserAnswers.departureId, None)()
+              set(updatedUserAnswers.metadata, updatedUserAnswers.departureId)()
             case None =>
               Future.successful(NotFound)
           }
@@ -201,7 +197,7 @@ class CacheController @Inject() (
           cacheRepository.get(lrn, request.eoriNumber).flatMap {
             case Some(userAnswers) =>
               val updatedUserAnswers = xPathService.prepareForAmendment(userAnswers, departureId)
-              set(updatedUserAnswers.metadata, updatedUserAnswers.departureId, None)()
+              set(updatedUserAnswers.metadata, updatedUserAnswers.departureId)()
             case None =>
               Future.successful(NotFound)
           }
@@ -211,14 +207,14 @@ class CacheController @Inject() (
       }
   }
 
-  def copy(lrn: String): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
+  def copy(lrn: String): Action[JsValue] = authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(newLrn, _) =>
           cacheRepository.get(lrn, request.eoriNumber).flatMap {
             case Some(userAnswers) =>
               val updatedUserAnswers = userAnswers.updateLrn(newLrn)
-              set(updatedUserAnswers.metadata, None, Some(request.phase))()
+              set(updatedUserAnswers.metadata, None)()
             case None =>
               Future.successful(NotFound)
           }
