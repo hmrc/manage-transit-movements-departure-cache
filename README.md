@@ -94,7 +94,6 @@
 * A call is made to the `GET` endpoint with:
   * a valid bearer token 
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
-  * a `2.1` `APIVersion` header
 * A document is found in the `user-answers` collection for the given LRN (the EORI number is extracted from the enrolment)
 * The response JSON has the following fields:
   * `lrn` - The local reference number associated with the departure application
@@ -195,7 +194,6 @@
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
   * a valid `String` request body representing the LRN
-  * a `2.1` `APIVersion` header
 * Then, for the given LRN in the request body and EORI number in the enrolment, a new document gets created with an empty user answers
 
 ### Unsuccessful responses (with possible causes)
@@ -303,7 +301,6 @@
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
   * a valid `String` request body representing the LRN
-  * a `2.1` `APIVersion` header
 * Then, an IE015 gets successfully submitted to the API
 
 ### Unsuccessful responses (with possible causes)
@@ -332,7 +329,6 @@
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
   * a valid `String` request body representing the LRN
-  * a `2.1` `APIVersion` header
 * Then, an IE013 gets successfully submitted to the API
 
 ### Unsuccessful responses (with possible causes)
@@ -360,7 +356,6 @@
 * A call is made to the `GET` endpoint with:
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
-  * a `2.1` `APIVersion` header
 * A departure is found in the API for the given LRN and EORI number (extracted from the enrolment)
 * Then, the messages corresponding to this departure ID are retrieved 
 
@@ -417,7 +412,6 @@
 * A call is made to the `GET` endpoint with:
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
-  * a `2.1` `APIVersion` header
 * A document is found in the `user-answers` collection for the given LRN (the EORI number is extracted from the enrolment)
 * The response JSON provides the number of days until the document expires
 
@@ -447,7 +441,6 @@
   * a valid bearer token
   * a valid `HMRC-CTC-ORG` enrolment with `EoriNumber` identifier
   * a valid `String` request body containing the new LRN
-  * a `2.1` `APIVersion` header
 * Then, a copy is made of the existing document with the new LRN
 
 ### Unsuccessful responses (with possible causes)
