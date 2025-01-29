@@ -28,7 +28,7 @@ final case class UserAnswers(
   lastUpdated: Instant,
   id: UUID,
   departureId: Option[String] = None,
-  isTransitional: Boolean = true
+  isTransitional: Boolean = false
 ) {
 
   val lrn: String        = metadata.lrn
@@ -73,7 +73,7 @@ object UserAnswers {
         (__ \ "lastUpdated").read[Instant] and
         (__ \ "_id").read[UUID] and
         (__ \ "departureId").readNullable[String] and
-        (__ \ "isTransitional").readWithDefault[Boolean](true)
+        (__ \ "isTransitional").readWithDefault[Boolean](false)
     )(UserAnswers.apply)
 
   private def writes(implicit instantWrites: Writes[Instant], metaDataWrites: Writes[Metadata]): Writes[UserAnswers] =

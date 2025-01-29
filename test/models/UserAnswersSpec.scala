@@ -44,7 +44,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
     lastUpdated = Instant.ofEpochMilli(1662546803472L),
     id = UUID.fromString(uuid),
     departureId = Some(departureId),
-    isTransitional = true
+    isTransitional = false
   )
 
   "User answers" when {
@@ -67,7 +67,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
           |  "lastUpdated" : "2022-09-07T10:33:23.472Z",
           |  "isSubmitted" : "notSubmitted",
           |  "departureId": "$departureId",
-          |  "isTransitional": true
+          |  "isTransitional": false
           |}
           |""".stripMargin)
 
@@ -76,7 +76,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
         result shouldBe userAnswers
       }
 
-      "default non existent isTransitional to true" in {
+      "default non existent isTransitional to false" in {
         Json
           .parse(s"""
              |{
@@ -145,7 +145,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                |    }
                |  },
                |  "departureId": "$departureId",
-               |  "isTransitional": true
+               |  "isTransitional": false
                |}
                |""".stripMargin)
 
@@ -194,7 +194,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                |    }
                |  },
                |  "departureId": "$departureId",
-               |  "isTransitional": true
+               |  "isTransitional": false
                |}
                |""".stripMargin)
 
