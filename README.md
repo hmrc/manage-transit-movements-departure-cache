@@ -106,9 +106,6 @@
 
 ### Unsuccessful responses (with possible causes)
 
-#### 400 BAD_REQUEST
-* `APIVersion` header was missing
-
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
 
@@ -205,7 +202,6 @@
 
 #### 400 BAD_REQUEST
 * Request body could not be validated as a `String`
-* `APIVersion` header was missing
 
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
@@ -314,7 +310,6 @@
 
 #### 400 BAD_REQUEST
 * Request body could not be validated as a `String`
-* `APIVersion` header was missing
 
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
@@ -344,7 +339,6 @@
 
 #### 400 BAD_REQUEST
 * Request body could not be validated as a `String`
-* `APIVersion` header was missing
 
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
@@ -374,9 +368,6 @@
 
 #### 204 NO_CONTENT
 * The departure was found, but it contained no messages
-
-#### 400 BAD_REQUEST
-* `APIVersion` header was missing
 
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
@@ -432,9 +423,6 @@
 
 ### Unsuccessful responses (with possible causes)
 
-#### 400 BAD_REQUEST
-* `APIVersion` header was missing
-
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
 
@@ -466,7 +454,6 @@
 
 #### 400 BAD_REQUEST
 * Request body could not be validated as a `String`
-* `APIVersion` header was missing
 
 #### 401 UNAUTHORIZED
 * A generic authorization error occurred. The likely cause of this is an invalid or missing bearer token.
