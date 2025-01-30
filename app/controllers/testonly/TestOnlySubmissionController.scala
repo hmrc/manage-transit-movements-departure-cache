@@ -17,7 +17,7 @@
 package controllers.testonly
 
 import api.submission.Declaration
-import controllers.actions.{AuthenticateActionProvider, VersionedAction}
+import controllers.actions.AuthenticateActionProvider
 import models.{MovementReferenceNumber, SensitiveFormats, UserAnswers}
 import play.api.Logging
 import play.api.libs.json._
@@ -29,17 +29,16 @@ import javax.inject.Inject
 class TestOnlySubmissionController @Inject() (
   cc: ControllerComponents,
   declaration: Declaration,
-  authenticate: AuthenticateActionProvider,
-  getVersion: VersionedAction
+  authenticate: AuthenticateActionProvider
 )(implicit sensitiveFormats: SensitiveFormats)
     extends BackendController(cc)
     with Logging {
 
-  def submit(): Action[JsValue] = (authenticate() andThen getVersion)(parse.json) {
+  def submit(): Action[JsValue] = authenticate()(parse.json) {
     request =>
       request.body.validate[UserAnswers](UserAnswers.nonSensitiveFormat orElse UserAnswers.sensitiveFormat) match {
         case JsSuccess(userAnswers, _) =>
-          Ok(declaration.transform(userAnswers, mrn = MovementReferenceNumber.Empty, request.phase))
+          Ok(declaration.transform(userAnswers, mrn = MovementReferenceNumber.Empty))
         case JsError(errors) =>
           logger.info(s"Failed to validate request body as UserAnswers: ${errors.mkString}")
           BadRequest

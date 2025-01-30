@@ -71,7 +71,7 @@ class UserAnswersSummarySpec extends SpecBase {
               "expiresInDays"  -> 29,
               "_id"            -> id2,
               "isSubmitted"    -> "submitted",
-              "isTransitional" -> true
+              "isTransitional" -> false
             ),
             Json.obj(
               "lrn" -> "EF123",
@@ -83,7 +83,7 @@ class UserAnswersSummarySpec extends SpecBase {
               "expiresInDays"  -> 30,
               "_id"            -> id3,
               "isSubmitted"    -> "notSubmitted",
-              "isTransitional" -> true
+              "isTransitional" -> false
             )
           )
         )
