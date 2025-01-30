@@ -37,7 +37,7 @@ class LockRepository @Inject() (
 )(implicit ec: ExecutionContext)
     extends PlayMongoRepository[Lock](
       mongoComponent = mongoComponent,
-      collectionName = "draft-locks",
+      collectionName = LockRepository.name,
       domainFormat = Lock.format,
       indexes = LockRepository.indexes(appConfig)
     ) {
@@ -98,6 +98,8 @@ class LockRepository @Inject() (
 }
 
 object LockRepository {
+
+  val name: String = "draft-locks"
 
   def indexes(appConfig: AppConfig): Seq[IndexModel] = {
     val userAnswersCreatedAtIndex: IndexModel = IndexModel(

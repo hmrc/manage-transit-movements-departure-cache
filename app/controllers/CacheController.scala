@@ -17,14 +17,14 @@
 package controllers
 
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider, VersionedAction}
+import models.*
 import models.AuditType.*
 import models.Rejection.*
-import models.*
 import play.api.Logging
 import play.api.libs.json.*
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
-import services.{AuditService, DateTimeService, MetricsService, SessionService, XPathService}
+import services.{AuditService, DateTimeService, MetricsService, XPathService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -40,8 +40,7 @@ class CacheController @Inject() (
   auditService: AuditService,
   metricsService: MetricsService,
   xPathService: XPathService,
-  dateTimeService: DateTimeService,
-  sessionService: SessionService
+  dateTimeService: DateTimeService
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
@@ -100,24 +99,6 @@ class CacheController @Inject() (
           logger.error("Failed to write user answers to mongo", e)
           InternalServerError
       }
-
-  def delete(lrn: String): Action[AnyContent] = authenticate().async {
-    implicit request =>
-      sessionService
-        .deleteUserAnswersAndLocks(request.eoriNumber, lrn)
-        .map {
-          _ =>
-            val auditType = DepartureDraftDeleted
-            auditService.audit(auditType, lrn, request.eoriNumber)
-            metricsService.increment(auditType.name)
-            Ok
-        }
-        .recover {
-          case e =>
-            logger.error("Failed to delete draft and locks", e)
-            InternalServerError
-        }
-  }
 
   def getAll(
     lrn: Option[String] = None,
