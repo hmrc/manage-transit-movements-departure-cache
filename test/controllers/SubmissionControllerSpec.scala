@@ -69,7 +69,6 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
           .thenReturn(Future.successful(HttpResponse(OK, Json.stringify(body))))
 
         val request = FakeRequest(POST, routes.SubmissionController.post().url)
-          .withHeaders("APIVersion" -> "2.1")
           .withBody(Json.toJson(lrn))
 
         val result = route(app, request).value
@@ -93,7 +92,6 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
           .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
 
         val request = FakeRequest(POST, routes.SubmissionController.post().url)
-          .withHeaders("APIVersion" -> "2.1")
           .withBody(Json.toJson(lrn))
 
         val result = route(app, request).value
@@ -108,7 +106,6 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
 
         val request = FakeRequest(POST, routes.SubmissionController.post().url)
-          .withHeaders("APIVersion" -> "2.1")
           .withBody(Json.toJson(lrn))
 
         val result = route(app, request).value
@@ -123,7 +120,6 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
 
         val request = FakeRequest(POST, routes.SubmissionController.post().url)
-          .withHeaders("APIVersion" -> "2.1")
           .withBody(Json.toJson("foo" -> "bar"))
 
         val result = route(app, request).value
@@ -150,7 +146,6 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
           .thenReturn(Future.successful(HttpResponse(OK, Json.stringify(body))))
 
         val request = FakeRequest(POST, routes.SubmissionController.postAmendment().url)
-          .withHeaders("APIVersion" -> "2.1")
           .withBody(Json.toJson(lrn))
 
         val result = route(app, request).value
@@ -174,7 +169,6 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
           .thenReturn(Future.successful(HttpResponse(BAD_REQUEST, "")))
 
         val request = FakeRequest(POST, routes.SubmissionController.postAmendment().url)
-          .withHeaders("APIVersion" -> "2.1")
           .withBody(Json.toJson(lrn))
 
         val result = route(app, request).value
@@ -189,7 +183,6 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
 
         val request = FakeRequest(POST, routes.SubmissionController.postAmendment().url)
-          .withHeaders("APIVersion" -> "2.1")
           .withBody(Json.toJson(lrn))
 
         val result = route(app, request).value
@@ -204,7 +197,6 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(emptyUserAnswers)))
 
         val request = FakeRequest(POST, routes.SubmissionController.postAmendment().url)
-          .withHeaders("APIVersion" -> "2.1")
           .withBody(Json.toJson(lrn))
 
         val result = route(app, request).value
@@ -219,7 +211,6 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
 
         val request = FakeRequest(POST, routes.SubmissionController.postAmendment().url)
-          .withHeaders("APIVersion" -> "2.1")
           .withBody(Json.toJson("foo" -> "bar"))
 
         val result = route(app, request).value
@@ -241,7 +232,6 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
           .thenReturn(Future.successful(Some(messages)))
 
         val request = FakeRequest(GET, routes.SubmissionController.get(lrn).url)
-          .withHeaders("APIVersion" -> "2.1")
 
         val result = route(app, request).value
 
@@ -258,7 +248,6 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
           .thenReturn(Future.successful(Some(Messages(Nil))))
 
         val request = FakeRequest(GET, routes.SubmissionController.get(lrn).url)
-          .withHeaders("APIVersion" -> "2.1")
 
         val result = route(app, request).value
 
@@ -274,7 +263,6 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
           .thenReturn(Future.successful(None))
 
         val request = FakeRequest(GET, routes.SubmissionController.get(lrn).url)
-          .withHeaders("APIVersion" -> "2.1")
 
         val result = route(app, request).value
 

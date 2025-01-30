@@ -73,7 +73,7 @@ object UserAnswers {
         (__ \ "lastUpdated").read[Instant] and
         (__ \ "_id").read[UUID] and
         (__ \ "departureId").readNullable[String] and
-        (__ \ "isTransitional").readWithDefault[Boolean](false)
+        (__ \ "isTransitional").readWithDefault[Boolean](true)
     )(UserAnswers.apply)
 
   private def writes(implicit instantWrites: Writes[Instant], metaDataWrites: Writes[Metadata]): Writes[UserAnswers] =
