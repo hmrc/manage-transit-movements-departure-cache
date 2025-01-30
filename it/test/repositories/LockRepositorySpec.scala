@@ -99,15 +99,39 @@ class LockRepositorySpec extends LockRepositorySpecBase {
 
   "unlock" when {
 
+    val lrn        = "lrn"
+    val eoriNumber = "eoriNumber"
+
     "when unlocking a document" should {
 
       "return true for successful unlock" in {
 
-        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", now, now)
+        val sessionId = "session1"
+
+        val lock1: Lock = Lock(sessionId, eoriNumber, lrn, now, now)
 
         insert(lock1).futureValue
 
-        val result = repository.unlock(lock1.eoriNumber, lock1.lrn, "session1").futureValue
+        val result = repository.unlock(eoriNumber, lrn, sessionId).futureValue
+
+        val numberOfDocs: Long = repository.collection.countDocuments().head().futureValue
+
+        result shouldBe true
+        numberOfDocs shouldBe 0
+      }
+    }
+
+    "when unlocking multiple documents" should {
+
+      "return true for successful unlock" in {
+
+        val lock1: Lock = Lock("session1", eoriNumber, lrn, now, now)
+        val lock2: Lock = Lock("session2", eoriNumber, lrn, now, now)
+
+        insert(lock1).futureValue
+        insert(lock2).futureValue
+
+        val result = repository.unlock(lock1.eoriNumber, lock1.lrn).futureValue
 
         val numberOfDocs: Long = repository.collection.countDocuments().head().futureValue
 

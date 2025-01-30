@@ -30,7 +30,7 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DefaultLockRepository @Inject() (
+class LockRepository @Inject() (
   mongoComponent: MongoComponent,
   appConfig: AppConfig,
   dateTimeService: DateTimeService
@@ -80,6 +80,18 @@ class DefaultLockRepository @Inject() (
 
     collection
       .deleteOne(filters)
+      .head()
+      .map(_.wasAcknowledged())
+  }
+
+  def unlock(eoriNumber: String, lrn: String): Future[Boolean] = {
+    val filters = Filters.and(
+      Filters.eq("eoriNumber", eoriNumber),
+      Filters.eq("lrn", lrn)
+    )
+
+    collection
+      .deleteMany(filters)
       .head()
       .map(_.wasAcknowledged())
   }

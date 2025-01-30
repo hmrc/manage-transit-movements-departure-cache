@@ -19,7 +19,7 @@ package controllers
 import controllers.actions.AuthenticateActionProvider
 import play.api.Logging
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import repositories.DefaultLockRepository
+import repositories.LockRepository
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -29,7 +29,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class LockController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
-  lockRepository: DefaultLockRepository
+  lockRepository: LockRepository
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {

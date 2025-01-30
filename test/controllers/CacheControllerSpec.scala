@@ -30,8 +30,8 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsBoolean, JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import repositories.{CacheRepository, DefaultLockRepository}
-import services.{AuditService, MetricsService, XPathService}
+import repositories.CacheRepository
+import services.{AuditService, MetricsService, SessionService, XPathService}
 
 import scala.concurrent.Future
 
@@ -40,6 +40,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
   private lazy val mockAuditService   = mock[AuditService]
   private lazy val mockMetricsService = mock[MetricsService]
   private lazy val mockXPathService   = mock[XPathService]
+  private lazy val mockSessionService = mock[SessionService]
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
@@ -47,7 +48,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         bind[AuthenticateActionProvider].to[FakeAuthenticateActionProvider],
         bind[AuthenticateAndLockActionProvider].to[FakeAuthenticateAndLockActionProvider],
         bind[CacheRepository].toInstance(mockCacheRepository),
-        bind[DefaultLockRepository].toInstance(mockLockRepository),
+        bind[SessionService].toInstance(mockSessionService),
         bind[AuditService].toInstance(mockAuditService),
         bind[MetricsService].toInstance(mockMetricsService),
         bind[XPathService].toInstance(mockXPathService)
@@ -58,6 +59,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
     reset(mockAuditService)
     reset(mockMetricsService)
     reset(mockXPathService)
+    reset(mockSessionService)
   }
 
   "get" should {
@@ -319,15 +321,16 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
 
     "return 200" when {
       "deletion was successful" in {
-        when(mockCacheRepository.remove(any(), any())).thenReturn(Future.successful(true))
+        when(mockSessionService.deleteUserAnswersAndLocks(any(), any())).thenReturn(Future.successful(()))
 
         val request = FakeRequest(DELETE, routes.CacheController.delete(lrn).url)
-          .withHeaders(("APIVersion", "2.0"))
+
         val result = route(app, request).value
 
         status(result) shouldBe OK
 
         val auditType = DepartureDraftDeleted
+        verify(mockSessionService).deleteUserAnswersAndLocks(eqTo(eoriNumber), eqTo(lrn))
         verify(mockAuditService).audit(eqTo(auditType), eqTo(lrn), eqTo(eoriNumber))(any())
         verify(mockMetricsService).increment(auditType.name)
       }
@@ -335,14 +338,15 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
 
     "return 500" when {
       "deletion was unsuccessful" in {
-        when(mockCacheRepository.remove(any(), any())).thenReturn(Future.failed(new Throwable()))
+        when(mockSessionService.deleteUserAnswersAndLocks(any(), any())).thenReturn(Future.failed(new Throwable()))
 
         val request = FakeRequest(DELETE, routes.CacheController.delete(lrn).url)
-          .withHeaders(("APIVersion", "2.0"))
+
         val result = route(app, request).value
 
         status(result) shouldBe INTERNAL_SERVER_ERROR
 
+        verify(mockSessionService).deleteUserAnswersAndLocks(eqTo(eoriNumber), eqTo(lrn))
         verifyNoInteractions(mockAuditService)
         verifyNoInteractions(mockMetricsService)
       }

@@ -24,7 +24,7 @@ import play.api.Logging
 import play.api.libs.json.*
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
-import services.{AuditService, DateTimeService, MetricsService, XPathService}
+import services.{AuditService, DateTimeService, MetricsService, SessionService, XPathService}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -40,7 +40,8 @@ class CacheController @Inject() (
   auditService: AuditService,
   metricsService: MetricsService,
   xPathService: XPathService,
-  dateTimeService: DateTimeService
+  dateTimeService: DateTimeService,
+  sessionService: SessionService
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
@@ -102,8 +103,8 @@ class CacheController @Inject() (
 
   def delete(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
-      cacheRepository
-        .remove(lrn, request.eoriNumber)
+      sessionService
+        .deleteUserAnswersAndLocks(request.eoriNumber, lrn)
         .map {
           _ =>
             val auditType = DepartureDraftDeleted
@@ -113,7 +114,7 @@ class CacheController @Inject() (
         }
         .recover {
           case e =>
-            logger.error("Failed to delete draft", e)
+            logger.error("Failed to delete draft and locks", e)
             InternalServerError
         }
   }
