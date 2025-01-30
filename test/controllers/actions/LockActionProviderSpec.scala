@@ -23,7 +23,7 @@ import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc._
 import play.api.test.Helpers._
-import repositories.DefaultLockRepository
+import repositories.LockRepository
 import uk.gov.hmrc.auth.core._
 import uk.gov.hmrc.http.HeaderNames
 
@@ -65,7 +65,7 @@ class LockActionProviderSpec extends SpecBase {
       "return ok after successful lock" in {
 
         val mockAuthConnector  = mock[AuthConnector]
-        val mockLockRepository = mock[DefaultLockRepository]
+        val mockLockRepository = mock[LockRepository]
 
         when(mockAuthConnector.authorise[Enrolments](any(), any())(any(), any()))
           .thenReturn(Future.successful(Enrolments(Set(validEnrolment))))
@@ -75,7 +75,7 @@ class LockActionProviderSpec extends SpecBase {
 
         val application = baseApplication
           .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
-          .overrides(bind[DefaultLockRepository].toInstance(mockLockRepository))
+          .overrides(bind[LockRepository].toInstance(mockLockRepository))
           .build()
 
         val actionProvider: AuthenticateAndLockActionProvider = application.injector.instanceOf[AuthenticateAndLockActionProvider]
@@ -90,7 +90,7 @@ class LockActionProviderSpec extends SpecBase {
       "return locked when lock already exists" in {
 
         val mockAuthConnector  = mock[AuthConnector]
-        val mockLockRepository = mock[DefaultLockRepository]
+        val mockLockRepository = mock[LockRepository]
 
         when(mockAuthConnector.authorise[Enrolments](any(), any())(any(), any()))
           .thenReturn(Future.successful(Enrolments(Set(validEnrolment))))
@@ -100,7 +100,7 @@ class LockActionProviderSpec extends SpecBase {
 
         val application = baseApplication
           .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
-          .overrides(bind[DefaultLockRepository].toInstance(mockLockRepository))
+          .overrides(bind[LockRepository].toInstance(mockLockRepository))
           .build()
 
         val actionProvider: AuthenticateAndLockActionProvider = application.injector.instanceOf[AuthenticateAndLockActionProvider]
@@ -117,7 +117,7 @@ class LockActionProviderSpec extends SpecBase {
       "return bad request" in {
 
         val mockAuthConnector  = mock[AuthConnector]
-        val mockLockRepository = mock[DefaultLockRepository]
+        val mockLockRepository = mock[LockRepository]
 
         when(mockAuthConnector.authorise[Enrolments](any(), any())(any(), any()))
           .thenReturn(Future.successful(Enrolments(Set(validEnrolment))))
@@ -127,7 +127,7 @@ class LockActionProviderSpec extends SpecBase {
 
         val application = baseApplication
           .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
-          .overrides(bind[DefaultLockRepository].toInstance(mockLockRepository))
+          .overrides(bind[LockRepository].toInstance(mockLockRepository))
           .build()
 
         val actionProvider: AuthenticateAndLockActionProvider = application.injector.instanceOf[AuthenticateAndLockActionProvider]

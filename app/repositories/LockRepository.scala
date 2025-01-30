@@ -30,14 +30,14 @@ import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class DefaultLockRepository @Inject() (
+class LockRepository @Inject() (
   mongoComponent: MongoComponent,
   appConfig: AppConfig,
   dateTimeService: DateTimeService
 )(implicit ec: ExecutionContext)
     extends PlayMongoRepository[Lock](
       mongoComponent = mongoComponent,
-      collectionName = "draft-locks",
+      collectionName = LockRepository.name,
       domainFormat = Lock.format,
       indexes = LockRepository.indexes(appConfig)
     ) {
@@ -83,9 +83,23 @@ class DefaultLockRepository @Inject() (
       .head()
       .map(_.wasAcknowledged())
   }
+
+  def unlock(eoriNumber: String, lrn: String): Future[Boolean] = {
+    val filters = Filters.and(
+      Filters.eq("eoriNumber", eoriNumber),
+      Filters.eq("lrn", lrn)
+    )
+
+    collection
+      .deleteMany(filters)
+      .head()
+      .map(_.wasAcknowledged())
+  }
 }
 
 object LockRepository {
+
+  val name: String = "draft-locks"
 
   def indexes(appConfig: AppConfig): Seq[IndexModel] = {
     val userAnswersCreatedAtIndex: IndexModel = IndexModel(

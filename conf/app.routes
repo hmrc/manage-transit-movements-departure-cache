@@ -4,7 +4,7 @@ GET        /user-answers                                        controllers.Cach
 GET        /user-answers/:lrn                                   controllers.CacheController.get(lrn: String)
 POST       /user-answers/:lrn                                   controllers.CacheController.post(lrn: String)
 PUT        /user-answers                                        controllers.CacheController.put()
-DELETE     /user-answers/:lrn                                   controllers.CacheController.delete(lrn: String)
+DELETE     /user-answers/:lrn                                   controllers.SessionController.delete(lrn: String)
 GET        /user-answers/:lrn/expiry                            controllers.CacheController.getExpiry(lrn: String)
 
 POST       /user-answers/:lrn/amendable                         controllers.CacheController.isRejectionAmendable(lrn: String)

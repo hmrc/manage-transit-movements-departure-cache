@@ -17,47 +17,41 @@
 package controllers
 
 import controllers.actions.AuthenticateActionProvider
+import models.AuditType.*
 import play.api.Logging
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
-import repositories.LockRepository
+import services.*
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton()
-class LockController @Inject() (
+class SessionController @Inject() (
   cc: ControllerComponents,
   authenticate: AuthenticateActionProvider,
-  lockRepository: LockRepository
+  auditService: AuditService,
+  metricsService: MetricsService,
+  sessionService: SessionService
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
 
-  def checkLock(lrn: String): Action[AnyContent] = authenticate().async {
+  def delete(lrn: String): Action[AnyContent] = authenticate().async {
     implicit request =>
-      hc.sessionId
+      sessionService
+        .deleteUserAnswersAndLocks(request.eoriNumber, lrn)
         .map {
-          sessionId =>
-            lockRepository.findLocks(request.eoriNumber, lrn).map {
-              case Some(lock) if sessionId.value != lock.sessionId => Locked
-              case _                                               => Ok
-            }
+          _ =>
+            val auditType = DepartureDraftDeleted
+            auditService.audit(auditType, lrn, request.eoriNumber)
+            metricsService.increment(auditType.name)
+            Ok
         }
-        .getOrElse(Future.successful(BadRequest))
-  }
-
-  def deleteLock(lrn: String): Action[AnyContent] = authenticate().async {
-    implicit request =>
-      hc.sessionId
-        .map {
-          sessionId =>
-            lockRepository.unlock(request.eoriNumber, lrn, sessionId.value).map {
-              case true  => Ok
-              case false => InternalServerError
-            }
+        .recover {
+          case e =>
+            logger.error("Failed to delete draft and locks", e)
+            InternalServerError
         }
-        .getOrElse(Future.successful(BadRequest))
-
   }
 }

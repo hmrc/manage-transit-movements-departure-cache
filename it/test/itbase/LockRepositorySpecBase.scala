@@ -17,11 +17,11 @@
 package itbase
 
 import models.Lock
-import repositories.DefaultLockRepository
+import repositories.LockRepository
 import uk.gov.hmrc.mongo.test.DefaultPlayMongoRepositorySupport
 
 trait LockRepositorySpecBase extends RepositorySpecBase with DefaultPlayMongoRepositorySupport[Lock] {
 
-  override protected val repository: DefaultLockRepository =
-    app.injector.instanceOf[DefaultLockRepository]
+  override protected val repository: LockRepository =
+    app.injector.instanceOf[LockRepository]
 }
