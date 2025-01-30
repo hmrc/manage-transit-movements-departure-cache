@@ -88,6 +88,19 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
       }
     }
 
+    "return 400" when {
+      "userAnswers is transition" in {
+        val transitionalUserAnswers = emptyUserAnswers.copy(isTransitional = true)
+        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(transitionalUserAnswers)))
+
+        val finalRequest = FakeRequest(GET, routes.CacheController.get(lrn).url)
+        val result       = route(app, finalRequest).value
+
+        status(result) shouldBe BAD_REQUEST
+        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+      }
+    }
+
     "return 500" when {
       "read from mongo fails" in {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.failed(new Throwable()))
