@@ -22,10 +22,15 @@ import models._
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers._
+import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.xml.NodeSeq
 
 class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
+
+  implicit override val hc: HeaderCarrier = HeaderCarrier(
+    otherHeaders = Seq(ACCEPT -> "application/vnd.hmrc.2.1+json")
+  )
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
@@ -74,6 +79,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
       "return Departures" in {
         server.stubFor(
           get(urlEqualTo(url))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
             .willReturn(okJson(responseJson.toString()))
         )
 
@@ -111,6 +117,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
       "return MRN" in {
         server.stubFor(
           get(urlEqualTo(url))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
             .willReturn(okJson(responseJson.toString()))
         )
 
@@ -169,6 +176,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
       "return messages" in {
         server.stubFor(
           get(urlEqualTo(url))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
             .willReturn(okJson(responseJson.toString()))
         )
 
@@ -214,6 +222,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
         "success" in {
           server.stubFor(
             post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
               .willReturn(okJson(expected))
           )
 
@@ -224,6 +233,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
         "bad request" in {
           server.stubFor(
             post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
               .willReturn(badRequest())
           )
 
@@ -234,6 +244,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
         "internal server error" in {
           server.stubFor(
             post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
               .willReturn(serverError())
           )
 
@@ -253,6 +264,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
         "success" in {
           server.stubFor(
             post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
               .willReturn(okJson(expected))
           )
 
@@ -263,6 +275,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
         "bad request" in {
           server.stubFor(
             post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
               .willReturn(badRequest())
           )
 
@@ -273,6 +286,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
         "internal server error" in {
           server.stubFor(
             post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
               .willReturn(serverError())
           )
 
