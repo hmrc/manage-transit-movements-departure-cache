@@ -68,17 +68,17 @@ case class XPath(value: String) {
     }
 
     val documents: PartialFunction[String, Task] = {
-      case x if x.matches("^(.*)/Consignment/PreviousDocument(.*)$")                                                        => Documents
-      case x if x.matches("^(.*)/Consignment/SupportingDocument(.*)$")                                                      => Documents
-      case x if x.matches("^(.*)/Consignment/TransportDocument(.*)$")                                                       => Documents
-      case x if x.matches("^(.*)/Consignment/HouseConsignment(\\[\\d*])/ConsignmentItem(\\[\\d*])/PreviousDocument(.*)$")   => Documents
-      case x if x.matches("^(.*)/Consignment/HouseConsignment(\\[\\d*])/ConsignmentItem(\\[\\d*])/SupportingDocument(.*)$") => Documents
-      case x if x.matches("^(.*)/Consignment/HouseConsignment(\\[\\d*])/ConsignmentItem(\\[\\d*])/TransportDocument(.*)$")  => Documents
+      case x if x.matches("^(.*)/Consignment/PreviousDocument(.*)$")           => Documents
+      case x if x.matches("^(.*)/Consignment/SupportingDocument(.*)$")         => Documents
+      case x if x.matches("^(.*)/Consignment/TransportDocument(.*)$")          => Documents
+      case x if x.matches("^(.*)/ConsignmentItem(.*)/PreviousDocument(.*)$")   => Documents
+      case x if x.matches("^(.*)/ConsignmentItem(.*)/SupportingDocument(.*)$") => Documents
+      case x if x.matches("^(.*)/ConsignmentItem(.*)/TransportDocument(.*)$")  => Documents
     }
 
     val items: PartialFunction[String, Task] = {
-      case x if x.matches("^(.*)/Consignment/TransportEquipment(\\[\\d*])/GoodsReference(.*)$") => Items
-      case x if x.matches("^(.*)/Consignment/HouseConsignment(\\[\\d*])/ConsignmentItem(.*)$")  => Items
+      case x if x.matches("^(.*)/GoodsReference(.*)$")  => Items
+      case x if x.matches("^(.*)/ConsignmentItem(.*)$") => Items
     }
 
     val guaranteeDetails: PartialFunction[String, Task] = {
