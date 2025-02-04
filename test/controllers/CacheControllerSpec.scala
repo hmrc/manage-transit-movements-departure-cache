@@ -30,7 +30,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsBoolean, JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
-import repositories.{CacheRepository, DefaultLockRepository}
+import repositories.CacheRepository
 import services.{AuditService, MetricsService, XPathService}
 
 import scala.concurrent.Future
@@ -47,7 +47,6 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
         bind[AuthenticateActionProvider].to[FakeAuthenticateActionProvider],
         bind[AuthenticateAndLockActionProvider].to[FakeAuthenticateAndLockActionProvider],
         bind[CacheRepository].toInstance(mockCacheRepository),
-        bind[DefaultLockRepository].toInstance(mockLockRepository),
         bind[AuditService].toInstance(mockAuditService),
         bind[MetricsService].toInstance(mockMetricsService),
         bind[XPathService].toInstance(mockXPathService)
@@ -311,40 +310,6 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
 
         metadataCaptor.getValue.lrn shouldBe lrn
         metadataCaptor.getValue.isSubmitted shouldBe SubmissionState.NotSubmitted
-      }
-    }
-  }
-
-  "delete" should {
-
-    "return 200" when {
-      "deletion was successful" in {
-        when(mockCacheRepository.remove(any(), any())).thenReturn(Future.successful(true))
-
-        val request = FakeRequest(DELETE, routes.CacheController.delete(lrn).url)
-          .withHeaders(("APIVersion", "2.0"))
-        val result = route(app, request).value
-
-        status(result) shouldBe OK
-
-        val auditType = DepartureDraftDeleted
-        verify(mockAuditService).audit(eqTo(auditType), eqTo(lrn), eqTo(eoriNumber))(any())
-        verify(mockMetricsService).increment(auditType.name)
-      }
-    }
-
-    "return 500" when {
-      "deletion was unsuccessful" in {
-        when(mockCacheRepository.remove(any(), any())).thenReturn(Future.failed(new Throwable()))
-
-        val request = FakeRequest(DELETE, routes.CacheController.delete(lrn).url)
-          .withHeaders(("APIVersion", "2.0"))
-        val result = route(app, request).value
-
-        status(result) shouldBe INTERNAL_SERVER_ERROR
-
-        verifyNoInteractions(mockAuditService)
-        verifyNoInteractions(mockMetricsService)
       }
     }
   }

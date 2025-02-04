@@ -17,9 +17,9 @@
 package controllers
 
 import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider, VersionedAction}
+import models.*
 import models.AuditType.*
 import models.Rejection.*
-import models.*
 import play.api.Logging
 import play.api.libs.json.*
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -99,24 +99,6 @@ class CacheController @Inject() (
           logger.error("Failed to write user answers to mongo", e)
           InternalServerError
       }
-
-  def delete(lrn: String): Action[AnyContent] = authenticate().async {
-    implicit request =>
-      cacheRepository
-        .remove(lrn, request.eoriNumber)
-        .map {
-          _ =>
-            val auditType = DepartureDraftDeleted
-            auditService.audit(auditType, lrn, request.eoriNumber)
-            metricsService.increment(auditType.name)
-            Ok
-        }
-        .recover {
-          case e =>
-            logger.error("Failed to delete draft", e)
-            InternalServerError
-        }
-  }
 
   def getAll(
     lrn: Option[String] = None,
