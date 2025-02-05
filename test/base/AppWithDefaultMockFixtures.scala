@@ -22,13 +22,13 @@ import org.scalatest.{BeforeAndAfterEach, TestSuite}
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import repositories.{CacheRepository, DefaultLockRepository}
+import repositories.{CacheRepository, LockRepository}
 
 trait AppWithDefaultMockFixtures extends BeforeAndAfterEach {
   self: TestSuite & SpecBase =>
 
-  lazy val mockCacheRepository: CacheRepository      = mock[CacheRepository]
-  lazy val mockLockRepository: DefaultLockRepository = mock[DefaultLockRepository]
+  lazy val mockCacheRepository: CacheRepository = mock[CacheRepository]
+  lazy val mockLockRepository: LockRepository   = mock[LockRepository]
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -47,6 +47,6 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach {
         bind[AuthenticateActionProvider].to[FakeAuthenticateActionProvider],
         bind[AuthenticateAndLockActionProvider].to[FakeAuthenticateAndLockActionProvider],
         bind[CacheRepository].toInstance(mockCacheRepository),
-        bind[DefaultLockRepository].toInstance(mockLockRepository)
+        bind[LockRepository].toInstance(mockLockRepository)
       )
 }

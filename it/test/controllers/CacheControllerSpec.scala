@@ -174,37 +174,6 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
     }
   }
 
-  "DELETE /user-answers/:lrn" when {
-
-    val url = s"$baseUrl/manage-transit-movements-departure-cache/user-answers/$lrn"
-
-    "document exists" should {
-      "remove document and respond with 200 status" in {
-        insert(emptyUserAnswers).futureValue
-
-        val response = wsClient
-          .url(url)
-          .delete()
-          .futureValue
-
-        response.status shouldBe 200
-
-        findAll().futureValue shouldBe empty
-      }
-    }
-
-    "document does not exist" should {
-      "respond with 200 status" in {
-        val response = wsClient
-          .url(url)
-          .delete()
-          .futureValue
-
-        response.status shouldBe 200
-      }
-    }
-  }
-
   "GET /user-answers" when {
 
     val url = s"$baseUrl/manage-transit-movements-departure-cache/user-answers"

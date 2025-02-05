@@ -22,20 +22,20 @@ import models.request.AuthenticatedRequest
 import play.api.Logging
 import play.api.mvc.Results.{BadRequest, Locked}
 import play.api.mvc.{ActionFilter, Result}
-import repositories.DefaultLockRepository
+import repositories.LockRepository
 import services.DateTimeService
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
 
 import scala.concurrent.{ExecutionContext, Future}
 
-class LockActionProvider @Inject() (repository: DefaultLockRepository, dateTimeService: DateTimeService)(implicit ec: ExecutionContext) {
+class LockActionProvider @Inject() (repository: LockRepository, dateTimeService: DateTimeService)(implicit ec: ExecutionContext) {
 
   def apply(lrn: String): ActionFilter[AuthenticatedRequest] =
     new LockAction(lrn, repository, dateTimeService)
 }
 
-class LockAction(lrn: String, repository: DefaultLockRepository, dateTimeService: DateTimeService)(implicit val executionContext: ExecutionContext)
+class LockAction(lrn: String, repository: LockRepository, dateTimeService: DateTimeService)(implicit val executionContext: ExecutionContext)
     extends ActionFilter[AuthenticatedRequest]
     with Logging {
 
