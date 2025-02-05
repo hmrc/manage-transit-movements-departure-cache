@@ -88,19 +88,4 @@ object Sort {
     case Some(SortByCreatedAtAsc.convertParams) => SortByCreatedAtAsc
     case _                                      => SortByCreatedAtDesc
   }
-
-  //  implicit def queryStringBindable(implicit stringBinder: QueryStringBindable[String]): QueryStringBindable[Sort] = new QueryStringBindable[Sort] {
-  //
-  //    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Sort]] =
-  //      Option(stringBinder.bind("sortBy", params) match {
-  //        case Some(Right(SortByLRNAsc.convertParams))        => Right(SortByLRNAsc)
-  //        case Some(Right(SortByLRNDesc.convertParams))       => Right(SortByLRNDesc)
-  //        case Some(Right(SortByCreatedAtAsc.convertParams))  => Right(SortByCreatedAtAsc)
-  //        case Some(Right(SortByCreatedAtDesc.convertParams)) => Right(SortByCreatedAtDesc)
-  //        case _                                              => Left("Invalid sort parameters")
-  //      })
-  //
-  //    override def unbind(key: String, value: Sort): String = stringBinder.unbind("sortBy", value.convertParams)
-  //
-  //  }
 }

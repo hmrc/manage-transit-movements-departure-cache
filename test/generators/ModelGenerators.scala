@@ -25,13 +25,6 @@ trait ModelGenerators {
 
   lazy val stringMaxLength = 36
 
-  implicit lazy val arbitraryPhase: Arbitrary[Phase] =
-    Arbitrary {
-      for {
-        phase <- Gen.oneOf(Phase.Transition, Phase.PostTransition)
-      } yield phase
-    }
-
   implicit lazy val arbitrarySubmissionState: Arbitrary[SubmissionState] = Arbitrary {
     val values = Seq(
       SubmissionState.NotSubmitted,

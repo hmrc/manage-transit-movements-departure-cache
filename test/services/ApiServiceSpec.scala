@@ -20,10 +20,9 @@ import api.submission.Declaration
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import connectors.ApiConnector
 import generators.Generators
-import models._
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
-import org.mockito.Mockito._
-import org.scalacheck.Arbitrary.arbitrary
+import models.*
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
+import org.mockito.Mockito.*
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.http.Status.OK
 import play.api.inject.bind
@@ -57,7 +56,7 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
     reset(mockApiConnector)
     reset(mockDeclaration)
 
-    when(mockDeclaration.transform(any(), any(), any()))
+    when(mockDeclaration.transform(any(), any()))
       .thenReturn(xml)
   }
 
@@ -65,21 +64,19 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
 
   "submitDeclaration" must {
     "call connector" in {
-      forAll(arbitrary[Phase]) {
-        phase =>
-          beforeEach()
+      beforeEach()
 
-          val userAnswers = emptyUserAnswers
+      val userAnswers = emptyUserAnswers
 
-          val expectedResult = HttpResponse(OK, "")
+      val expectedResult = HttpResponse(OK, "")
 
-          when(mockApiConnector.submitDeclaration(any(), any())(any())).thenReturn(Future.successful(expectedResult))
+      when(mockApiConnector.submitDeclaration(any())(any())).thenReturn(Future.successful(expectedResult))
 
-          val result = service.submitDeclaration(userAnswers, phase).futureValue
-          result shouldBe expectedResult
+      val result = service.submitDeclaration(userAnswers).futureValue
+      result shouldBe expectedResult
 
-          verify(mockApiConnector).submitDeclaration(eqTo(xml), eqTo(phase))(any())
-      }
+      verify(mockApiConnector).submitDeclaration(eqTo(xml))(any())
+
     }
   }
 
@@ -87,66 +84,60 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
     val mrn = MovementReferenceNumber(Some("mrn"))
 
     "call connector" in {
-      forAll(arbitrary[Phase]) {
-        phase =>
-          beforeEach()
+      beforeEach()
 
-          val userAnswers = emptyUserAnswersWithDepartureId
+      val userAnswers = emptyUserAnswersWithDepartureId
 
-          val expectedResult = HttpResponse(OK, "")
+      val expectedResult = HttpResponse(OK, "")
 
-          when(mockApiConnector.getMRN(any(), any())(any())).thenReturn(Future.successful(mrn))
-          when(mockApiConnector.submitAmendment(any(), any(), any())(any())).thenReturn(Future.successful(expectedResult))
+      when(mockApiConnector.getMRN(any())(any())).thenReturn(Future.successful(mrn))
+      when(mockApiConnector.submitAmendment(any(), any())(any())).thenReturn(Future.successful(expectedResult))
 
-          val result = service.submitAmendment(userAnswers, departureId, phase).futureValue
-          result shouldBe expectedResult
+      val result = service.submitAmendment(userAnswers, departureId).futureValue
+      result shouldBe expectedResult
 
-          verify(mockApiConnector).getMRN(eqTo(departureId), eqTo(phase))(any())
-          verify(mockApiConnector).submitAmendment(eqTo(departureId), eqTo(xml), eqTo(phase))(any())
-      }
+      verify(mockApiConnector).getMRN(eqTo(departureId))(any())
+      verify(mockApiConnector).submitAmendment(eqTo(departureId), eqTo(xml))(any())
+
     }
   }
 
   "get" when {
     "no departure found" must {
       "return None" in {
-        forAll(arbitrary[Phase]) {
-          phase =>
-            beforeEach()
+        beforeEach()
 
-            when(mockApiConnector.getDeparture(any(), any())(any()))
-              .thenReturn(Future.successful(None))
+        when(mockApiConnector.getDeparture(any())(any()))
+          .thenReturn(Future.successful(None))
 
-            val result = service.get(lrn, phase).futureValue
-            result shouldBe None
+        val result = service.get(lrn).futureValue
+        result shouldBe None
 
-            verify(mockApiConnector).getDeparture(eqTo(lrn), eqTo(phase))(any())
-        }
+        verify(mockApiConnector).getDeparture(eqTo(lrn))(any())
+
       }
     }
 
     "departure found" when {
       "messages found" must {
         "return list of messages" in {
-          forAll(arbitrary[Phase]) {
-            phase =>
-              beforeEach()
+          beforeEach()
 
-              val departure = Departure(departureId, lrn)
-              val messages  = Messages(Seq(Message("IE015")))
+          val departure = Departure(departureId, lrn)
+          val messages  = Messages(Seq(Message("IE015")))
 
-              when(mockApiConnector.getDeparture(any(), any())(any()))
-                .thenReturn(Future.successful(Some(departure)))
+          when(mockApiConnector.getDeparture(any())(any()))
+            .thenReturn(Future.successful(Some(departure)))
 
-              when(mockApiConnector.getMessages(any(), any())(any()))
-                .thenReturn(Future.successful(messages))
+          when(mockApiConnector.getMessages(any())(any()))
+            .thenReturn(Future.successful(messages))
 
-              val result = await(service.get(lrn, phase))
-              result shouldBe Some(messages)
+          val result = await(service.get(lrn))
+          result shouldBe Some(messages)
 
-              verify(mockApiConnector).getDeparture(eqTo(lrn), eqTo(phase))(any())
-              verify(mockApiConnector).getMessages(eqTo(departureId), eqTo(phase))(any())
-          }
+          verify(mockApiConnector).getDeparture(eqTo(lrn))(any())
+          verify(mockApiConnector).getMessages(eqTo(departureId))(any())
+
         }
       }
     }

@@ -97,7 +97,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
 
       findOne(userAnswers3.lrn, userAnswers3.eoriNumber) should not be defined
 
-      val setResult = repository.set(userAnswers3.metadata, None, Some(Phase.Transition)).futureValue
+      val setResult = repository.set(userAnswers3.metadata, None).futureValue
 
       setResult shouldBe true
 
@@ -106,7 +106,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       getResult.lrn shouldBe userAnswers3.lrn
       getResult.eoriNumber shouldBe userAnswers3.eoriNumber
       getResult.metadata shouldBe userAnswers3.metadata
-      getResult.isTransitional shouldBe true
+      getResult.isTransitional shouldBe false
     }
 
     "create new document when given valid UserAnswers with departureId" in {
@@ -114,7 +114,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       findOne(userAnswers3.lrn, userAnswers3.eoriNumber) should not be defined
       val depId = "departureId123"
 
-      val setResult = repository.set(userAnswers3.metadata, Some(depId), Some(Phase.PostTransition)).futureValue
+      val setResult = repository.set(userAnswers3.metadata, Some(depId)).futureValue
 
       setResult shouldBe true
 
@@ -135,7 +135,7 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
         data = Json.obj("foo" -> "bar"),
         tasks = Map(".task" -> Status.InProgress)
       )
-      val setResult = repository.set(metadata, None, Some(Phase.Transition)).futureValue
+      val setResult = repository.set(metadata, None).futureValue
 
       setResult shouldBe true
 

@@ -16,9 +16,9 @@
 
 package api.submission
 
-import generated._
+import generated.*
 import models.SubmissionState.{Amendment, GuaranteeAmendment}
-import models.{MovementReferenceNumber, Phase, UserAnswers}
+import models.{MovementReferenceNumber, UserAnswers}
 import scalaxb.DataRecord
 import scalaxb.`package`.toXML
 
@@ -29,14 +29,14 @@ class Declaration @Inject() (header: Header) {
 
   private val scope: NamespaceBinding = scalaxb.toScope(Some("ncts") -> "http://ncts.dgtaxud.ec")
 
-  def transform(uA: UserAnswers, mrn: MovementReferenceNumber, phase: Phase): NodeSeq =
+  def transform(uA: UserAnswers, mrn: MovementReferenceNumber): NodeSeq =
     uA.metadata.isSubmitted match {
-      case Amendment          => toXML(IE013(uA, mrn.value, amendmentTypeFlag = false, phase), s"ncts:$CC013C", scope)
-      case GuaranteeAmendment => toXML(IE013(uA, mrn.value, amendmentTypeFlag = true, phase), s"ncts:$CC013C", scope)
-      case _                  => toXML(IE015(uA, phase), s"ncts:${CC015C.toString}", scope)
+      case Amendment          => toXML(IE013(uA, mrn.value, amendmentTypeFlag = false), s"ncts:$CC013C", scope)
+      case GuaranteeAmendment => toXML(IE013(uA, mrn.value, amendmentTypeFlag = true), s"ncts:$CC013C", scope)
+      case _                  => toXML(IE015(uA), s"ncts:${CC015C.toString}", scope)
     }
 
-  private def IE015(uA: UserAnswers, phase: Phase): CC015CType =
+  private def IE015(uA: UserAnswers): CC015CType =
     CC015CType(
       messageSequence1 = header.message(uA, CC015C),
       TransitOperation = TransitOperation.transform(uA),
@@ -48,11 +48,11 @@ class Declaration @Inject() (header: Header) {
       HolderOfTheTransitProcedure = HolderOfTheTransitProcedure.transform(uA),
       Representative = Representative.transform(uA),
       Guarantee = Guarantee.transform(uA),
-      Consignment = Consignment.transform(uA, phase),
+      Consignment = Consignment.transform(uA),
       attributes = attributes
     )
 
-  private def IE013(uA: UserAnswers, mrn: Option[String], amendmentTypeFlag: Boolean, phase: Phase): CC013CType =
+  private def IE013(uA: UserAnswers, mrn: Option[String], amendmentTypeFlag: Boolean): CC013CType =
     CC013CType(
       messageSequence1 = header.message(uA, CC013C),
       TransitOperation = TransitOperation.transformIE013(uA, mrn, amendmentTypeFlag),
@@ -64,7 +64,7 @@ class Declaration @Inject() (header: Header) {
       HolderOfTheTransitProcedure = HolderOfTheTransitProcedure.transform(uA),
       Representative = Representative.transform(uA),
       Guarantee = Guarantee.transformIE013(uA),
-      Consignment = Consignment.transform(uA, phase),
+      Consignment = Consignment.transform(uA),
       attributes = attributes
     )
 
