@@ -26,6 +26,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import repositories.CacheRepository
 import services.{ApiService, AuditService}
 import uk.gov.hmrc.http.HttpResponse
 
@@ -33,14 +34,15 @@ import scala.concurrent.Future
 
 class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
-  private lazy val mockApiService = mock[ApiService]
-
-  private lazy val mockAuditService = mock[AuditService]
+  private lazy val mockCacheRepository = mock[CacheRepository]
+  private lazy val mockApiService      = mock[ApiService]
+  private lazy val mockAuditService    = mock[AuditService]
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
       .guiceApplicationBuilder()
       .overrides(
+        bind[CacheRepository].toInstance(mockCacheRepository),
         bind[ApiService].toInstance(mockApiService),
         bind[AuditService].toInstance(mockAuditService)
       )

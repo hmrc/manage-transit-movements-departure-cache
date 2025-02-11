@@ -17,15 +17,17 @@
 package controllers.actions
 
 import base.SpecBase
+import config.AppConfig
+import models.request.AuthenticatedRequest
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
+import org.mockito.Mockito.*
 import org.scalacheck.Gen
-import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc._
-import play.api.test.Helpers._
-import uk.gov.hmrc.auth.core._
+import play.api.mvc.*
+import play.api.test.Helpers.*
+import uk.gov.hmrc.auth.core.*
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class AuthenticateActionProviderSpec extends SpecBase {
@@ -34,12 +36,12 @@ class AuthenticateActionProviderSpec extends SpecBase {
     new GuiceApplicationBuilder()
       .configure("metrics.jvm" -> false)
 
-  class Harness(authenticate: AuthenticateActionProvider) {
+  private val appConfig = app.injector.instanceOf[AppConfig]
 
-    def action(): Action[AnyContent] = authenticate() {
-      result =>
-        Results.Ok(result.eoriNumber)
-    }
+  class Harness(authConnector: AuthConnector) extends AuthenticateAction(authConnector, appConfig) {
+
+    def action(request: Request[?]): Future[Either[Result, AuthenticatedRequest[?]]] =
+      refine(request)
   }
 
   private val enrolmentKey           = "HMRC-CTC-ORG"
@@ -80,17 +82,14 @@ class AuthenticateActionProviderSpec extends SpecBase {
         when(mockAuthConnector.authorise[Enrolments](any(), any())(any(), any()))
           .thenReturn(Future.successful(Enrolments(Set(validEnrolment))))
 
-        val application = baseApplication
-          .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
-          .build()
+        val harness = new Harness(mockAuthConnector)
 
-        val actionProvider = application.injector.instanceOf[AuthenticateActionProvider]
+        val request = fakeRequest
 
-        val controller = new Harness(actionProvider)
-        val result     = controller.action()(fakeRequest)
-
-        status(result) shouldBe OK
-        contentAsString(result) shouldBe eoriNumber
+        whenReady(harness.action(request)) {
+          result =>
+            result.value shouldEqual AuthenticatedRequest(request, eoriNumber)
+        }
       }
     }
 
@@ -102,15 +101,14 @@ class AuthenticateActionProviderSpec extends SpecBase {
         when(mockAuthConnector.authorise[Enrolments](any(), any())(any(), any()))
           .thenReturn(Future.successful(Enrolments(Set(invalidEnrolment))))
 
-        val application = baseApplication
-          .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
+        val harness = new Harness(mockAuthConnector)
 
-        val actionProvider = application.injector().instanceOf[AuthenticateActionProvider]
+        val request = fakeRequest
 
-        val controller = new Harness(actionProvider)
-        val result     = controller.action()(fakeRequest)
-
-        status(result) shouldBe FORBIDDEN
+        whenReady(harness.action(request)) {
+          result =>
+            status(Future.successful(result.left.value)) shouldEqual FORBIDDEN
+        }
       }
     }
 
@@ -122,15 +120,14 @@ class AuthenticateActionProviderSpec extends SpecBase {
         when(mockAuthConnector.authorise[Enrolments](any(), any())(any(), any()))
           .thenReturn(Future.failed(MissingBearerToken()))
 
-        val application = baseApplication
-          .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
+        val harness = new Harness(mockAuthConnector)
 
-        val actionProvider = application.injector().instanceOf[AuthenticateActionProvider]
+        val request = fakeRequest
 
-        val controller = new Harness(actionProvider)
-        val result     = controller.action()(fakeRequest)
-
-        status(result) shouldBe UNAUTHORIZED
+        whenReady(harness.action(request)) {
+          result =>
+            status(Future.successful(result.left.value)) shouldEqual UNAUTHORIZED
+        }
       }
     }
   }

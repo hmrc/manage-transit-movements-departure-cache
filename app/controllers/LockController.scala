@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.AuthenticateActionProvider
+import controllers.actions.Actions
 import play.api.Logging
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.LockRepository
@@ -28,13 +28,13 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton()
 class LockController @Inject() (
   cc: ControllerComponents,
-  authenticate: AuthenticateActionProvider,
+  actions: Actions,
   lockRepository: LockRepository
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
 
-  def checkLock(lrn: String): Action[AnyContent] = authenticate().async {
+  def checkLock(lrn: String): Action[AnyContent] = actions.authenticate().async {
     implicit request =>
       hc.sessionId
         .map {
@@ -47,7 +47,7 @@ class LockController @Inject() (
         .getOrElse(Future.successful(BadRequest))
   }
 
-  def deleteLock(lrn: String): Action[AnyContent] = authenticate().async {
+  def deleteLock(lrn: String): Action[AnyContent] = actions.authenticate().async {
     implicit request =>
       hc.sessionId
         .map {

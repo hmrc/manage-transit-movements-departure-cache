@@ -32,10 +32,10 @@ import scala.concurrent.{ExecutionContext, Future}
 class LockActionProvider @Inject() (repository: LockRepository, dateTimeService: DateTimeService)(implicit ec: ExecutionContext) {
 
   def apply(lrn: String): ActionFilter[AuthenticatedRequest] =
-    new LockAction(lrn, repository, dateTimeService)
+    new LockAction(lrn)(repository, dateTimeService)
 }
 
-class LockAction(lrn: String, repository: LockRepository, dateTimeService: DateTimeService)(implicit val executionContext: ExecutionContext)
+class LockAction(lrn: String)(repository: LockRepository, dateTimeService: DateTimeService)(implicit val executionContext: ExecutionContext)
     extends ActionFilter[AuthenticatedRequest]
     with Logging {
 

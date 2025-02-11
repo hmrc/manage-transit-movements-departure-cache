@@ -18,7 +18,7 @@ package controllers
 
 import cats.data.OptionT
 import cats.implicits.*
-import controllers.actions.{AuthenticateActionProvider, VersionedAction}
+import controllers.actions.Actions
 import models.*
 import models.AuditType.*
 import play.api.Logging
@@ -36,8 +36,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton()
 class SubmissionController @Inject() (
   cc: ControllerComponents,
-  authenticate: AuthenticateActionProvider,
-  getVersion: VersionedAction,
+  actions: Actions,
   apiService: ApiService,
   cacheRepository: CacheRepository,
   auditService: AuditService,
@@ -50,7 +49,7 @@ class SubmissionController @Inject() (
     s"SubmissionController:$method:${args.mkString(":")} - $message"
 
   def post(): Action[JsValue] =
-    (authenticate() andThen getVersion).async(parse.json) {
+    actions.authenticateAndGetVersion().async(parse.json) {
       implicit request =>
         import request.*
         val auditType = DeclarationData
@@ -78,7 +77,7 @@ class SubmissionController @Inject() (
     }
 
   def postAmendment(): Action[JsValue] =
-    (authenticate() andThen getVersion).async(parse.json) {
+    actions.authenticateAndGetVersion().async(parse.json) {
       implicit request =>
         import request.*
         val auditType = DeclarationAmendment
@@ -133,7 +132,7 @@ class SubmissionController @Inject() (
     }
   }
 
-  def get(lrn: String): Action[AnyContent] = (authenticate() andThen getVersion).async {
+  def get(lrn: String): Action[AnyContent] = actions.authenticateAndGetVersion().async {
     implicit request =>
       import request.*
       apiService.get(lrn, phase).map {
@@ -148,7 +147,7 @@ class SubmissionController @Inject() (
       }
   }
 
-  def rejection(): Action[JsValue] = authenticate()(parse.json) {
+  def rejection(): Action[JsValue] = actions.authenticate()(parse.json) {
     implicit request =>
       import request.*
       body.validate[Seq[FunctionalError]] match {

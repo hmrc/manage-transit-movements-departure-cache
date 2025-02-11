@@ -17,16 +17,17 @@
 package controllers.actions
 
 import base.SpecBase
+import models.request.AuthenticatedRequest
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito._
-import play.api.inject.bind
+import org.mockito.Mockito.*
 import play.api.inject.guice.GuiceApplicationBuilder
-import play.api.mvc._
-import play.api.test.Helpers._
+import play.api.mvc.*
+import play.api.test.Helpers.*
 import repositories.LockRepository
-import uk.gov.hmrc.auth.core._
+import services.DateTimeService
 import uk.gov.hmrc.http.HeaderNames
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class LockActionProviderSpec extends SpecBase {
@@ -35,107 +36,69 @@ class LockActionProviderSpec extends SpecBase {
     new GuiceApplicationBuilder()
       .configure("metrics.jvm" -> false)
 
-  class Harness(lock: AuthenticateAndLockActionProvider) {
+  private val dateTimeService = app.injector.instanceOf[DateTimeService]
 
-    def action(): Action[AnyContent] = lock(lrn) {
-      _ =>
-        Results.Ok(lrn)
-    }
+  class Harness(lockRepository: LockRepository) extends LockAction(lrn)(lockRepository, dateTimeService) {
+
+    def action(request: AuthenticatedRequest[?]): Future[Option[Result]] =
+      filter(request)
   }
-
-  private val enrolmentKey           = "HMRC-CTC-ORG"
-  private val enrolmentIdentifierKey = "EORINumber"
-  private val state                  = "Activated"
-
-  private val validEnrolment: Enrolment =
-    Enrolment(
-      key = enrolmentKey,
-      identifiers = Seq(
-        EnrolmentIdentifier(
-          enrolmentIdentifierKey,
-          eoriNumber
-        )
-      ),
-      state = state
-    )
 
   "LockAction" when {
 
     "when a user has a sessionId" should {
       "return ok after successful lock" in {
 
-        val mockAuthConnector  = mock[AuthConnector]
         val mockLockRepository = mock[LockRepository]
-
-        when(mockAuthConnector.authorise[Enrolments](any(), any())(any(), any()))
-          .thenReturn(Future.successful(Enrolments(Set(validEnrolment))))
 
         when(mockLockRepository.lock(any()))
           .thenReturn(Future.successful(true))
 
-        val application = baseApplication
-          .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
-          .overrides(bind[LockRepository].toInstance(mockLockRepository))
-          .build()
+        val harness = new Harness(mockLockRepository)
 
-        val actionProvider: AuthenticateAndLockActionProvider = application.injector.instanceOf[AuthenticateAndLockActionProvider]
+        val request = AuthenticatedRequest(fakeRequest.withHeaders((HeaderNames.xSessionId, "sessionId")), eoriNumber)
 
-        val controller = new Harness(actionProvider)
-        val result     = controller.action()(fakeRequest.withHeaders((HeaderNames.xSessionId, "sessionId")))
-
-        status(result) shouldBe OK
-        contentAsString(result) shouldBe lrn
+        whenReady(harness.action(request)) {
+          result =>
+            result shouldEqual None
+        }
       }
 
       "return locked when lock already exists" in {
 
-        val mockAuthConnector  = mock[AuthConnector]
         val mockLockRepository = mock[LockRepository]
-
-        when(mockAuthConnector.authorise[Enrolments](any(), any())(any(), any()))
-          .thenReturn(Future.successful(Enrolments(Set(validEnrolment))))
 
         when(mockLockRepository.lock(any()))
           .thenReturn(Future.successful(false))
 
-        val application = baseApplication
-          .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
-          .overrides(bind[LockRepository].toInstance(mockLockRepository))
-          .build()
+        val harness = new Harness(mockLockRepository)
 
-        val actionProvider: AuthenticateAndLockActionProvider = application.injector.instanceOf[AuthenticateAndLockActionProvider]
+        val request = AuthenticatedRequest(fakeRequest.withHeaders((HeaderNames.xSessionId, "sessionId")), eoriNumber)
 
-        val controller = new Harness(actionProvider)
-        val result     = controller.action()(fakeRequest.withHeaders((HeaderNames.xSessionId, "sessionId")))
-
-        status(result) shouldBe LOCKED
+        whenReady(harness.action(request)) {
+          result =>
+            status(Future.successful(result.value)) shouldEqual LOCKED
+        }
       }
     }
 
-    "when a user doesnt have a sessionId" should {
+    "when a user doesn't have a sessionId" should {
 
       "return bad request" in {
 
-        val mockAuthConnector  = mock[AuthConnector]
         val mockLockRepository = mock[LockRepository]
-
-        when(mockAuthConnector.authorise[Enrolments](any(), any())(any(), any()))
-          .thenReturn(Future.successful(Enrolments(Set(validEnrolment))))
 
         when(mockLockRepository.lock(any()))
           .thenReturn(Future.successful(false))
 
-        val application = baseApplication
-          .overrides(bind[AuthConnector].toInstance(mockAuthConnector))
-          .overrides(bind[LockRepository].toInstance(mockLockRepository))
-          .build()
+        val harness = new Harness(mockLockRepository)
 
-        val actionProvider: AuthenticateAndLockActionProvider = application.injector.instanceOf[AuthenticateAndLockActionProvider]
+        val request = AuthenticatedRequest(fakeRequest, eoriNumber)
 
-        val controller = new Harness(actionProvider)
-        val result     = controller.action()(fakeRequest)
-
-        status(result) shouldBe BAD_REQUEST
+        whenReady(harness.action(request)) {
+          result =>
+            status(Future.successful(result.value)) shouldEqual BAD_REQUEST
+        }
       }
     }
   }

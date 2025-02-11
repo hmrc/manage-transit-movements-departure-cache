@@ -17,10 +17,10 @@
 package controllers.testonly
 
 import api.submission.Declaration
-import controllers.actions.{AuthenticateActionProvider, VersionedAction}
+import controllers.actions.Actions
 import models.{MovementReferenceNumber, SensitiveFormats, UserAnswers}
 import play.api.Logging
-import play.api.libs.json._
+import play.api.libs.json.*
 import play.api.mvc.{Action, ControllerComponents}
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
@@ -29,13 +29,12 @@ import javax.inject.Inject
 class TestOnlySubmissionController @Inject() (
   cc: ControllerComponents,
   declaration: Declaration,
-  authenticate: AuthenticateActionProvider,
-  getVersion: VersionedAction
+  actions: Actions
 )(implicit sensitiveFormats: SensitiveFormats)
     extends BackendController(cc)
     with Logging {
 
-  def submit(): Action[JsValue] = (authenticate() andThen getVersion)(parse.json) {
+  def submit(): Action[JsValue] = actions.authenticateAndGetVersion()(parse.json) {
     request =>
       request.body.validate[UserAnswers](UserAnswers.nonSensitiveFormat orElse UserAnswers.sensitiveFormat) match {
         case JsSuccess(userAnswers, _) =>

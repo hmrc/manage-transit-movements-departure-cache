@@ -16,13 +16,12 @@
 
 package controllers.actions
 
-import com.codahale.metrics.MetricRegistry
 import config.AppConfig
 import models.request.AuthenticatedRequest
 import play.api.Logging
 import play.api.mvc.Results.{Forbidden, Unauthorized}
 import play.api.mvc.{ActionRefiner, Request, Result}
-import uk.gov.hmrc.auth.core._
+import uk.gov.hmrc.auth.core.*
 import uk.gov.hmrc.auth.core.retrieve.v2.Retrievals
 import uk.gov.hmrc.http.HeaderCarrier
 import uk.gov.hmrc.play.http.HeaderCarrierConverter
@@ -32,7 +31,6 @@ import scala.concurrent.{ExecutionContext, Future}
 
 class AuthenticateAction @Inject() (
   override val authConnector: AuthConnector,
-  val metrics: MetricRegistry,
   appConfig: AppConfig
 )(implicit val executionContext: ExecutionContext)
     extends ActionRefiner[Request, AuthenticatedRequest]

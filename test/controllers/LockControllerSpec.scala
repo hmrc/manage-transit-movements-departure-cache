@@ -19,15 +19,30 @@ package controllers
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import models.Lock
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{reset, when}
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.test.FakeRequest
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
+import repositories.LockRepository
 import uk.gov.hmrc.http.HeaderNames
 
 import java.time.Instant
 import scala.concurrent.Future
 
 class LockControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+
+  private val mockLockRepository: LockRepository = mock[LockRepository]
+
+  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
+    super
+      .guiceApplicationBuilder()
+      .overrides(bind[LockRepository].toInstance(mockLockRepository))
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockLockRepository)
+  }
 
   "checkLock" should {
 

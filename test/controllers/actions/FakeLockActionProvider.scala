@@ -16,24 +16,19 @@
 
 package controllers.actions
 
+import com.google.inject.Inject
 import models.request.AuthenticatedRequest
-import play.api.mvc.{ActionBuilder, AnyContent, DefaultActionBuilder}
+import play.api.mvc.*
+import repositories.LockRepository
+import services.DateTimeService
 
-import javax.inject.Inject
+import scala.concurrent.ExecutionContext.Implicits.global
 
-trait AuthenticateAndLockActionProvider {
-  def apply(lrn: String): ActionBuilder[AuthenticatedRequest, AnyContent]
-}
+class FakeLockActionProvider @Inject() (
+  repository: LockRepository,
+  dateTimeService: DateTimeService
+) extends LockActionProvider(repository, dateTimeService) {
 
-object AuthenticateAndLockActionProvider {
-
-  class AuthenticateAndLockActionProviderImpl @Inject() (
-    authenticate: AuthenticateAction,
-    lock: LockActionProvider,
-    buildDefault: DefaultActionBuilder
-  ) extends AuthenticateAndLockActionProvider {
-
-    override def apply(lrn: String): ActionBuilder[AuthenticatedRequest, AnyContent] =
-      buildDefault andThen authenticate andThen lock(lrn)
-  }
+  override def apply(lrn: String): ActionFilter[AuthenticatedRequest] =
+    new FakeLockAction()
 }
