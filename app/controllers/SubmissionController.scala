@@ -24,7 +24,7 @@ import models.AuditType.*
 import play.api.Logging
 import play.api.libs.json.*
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
-import repositories.CacheRepository
+import repositories.{CacheRepository, LockRepository}
 import services.{ApiService, AuditService, MetricsService}
 import uk.gov.hmrc.http.HttpErrorFunctions.is2xx
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -39,6 +39,7 @@ class SubmissionController @Inject() (
   actions: Actions,
   apiService: ApiService,
   cacheRepository: CacheRepository,
+  lockRepository: LockRepository,
   auditService: AuditService,
   metricsService: MetricsService
 )(implicit ec: ExecutionContext)
@@ -116,13 +117,13 @@ class SubmissionController @Inject() (
     metricsService.increment(auditType.name, response)
     response.status match {
       case status if is2xx(status) =>
-        cacheRepository
-          .set(metadata, departureId, None)
-          .map {
-            _ =>
-              auditService.audit(auditType, updatedUserAnswers)
-              Ok(response.body)
-          }
+        for {
+          _ <- cacheRepository.set(metadata, departureId, None)
+          _ <- lockRepository.unlock(eoriNumber, lrn)
+        } yield {
+          auditService.audit(auditType, updatedUserAnswers)
+          Ok(response.body)
+        }
       case BAD_REQUEST =>
         logger.warn(log("responseToResult", "Bad request", auditType.toString, eoriNumber, lrn))
         Future.successful(BadRequest)
