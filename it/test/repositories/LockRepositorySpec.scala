@@ -20,7 +20,7 @@ import itbase.LockRepositorySpecBase
 import models.Lock
 
 import java.time.Instant
-import java.time.temporal.ChronoUnit.DAYS
+import java.time.temporal.ChronoUnit.*
 
 class LockRepositorySpec extends LockRepositorySpecBase {
 
@@ -41,7 +41,7 @@ class LockRepositorySpec extends LockRepositorySpecBase {
 
       "update lock when sessionId is the same as lock" in {
 
-        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", now, now.minus(1, DAYS))
+        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", now, now.minus(1, SECONDS))
         val lock2: Lock = Lock("session1", "eoriNumber", "lrn", now, now)
 
         insert(lock1).futureValue
@@ -86,6 +86,17 @@ class LockRepositorySpec extends LockRepositorySpecBase {
         result.value.sessionId shouldBe lock1.sessionId
         result.value.eoriNumber shouldBe lock1.eoriNumber
         result.value.lrn shouldBe lock1.lrn
+      }
+
+      "not find a lock where the lastUpdated was more than 15 minutes ago (e.g. small window where TTL hasn't kicked in yet)" in {
+
+        val lock1: Lock = Lock("session1", "eoriNumber", "lrn", now, now.minus(16, MINUTES))
+
+        insert(lock1).futureValue
+
+        val result = repository.findLocks(lock1.eoriNumber, lock1.lrn).futureValue
+
+        result shouldBe None
       }
 
       "return None for no lock" in {
