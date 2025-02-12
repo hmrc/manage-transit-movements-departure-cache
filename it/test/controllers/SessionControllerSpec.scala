@@ -17,11 +17,8 @@
 package controllers
 
 import itbase.RepositorySpecBase
-import models.Lock
 import repositories.{CacheRepository, LockRepository}
 import uk.gov.hmrc.mongo.test.CleanMongoCollectionSupport
-
-import java.time.Instant
 
 class SessionControllerSpec extends RepositorySpecBase with CleanMongoCollectionSupport {
 
@@ -35,8 +32,8 @@ class SessionControllerSpec extends RepositorySpecBase with CleanMongoCollection
     "document and locks exist" should {
       "remove document and locks and respond with 200 status" in {
         cacheRepository.set(emptyMetadata, None, None).futureValue
-        lockRepository.lock(Lock("session1", eoriNumber, lrn, Instant.now(), Instant.now())).futureValue
-        lockRepository.lock(Lock("session2", eoriNumber, lrn, Instant.now(), Instant.now())).futureValue
+        lockRepository.lock("session1", eoriNumber, lrn).futureValue
+        lockRepository.lock("session2", eoriNumber, lrn).futureValue
 
         val response = wsClient
           .url(url)

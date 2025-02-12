@@ -46,7 +46,7 @@ class CacheController @Inject() (
   def get(lrn: String): Action[AnyContent] =
     getUserAnswers[UserAnswers](lrn)(identity)
 
-  def post(lrn: String): Action[JsValue] = actions.authenticateAndLock(lrn).async(parse.json) {
+  def post(lrn: String): Action[JsValue] = actions.authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
@@ -125,7 +125,7 @@ class CacheController @Inject() (
     }
 
   private def getUserAnswers[T](lrn: String)(f: UserAnswers => T)(implicit writes: Writes[T]): Action[AnyContent] =
-    actions.authenticateAndLockAndGetVersion(lrn).async {
+    actions.authenticateAndGetVersion().async {
       implicit request =>
         val eoriNumber = request.eoriNumber
         cacheRepository

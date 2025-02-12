@@ -33,7 +33,6 @@ trait AppWithDefaultMockFixtures extends BeforeAndAfterEach {
   def guiceApplicationBuilder(): GuiceApplicationBuilder =
     new GuiceApplicationBuilder()
       .overrides(
-        bind[AuthenticateActionProvider].toInstance(new FakeAuthenticateActionProvider(eoriNumber)),
-        bind[LockActionProvider].to[FakeLockActionProvider]
+        bind[AuthenticateActionProvider].toInstance(new FakeAuthenticateActionProvider(eoriNumber))
       )
 }

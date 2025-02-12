@@ -61,11 +61,22 @@ class LockRepository @Inject() (
       .map(_.wasAcknowledged())
   }
 
-  def lock(newLock: Lock): Future[Boolean] =
-    findLocks(newLock.eoriNumber, newLock.lrn).flatMap {
-      case Some(existingLock) if existingLock.sessionId == newLock.sessionId => updateLock(existingLock)
-      case None                                                              => insertNewLock(newLock)
-      case _                                                                 => Future.successful(false)
+  def lock(sessionId: String, eoriNumber: String, lrn: String): Future[Boolean] =
+    findLocks(eoriNumber, lrn).flatMap {
+      case Some(existingLock) if existingLock.sessionId == sessionId =>
+        updateLock(existingLock)
+      case None =>
+        val now = dateTimeService.timestamp
+        val lock = Lock(
+          sessionId = sessionId,
+          eoriNumber = eoriNumber,
+          lrn = lrn,
+          createdAt = now,
+          lastUpdated = now
+        )
+        insertNewLock(lock)
+      case _ =>
+        Future.successful(false)
     }
 
   def findLocks(eoriNumber: String, lrn: String): Future[Option[Lock]] = {
