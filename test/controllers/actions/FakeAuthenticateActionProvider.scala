@@ -17,17 +17,10 @@
 package controllers.actions
 
 import models.request.AuthenticatedRequest
-import play.api.mvc._
-import play.api.test.Helpers
+import play.api.mvc.*
 
-import scala.concurrent.ExecutionContext.Implicits.global
+class FakeAuthenticateActionProvider(eoriNumber: String) extends AuthenticateActionProvider {
 
-class FakeAuthenticateActionProvider extends AuthenticateActionProvider {
-
-  override def apply(): ActionBuilder[AuthenticatedRequest, AnyContent] = {
-    val defaultActionBuilder = DefaultActionBuilder(Helpers.stubBodyParser())
-    val authenticate         = new FakeAuthenticateAction("eori")
-
-    defaultActionBuilder andThen authenticate
-  }
+  override def apply(): ActionRefiner[Request, AuthenticatedRequest] =
+    new FakeAuthenticateAction(eoriNumber)
 }

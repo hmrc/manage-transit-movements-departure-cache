@@ -17,7 +17,6 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import controllers.actions.*
 import generators.Generators
 import models.AuditType.*
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
@@ -33,15 +32,15 @@ import scala.concurrent.Future
 
 class SessionControllerSpec extends SpecBase with AppWithDefaultMockFixtures with Generators {
 
-  private lazy val mockAuditService   = mock[AuditService]
-  private lazy val mockMetricsService = mock[MetricsService]
-  private lazy val mockSessionService = mock[SessionService]
+  private lazy val mockCacheRepository = mock[CacheRepository]
+  private lazy val mockAuditService    = mock[AuditService]
+  private lazy val mockMetricsService  = mock[MetricsService]
+  private lazy val mockSessionService  = mock[SessionService]
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
-    new GuiceApplicationBuilder()
+    super
+      .guiceApplicationBuilder()
       .overrides(
-        bind[AuthenticateActionProvider].to[FakeAuthenticateActionProvider],
-        bind[AuthenticateAndLockActionProvider].to[FakeAuthenticateAndLockActionProvider],
         bind[CacheRepository].toInstance(mockCacheRepository),
         bind[SessionService].toInstance(mockSessionService),
         bind[AuditService].toInstance(mockAuditService),
@@ -50,6 +49,7 @@ class SessionControllerSpec extends SpecBase with AppWithDefaultMockFixtures wit
 
   override def beforeEach(): Unit = {
     super.beforeEach()
+    reset(mockCacheRepository)
     reset(mockAuditService)
     reset(mockMetricsService)
     reset(mockSessionService)

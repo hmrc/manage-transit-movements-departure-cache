@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.{AuthenticateActionProvider, AuthenticateAndLockActionProvider, VersionedAction}
+import controllers.actions.Actions
 import models.*
 import models.AuditType.*
 import models.Rejection.*
@@ -33,9 +33,7 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton()
 class CacheController @Inject() (
   cc: ControllerComponents,
-  authenticate: AuthenticateActionProvider,
-  authenticateAndLock: AuthenticateAndLockActionProvider,
-  getVersion: VersionedAction,
+  actions: Actions,
   cacheRepository: CacheRepository,
   auditService: AuditService,
   metricsService: MetricsService,
@@ -48,7 +46,7 @@ class CacheController @Inject() (
   def get(lrn: String): Action[AnyContent] =
     getUserAnswers[UserAnswers](lrn)(identity)
 
-  def post(lrn: String): Action[JsValue] = authenticateAndLock(lrn).async(parse.json) {
+  def post(lrn: String): Action[JsValue] = actions.authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[Metadata] match {
         case JsSuccess(data, _) =>
@@ -64,7 +62,7 @@ class CacheController @Inject() (
       }
   }
 
-  def put(): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
+  def put(): Action[JsValue] = actions.authenticateAndGetVersion().async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(lrn, _) =>
@@ -107,7 +105,7 @@ class CacheController @Inject() (
     skip: Option[Int] = None,
     sortBy: Option[String] = None
   ): Action[AnyContent] =
-    authenticate().async {
+    actions.authenticate().async {
       implicit request =>
         cacheRepository
           .getAll(request.eoriNumber, lrn, state, limit, skip, sortBy)
@@ -127,7 +125,7 @@ class CacheController @Inject() (
     }
 
   private def getUserAnswers[T](lrn: String)(f: UserAnswers => T)(implicit writes: Writes[T]): Action[AnyContent] =
-    (authenticate() andThen getVersion).async {
+    actions.authenticateAndGetVersion().async {
       implicit request =>
         val eoriNumber = request.eoriNumber
         cacheRepository
@@ -148,7 +146,7 @@ class CacheController @Inject() (
           }
     }
 
-  def handleErrors(lrn: String): Action[JsValue] = authenticate().async(parse.json) {
+  def handleErrors(lrn: String): Action[JsValue] = actions.authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[Rejection] match {
         case JsSuccess(rejection, _) =>
@@ -165,7 +163,7 @@ class CacheController @Inject() (
       }
   }
 
-  def isRejectionAmendable(lrn: String): Action[JsValue] = authenticate().async(parse.json) {
+  def isRejectionAmendable(lrn: String): Action[JsValue] = actions.authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[Rejection] match {
         case JsSuccess(rejection, _) =>
@@ -176,7 +174,7 @@ class CacheController @Inject() (
       }
   }
 
-  def prepareForAmendment(lrn: String): Action[JsValue] = authenticate().async(parse.json) {
+  def prepareForAmendment(lrn: String): Action[JsValue] = actions.authenticate().async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(departureId, _) =>
@@ -193,7 +191,7 @@ class CacheController @Inject() (
       }
   }
 
-  def copy(lrn: String): Action[JsValue] = (authenticate() andThen getVersion).async(parse.json) {
+  def copy(lrn: String): Action[JsValue] = actions.authenticateAndGetVersion().async(parse.json) {
     implicit request =>
       request.body.validate[String] match {
         case JsSuccess(newLrn, _) =>

@@ -18,9 +18,8 @@ package repositories
 
 import config.AppConfig
 import models.Lock
-import org.mongodb.scala.bson.conversions.Bson
+import org.mongodb.scala.model.*
 import org.mongodb.scala.model.Indexes.{ascending, compoundIndex}
-import org.mongodb.scala.model._
 import services.DateTimeService
 import uk.gov.hmrc.mongo.MongoComponent
 import uk.gov.hmrc.mongo.play.json.PlayMongoRepository
@@ -42,11 +41,6 @@ class LockRepository @Inject() (
       indexes = LockRepository.indexes(appConfig)
     ) {
 
-  private def primaryFilter(eoriNumber: String, lrn: String): Bson = Filters.and(
-    Filters.eq("eoriNumber", eoriNumber),
-    Filters.eq("lrn", lrn)
-  )
-
   private def insertNewLock(lock: Lock): Future[Boolean] =
     collection
       .insertOne(lock)
@@ -54,22 +48,46 @@ class LockRepository @Inject() (
       .map(_.wasAcknowledged())
 
   private def updateLock(existingLock: Lock): Future[Boolean] = {
+    val filters = Filters.and(
+      Filters.eq("eoriNumber", existingLock.eoriNumber),
+      Filters.eq("lrn", existingLock.lrn)
+    )
+
     val updatedLock = existingLock.copy(lastUpdated = dateTimeService.timestamp)
+
     collection
-      .replaceOne(primaryFilter(existingLock.eoriNumber, existingLock.lrn), updatedLock)
+      .replaceOne(filters, updatedLock)
       .head()
       .map(_.wasAcknowledged())
   }
 
-  def lock(newLock: Lock): Future[Boolean] =
-    findLocks(newLock.eoriNumber, newLock.lrn).flatMap {
-      case Some(existingLock) if existingLock.sessionId == newLock.sessionId => updateLock(existingLock)
-      case None                                                              => insertNewLock(newLock)
-      case _                                                                 => Future.successful(false)
+  def lock(sessionId: String, eoriNumber: String, lrn: String): Future[Boolean] =
+    findLocks(eoriNumber, lrn).flatMap {
+      case Some(existingLock) if existingLock.sessionId == sessionId =>
+        updateLock(existingLock)
+      case None =>
+        val now = dateTimeService.timestamp
+        val lock = Lock(
+          sessionId = sessionId,
+          eoriNumber = eoriNumber,
+          lrn = lrn,
+          createdAt = now,
+          lastUpdated = now
+        )
+        insertNewLock(lock)
+      case _ =>
+        Future.successful(false)
     }
 
-  def findLocks(eoriNumber: String, lrn: String): Future[Option[Lock]] =
-    collection.find(primaryFilter(eoriNumber, lrn)).headOption()
+  def findLocks(eoriNumber: String, lrn: String): Future[Option[Lock]] = {
+    val filters = Filters.and(
+      Filters.eq("eoriNumber", eoriNumber),
+      Filters.eq("lrn", lrn),
+      Filters.gt("lastUpdated", dateTimeService.nMinutesAgo(appConfig.lockTTLInMins))
+    )
+
+    collection.find(filters).headOption()
+  }
 
   def unlock(eoriNumber: String, lrn: String, sessionId: String): Future[Boolean] = {
     val filters = Filters.and(
