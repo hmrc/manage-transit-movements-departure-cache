@@ -18,12 +18,32 @@ package services
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.when
+import org.mockito.Mockito.{reset, when}
 import org.scalatest.Assertion
+import play.api.inject.bind
+import play.api.inject.guice.GuiceApplicationBuilder
+import repositories.{CacheRepository, LockRepository}
 
 import scala.concurrent.Future
 
 class SessionServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
+
+  private val mockCacheRepository: CacheRepository = mock[CacheRepository]
+  private val mockLockRepository: LockRepository   = mock[LockRepository]
+
+  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
+    super
+      .guiceApplicationBuilder()
+      .overrides(
+        bind[CacheRepository].toInstance(mockCacheRepository),
+        bind[LockRepository].toInstance(mockLockRepository)
+      )
+
+  override def beforeEach(): Unit = {
+    super.beforeEach()
+    reset(mockCacheRepository)
+    reset(mockLockRepository)
+  }
 
   private val sessionService = app.injector.instanceOf[SessionService]
 

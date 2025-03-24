@@ -18,13 +18,13 @@ package controllers
 
 import cats.data.OptionT
 import cats.implicits.*
-import controllers.actions.AuthenticateActionProvider
+import controllers.actions.Actions
 import models.*
 import models.AuditType.*
 import play.api.Logging
 import play.api.libs.json.*
 import play.api.mvc.{Action, AnyContent, ControllerComponents, Result}
-import repositories.CacheRepository
+import repositories.{CacheRepository, LockRepository}
 import services.{ApiService, AuditService, MetricsService}
 import uk.gov.hmrc.http.HttpErrorFunctions.is2xx
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
@@ -36,9 +36,10 @@ import scala.concurrent.{ExecutionContext, Future}
 @Singleton()
 class SubmissionController @Inject() (
   cc: ControllerComponents,
-  authenticate: AuthenticateActionProvider,
+  actions: Actions,
   apiService: ApiService,
   cacheRepository: CacheRepository,
+  lockRepository: LockRepository,
   auditService: AuditService,
   metricsService: MetricsService
 )(implicit ec: ExecutionContext)
@@ -49,7 +50,7 @@ class SubmissionController @Inject() (
     s"SubmissionController:$method:${args.mkString(":")} - $message"
 
   def post(): Action[JsValue] =
-    authenticate().async(parse.json) {
+    actions.authenticate().async(parse.json) {
       implicit request =>
         import request.*
         val auditType = DeclarationData
@@ -77,7 +78,7 @@ class SubmissionController @Inject() (
     }
 
   def postAmendment(): Action[JsValue] =
-    authenticate().async(parse.json) {
+    actions.authenticate().async(parse.json) {
       implicit request =>
         import request.*
         val auditType = DeclarationAmendment
@@ -116,13 +117,13 @@ class SubmissionController @Inject() (
     metricsService.increment(auditType.name, response)
     response.status match {
       case status if is2xx(status) =>
-        cacheRepository
-          .set(metadata, departureId)
-          .map {
-            _ =>
-              auditService.audit(auditType, updatedUserAnswers)
-              Ok(response.body)
-          }
+        for {
+          _ <- cacheRepository.set(metadata, departureId)
+          _ <- lockRepository.unlock(eoriNumber, lrn)
+        } yield {
+          auditService.audit(auditType, updatedUserAnswers)
+          Ok(response.body)
+        }
       case BAD_REQUEST =>
         logger.warn(log("responseToResult", "Bad request", auditType.toString, eoriNumber, lrn))
         Future.successful(BadRequest)
@@ -132,7 +133,7 @@ class SubmissionController @Inject() (
     }
   }
 
-  def get(lrn: String): Action[AnyContent] = authenticate().async {
+  def get(lrn: String): Action[AnyContent] = actions.authenticate().async {
     implicit request =>
       import request.*
       apiService.get(lrn).map {
@@ -147,7 +148,7 @@ class SubmissionController @Inject() (
       }
   }
 
-  def rejection(): Action[JsValue] = authenticate()(parse.json) {
+  def rejection(): Action[JsValue] = actions.authenticate()(parse.json) {
     implicit request =>
       import request.*
       body.validate[Seq[FunctionalError]] match {

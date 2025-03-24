@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,19 +21,11 @@ import play.api.mvc.{ActionBuilder, AnyContent, DefaultActionBuilder}
 
 import javax.inject.Inject
 
-trait AuthenticateAndLockActionProvider {
-  def apply(lrn: String): ActionBuilder[AuthenticatedRequest, AnyContent]
-}
+class Actions @Inject() (
+  buildDefault: DefaultActionBuilder,
+  authenticateActionProvider: AuthenticateActionProvider
+) {
 
-object AuthenticateAndLockActionProvider {
-
-  class AuthenticateAndLockActionProviderImpl @Inject() (
-    authenticate: AuthenticateAction,
-    lock: LockActionProvider,
-    buildDefault: DefaultActionBuilder
-  ) extends AuthenticateAndLockActionProvider {
-
-    override def apply(lrn: String): ActionBuilder[AuthenticatedRequest, AnyContent] =
-      buildDefault andThen authenticate andThen lock(lrn)
-  }
+  def authenticate(): ActionBuilder[AuthenticatedRequest, AnyContent] =
+    buildDefault andThen authenticateActionProvider()
 }

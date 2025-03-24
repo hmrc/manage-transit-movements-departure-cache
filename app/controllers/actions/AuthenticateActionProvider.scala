@@ -17,22 +17,21 @@
 package controllers.actions
 
 import models.request.AuthenticatedRequest
-import play.api.mvc.{ActionBuilder, AnyContent, DefaultActionBuilder}
+import play.api.mvc.{ActionRefiner, Request}
 
 import javax.inject.Inject
 
 trait AuthenticateActionProvider {
-  def apply(): ActionBuilder[AuthenticatedRequest, AnyContent]
+  def apply(): ActionRefiner[Request, AuthenticatedRequest]
 }
 
 object AuthenticateActionProvider {
 
   class AuthenticateActionProviderImpl @Inject() (
-    authenticate: AuthenticateAction,
-    buildDefault: DefaultActionBuilder
+    authenticate: AuthenticateAction
   ) extends AuthenticateActionProvider {
 
-    override def apply(): ActionBuilder[AuthenticatedRequest, AnyContent] =
-      buildDefault andThen authenticate
+    override def apply(): ActionRefiner[Request, AuthenticatedRequest] =
+      authenticate
   }
 }

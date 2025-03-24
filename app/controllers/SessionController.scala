@@ -16,7 +16,7 @@
 
 package controllers
 
-import controllers.actions.AuthenticateActionProvider
+import controllers.actions.Actions
 import models.AuditType.*
 import play.api.Logging
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
@@ -29,7 +29,7 @@ import scala.concurrent.ExecutionContext
 @Singleton()
 class SessionController @Inject() (
   cc: ControllerComponents,
-  authenticate: AuthenticateActionProvider,
+  actions: Actions,
   auditService: AuditService,
   metricsService: MetricsService,
   sessionService: SessionService
@@ -37,7 +37,7 @@ class SessionController @Inject() (
     extends BackendController(cc)
     with Logging {
 
-  def delete(lrn: String): Action[AnyContent] = authenticate().async {
+  def delete(lrn: String): Action[AnyContent] = actions.authenticate().async {
     implicit request =>
       sessionService
         .deleteUserAnswersAndLocks(request.eoriNumber, lrn)

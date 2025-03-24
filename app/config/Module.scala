@@ -17,9 +17,8 @@
 package config
 
 import com.google.inject.AbstractModule
+import controllers.actions.*
 import controllers.actions.AuthenticateActionProvider.AuthenticateActionProviderImpl
-import controllers.actions.AuthenticateAndLockActionProvider.AuthenticateAndLockActionProviderImpl
-import controllers.actions._
 
 import java.time.Clock
 
@@ -28,7 +27,6 @@ class Module extends AbstractModule {
   override def configure(): Unit = {
     bind(classOf[AppConfig]).asEagerSingleton()
     bind(classOf[AuthenticateActionProvider]).to(classOf[AuthenticateActionProviderImpl]).asEagerSingleton()
-    bind(classOf[AuthenticateAndLockActionProvider]).to(classOf[AuthenticateAndLockActionProviderImpl]).asEagerSingleton()
 
     bind(classOf[Clock]).toInstance(Clock.systemUTC)
   }

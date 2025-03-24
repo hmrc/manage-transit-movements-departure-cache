@@ -17,7 +17,6 @@
 package controllers
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import controllers.actions.*
 import generators.Generators
 import models.AuditType.*
 import models.Rejection.IE055Rejection
@@ -37,15 +36,15 @@ import scala.concurrent.Future
 
 class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with Generators {
 
-  private lazy val mockAuditService   = mock[AuditService]
-  private lazy val mockMetricsService = mock[MetricsService]
-  private lazy val mockXPathService   = mock[XPathService]
+  private lazy val mockCacheRepository = mock[CacheRepository]
+  private lazy val mockAuditService    = mock[AuditService]
+  private lazy val mockMetricsService  = mock[MetricsService]
+  private lazy val mockXPathService    = mock[XPathService]
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
-    new GuiceApplicationBuilder()
+    super
+      .guiceApplicationBuilder()
       .overrides(
-        bind[AuthenticateActionProvider].to[FakeAuthenticateActionProvider],
-        bind[AuthenticateAndLockActionProvider].to[FakeAuthenticateAndLockActionProvider],
         bind[CacheRepository].toInstance(mockCacheRepository),
         bind[AuditService].toInstance(mockAuditService),
         bind[MetricsService].toInstance(mockMetricsService),
@@ -54,6 +53,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
 
   override def beforeEach(): Unit = {
     super.beforeEach()
+    reset(mockCacheRepository)
     reset(mockAuditService)
     reset(mockMetricsService)
     reset(mockXPathService)

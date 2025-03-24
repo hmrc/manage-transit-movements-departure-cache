@@ -26,6 +26,7 @@ import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsString, Json}
 import play.api.test.FakeRequest
 import play.api.test.Helpers.*
+import repositories.{CacheRepository, LockRepository}
 import services.{ApiService, AuditService}
 import uk.gov.hmrc.http.HttpResponse
 
@@ -33,14 +34,17 @@ import scala.concurrent.Future
 
 class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
-  private lazy val mockApiService = mock[ApiService]
-
-  private lazy val mockAuditService = mock[AuditService]
+  private lazy val mockCacheRepository = mock[CacheRepository]
+  private lazy val mockLockRepository  = mock[LockRepository]
+  private lazy val mockApiService      = mock[ApiService]
+  private lazy val mockAuditService    = mock[AuditService]
 
   override def guiceApplicationBuilder(): GuiceApplicationBuilder =
     super
       .guiceApplicationBuilder()
       .overrides(
+        bind[CacheRepository].toInstance(mockCacheRepository),
+        bind[LockRepository].toInstance(mockLockRepository),
         bind[ApiService].toInstance(mockApiService),
         bind[AuditService].toInstance(mockAuditService)
       )
@@ -48,10 +52,14 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockCacheRepository)
+    reset(mockLockRepository)
     reset(mockApiService)
     reset(mockAuditService)
 
     when(mockCacheRepository.set(any(): Metadata, any(): Option[String]))
+      .thenReturn(Future.successful(true))
+
+    when(mockLockRepository.unlock(any(), any()))
       .thenReturn(Future.successful(true))
   }
 
@@ -78,6 +86,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockCacheRepository).set(eqTo(updatedUserAnswers.metadata), eqTo(None))
+        verify(mockLockRepository).unlock(eqTo(eoriNumber), eqTo(lrn))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers))(any())
         verify(mockAuditService).audit(eqTo(DeclarationData), eqTo(updatedUserAnswers))(any())
       }
@@ -155,6 +164,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockCacheRepository).set(eqTo(updatedUserAnswers.metadata), eqTo(Some("departureId123")))
+        verify(mockLockRepository).unlock(eqTo(eoriNumber), eqTo(lrn))
         verify(mockApiService).submitAmendment(eqTo(userAnswers), eqTo(departureId))(any())
         verify(mockAuditService).audit(eqTo(DeclarationAmendment), eqTo(updatedUserAnswers))(any())
       }
