@@ -36,18 +36,9 @@ object Consignment {
   implicit class RichConsignmentType20(value: ConsignmentType20) {
 
     def postProcess(): ConsignmentType20 = value
-      .rollUpTransportCharges()
       .rollUpUCR()
       .rollUpCountryOfDispatch()
       .rollUpCountryOfDestination()
-
-    def rollUpTransportCharges(): ConsignmentType20 =
-      rollUp[TransportChargesType, TransportChargesType](
-        consignmentLevel = _.TransportCharges,
-        itemLevel = _.TransportCharges,
-        updateConsignmentLevel = transportCharges => _.copy(TransportCharges = transportCharges),
-        updateItemLevel = _ => _.copy(TransportCharges = None)
-      )(identity)
 
     def rollUpUCR(): ConsignmentType20 =
       rollUp[String, String](
