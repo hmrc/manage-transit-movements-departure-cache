@@ -82,14 +82,16 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe OK
-        contentAsJson(result) shouldBe body
+        status(result) shouldEqual OK
+        contentAsJson(result) shouldEqual body
+
+        val auditType = DeclarationData(updatedUserAnswers, OK)
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockCacheRepository).set(eqTo(updatedUserAnswers.metadata), eqTo(None), eqTo(None))
         verify(mockLockRepository).unlock(eqTo(eoriNumber), eqTo(lrn))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Phase.Transition))(any())
-        verify(mockAuditService).audit(eqTo(DeclarationData), eqTo(updatedUserAnswers))(any())
+        verify(mockAuditService).audit(eqTo(auditType))(any())
       }
     }
 
@@ -107,7 +109,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe BAD_REQUEST
+        status(result) shouldEqual BAD_REQUEST
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Phase.Transition))(any())
@@ -122,7 +124,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe NOT_FOUND
+        status(result) shouldEqual NOT_FOUND
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockApiService, never()).submitDeclaration(any(), any())(any())
@@ -137,7 +139,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe BAD_REQUEST
+        status(result) shouldEqual BAD_REQUEST
 
         verify(mockCacheRepository, never()).get(any(), any())
         verify(mockApiService, never()).submitDeclaration(any(), any())(any())
@@ -164,14 +166,16 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe OK
-        contentAsJson(result) shouldBe body
+        status(result) shouldEqual OK
+        contentAsJson(result) shouldEqual body
+
+        val auditType = DeclarationAmendment(updatedUserAnswers, OK)
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockCacheRepository).set(eqTo(updatedUserAnswers.metadata), eqTo(Some("departureId123")), eqTo(None))
         verify(mockLockRepository).unlock(eqTo(eoriNumber), eqTo(lrn))
         verify(mockApiService).submitAmendment(eqTo(userAnswers), eqTo(departureId), eqTo(Phase.Transition))(any())
-        verify(mockAuditService).audit(eqTo(DeclarationAmendment), eqTo(updatedUserAnswers))(any())
+        verify(mockAuditService).audit(eqTo(auditType))(any())
       }
     }
 
@@ -189,7 +193,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe BAD_REQUEST
+        status(result) shouldEqual BAD_REQUEST
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockApiService).submitAmendment(eqTo(userAnswers), eqTo(departureId), eqTo(Phase.Transition))(any())
@@ -204,7 +208,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe NOT_FOUND
+        status(result) shouldEqual NOT_FOUND
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockApiService, never()).submitAmendment(any(), any(), any())(any())
@@ -219,7 +223,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe NOT_FOUND
+        status(result) shouldEqual NOT_FOUND
 
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockApiService, never()).submitAmendment(any(), any(), any())(any())
@@ -234,7 +238,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe BAD_REQUEST
+        status(result) shouldEqual BAD_REQUEST
 
         verify(mockCacheRepository, never()).get(any(), any())
         verify(mockApiService, never()).submitAmendment(any(), any(), any())(any())
@@ -255,8 +259,8 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe OK
-        contentAsJson(result) shouldBe Json.toJson(messages)
+        status(result) shouldEqual OK
+        contentAsJson(result) shouldEqual Json.toJson(messages)
 
         verify(mockApiService).get(eqTo(lrn), eqTo(Phase.Transition))(any())
       }
@@ -272,7 +276,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe NO_CONTENT
+        status(result) shouldEqual NO_CONTENT
 
         verify(mockApiService).get(eqTo(lrn), eqTo(Phase.Transition))(any())
       }
@@ -288,7 +292,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe NOT_FOUND
+        status(result) shouldEqual NOT_FOUND
 
         verify(mockApiService).get(eqTo(lrn), eqTo(Phase.Transition))(any())
       }
@@ -337,8 +341,8 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
             |]
             |""".stripMargin)
 
-        status(result) shouldBe OK
-        contentAsJson(result) shouldBe expectedResult
+        status(result) shouldEqual OK
+        contentAsJson(result) shouldEqual expectedResult
       }
     }
 
@@ -349,7 +353,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe BAD_REQUEST
+        status(result) shouldEqual BAD_REQUEST
       }
 
       "request body is empty" in {
@@ -358,7 +362,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         val result = route(app, request).value
 
-        status(result) shouldBe BAD_REQUEST
+        status(result) shouldEqual BAD_REQUEST
       }
     }
   }

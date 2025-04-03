@@ -16,14 +16,72 @@
 
 package models
 
-sealed abstract class AuditType(val name: String) {
+import play.api.libs.json.{JsValue, Json, Writes}
+
+sealed trait AuditType {
+  val name: String
+  val lrn: String
+  val eoriNumber: String
+
+  val channel: String = "web"
+
+  def toJson: JsValue = Json.obj(
+    "channel" -> channel,
+    "detail" -> Json.obj(
+      "lrn"        -> lrn,
+      "eoriNumber" -> eoriNumber
+    )
+  )
+
   override def toString: String = name
 }
 
 object AuditType {
 
-  case object DepartureDraftStarted extends AuditType("DepartureDraftStarted")
-  case object DepartureDraftDeleted extends AuditType("DepartureDraftDeleted")
-  case object DeclarationData extends AuditType("DeclarationData")
-  case object DeclarationAmendment extends AuditType("DeclarationAmendment")
+  sealed trait SubmissionAuditType extends AuditType {
+    val userAnswers: UserAnswers
+    override val lrn: String        = userAnswers.lrn
+    override val eoriNumber: String = userAnswers.eoriNumber
+    val status: Int
+
+    override def toJson: JsValue = Json.obj(
+      "channel" -> channel,
+      "status"  -> status,
+      "detail"  -> Json.toJson(userAnswers)
+    )
+  }
+
+  case class DepartureDraftStarted(lrn: String, eoriNumber: String) extends AuditType {
+    override val name: String = DepartureDraftStarted.name
+  }
+
+  object DepartureDraftStarted {
+    val name: String = "DepartureDraftStarted"
+  }
+
+  case class DepartureDraftDeleted(lrn: String, eoriNumber: String) extends AuditType {
+    override val name: String = DepartureDraftDeleted.name
+  }
+
+  object DepartureDraftDeleted {
+    val name: String = "DepartureDraftDeleted"
+  }
+
+  case class DeclarationData(userAnswers: UserAnswers, status: Int) extends SubmissionAuditType {
+    override val name: String = DeclarationData.name
+  }
+
+  object DeclarationData {
+    val name: String = "DeclarationData"
+  }
+
+  case class DeclarationAmendment(userAnswers: UserAnswers, status: Int) extends SubmissionAuditType {
+    override val name: String = DeclarationAmendment.name
+  }
+
+  object DeclarationAmendment {
+    val name: String = "DeclarationAmendment"
+  }
+
+  implicit val writes: Writes[AuditType] = Writes(_.toJson)
 }

@@ -67,9 +67,9 @@ class CacheController @Inject() (
       request.body.validate[String] match {
         case JsSuccess(lrn, _) =>
           set(Metadata(lrn, request.eoriNumber, SubmissionState.NotSubmitted), None, Some(request.phase)) {
-            val auditType = DepartureDraftStarted
-            auditService.audit(auditType, lrn, request.eoriNumber)
-            metricsService.increment(auditType.name)
+            val auditType = DepartureDraftStarted(lrn, request.eoriNumber)
+            auditService.audit(auditType)
+            metricsService.increment(auditType)
           }
         case JsError(errors) =>
           logger.warn(s"Failed to validate request body as String: $errors")

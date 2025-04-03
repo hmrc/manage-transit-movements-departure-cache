@@ -43,9 +43,9 @@ class SessionController @Inject() (
         .deleteUserAnswersAndLocks(request.eoriNumber, lrn)
         .map {
           _ =>
-            val auditType = DepartureDraftDeleted
-            auditService.audit(auditType, lrn, request.eoriNumber)
-            metricsService.increment(auditType.name)
+            val auditType = DepartureDraftDeleted(lrn, request.eoriNumber)
+            auditService.audit(auditType)
+            metricsService.increment(auditType)
             Ok
         }
         .recover {

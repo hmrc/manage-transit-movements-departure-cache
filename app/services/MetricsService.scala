@@ -17,9 +17,10 @@
 package services
 
 import com.codahale.metrics.MetricRegistry
+import models.AuditType
+import models.AuditType.SubmissionAuditType
 import play.api.mvc.BaseController
 import uk.gov.hmrc.http.HttpErrorFunctions.{is4xx, is5xx}
-import uk.gov.hmrc.http.HttpResponse
 import uk.gov.hmrc.play.bootstrap.metrics.Metrics
 
 import javax.inject.Inject
@@ -29,16 +30,20 @@ class MetricsService @Inject() (metrics: Metrics) {
 
   private lazy val registry: MetricRegistry = metrics.defaultRegistry
 
-  def increment(name: String, response: HttpResponse): Unit =
-    increment(name, response.status)
+  def increment[T <: AuditType](auditType: T): Unit =
+    auditType match
+      case auditType: SubmissionAuditType =>
+        increment(auditType.name, auditType.status)
+      case _ =>
+        increment(auditType.name)
 
   def increment(name: String, status: Int): Unit =
     status match {
-      case status if is4xx(status) => registry.counter(s"$name-4xx").inc()
-      case status if is5xx(status) => registry.counter(s"$name-5xx").inc()
+      case status if is4xx(status) => increment(s"$name-4xx")
+      case status if is5xx(status) => increment(s"$name-5xx")
       case _                       => increment(name)
     }
 
-  def increment(name: String): Unit =
+  private def increment(name: String): Unit =
     registry.counter(name).inc()
 }
