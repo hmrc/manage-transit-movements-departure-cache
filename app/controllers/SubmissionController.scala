@@ -110,20 +110,27 @@ class SubmissionController @Inject() (
     departureId: Option[String],
     auditType: (UserAnswers, Int) => AuditType
   )(implicit hc: HeaderCarrier): Future[Result] = {
-    val updatedUserAnswers = userAnswers.updateStatus(SubmissionState.Submitted)
-    import updatedUserAnswers.{eoriNumber, lrn, metadata}
-    metricsService.increment(auditType(updatedUserAnswers, response.status))
+    import userAnswers.{eoriNumber, lrn}
+
+    def auditAndUpdateMetrics(userAnswers: UserAnswers): Unit = {
+      auditService.audit(auditType(userAnswers, response.status))
+      metricsService.increment(auditType(userAnswers, response.status))
+    }
+
     response.status match {
       case status if is2xx(status) =>
+        val updatedUserAnswers = userAnswers.updateStatus(SubmissionState.Submitted)
         for {
-          _ <- cacheRepository.set(metadata, departureId, None)
+          _ <- cacheRepository.set(updatedUserAnswers.metadata, departureId, None)
           _ <- lockRepository.unlock(eoriNumber, lrn)
-          _ = auditService.audit(auditType(updatedUserAnswers, response.status))
+          _ = auditAndUpdateMetrics(updatedUserAnswers)
         } yield Ok(response.body)
       case BAD_REQUEST =>
+        auditAndUpdateMetrics(userAnswers)
         logger.warn(log("responseToResult", "Bad request", auditType.toString, eoriNumber, lrn))
         Future.successful(BadRequest)
       case e =>
+        auditAndUpdateMetrics(userAnswers)
         logger.error(log("responseToResult", s"Something went wrong: $e", auditType.toString, eoriNumber, lrn))
         Future.successful(InternalServerError)
     }

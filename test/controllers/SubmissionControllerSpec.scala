@@ -21,6 +21,8 @@ import models.*
 import models.AuditType.{DeclarationAmendment, DeclarationData}
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{never, reset, verify, when}
+import org.scalacheck.Gen
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsString, Json}
@@ -32,7 +34,7 @@ import uk.gov.hmrc.http.HttpResponse
 
 import scala.concurrent.Future
 
-class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
+class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaCheckPropertyChecks {
 
   private lazy val mockCacheRepository = mock[CacheRepository]
   private lazy val mockLockRepository  = mock[LockRepository]
@@ -96,7 +98,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
     }
 
     "return error" when {
-      "submission is unsuccessful" in {
+      "submission is invalid" in {
         val userAnswers = emptyUserAnswers
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
@@ -111,8 +113,38 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         status(result) shouldEqual BAD_REQUEST
 
+        val auditType = DeclarationData(userAnswers, BAD_REQUEST)
+
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Phase.Transition))(any())
+        verify(mockAuditService).audit(eqTo(auditType))(any())
+      }
+
+      "submission is unsuccessful" in {
+        forAll(Gen.choose(401, 599)) {
+          error =>
+            beforeEach()
+
+            val userAnswers = emptyUserAnswers
+            when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
+
+            when(mockApiService.submitDeclaration(any(), any())(any()))
+              .thenReturn(Future.successful(HttpResponse(error, "")))
+
+            val request = FakeRequest(POST, routes.SubmissionController.post().url)
+              .withHeaders("APIVersion" -> "2.0")
+              .withBody(Json.toJson(lrn))
+
+            val result = route(app, request).value
+
+            status(result) shouldEqual INTERNAL_SERVER_ERROR
+
+            val auditType = DeclarationData(userAnswers, error)
+
+            verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+            verify(mockApiService).submitDeclaration(eqTo(userAnswers), eqTo(Phase.Transition))(any())
+            verify(mockAuditService).audit(eqTo(auditType))(any())
+        }
       }
 
       "document not found in cache" in {
@@ -180,7 +212,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
     }
 
     "return error" when {
-      "submission is unsuccessful" in {
+      "submission is invalid" in {
         val userAnswers = emptyUserAnswersWithDepartureId
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
 
@@ -195,8 +227,38 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
 
         status(result) shouldEqual BAD_REQUEST
 
+        val auditType = DeclarationAmendment(userAnswers, BAD_REQUEST)
+
         verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         verify(mockApiService).submitAmendment(eqTo(userAnswers), eqTo(departureId), eqTo(Phase.Transition))(any())
+        verify(mockAuditService).audit(eqTo(auditType))(any())
+      }
+
+      "submission is unsuccessful" in {
+        forAll(Gen.choose(401, 599)) {
+          error =>
+            beforeEach()
+
+            val userAnswers = emptyUserAnswersWithDepartureId
+            when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
+
+            when(mockApiService.submitAmendment(any(), any(), any())(any()))
+              .thenReturn(Future.successful(HttpResponse(error, "")))
+
+            val request = FakeRequest(POST, routes.SubmissionController.postAmendment().url)
+              .withHeaders("APIVersion" -> "2.0")
+              .withBody(Json.toJson(lrn))
+
+            val result = route(app, request).value
+
+            status(result) shouldEqual INTERNAL_SERVER_ERROR
+
+            val auditType = DeclarationAmendment(userAnswers, error)
+
+            verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+            verify(mockApiService).submitAmendment(eqTo(userAnswers), eqTo(departureId), eqTo(Phase.Transition))(any())
+            verify(mockAuditService).audit(eqTo(auditType))(any())
+        }
       }
 
       "document not found in cache" in {
