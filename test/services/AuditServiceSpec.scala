@@ -17,8 +17,8 @@
 package services
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import models.AuditType.{DeclarationData, DepartureDraftStarted}
-import org.mockito.ArgumentMatchers.{any, eq => eqTo}
+import models.AuditType.*
+import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{reset, verify}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -47,16 +47,40 @@ class AuditServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
         val service = app.injector.instanceOf[AuditService]
 
         val userAnswers = emptyUserAnswers
-        service.audit(DeclarationData, userAnswers)
+
+        val auditType = DeclarationData(userAnswers, 200)
+
+        service.audit(auditType)
 
         val expectedDetail = Json.parse(s"""
             |{
             |  "channel" : "web",
+            |  "status" : 200,
             |  "detail" : ${Json.toJson(userAnswers)}
             |}
             |""".stripMargin)
 
-        verify(mockAuditConnector).sendExplicitAudit(eqTo(DeclarationData.name), eqTo(expectedDetail))(any(), any(), any())
+        verify(mockAuditConnector).sendExplicitAudit(eqTo(auditType.name), eqTo(expectedDetail))(any(), any(), any())
+      }
+
+      "DeclarationAmendment" in {
+        val service = app.injector.instanceOf[AuditService]
+
+        val userAnswers = emptyUserAnswers
+
+        val auditType = DeclarationAmendment(userAnswers, 200)
+
+        service.audit(auditType)
+
+        val expectedDetail = Json.parse(s"""
+            |{
+            |  "channel" : "web",
+            |  "status" : 200,
+            |  "detail" : ${Json.toJson(userAnswers)}
+            |}
+            |""".stripMargin)
+
+        verify(mockAuditConnector).sendExplicitAudit(eqTo(auditType.name), eqTo(expectedDetail))(any(), any(), any())
       }
 
       "DepartureDraftStarted" in {
@@ -64,7 +88,10 @@ class AuditServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val lrn        = "12345"
         val eoriNumber = "67890"
-        service.audit(DepartureDraftStarted, lrn, eoriNumber)
+
+        val auditType = DepartureDraftStarted(lrn, eoriNumber)
+
+        service.audit(auditType)
 
         val expectedDetail = Json.parse(s"""
              |{
@@ -76,7 +103,30 @@ class AuditServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
              |}
              |""".stripMargin)
 
-        verify(mockAuditConnector).sendExplicitAudit(eqTo(DepartureDraftStarted.name), eqTo(expectedDetail))(any(), any(), any())
+        verify(mockAuditConnector).sendExplicitAudit(eqTo(auditType.name), eqTo(expectedDetail))(any(), any(), any())
+      }
+
+      "DepartureDraftDeleted" in {
+        val service = app.injector.instanceOf[AuditService]
+
+        val lrn        = "12345"
+        val eoriNumber = "67890"
+
+        val auditType = DepartureDraftDeleted(lrn, eoriNumber)
+
+        service.audit(auditType)
+
+        val expectedDetail = Json.parse(s"""
+             |{
+             |  "channel" : "web",
+             |  "detail" : {
+             |    "lrn" : "$lrn",
+             |    "eoriNumber" : "$eoriNumber"
+             |  }
+             |}
+             |""".stripMargin)
+
+        verify(mockAuditConnector).sendExplicitAudit(eqTo(auditType.name), eqTo(expectedDetail))(any(), any(), any())
       }
     }
   }

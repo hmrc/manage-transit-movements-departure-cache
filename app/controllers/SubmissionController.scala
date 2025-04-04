@@ -53,7 +53,6 @@ class SubmissionController @Inject() (
     actions.authenticate().async(parse.json) {
       implicit request =>
         import request.*
-        val auditType = DeclarationData
         body.validate[String] match {
           case JsSuccess(lrn, _) =>
             val result = for {
@@ -61,17 +60,17 @@ class SubmissionController @Inject() (
               result <- OptionT.liftF {
                 apiService
                   .submitDeclaration(userAnswers)
-                  .flatMap(responseToResult(userAnswers, _, None, DeclarationData))
+                  .flatMap(responseToResult(userAnswers, _, None, DeclarationData.apply))
               }
             } yield result
 
             result.value.map(_.getOrElse {
-              metricsService.increment(auditType.name, NOT_FOUND)
+              metricsService.increment(DeclarationData.name, NOT_FOUND)
               logger.error(log("post", "Could not find user answers", eoriNumber, lrn))
               NotFound
             })
           case JsError(errors) =>
-            metricsService.increment(auditType.name, BAD_REQUEST)
+            metricsService.increment(DeclarationData.name, BAD_REQUEST)
             logger.warn(log("post", "Failed to validate request body as String", eoriNumber))
             Future.successful(BadRequest)
         }
@@ -81,7 +80,6 @@ class SubmissionController @Inject() (
     actions.authenticate().async(parse.json) {
       implicit request =>
         import request.*
-        val auditType = DeclarationAmendment
         body.validate[String] match {
           case JsSuccess(lrn, _) =>
             val result = for {
@@ -90,17 +88,17 @@ class SubmissionController @Inject() (
               result <- OptionT.liftF {
                 apiService
                   .submitAmendment(userAnswers, departureId)
-                  .flatMap(responseToResult(userAnswers, _, Some(departureId), auditType))
+                  .flatMap(responseToResult(userAnswers, _, Some(departureId), DeclarationAmendment.apply))
               }
             } yield result
 
             result.value.map(_.getOrElse {
-              metricsService.increment(auditType.name, NOT_FOUND)
+              metricsService.increment(DeclarationAmendment.name, NOT_FOUND)
               logger.error(log("postAmendment", "Could not find user answers, or they did not contain a departure ID", eoriNumber, lrn))
               NotFound
             })
           case JsError(errors) =>
-            metricsService.increment(auditType.name, BAD_REQUEST)
+            metricsService.increment(DeclarationAmendment.name, BAD_REQUEST)
             logger.warn(log("postAmendment", s"Failed to validate request body as String: $errors", eoriNumber))
             Future.successful(BadRequest)
         }
@@ -110,24 +108,29 @@ class SubmissionController @Inject() (
     userAnswers: UserAnswers,
     response: HttpResponse,
     departureId: Option[String],
-    auditType: AuditType
+    auditType: (UserAnswers, Int) => AuditType
   )(implicit hc: HeaderCarrier): Future[Result] = {
-    val updatedUserAnswers = userAnswers.updateStatus(SubmissionState.Submitted)
-    import updatedUserAnswers.{eoriNumber, lrn, metadata}
-    metricsService.increment(auditType.name, response)
+    import userAnswers.{eoriNumber, lrn}
+
+    def auditAndUpdateMetrics(userAnswers: UserAnswers): Unit = {
+      auditService.audit(auditType(userAnswers, response.status))
+      metricsService.increment(auditType(userAnswers, response.status))
+    }
+
     response.status match {
       case status if is2xx(status) =>
+        val updatedUserAnswers = userAnswers.updateStatus(SubmissionState.Submitted)
         for {
-          _ <- cacheRepository.set(metadata, departureId)
+          _ <- cacheRepository.set(updatedUserAnswers.metadata, departureId)
           _ <- lockRepository.unlock(eoriNumber, lrn)
-        } yield {
-          auditService.audit(auditType, updatedUserAnswers)
-          Ok(response.body)
-        }
+          _ = auditAndUpdateMetrics(updatedUserAnswers)
+        } yield Ok(response.body)
       case BAD_REQUEST =>
+        auditAndUpdateMetrics(userAnswers)
         logger.warn(log("responseToResult", "Bad request", auditType.toString, eoriNumber, lrn))
         Future.successful(BadRequest)
       case e =>
+        auditAndUpdateMetrics(userAnswers)
         logger.error(log("responseToResult", s"Something went wrong: $e", auditType.toString, eoriNumber, lrn))
         Future.successful(InternalServerError)
     }
