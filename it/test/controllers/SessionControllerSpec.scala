@@ -31,7 +31,7 @@ class SessionControllerSpec extends RepositorySpecBase with CleanMongoCollection
 
     "document and locks exist" should {
       "remove document and locks and respond with 200 status" in {
-        cacheRepository.set(emptyMetadata, None, None).futureValue
+        cacheRepository.set(emptyMetadata, None).futureValue
         lockRepository.lock("session1", eoriNumber, lrn).futureValue
         lockRepository.lock("session2", eoriNumber, lrn).futureValue
 
@@ -49,7 +49,7 @@ class SessionControllerSpec extends RepositorySpecBase with CleanMongoCollection
 
     "document exists and no locks exist" should {
       "remove document and respond with 200 status" in {
-        cacheRepository.set(emptyMetadata, None, None).futureValue
+        cacheRepository.set(emptyMetadata, None).futureValue
 
         val response = wsClient
           .url(url)

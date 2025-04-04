@@ -47,10 +47,10 @@ trait SpecBase
 
   implicit val hc: HeaderCarrier = HeaderCarrier()
 
-  val emptyMetadata: Metadata         = Metadata(lrn, eoriNumber, SubmissionState.NotSubmitted)
-  val emptyUserAnswers: UserAnswers   = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
-  val departureId                     = "departureId123"
-  val emptyUserAnswersWithDepartureId = emptyUserAnswers.copy(departureId = Some(departureId))
+  val emptyMetadata: Metadata                      = Metadata(lrn, eoriNumber, SubmissionState.NotSubmitted)
+  val emptyUserAnswers: UserAnswers                = UserAnswers(emptyMetadata, Instant.now(), Instant.now(), UUID.randomUUID())
+  val departureId                                  = "departureId123"
+  val emptyUserAnswersWithDepartureId: UserAnswers = emptyUserAnswers.copy(departureId = Some(departureId))
 
   def fakeRequest: FakeRequest[AnyContent] = FakeRequest("", "")
 

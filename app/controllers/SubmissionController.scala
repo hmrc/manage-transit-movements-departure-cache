@@ -50,7 +50,7 @@ class SubmissionController @Inject() (
     s"SubmissionController:$method:${args.mkString(":")} - $message"
 
   def post(): Action[JsValue] =
-    actions.authenticateAndGetVersion().async(parse.json) {
+    actions.authenticate().async(parse.json) {
       implicit request =>
         import request.*
         body.validate[String] match {
@@ -59,7 +59,7 @@ class SubmissionController @Inject() (
               userAnswers <- OptionT(cacheRepository.get(lrn, eoriNumber))
               result <- OptionT.liftF {
                 apiService
-                  .submitDeclaration(userAnswers, phase)
+                  .submitDeclaration(userAnswers)
                   .flatMap(responseToResult(userAnswers, _, None, DeclarationData.apply))
               }
             } yield result
@@ -77,7 +77,7 @@ class SubmissionController @Inject() (
     }
 
   def postAmendment(): Action[JsValue] =
-    actions.authenticateAndGetVersion().async(parse.json) {
+    actions.authenticate().async(parse.json) {
       implicit request =>
         import request.*
         body.validate[String] match {
@@ -87,7 +87,7 @@ class SubmissionController @Inject() (
               departureId <- OptionT.fromOption[Future](userAnswers.departureId)
               result <- OptionT.liftF {
                 apiService
-                  .submitAmendment(userAnswers, departureId, phase)
+                  .submitAmendment(userAnswers, departureId)
                   .flatMap(responseToResult(userAnswers, _, Some(departureId), DeclarationAmendment.apply))
               }
             } yield result
@@ -121,7 +121,7 @@ class SubmissionController @Inject() (
       case status if is2xx(status) =>
         val updatedUserAnswers = userAnswers.updateStatus(SubmissionState.Submitted)
         for {
-          _ <- cacheRepository.set(updatedUserAnswers.metadata, departureId, None)
+          _ <- cacheRepository.set(updatedUserAnswers.metadata, departureId)
           _ <- lockRepository.unlock(eoriNumber, lrn)
           _ = auditAndUpdateMetrics(updatedUserAnswers)
         } yield Ok(response.body)
@@ -136,10 +136,10 @@ class SubmissionController @Inject() (
     }
   }
 
-  def get(lrn: String): Action[AnyContent] = actions.authenticateAndGetVersion().async {
+  def get(lrn: String): Action[AnyContent] = actions.authenticate().async {
     implicit request =>
       import request.*
-      apiService.get(lrn, phase).map {
+      apiService.get(lrn).map {
         case Some(Messages(Nil)) =>
           logger.warn(log("get", "No messages found for LRN", eoriNumber, lrn))
           NoContent
