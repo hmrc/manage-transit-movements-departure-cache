@@ -20,10 +20,8 @@ import api.submission.Level.*
 import api.submission.documentType.RichDocumentJsValue
 import api.submission.houseConsignmentType10.RichHouseConsignmentType10
 import api.submission.transportEquipmentType06.RichTransportEquipmentJsValue
-import config.Constants.ModeOfTransport.Rail
 import generated.*
-import models.Phase.Transition
-import models.{Phase, UserAnswers}
+import models.UserAnswers
 import play.api.libs.functional.syntax.*
 import play.api.libs.json.*
 
@@ -32,25 +30,15 @@ import scala.language.implicitConversions
 
 object Consignment {
 
-  def transform(uA: UserAnswers, phase: Phase): ConsignmentType20 =
-    uA.metadata.data.as[ConsignmentType20](consignmentType20.reads(phase)).postProcess(phase)
+  def transform(uA: UserAnswers): ConsignmentType20 =
+    uA.metadata.data.as[ConsignmentType20](consignmentType20.reads).postProcess()
 
   implicit class RichConsignmentType20(value: ConsignmentType20) {
 
-    def postProcess(phase: Phase): ConsignmentType20 = value
-      .rollUpTransportCharges()
+    def postProcess(): ConsignmentType20 = value
       .rollUpUCR()
       .rollUpCountryOfDispatch()
       .rollUpCountryOfDestination()
-      .rollUpConsignee(phase)
-
-    def rollUpTransportCharges(): ConsignmentType20 =
-      rollUp[TransportChargesType, TransportChargesType](
-        consignmentLevel = _.TransportCharges,
-        itemLevel = _.TransportCharges,
-        updateConsignmentLevel = transportCharges => _.copy(TransportCharges = transportCharges),
-        updateItemLevel = _ => _.copy(TransportCharges = None)
-      )(identity)
 
     def rollUpUCR(): ConsignmentType20 =
       rollUp[String, String](
@@ -75,18 +63,6 @@ object Consignment {
         updateConsignmentLevel = countryOfDestination => _.copy(countryOfDestination = countryOfDestination),
         updateItemLevel = _ => _.copy(countryOfDestination = None)
       )(identity)
-
-    def rollUpConsignee(phase: Phase): ConsignmentType20 =
-      phase match
-        case Phase.Transition =>
-          rollUp[ConsigneeType05, ConsigneeType02](
-            consignmentLevel = _.Consignee,
-            itemLevel = _.Consignee,
-            updateConsignmentLevel = consignee => _.copy(Consignee = consignee),
-            updateItemLevel = _ => _.copy(Consignee = None)
-          )(_.asConsigneeType05)
-        case Phase.PostTransition =>
-          value
 
     def update(f: ConsignmentType20 => ConsignmentType20): ConsignmentType20 = f(value)
 
@@ -134,14 +110,11 @@ object Consignment {
 
 object consignmentType20 {
 
-  implicit def reads(phase: Phase): Reads[ConsignmentType20] = for {
-    countryOfDispatch    <- (preRequisitesPath \ "countryOfDispatch" \ "code").readNullable[String]
-    countryOfDestination <- (preRequisitesPath \ "itemsDestinationCountry" \ "code").readNullable[String]
-    containerIndicator   <- (preRequisitesPath \ "containerIndicator").readNullable[Boolean]
-    inlandModeOfTransport <- (transportDetailsPath \ "inlandMode" \ "code").readNullable[String].map {
-      case Some(Rail) if phase == Transition => None
-      case value                             => value
-    }
+  implicit val reads: Reads[ConsignmentType20] = for {
+    countryOfDispatch           <- (preRequisitesPath \ "countryOfDispatch" \ "code").readNullable[String]
+    countryOfDestination        <- (preRequisitesPath \ "itemsDestinationCountry" \ "code").readNullable[String]
+    containerIndicator          <- (preRequisitesPath \ "containerIndicator").readNullable[Boolean]
+    inlandModeOfTransport       <- (transportDetailsPath \ "inlandMode" \ "code").readNullable[String]
     modeOfTransportAtTheBorder  <- (transportDetailsPath \ "borderModeOfTransport" \ "code").readNullable[String]
     referenceNumberUCR          <- (preRequisitesPath \ "uniqueConsignmentReference").readNullable[String]
     carrier                     <- (transportDetailsPath \ "carrierDetails").readNullable[CarrierType04](carrierType04.reads)

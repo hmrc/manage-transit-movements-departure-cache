@@ -28,7 +28,7 @@ final case class UserAnswers(
   lastUpdated: Instant,
   id: UUID,
   departureId: Option[String] = None,
-  isTransitional: Boolean = true
+  isTransitional: Boolean = false
 ) {
 
   val lrn: String        = metadata.lrn

@@ -50,7 +50,7 @@ class SubmissionController @Inject() (
     s"SubmissionController:$method:${args.mkString(":")} - $message"
 
   def post(): Action[JsValue] =
-    actions.authenticateAndGetVersion().async(parse.json) {
+    actions.authenticate().async(parse.json) {
       implicit request =>
         import request.*
         val auditType = DeclarationData
@@ -60,7 +60,7 @@ class SubmissionController @Inject() (
               userAnswers <- OptionT(cacheRepository.get(lrn, eoriNumber))
               result <- OptionT.liftF {
                 apiService
-                  .submitDeclaration(userAnswers, phase)
+                  .submitDeclaration(userAnswers)
                   .flatMap(responseToResult(userAnswers, _, None, DeclarationData))
               }
             } yield result
@@ -78,7 +78,7 @@ class SubmissionController @Inject() (
     }
 
   def postAmendment(): Action[JsValue] =
-    actions.authenticateAndGetVersion().async(parse.json) {
+    actions.authenticate().async(parse.json) {
       implicit request =>
         import request.*
         val auditType = DeclarationAmendment
@@ -89,7 +89,7 @@ class SubmissionController @Inject() (
               departureId <- OptionT.fromOption[Future](userAnswers.departureId)
               result <- OptionT.liftF {
                 apiService
-                  .submitAmendment(userAnswers, departureId, phase)
+                  .submitAmendment(userAnswers, departureId)
                   .flatMap(responseToResult(userAnswers, _, Some(departureId), auditType))
               }
             } yield result
@@ -118,7 +118,7 @@ class SubmissionController @Inject() (
     response.status match {
       case status if is2xx(status) =>
         for {
-          _ <- cacheRepository.set(metadata, departureId, None)
+          _ <- cacheRepository.set(metadata, departureId)
           _ <- lockRepository.unlock(eoriNumber, lrn)
         } yield {
           auditService.audit(auditType, updatedUserAnswers)
@@ -133,10 +133,10 @@ class SubmissionController @Inject() (
     }
   }
 
-  def get(lrn: String): Action[AnyContent] = actions.authenticateAndGetVersion().async {
+  def get(lrn: String): Action[AnyContent] = actions.authenticate().async {
     implicit request =>
       import request.*
-      apiService.get(lrn, phase).map {
+      apiService.get(lrn).map {
         case Some(Messages(Nil)) =>
           logger.warn(log("get", "No messages found for LRN", eoriNumber, lrn))
           NoContent
