@@ -73,7 +73,6 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       result.value.lrn shouldBe userAnswers1.lrn
       result.value.eoriNumber shouldBe userAnswers1.eoriNumber
       result.value.metadata shouldBe userAnswers1.metadata
-      result.value.isTransitional shouldBe userAnswers1.isTransitional
     }
 
     "return None when no UserAnswers match LocalReferenceNumber" in {
@@ -106,7 +105,6 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       getResult.lrn shouldBe userAnswers3.lrn
       getResult.eoriNumber shouldBe userAnswers3.eoriNumber
       getResult.metadata shouldBe userAnswers3.metadata
-      getResult.isTransitional shouldBe false
     }
 
     "create new document when given valid UserAnswers with departureId" in {
@@ -124,7 +122,6 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       getResult.eoriNumber shouldBe userAnswers3.eoriNumber
       getResult.metadata shouldBe userAnswers3.metadata
       getResult.departureId.get shouldBe depId
-      getResult.isTransitional shouldBe false
     }
 
     "update document when it already exists" in {
@@ -146,7 +143,6 @@ class CacheRepositorySpec extends CacheRepositorySpecBase {
       firstGet.eoriNumber shouldBe secondGet.eoriNumber
       firstGet.metadata shouldNot equal(secondGet.metadata)
       firstGet.createdAt shouldBe secondGet.createdAt
-      firstGet.isTransitional shouldBe secondGet.isTransitional
       firstGet.lastUpdated `isBefore` secondGet.lastUpdated shouldBe true
     }
   }

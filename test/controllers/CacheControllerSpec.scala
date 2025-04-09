@@ -87,19 +87,6 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
       }
     }
 
-    "return 400" when {
-      "userAnswers is transition" in {
-        val transitionalUserAnswers = emptyUserAnswers.copy(isTransitional = true)
-        when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(transitionalUserAnswers)))
-
-        val finalRequest = FakeRequest(GET, routes.CacheController.get(lrn).url)
-        val result       = route(app, finalRequest).value
-
-        status(result) shouldBe BAD_REQUEST
-        verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
-      }
-    }
-
     "return 500" when {
       "read from mongo fails" in {
         when(mockCacheRepository.get(any(), any())).thenReturn(Future.failed(new Throwable()))
@@ -299,7 +286,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
 
       "read from mongo is successful" in {
         val userAnswer1 = emptyUserAnswers.copy(metadata = Metadata("AB123", eoriNumber, SubmissionState.NotSubmitted))
-        val userAnswer2 = emptyUserAnswers.copy(metadata = Metadata("CD123", eoriNumber, SubmissionState.NotSubmitted), isTransitional = false)
+        val userAnswer2 = emptyUserAnswers.copy(metadata = Metadata("CD123", eoriNumber, SubmissionState.NotSubmitted))
         val userAnswers = Seq(userAnswer1, userAnswer2)
 
         when(mockCacheRepository.getAll(any(), any(), any(), any(), any(), any()))
@@ -326,8 +313,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
             |      "lastUpdated": "${userAnswer1.lastUpdated}",
             |      "expiresInDays": 30,
             |      "_id": "${userAnswer1.id}",
-            |      "isSubmitted": "${userAnswer1.metadata.isSubmitted.asString}",
-            |      "isTransitional": false
+            |      "isSubmitted": "${userAnswer1.metadata.isSubmitted.asString}"
             |    },
             |    {
             |      "lrn": "${userAnswer2.lrn}",
@@ -340,8 +326,7 @@ class CacheControllerSpec extends SpecBase with AppWithDefaultMockFixtures with 
             |      "lastUpdated": "${userAnswer2.lastUpdated}",
             |      "expiresInDays": 30,
             |      "_id": "${userAnswer2.id}",
-            |      "isSubmitted": "${userAnswer2.metadata.isSubmitted.asString}",
-            |      "isTransitional": false
+            |      "isSubmitted": "${userAnswer2.metadata.isSubmitted.asString}"
             |    }
             |  ]
             |}
