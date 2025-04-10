@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json._
+import play.api.libs.json.*
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.Instant
@@ -52,7 +52,7 @@ final case class UserAnswers(
 
 object UserAnswers {
 
-  import play.api.libs.functional.syntax._
+  import play.api.libs.functional.syntax.*
 
   implicit val nonSensitiveFormat: Format[UserAnswers] =
     Format(
@@ -66,9 +66,31 @@ object UserAnswers {
       writes(MongoJavatimeFormats.instantWrites, Metadata.sensitiveWrites)
     )
 
+  private def updateMetadata(metadata: Metadata): Metadata = {
+    def update(path: String): Reads[JsObject] = for {
+      pick <- (__ \ path).readNullable[JsValue]
+      update <- pick match {
+        case Some(arr: JsArray) =>
+          __.json.update(
+            (__ \ path).json.prune andThen
+              (__ \ path \ path).json.put(arr)
+          )
+        case _ =>
+          __.json.pick[JsObject]
+      }
+    } yield update
+
+    metadata.data
+      .transform(update("items") andThen update("guaranteeDetails"))
+      .map {
+        x => metadata.copy(data = x)
+      }
+      .getOrElse(metadata)
+  }
+
   private def reads(implicit instantReads: Reads[Instant], metaDataReads: Reads[Metadata]): Reads[UserAnswers] =
     (
-      __.read[Metadata] and
+      __.read[Metadata].map(updateMetadata) and
         (__ \ "createdAt").read[Instant] and
         (__ \ "lastUpdated").read[Instant] and
         (__ \ "_id").read[UUID] and

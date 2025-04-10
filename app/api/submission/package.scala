@@ -44,11 +44,11 @@ package object submission {
   lazy val equipmentsAndChargesPath: JsPath                  = transportDetailsPath \ "equipmentsAndCharges"
   lazy val equipmentsPath: JsPath                            = equipmentsAndChargesPath \ "equipments"
 
-  lazy val guaranteesPath: JsPath = __ \ "guaranteeDetails"
+  lazy val guaranteesPath: JsPath = __ \ "guaranteeDetails" \ "guaranteeDetails"
 
   lazy val documentsPath: JsPath = __ \ "documents" \ "documents"
 
-  lazy val itemsPath: JsPath         = __ \ "items"
+  lazy val itemsPath: JsPath         = __ \ "items" \ "items"
   lazy val itemConsigneePath: JsPath = __ \ "consignee"
 
   lazy val reducedDatasetIndicatorReads: Reads[Boolean] =
