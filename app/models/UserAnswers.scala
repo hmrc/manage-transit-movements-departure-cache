@@ -83,7 +83,7 @@ object UserAnswers {
     metadata.data
       .transform(update("items") andThen update("guaranteeDetails"))
       .map {
-        x => metadata.copy(data = x)
+        data => metadata.copy(data = data)
       }
       .getOrElse(metadata)
   }
