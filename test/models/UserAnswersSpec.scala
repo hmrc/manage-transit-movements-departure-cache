@@ -350,10 +350,10 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                    |  },
                    |  "isSubmitted" : "notSubmitted",
                    |  "tasks" : {
-                   |    "task1" : "completed",
-                   |    "task2" : "in-progress",
-                   |    "task3" : "not-started",
-                   |    "task4" : "cannot-start-yet"
+                   |    ".items" : "completed",
+                   |    ".addAnotherItem" : "completed",
+                   |    ".guaranteeDetails" : "completed",
+                   |    ".addAnotherGuarantee" : "completed"
                    |  },
                    |  "createdAt" : {
                    |    "$$date" : {
@@ -398,6 +398,11 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                   |""".stripMargin)
 
               result.metadata.data shouldEqual expectedData
+
+              result.metadata.tasks shouldEqual Map(
+                ".items"            -> Status.Completed,
+                ".guaranteeDetails" -> Status.Completed
+              )
             }
 
             "items and guarantee details at new path" in {

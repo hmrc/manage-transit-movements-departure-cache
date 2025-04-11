@@ -66,6 +66,7 @@ object UserAnswers {
       writes(MongoJavatimeFormats.instantWrites, Metadata.sensitiveWrites)
     )
 
+  // TODO - 30 days after deployment of CTCP-6442, this logic can be removed
   private def updateMetadata(metadata: Metadata): Metadata = {
     def update(path: String): Reads[JsObject] = for {
       pick <- (__ \ path).readNullable[JsValue]
@@ -83,7 +84,11 @@ object UserAnswers {
     metadata.data
       .transform(update("items") andThen update("guaranteeDetails"))
       .map {
-        data => metadata.copy(data = data)
+        data =>
+          metadata.copy(
+            data = data,
+            tasks = metadata.tasks.removed(".addAnotherItem").removed(".addAnotherGuarantee")
+          )
       }
       .getOrElse(metadata)
   }
