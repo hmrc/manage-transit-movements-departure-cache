@@ -161,7 +161,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                    |  "_id" : "$uuid",
                    |  "lrn" : "$lrn",
                    |  "eoriNumber" : "$eoriNumber",
-                   |  "data" : "4ocBCYof/4guxlQN7ju0y8LZYNh8SDNiQnWvpo8UuDp2MRLz2apgshVdu9JAnCAiyUQ189V/zumQUS0iMTrZoys5v+WYiUzJ9LAwWR+GDIgxwibGfQGKYPKtq7U2Q0ImOoQpYG0kc1z06FV2o2Yr6uwtLPmY8pCUSC1kKom0Mf10tI6WIJBbaq/xGzNGFg==",
+                   |  "data" : "tVWjq7/INmVWSQeX36H3nuS/mVkyalKoTLmriv77p/3a7R82VAAGMY0lVbqvwbBFhxxmoJDfn4lUOnytUr/V5KY3QQGbW2D4cH0UqreIyUE/lvwFY4G08keAxHqNtn39DnErxD92KoIHqq8Bmtd6b+Vj6kqs6SQrEBa8TBwWMq4VVpuOuvjfW/bayoGzwiXgNyfyW3Zrn+RWNChdsG/kvDKAscSBbcpGvZHAfHejjstklvJBt191UJXBnv5GQOfNBhiDpyqU+BUzkB89dcSe30+w06+GCn5jYhlKHgHVYGiq+3JzdBa9",
                    |  "isSubmitted" : "notSubmitted",
                    |  "tasks" : {
                    |    "task1" : "completed",
@@ -189,6 +189,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
               val expectedData = Json.parse("""
                   |{
                   |  "items" : {
+                  |    "addAnotherItem" : false,
                   |    "items" : [
                   |      {
                   |        "foo" : "bar"
@@ -199,6 +200,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                   |    ]
                   |  },
                   |  "guaranteeDetails" : {
+                  |    "addAnotherGuarantee" : true,
                   |    "guaranteeDetails" : [
                   |      {
                   |        "foo" : "bar"
@@ -220,7 +222,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                    |  "_id" : "$uuid",
                    |  "lrn" : "$lrn",
                    |  "eoriNumber" : "$eoriNumber",
-                   |  "data" : "Q8yK1CjxzIU+iyzyx8zqCplb7uqazNW+XkM7MpWUIO+mIEEFr1WsBgurMqZWeLc/JNLTmFDK/gWkI+55T/oeQ6w6/5sS8F2EYOBikg7Q5CCtaA5tKNxUXRYDrXSPHIOHJ0KIN2LzbuPTKl6Qt+IyEL9Q0UhDN7uRFWg4mh2sNsvjRHjyeqrMt3vfEcNWnMn7OCWEKe3AIkwk8qnD22oNo9GJf0IwSdmQU/aV1gW0pmRY",
+                   |  "data" : "/HrWST8ii7p2rz3lPBjtt/vmbgobSwFE2oliEQIXYgT03g2XBRxcA3QDa1D8cQE0HQ0Y6+LuFnNBKvbUVhE7WaflJ91icPu8AGV4ULi4+8RDI/eOzPGxYu03OSOcgTQnboZLABJMhMvALYetlUefu+H56odxaODcOsX1+c1DNcgxgHhho93j9AfSktwF9tnVoeoB3hX7gUQHJ5+aNMYCf1ZBVVNgzy9mtRIT3ctspAqg1Mzvi+cayyZ5dPuCh4zXIA5hRyOV1lQ5DHyo78JzTCwo/RBrs+bLRPIsg2nSvswxt6Iu4vrW",
                    |  "isSubmitted" : "notSubmitted",
                    |  "tasks" : {
                    |    "task1" : "completed",
@@ -248,6 +250,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
               val expectedData = Json.parse("""
                   |{
                   |  "items" : {
+                  |    "addAnotherItem" : false,
                   |    "items" : [
                   |      {
                   |        "foo" : "bar"
@@ -258,6 +261,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                   |    ]
                   |  },
                   |  "guaranteeDetails" : {
+                  |    "addAnotherGuarantee" : true,
                   |    "guaranteeDetails" : [
                   |      {
                   |        "foo" : "bar"
@@ -331,6 +335,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                    |  "lrn" : "$lrn",
                    |  "eoriNumber" : "$eoriNumber",
                    |  "data" : {
+                   |    "addAnotherItem" : false,
                    |    "items" : [
                    |      {
                    |        "foo" : "bar"
@@ -339,6 +344,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                    |        "bar" : "baz"
                    |      }
                    |    ],
+                   |    "addAnotherGuarantee" : true,
                    |    "guaranteeDetails" : [
                    |      {
                    |        "foo" : "bar"
@@ -375,6 +381,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
               val expectedData = Json.parse("""
                   |{
                   |  "items" : {
+                  |    "addAnotherItem" : false,
                   |    "items" : [
                   |      {
                   |        "foo" : "bar"
@@ -385,6 +392,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                   |    ]
                   |  },
                   |  "guaranteeDetails" : {
+                  |    "addAnotherGuarantee" : true,
                   |    "guaranteeDetails" : [
                   |      {
                   |        "foo" : "bar"
@@ -413,6 +421,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                    |  "eoriNumber" : "$eoriNumber",
                    |  "data" : {
                    |    "items" : {
+                   |      "addAnotherItem" : false,
                    |      "items" : [
                    |        {
                    |          "foo" : "bar"
@@ -423,6 +432,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                    |      ]
                    |    },
                    |    "guaranteeDetails" : {
+                   |      "addAnotherGuarantee" : true,
                    |      "guaranteeDetails" : [
                    |        {
                    |          "foo" : "bar"
@@ -460,6 +470,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
               val expectedData = Json.parse("""
                   |{
                   |  "items" : {
+                  |    "addAnotherItem" : false,
                   |    "items" : [
                   |      {
                   |        "foo" : "bar"
@@ -470,6 +481,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                   |    ]
                   |  },
                   |  "guaranteeDetails" : {
+                  |    "addAnotherGuarantee" : true,
                   |    "guaranteeDetails" : [
                   |      {
                   |        "foo" : "bar"

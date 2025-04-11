@@ -68,26 +68,50 @@ object UserAnswers {
 
   // TODO - 30 days after deployment of CTCP-6442, this logic can be removed
   private def updateMetadata(metadata: Metadata): Metadata = {
-    def update(path: String): Reads[JsObject] = for {
-      pick <- (__ \ path).readNullable[JsValue]
-      update <- pick match {
-        case Some(arr: JsArray) =>
-          __.json.update(
-            (__ \ path).json.prune andThen
-              (__ \ path \ path).json.put(arr)
-          )
-        case _ =>
-          __.json.pick[JsObject]
-      }
-    } yield update
+    def doNothing(): Reads[JsObject] = __.json.pick[JsObject]
+
+    def updateArray(path: String): Reads[JsObject] =
+      for {
+        pick <- (__ \ path).readNullable[JsArray]
+        update <- pick match {
+          case Some(array) =>
+            __.json.update(
+              (__ \ path).json.prune andThen
+                (__ \ path \ path).json.put(array)
+            )
+          case _ =>
+            doNothing()
+        }
+      } yield update
+
+    def updateAddAnother(arrayPath: String, addAnotherPath: String): Reads[JsObject] =
+      for {
+        pick <- (__ \ addAnotherPath).readNullable[JsBoolean]
+        update <- pick match {
+          case Some(bool) =>
+            __.json.update(
+              (__ \ arrayPath \ addAnotherPath).json.put(bool)
+            ) andThen (__ \ addAnotherPath).json.prune
+          case _ =>
+            doNothing()
+        }
+      } yield update
+
+    val addAnotherItem      = "addAnotherItem"
+    val addAnotherGuarantee = "addAnotherGuarantee"
 
     metadata.data
-      .transform(update("items") andThen update("guaranteeDetails"))
+      .transform(
+        updateArray("items") andThen
+          updateArray("guaranteeDetails") andThen
+          updateAddAnother("items", addAnotherItem) andThen
+          updateAddAnother("guaranteeDetails", addAnotherGuarantee)
+      )
       .map {
         data =>
           metadata.copy(
             data = data,
-            tasks = metadata.tasks.removed(".addAnotherItem").removed(".addAnotherGuarantee")
+            tasks = metadata.tasks.removed(s".$addAnotherItem").removed(s".$addAnotherGuarantee")
           )
       }
       .getOrElse(metadata)
