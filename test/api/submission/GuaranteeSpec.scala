@@ -38,34 +38,36 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
                |  "eoriNumber" : "$eoriNumber",
                |  "isSubmitted" : "notSubmitted",
                |  "data" : {
-               |    "guaranteeDetails" : [
-               |      {
-               |        "guaranteeType" : {
-               |          "code": "1"
+               |  "guaranteeDetails" : {
+               |      "guaranteeDetails" : [
+               |        {
+               |          "guaranteeType" : {
+               |            "code": "1"
+               |          },
+               |          "otherReference" : "otherRefNo1",
+               |          "referenceNumber" : "refNo1",
+               |          "accessCode" : "1234",
+               |          "liabilityAmount" : 1000,
+               |          "currency" : {
+               |            "currency" : "GBP",
+               |            "description" : "Sterling"
+               |          }
                |        },
-               |        "otherReference" : "otherRefNo1",
-               |        "referenceNumber" : "refNo1",
-               |        "accessCode" : "1234",
-               |        "liabilityAmount" : 1000,
-               |        "currency" : {
-               |          "currency" : "GBP",
-               |          "description" : "Sterling"
+               |        {
+               |          "guaranteeType" : {
+               |            "code": "A"
+               |          },
+               |          "otherReference" : "otherRefNo2",
+               |          "referenceNumber" : "refNo2",
+               |          "accessCode" : "5678",
+               |          "liabilityAmount" : 2000,
+               |          "currency" : {
+               |            "currency" : "EUR",
+               |            "description" : "Euro"
+               |          }
                |        }
-               |      },
-               |      {
-               |        "guaranteeType" : {
-               |          "code": "A"
-               |        },
-               |        "otherReference" : "otherRefNo2",
-               |        "referenceNumber" : "refNo2",
-               |        "accessCode" : "5678",
-               |        "liabilityAmount" : 2000,
-               |        "currency" : {
-               |          "currency" : "EUR",
-               |          "description" : "Euro"
-               |        }
-               |      }
-               |    ]
+               |      ]
+               |    }
                |  },
                |  "tasks" : {},
                |  "createdAt" : "2022-09-05T15:58:44.188Z",
@@ -121,58 +123,60 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
                |  "eoriNumber" : "$eoriNumber",
                |  "isSubmitted" : "notSubmitted",
                |  "data" : {
-               |    "guaranteeDetails" : [
-               |      {
-               |        "guaranteeType" : {
-               |          "code": "3"
+               |    "guaranteeDetails" : {
+               |      "guaranteeDetails" : [
+               |        {
+               |          "guaranteeType" : {
+               |            "code": "3"
+               |          },
+               |          "otherReferenceYesNo" : true,
+               |          "otherReference" : "3_1",
+               |          "accessCode" : "1234",
+               |          "liabilityAmount" : 1000,
+               |          "currency" : {
+               |            "currency" : "GBP",
+               |            "description" : "Sterling"
+               |          }
                |        },
-               |        "otherReferenceYesNo" : true,
-               |        "otherReference" : "3_1",
-               |        "accessCode" : "1234",
-               |        "liabilityAmount" : 1000,
-               |        "currency" : {
-               |          "currency" : "GBP",
-               |          "description" : "Sterling"
-               |        }
-               |      },
-               |      {
-               |        "guaranteeType" : {
-               |          "code": "3"
+               |        {
+               |          "guaranteeType" : {
+               |            "code": "3"
+               |          },
+               |          "otherReferenceYesNo" : true,
+               |          "otherReference" : "3_2",
+               |          "accessCode" : "5678",
+               |          "liabilityAmount" : 2000,
+               |          "currency" : {
+               |            "currency" : "EUR",
+               |            "description" : "EUR"
+               |          }
                |        },
-               |        "otherReferenceYesNo" : true,
-               |        "otherReference" : "3_2",
-               |        "accessCode" : "5678",
-               |        "liabilityAmount" : 2000,
-               |        "currency" : {
-               |          "currency" : "EUR",
-               |          "description" : "EUR"
-               |        }
-               |      },
-               |      {
-               |        "guaranteeType" : {
-               |          "code": "8"
+               |        {
+               |          "guaranteeType" : {
+               |            "code": "8"
+               |          },
+               |          "otherReference" : "8_1",
+               |          "accessCode" : "1234",
+               |          "liabilityAmount" : 1000,
+               |          "currency" : {
+               |            "currency" : "GBP",
+               |            "description" : "Sterling"
+               |          }
                |        },
-               |        "otherReference" : "8_1",
-               |        "accessCode" : "1234",
-               |        "liabilityAmount" : 1000,
-               |        "currency" : {
-               |          "currency" : "GBP",
-               |          "description" : "Sterling"
+               |        {
+               |          "guaranteeType" : {
+               |            "code": "8"
+               |          },
+               |          "otherReference" : "8_2",
+               |          "accessCode" : "5678",
+               |          "liabilityAmount" : 2000,
+               |          "currency" : {
+               |            "currency" : "EUR",
+               |            "description" : "Euro"
+               |          }
                |        }
-               |      },
-               |      {
-               |        "guaranteeType" : {
-               |          "code": "8"
-               |        },
-               |        "otherReference" : "8_2",
-               |        "accessCode" : "5678",
-               |        "liabilityAmount" : 2000,
-               |        "currency" : {
-               |          "currency" : "EUR",
-               |          "description" : "Euro"
-               |        }
-               |      }
-               |    ]
+               |      ]
+               |    }
                |  },
                |  "tasks" : {},
                |  "createdAt" : "2022-09-05T15:58:44.188Z",
@@ -256,58 +260,60 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
                |  "eoriNumber" : "$eoriNumber",
                |  "isSubmitted" : "notSubmitted",
                |  "data" : {
-               |    "guaranteeDetails" : [
-               |      {
-               |        "guaranteeType" : {
-               |          "code": "3"
+               |    "guaranteeDetails" : {
+               |      "guaranteeDetails" : [
+               |        {
+               |          "guaranteeType" : {
+               |            "code": "3"
+               |          },
+               |          "otherReferenceYesNo" : true,
+               |          "otherReference" : "3",
+               |          "accessCode" : "1234",
+               |          "liabilityAmount" : 1000,
+               |          "currency" : {
+               |            "currency" : "GBP",
+               |            "description" : "Sterling"
+               |          }
                |        },
-               |        "otherReferenceYesNo" : true,
-               |        "otherReference" : "3",
-               |        "accessCode" : "1234",
-               |        "liabilityAmount" : 1000,
-               |        "currency" : {
-               |          "currency" : "GBP",
-               |          "description" : "Sterling"
-               |        }
-               |      },
-               |      {
-               |        "guaranteeType" : {
-               |          "code": "3"
+               |        {
+               |          "guaranteeType" : {
+               |            "code": "3"
+               |          },
+               |          "otherReferenceYesNo" : true,
+               |          "otherReference" : "3",
+               |          "accessCode" : "5678",
+               |          "liabilityAmount" : 2000,
+               |          "currency" : {
+               |            "currency" : "EUR",
+               |            "description" : "EUR"
+               |          }
                |        },
-               |        "otherReferenceYesNo" : true,
-               |        "otherReference" : "3",
-               |        "accessCode" : "5678",
-               |        "liabilityAmount" : 2000,
-               |        "currency" : {
-               |          "currency" : "EUR",
-               |          "description" : "EUR"
-               |        }
-               |      },
-               |      {
-               |        "guaranteeType" : {
-               |          "code": "8"
+               |        {
+               |          "guaranteeType" : {
+               |            "code": "8"
+               |          },
+               |          "otherReference" : "8",
+               |          "accessCode" : "1234",
+               |          "liabilityAmount" : 1000,
+               |          "currency" : {
+               |            "currency" : "GBP",
+               |            "description" : "Sterling"
+               |          }
                |        },
-               |        "otherReference" : "8",
-               |        "accessCode" : "1234",
-               |        "liabilityAmount" : 1000,
-               |        "currency" : {
-               |          "currency" : "GBP",
-               |          "description" : "Sterling"
+               |        {
+               |          "guaranteeType" : {
+               |            "code": "8"
+               |          },
+               |          "otherReference" : "8",
+               |          "accessCode" : "5678",
+               |          "liabilityAmount" : 2000,
+               |          "currency" : {
+               |            "currency" : "EUR",
+               |            "description" : "Euro"
+               |          }
                |        }
-               |      },
-               |      {
-               |        "guaranteeType" : {
-               |          "code": "8"
-               |        },
-               |        "otherReference" : "8",
-               |        "accessCode" : "5678",
-               |        "liabilityAmount" : 2000,
-               |        "currency" : {
-               |          "currency" : "EUR",
-               |          "description" : "Euro"
-               |        }
-               |      }
-               |    ]
+               |      ]
+               |    }
                |  },
                |  "tasks" : {},
                |  "createdAt" : "2022-09-05T15:58:44.188Z",
@@ -377,44 +383,46 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
                |  "eoriNumber" : "$eoriNumber",
                |  "isSubmitted" : "notSubmitted",
                |  "data" : {
-               |    "guaranteeDetails" : [
-               |      {
-               |        "guaranteeType" : {
-               |          "code": "3"
+               |    "guaranteeDetails" : {
+               |      "guaranteeDetails" : [
+               |        {
+               |          "guaranteeType" : {
+               |            "code": "3"
+               |          },
+               |          "otherReferenceYesNo" : false
                |        },
-               |        "otherReferenceYesNo" : false
-               |      },
-               |      {
-               |        "guaranteeType" : {
-               |          "code": "3"
+               |        {
+               |          "guaranteeType" : {
+               |            "code": "3"
+               |          },
+               |          "otherReferenceYesNo" : false
                |        },
-               |        "otherReferenceYesNo" : false
-               |      },
-               |      {
-               |        "guaranteeType" : {
-               |          "code": "0"
+               |        {
+               |          "guaranteeType" : {
+               |            "code": "0"
+               |          },
+               |          "referenceNumber" : "0_1",
+               |          "accessCode" : "1234",
+               |          "liabilityAmount" : 1000,
+               |          "currency" : {
+               |            "currency" : "GBP",
+               |            "description" : "Sterling"
+               |          }
                |        },
-               |        "referenceNumber" : "0_1",
-               |        "accessCode" : "1234",
-               |        "liabilityAmount" : 1000,
-               |        "currency" : {
-               |          "currency" : "GBP",
-               |          "description" : "Sterling"
+               |        {
+               |          "guaranteeType" : {
+               |            "code": "0"
+               |          },
+               |          "referenceNumber" : "0_2",
+               |          "accessCode" : "5678",
+               |          "liabilityAmount" : 2000,
+               |          "currency" : {
+               |            "currency" : "EUR",
+               |            "description" : "Euro"
+               |          }
                |        }
-               |      },
-               |      {
-               |        "guaranteeType" : {
-               |          "code": "0"
-               |        },
-               |        "referenceNumber" : "0_2",
-               |        "accessCode" : "5678",
-               |        "liabilityAmount" : 2000,
-               |        "currency" : {
-               |          "currency" : "EUR",
-               |          "description" : "Euro"
-               |        }
-               |      }
-               |    ]
+               |      ]
+               |    }
                |  },
                |  "tasks" : {},
                |  "createdAt" : "2022-09-05T15:58:44.188Z",
@@ -490,30 +498,32 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
                |  "eoriNumber" : "$eoriNumber",
                |  "isSubmitted" : "guaranteeAmendment",
                |  "data" : {
-               |    "guaranteeDetails" : [
-               |      {
-               |        "guaranteeType" : {"code" : "1"},
-               |        "otherReference" : "otherRefNo1",
-               |        "referenceNumber" : "refNo1",
-               |        "accessCode" : "1234",
-               |        "liabilityAmount" : 1000,
-               |        "currency" : {
-               |          "currency" : "GBP",
-               |          "description" : "Sterling"
+               |    "guaranteeDetails" : {
+               |      "guaranteeDetails" : [
+               |        {
+               |          "guaranteeType" : {"code" : "1"},
+               |          "otherReference" : "otherRefNo1",
+               |          "referenceNumber" : "refNo1",
+               |          "accessCode" : "1234",
+               |          "liabilityAmount" : 1000,
+               |          "currency" : {
+               |            "currency" : "GBP",
+               |            "description" : "Sterling"
+               |          }
+               |        },
+               |        {
+               |          "guaranteeType" : {"code" : "A"},
+               |          "otherReference" : "otherRefNo2",
+               |          "referenceNumber" : "refNo2",
+               |          "accessCode" : "5678",
+               |          "liabilityAmount" : 2000,
+               |          "currency" : {
+               |            "currency" : "EUR",
+               |            "description" : "Euro"
+               |          }
                |        }
-               |      },
-               |      {
-               |        "guaranteeType" : {"code" : "A"},
-               |        "otherReference" : "otherRefNo2",
-               |        "referenceNumber" : "refNo2",
-               |        "accessCode" : "5678",
-               |        "liabilityAmount" : 2000,
-               |        "currency" : {
-               |          "currency" : "EUR",
-               |          "description" : "Euro"
-               |        }
-               |      }
-               |    ]
+               |      ]
+               |    }
                |  },
                |  "tasks" : {},
                |  "createdAt" : "2022-09-05T15:58:44.188Z",
@@ -569,50 +579,52 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
                |  "eoriNumber" : "$eoriNumber",
                |  "isSubmitted" : "guaranteeAmendment",
                |  "data" : {
-               |    "guaranteeDetails" : [
-               |      {
-               |        "guaranteeType" : {"code" : "3"},
-               |        "otherReferenceYesNo" : true,
-               |        "otherReference" : "3_1",
-               |        "accessCode" : "1234",
-               |        "liabilityAmount" : 1000,
-               |        "currency" : {
-               |          "currency" : "GBP",
-               |          "description" : "Sterling"
+               |    "guaranteeDetails" : {
+               |      "guaranteeDetails" : [
+               |        {
+               |          "guaranteeType" : {"code" : "3"},
+               |          "otherReferenceYesNo" : true,
+               |          "otherReference" : "3_1",
+               |          "accessCode" : "1234",
+               |          "liabilityAmount" : 1000,
+               |          "currency" : {
+               |            "currency" : "GBP",
+               |            "description" : "Sterling"
+               |          }
+               |        },
+               |        {
+               |          "guaranteeType" : {"code" : "3"},
+               |          "otherReferenceYesNo" : true,
+               |          "otherReference" : "3_2",
+               |          "accessCode" : "5678",
+               |          "liabilityAmount" : 2000,
+               |          "currency" : {
+               |            "currency" : "EUR",
+               |            "description" : "EUR"
+               |          }
+               |        },
+               |        {
+               |          "guaranteeType" : {"code" : "8"},
+               |          "otherReference" : "8_1",
+               |          "accessCode" : "1234",
+               |          "liabilityAmount" : 1000,
+               |          "currency" : {
+               |            "currency" : "GBP",
+               |            "description" : "Sterling"
+               |          }
+               |        },
+               |        {
+               |          "guaranteeType" : {"code" : "8"},
+               |          "otherReference" : "8_2",
+               |          "accessCode" : "5678",
+               |          "liabilityAmount" : 2000,
+               |          "currency" : {
+               |            "currency" : "EUR",
+               |            "description" : "Euro"
+               |          }
                |        }
-               |      },
-               |      {
-               |        "guaranteeType" : {"code" : "3"},
-               |        "otherReferenceYesNo" : true,
-               |        "otherReference" : "3_2",
-               |        "accessCode" : "5678",
-               |        "liabilityAmount" : 2000,
-               |        "currency" : {
-               |          "currency" : "EUR",
-               |          "description" : "EUR"
-               |        }
-               |      },
-               |      {
-               |        "guaranteeType" : {"code" : "8"},
-               |        "otherReference" : "8_1",
-               |        "accessCode" : "1234",
-               |        "liabilityAmount" : 1000,
-               |        "currency" : {
-               |          "currency" : "GBP",
-               |          "description" : "Sterling"
-               |        }
-               |      },
-               |      {
-               |        "guaranteeType" : {"code" : "8"},
-               |        "otherReference" : "8_2",
-               |        "accessCode" : "5678",
-               |        "liabilityAmount" : 2000,
-               |        "currency" : {
-               |          "currency" : "EUR",
-               |          "description" : "Euro"
-               |        }
-               |      }
-               |    ]
+               |      ]
+               |    }
                |  },
                |  "tasks" : {},
                |  "createdAt" : "2022-09-05T15:58:44.188Z",
@@ -696,50 +708,52 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
                |  "eoriNumber" : "$eoriNumber",
                |  "isSubmitted" : "guaranteeAmendment",
                |  "data" : {
-               |    "guaranteeDetails" : [
-               |      {
-               |        "guaranteeType" : {"code" : "3"},
-               |        "otherReferenceYesNo" : true,
-               |        "otherReference" : "3",
-               |        "accessCode" : "1234",
-               |        "liabilityAmount" : 1000,
-               |        "currency" : {
-               |          "currency" : "GBP",
-               |          "description" : "Sterling"
+               |    "guaranteeDetails" : {
+               |      "guaranteeDetails" : [
+               |        {
+               |          "guaranteeType" : {"code" : "3"},
+               |          "otherReferenceYesNo" : true,
+               |          "otherReference" : "3",
+               |          "accessCode" : "1234",
+               |          "liabilityAmount" : 1000,
+               |          "currency" : {
+               |            "currency" : "GBP",
+               |            "description" : "Sterling"
+               |          }
+               |        },
+               |        {
+               |          "guaranteeType" : {"code" : "3"},
+               |          "otherReferenceYesNo" : true,
+               |          "otherReference" : "3",
+               |          "accessCode" : "5678",
+               |          "liabilityAmount" : 2000,
+               |          "currency" : {
+               |            "currency" : "EUR",
+               |            "description" : "EUR"
+               |          }
+               |        },
+               |        {
+               |          "guaranteeType" : {"code" : "8"},
+               |          "otherReference" : "8",
+               |          "accessCode" : "1234",
+               |          "liabilityAmount" : 1000,
+               |          "currency" : {
+               |            "currency" : "GBP",
+               |            "description" : "Sterling"
+               |          }
+               |        },
+               |        {
+               |          "guaranteeType" : {"code" : "8"},
+               |          "otherReference" : "8",
+               |          "accessCode" : "5678",
+               |          "liabilityAmount" : 2000,
+               |          "currency" : {
+               |            "currency" : "EUR",
+               |            "description" : "Euro"
+               |          }
                |        }
-               |      },
-               |      {
-               |        "guaranteeType" : {"code" : "3"},
-               |        "otherReferenceYesNo" : true,
-               |        "otherReference" : "3",
-               |        "accessCode" : "5678",
-               |        "liabilityAmount" : 2000,
-               |        "currency" : {
-               |          "currency" : "EUR",
-               |          "description" : "EUR"
-               |        }
-               |      },
-               |      {
-               |        "guaranteeType" : {"code" : "8"},
-               |        "otherReference" : "8",
-               |        "accessCode" : "1234",
-               |        "liabilityAmount" : 1000,
-               |        "currency" : {
-               |          "currency" : "GBP",
-               |          "description" : "Sterling"
-               |        }
-               |      },
-               |      {
-               |        "guaranteeType" : {"code" : "8"},
-               |        "otherReference" : "8",
-               |        "accessCode" : "5678",
-               |        "liabilityAmount" : 2000,
-               |        "currency" : {
-               |          "currency" : "EUR",
-               |          "description" : "Euro"
-               |        }
-               |      }
-               |    ]
+               |      ]
+               |    }
                |  },
                |  "tasks" : {},
                |  "createdAt" : "2022-09-05T15:58:44.188Z",
@@ -809,36 +823,38 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
                |  "eoriNumber" : "$eoriNumber",
                |  "isSubmitted" : "guaranteeAmendment",
                |  "data" : {
-               |    "guaranteeDetails" : [
-               |      {
-               |        "guaranteeType" : {"code" : "3"},
-               |        "otherReferenceYesNo" : false
-               |      },
-               |      {
-               |        "guaranteeType" : {"code" : "3"},
-               |        "otherReferenceYesNo" : false
-               |      },
-               |      {
-               |        "guaranteeType" : {"code" : "0"},
-               |        "referenceNumber" : "0_1",
-               |        "accessCode" : "1234",
-               |        "liabilityAmount" : 1000,
-               |        "currency" : {
-               |          "currency" : "GBP",
-               |          "description" : "Sterling"
+               |    "guaranteeDetails" : {
+               |      "guaranteeDetails" : [
+               |        {
+               |          "guaranteeType" : {"code" : "3"},
+               |          "otherReferenceYesNo" : false
+               |        },
+               |        {
+               |          "guaranteeType" : {"code" : "3"},
+               |          "otherReferenceYesNo" : false
+               |        },
+               |        {
+               |          "guaranteeType" : {"code" : "0"},
+               |          "referenceNumber" : "0_1",
+               |          "accessCode" : "1234",
+               |          "liabilityAmount" : 1000,
+               |          "currency" : {
+               |            "currency" : "GBP",
+               |            "description" : "Sterling"
+               |          }
+               |        },
+               |        {
+               |          "guaranteeType" : {"code" : "0"},
+               |          "referenceNumber" : "0_2",
+               |          "accessCode" : "5678",
+               |          "liabilityAmount" : 2000,
+               |          "currency" : {
+               |            "currency" : "EUR",
+               |            "description" : "Euro"
+               |          }
                |        }
-               |      },
-               |      {
-               |        "guaranteeType" : {"code" : "0"},
-               |        "referenceNumber" : "0_2",
-               |        "accessCode" : "5678",
-               |        "liabilityAmount" : 2000,
-               |        "currency" : {
-               |          "currency" : "EUR",
-               |          "description" : "Euro"
-               |        }
-               |      }
-               |    ]
+               |      ]
+               |    }
                |  },
                |  "tasks" : {},
                |  "createdAt" : "2022-09-05T15:58:44.188Z",

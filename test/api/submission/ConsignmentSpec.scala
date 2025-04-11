@@ -797,205 +797,207 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
              |    "documents" : {
              |      "addDocumentsYesNo" : false
              |    },
-             |    "items" : [
-             |      {
-             |        "description" : "Description 1",
-             |        "declarationType" : {
-             |          "code": "T1",
-             |          "description": "Goods not having the customs status of Union goods, which are placed under the common transit procedure."
-             |        },
-             |        "countryOfDispatch" : {
-             |          "code" : "GB",
-             |          "description" : "United Kingdom"
-             |        },
-             |        "countryOfDestination" : {
-             |          "code" : "FR",
-             |          "description" : "France"
-             |        },
-             |        "uniqueConsignmentReference" : "UCR 1",
-             |        "customsUnionAndStatisticsCode" : "CUS code 1",
-             |        "commodityCode" : "commodity code 1",
-             |        "combinedNomenclatureCode" : "CN code 1",
-             |        "dangerousGoodsList" : [
-             |          {
-             |            "unNumber" : "UN number 1_1"
+             |    "items" : {
+             |      "items" : [
+             |        {
+             |          "description" : "Description 1",
+             |          "declarationType" : {
+             |            "code": "T1",
+             |            "description": "Goods not having the customs status of Union goods, which are placed under the common transit procedure."
              |          },
-             |          {
-             |            "unNumber" : "UN number 1_2"
-             |          }
-             |        ],
-             |        "grossWeight" : 123.456,
-             |        "netWeight" : 1234,
-             |        "supplementaryUnits" : 12345,
-             |        "methodOfPayment" : {
-             |          "method" : "A",
-             |          "description" : "Payment in cash"
-             |        },
-             |        "packages" : [
-             |          {
-             |            "packageType" : {
-             |              "code" : "VL",
-             |              "description" : "Bulk, liquid",
-             |              "type" : "Bulk"
-             |            },
-             |            "addShippingMarkYesNo" : false
-             |          },
-             |          {
-             |            "packageType" : {
-             |              "code" : "NE",
-             |              "description" : "Unpacked or unpackaged",
-             |              "type" : "Unpacked"
-             |            },
-             |            "numberOfPackages" : 5,
-             |            "addShippingMarkYesNo" : false
-             |          },
-             |          {
-             |            "packageType" : {
-             |              "code" : "TR",
-             |              "description" : "Trunk",
-             |              "type" : "Other"
-             |            },
-             |            "shippingMark" : "mark3"
-             |          }
-             |        ],
-             |        "addSupplyChainActorYesNo" : true,
-             |        "supplyChainActors" : [
-             |          {
-             |            "supplyChainActorType" : {
-             |              "role": "CS",
-             |              "description": "Consolidator"
-             |            },
-             |            "identificationNumber" : "itemSCA1"
-             |          },
-             |          {
-             |            "supplyChainActorType" : {
-             |              "role": "FW",
-             |              "description": "Freight Forwarder"
-             |            },
-             |            "identificationNumber" : "itemSCA2"
-             |          },
-             |          {
-             |            "supplyChainActorType" : {
-             |              "role": "MF",
-             |              "description": "Manufacturer"
-             |            },
-             |            "identificationNumber" : "itemSCA3"
-             |          },
-             |          {
-             |            "supplyChainActorType" : {
-             |              "role": "WH",
-             |              "description": "Warehouse Keeper"
-             |            },
-             |            "identificationNumber" : "itemSCA4"
-             |          }
-             |        ],
-             |        "addDocumentsYesNo" : false,
-             |        "addAdditionalReferenceYesNo" : true,
-             |        "additionalReferences" : [
-             |          {
-             |            "additionalReference" : {
-             |              "documentType" : "ar1",
-             |              "description" : "Additional reference 1"
-             |            },
-             |            "addAdditionalReferenceNumberYesNo" : true,
-             |            "additionalReferenceNumber" : "arno1"
-             |          },
-             |          {
-             |            "additionalReference" : {
-             |              "documentType" : "ar2",
-             |              "description" : "Additional reference 2"
-             |            },
-             |            "addAdditionalReferenceNumberYesNo" : false
-             |          }
-             |        ],
-             |        "additionalInformationList" : [
-             |          {
-             |            "additionalInformationType" : {
-             |              "code" : "aiCode1",
-             |              "description" : "aiDescription1"
-             |            },
-             |            "additionalInformation" : "ai1"
-             |          },
-             |          {
-             |            "additionalInformationType" : {
-             |              "code" : "aiCode2",
-             |              "description" : "aiDescription2"
-             |            },
-             |            "additionalInformation" : "ai2"
-             |          }
-             |        ],
-             |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371",
-             |        "consignee" : {
-             |          "addConsigneeEoriNumberYesNo" : true,
-             |          "identificationNumber" : "GE00101001",
-             |          "name" : "Mr. Consignee",
-             |          "country" : {
+             |          "countryOfDispatch" : {
              |            "code" : "GB",
              |            "description" : "United Kingdom"
              |          },
-             |          "address" : {
-             |            "numberAndStreet" : "1 Merry Lane",
-             |            "city" : "Godrics Hollow",
-             |            "postalCode" : "CA1 9AA"
-             |          }
-             |        }
-             |      },
-             |      {
-             |        "description" : "Description 2",
-             |        "declarationType" : {
-             |          "code": "T2",
-             |          "description": "Goods having the customs status of Union goods, which are placed under the common transit procedure"
-             |        },
-             |        "countryOfDispatch" : {
-             |          "code" : "DE",
-             |          "description" : "Germany"
-             |        },
-             |        "countryOfDestination" : {
-             |          "code" : "ES",
-             |          "description" : "Spain"
-             |        },
-             |        "uniqueConsignmentReference" : "UCR 2",
-             |        "customsUnionAndStatisticsCode" : "CUS code 2",
-             |        "commodityCode" : "commodity code 2",
-             |        "combinedNomenclatureCode" : "CN code 2",
-             |        "dangerousGoodsList" : [
-             |          {
-             |            "unNumber" : "UN number 2_1"
+             |          "countryOfDestination" : {
+             |            "code" : "FR",
+             |            "description" : "France"
              |          },
-             |          {
-             |            "unNumber" : "UN number 2_2"
+             |          "uniqueConsignmentReference" : "UCR 1",
+             |          "customsUnionAndStatisticsCode" : "CUS code 1",
+             |          "commodityCode" : "commodity code 1",
+             |          "combinedNomenclatureCode" : "CN code 1",
+             |          "dangerousGoodsList" : [
+             |            {
+             |              "unNumber" : "UN number 1_1"
+             |            },
+             |            {
+             |              "unNumber" : "UN number 1_2"
+             |            }
+             |          ],
+             |          "grossWeight" : 123.456,
+             |          "netWeight" : 1234,
+             |          "supplementaryUnits" : 12345,
+             |          "methodOfPayment" : {
+             |            "method" : "A",
+             |            "description" : "Payment in cash"
+             |          },
+             |          "packages" : [
+             |            {
+             |              "packageType" : {
+             |                "code" : "VL",
+             |                "description" : "Bulk, liquid",
+             |                "type" : "Bulk"
+             |              },
+             |              "addShippingMarkYesNo" : false
+             |            },
+             |            {
+             |              "packageType" : {
+             |                "code" : "NE",
+             |                "description" : "Unpacked or unpackaged",
+             |                "type" : "Unpacked"
+             |              },
+             |              "numberOfPackages" : 5,
+             |              "addShippingMarkYesNo" : false
+             |            },
+             |            {
+             |              "packageType" : {
+             |                "code" : "TR",
+             |                "description" : "Trunk",
+             |                "type" : "Other"
+             |              },
+             |              "shippingMark" : "mark3"
+             |            }
+             |          ],
+             |          "addSupplyChainActorYesNo" : true,
+             |          "supplyChainActors" : [
+             |            {
+             |              "supplyChainActorType" : {
+             |                "role": "CS",
+             |                "description": "Consolidator"
+             |              },
+             |              "identificationNumber" : "itemSCA1"
+             |            },
+             |            {
+             |              "supplyChainActorType" : {
+             |                "role": "FW",
+             |                "description": "Freight Forwarder"
+             |              },
+             |              "identificationNumber" : "itemSCA2"
+             |            },
+             |            {
+             |              "supplyChainActorType" : {
+             |                "role": "MF",
+             |                "description": "Manufacturer"
+             |              },
+             |              "identificationNumber" : "itemSCA3"
+             |            },
+             |            {
+             |              "supplyChainActorType" : {
+             |                "role": "WH",
+             |                "description": "Warehouse Keeper"
+             |              },
+             |              "identificationNumber" : "itemSCA4"
+             |            }
+             |          ],
+             |          "addDocumentsYesNo" : false,
+             |          "addAdditionalReferenceYesNo" : true,
+             |          "additionalReferences" : [
+             |            {
+             |              "additionalReference" : {
+             |                "documentType" : "ar1",
+             |                "description" : "Additional reference 1"
+             |              },
+             |              "addAdditionalReferenceNumberYesNo" : true,
+             |              "additionalReferenceNumber" : "arno1"
+             |            },
+             |            {
+             |              "additionalReference" : {
+             |                "documentType" : "ar2",
+             |                "description" : "Additional reference 2"
+             |              },
+             |              "addAdditionalReferenceNumberYesNo" : false
+             |            }
+             |          ],
+             |          "additionalInformationList" : [
+             |            {
+             |              "additionalInformationType" : {
+             |                "code" : "aiCode1",
+             |                "description" : "aiDescription1"
+             |              },
+             |              "additionalInformation" : "ai1"
+             |            },
+             |            {
+             |              "additionalInformationType" : {
+             |                "code" : "aiCode2",
+             |                "description" : "aiDescription2"
+             |              },
+             |              "additionalInformation" : "ai2"
+             |            }
+             |          ],
+             |          "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371",
+             |          "consignee" : {
+             |            "addConsigneeEoriNumberYesNo" : true,
+             |            "identificationNumber" : "GE00101001",
+             |            "name" : "Mr. Consignee",
+             |            "country" : {
+             |              "code" : "GB",
+             |              "description" : "United Kingdom"
+             |            },
+             |            "address" : {
+             |              "numberAndStreet" : "1 Merry Lane",
+             |              "city" : "Godrics Hollow",
+             |              "postalCode" : "CA1 9AA"
+             |            }
              |          }
-             |        ],
-             |        "grossWeight" : 456.789,
-             |        "methodOfPayment" : {
-             |          "method" : "A",
-             |          "description" : "Payment in cash"
              |        },
-             |        "addSupplyChainActorYesNo" : false,
-             |        "addDocumentsYesNo" : false,
-             |        "addAdditionalReferenceYesNo" : true,
-             |        "additionalReferences" : [
-             |          {
-             |            "additionalReference" : {
-             |              "documentType" : "ar1",
-             |              "description" : "Additional reference 1"
+             |        {
+             |          "description" : "Description 2",
+             |          "declarationType" : {
+             |            "code": "T2",
+             |            "description": "Goods having the customs status of Union goods, which are placed under the common transit procedure"
+             |          },
+             |          "countryOfDispatch" : {
+             |            "code" : "DE",
+             |            "description" : "Germany"
+             |          },
+             |          "countryOfDestination" : {
+             |            "code" : "ES",
+             |            "description" : "Spain"
+             |          },
+             |          "uniqueConsignmentReference" : "UCR 2",
+             |          "customsUnionAndStatisticsCode" : "CUS code 2",
+             |          "commodityCode" : "commodity code 2",
+             |          "combinedNomenclatureCode" : "CN code 2",
+             |          "dangerousGoodsList" : [
+             |            {
+             |              "unNumber" : "UN number 2_1"
              |            },
-             |            "addAdditionalReferenceNumberYesNo" : true,
-             |            "additionalReferenceNumber" : "arno1"
-             |          }
-             |        ],
-             |        "additionalInformationList" : [
-             |          {
-             |            "additionalInformationType" : {
-             |              "code" : "aiCode1",
-             |              "description" : "aiDescription1"
-             |            },
-             |            "additionalInformation" : "ai1"
-             |          }
-             |        ],
-             |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
-             |      }
-             |    ]
+             |            {
+             |              "unNumber" : "UN number 2_2"
+             |            }
+             |          ],
+             |          "grossWeight" : 456.789,
+             |          "methodOfPayment" : {
+             |            "method" : "A",
+             |            "description" : "Payment in cash"
+             |          },
+             |          "addSupplyChainActorYesNo" : false,
+             |          "addDocumentsYesNo" : false,
+             |          "addAdditionalReferenceYesNo" : true,
+             |          "additionalReferences" : [
+             |            {
+             |              "additionalReference" : {
+             |                "documentType" : "ar1",
+             |                "description" : "Additional reference 1"
+             |              },
+             |              "addAdditionalReferenceNumberYesNo" : true,
+             |              "additionalReferenceNumber" : "arno1"
+             |            }
+             |          ],
+             |          "additionalInformationList" : [
+             |            {
+             |              "additionalInformationType" : {
+             |                "code" : "aiCode1",
+             |                "description" : "aiDescription1"
+             |              },
+             |              "additionalInformation" : "ai1"
+             |            }
+             |          ],
+             |          "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+             |        }
+             |      ]
+             |    }
              |  },
              |  "tasks" : {},
              |  "createdAt" : "2022-09-05T15:58:44.188Z",
@@ -2151,11 +2153,13 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             |  "transportDetails" : {
             |    "addTransportEquipmentYesNo" : false
             |  },
-            |  "items" : [
-            |    {},
-            |    {},
-            |    {}
-            |  ]
+            |  "items" : {
+            |    "items" : [
+            |      {},
+            |      {},
+            |      {}
+            |    ]
+            |  }
             |}
             |""".stripMargin)
 
@@ -2186,17 +2190,19 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             |      ]
             |    }
             |  },
-            |  "items" : [
-            |    {
-            |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
-            |    },
-            |    {
-            |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
-            |    },
-            |    {
-            |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
-            |    }
-            |  ]
+            |  "items" : {
+            |    "items" : [
+            |      {
+            |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+            |      },
+            |      {
+            |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+            |      },
+            |      {
+            |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+            |      }
+            |    ]
+            |  }
             |}
             |""".stripMargin)
 
@@ -2246,20 +2252,22 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               |      ]
               |    }
               |  },
-              |  "items" : [
-              |    {
-              |      "transportEquipment" : "00602057-2652-43f4-8fe5-d97460d708ec"
-              |    },
-              |    {
-              |      "transportEquipment" : "b8f72766-3781-49f2-8788-db8913d41f8c"
-              |    },
-              |    {
-              |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
-              |    },
-              |    {
-              |      "transportEquipment" : "00602057-2652-43f4-8fe5-d97460d708ec"
-              |    }
-              |  ]
+              |  "items" : {
+              |    "items" : [
+              |      {
+              |        "transportEquipment" : "00602057-2652-43f4-8fe5-d97460d708ec"
+              |      },
+              |      {
+              |        "transportEquipment" : "b8f72766-3781-49f2-8788-db8913d41f8c"
+              |      },
+              |      {
+              |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+              |      },
+              |      {
+              |        "transportEquipment" : "00602057-2652-43f4-8fe5-d97460d708ec"
+              |      }
+              |    ]
+              |  }
               |}
               |""".stripMargin)
 
@@ -2322,14 +2330,16 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               |      ]
               |    }
               |  },
-              |  "items" : [
-              |    {
-              |      "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
-              |    },
-              |    {
-              |      "transportEquipment" : "00602057-2652-43f4-8fe5-d97460d708ec"
-              |    }
-              |  ]
+              |  "items" : {
+              |    "items" : [
+              |      {
+              |        "transportEquipment" : "ea575adc-1ab8-4d78-bd76-5eb893def371"
+              |      },
+              |      {
+              |        "transportEquipment" : "00602057-2652-43f4-8fe5-d97460d708ec"
+              |      }
+              |    ]
+              |  }
               |}
               |""".stripMargin)
 

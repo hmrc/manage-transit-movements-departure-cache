@@ -16,7 +16,7 @@
 
 package models
 
-import play.api.libs.json._
+import play.api.libs.json.*
 import uk.gov.hmrc.mongo.play.json.formats.MongoJavatimeFormats
 
 import java.time.Instant
@@ -52,7 +52,7 @@ final case class UserAnswers(
 
 object UserAnswers {
 
-  import play.api.libs.functional.syntax._
+  import play.api.libs.functional.syntax.*
 
   implicit val nonSensitiveFormat: Format[UserAnswers] =
     Format(
@@ -66,9 +66,60 @@ object UserAnswers {
       writes(MongoJavatimeFormats.instantWrites, Metadata.sensitiveWrites)
     )
 
+  // TODO - 30 days after deployment of CTCP-6442, this logic can be removed
+  private def updateMetadata(metadata: Metadata): Metadata = {
+    def doNothing(): Reads[JsObject] = __.json.pick[JsObject]
+
+    def updateArray(path: String): Reads[JsObject] =
+      for {
+        pick <- (__ \ path).readNullable[JsArray]
+        update <- pick match {
+          case Some(array) =>
+            __.json.update(
+              (__ \ path).json.prune andThen
+                (__ \ path \ path).json.put(array)
+            )
+          case _ =>
+            doNothing()
+        }
+      } yield update
+
+    def updateAddAnother(arrayPath: String, addAnotherPath: String): Reads[JsObject] =
+      for {
+        pick <- (__ \ addAnotherPath).readNullable[JsBoolean]
+        update <- pick match {
+          case Some(bool) =>
+            __.json.update(
+              (__ \ arrayPath \ addAnotherPath).json.put(bool)
+            ) andThen (__ \ addAnotherPath).json.prune
+          case _ =>
+            doNothing()
+        }
+      } yield update
+
+    val addAnotherItem      = "addAnotherItem"
+    val addAnotherGuarantee = "addAnotherGuarantee"
+
+    metadata.data
+      .transform(
+        updateArray("items") andThen
+          updateArray("guaranteeDetails") andThen
+          updateAddAnother("items", addAnotherItem) andThen
+          updateAddAnother("guaranteeDetails", addAnotherGuarantee)
+      )
+      .map {
+        data =>
+          metadata.copy(
+            data = data,
+            tasks = metadata.tasks.removed(s".$addAnotherItem").removed(s".$addAnotherGuarantee")
+          )
+      }
+      .getOrElse(metadata)
+  }
+
   private def reads(implicit instantReads: Reads[Instant], metaDataReads: Reads[Metadata]): Reads[UserAnswers] =
     (
-      __.read[Metadata] and
+      __.read[Metadata].map(updateMetadata) and
         (__ \ "createdAt").read[Instant] and
         (__ \ "lastUpdated").read[Instant] and
         (__ \ "_id").read[UUID] and
