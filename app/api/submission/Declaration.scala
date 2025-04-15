@@ -68,6 +68,7 @@ class Declaration @Inject() (header: Header) {
       attributes = attributes
     )
 
+  // TODO - Phase ID driven by API-Version header
   def attributes: Map[String, DataRecord[?]] =
     Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString(NCTS5u461.toString, scope)))
 }
