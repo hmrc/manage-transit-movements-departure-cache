@@ -25,7 +25,7 @@ class DeclarationSpec extends SpecBase {
   "attributes" must {
     "assign phase ID" in {
       val result = service.attributes
-      result.keys.size shouldBe 1
+      result.keys.size shouldEqual 1
       result.get("@PhaseID").value.value.toString shouldBe "NCTS5.1"
     }
   }

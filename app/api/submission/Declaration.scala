@@ -55,7 +55,7 @@ class Declaration @Inject() (header: Header) {
   private def IE013(uA: UserAnswers, mrn: Option[String], amendmentTypeFlag: Boolean): CC013CType =
     CC013CType(
       messageSequence1 = header.message(uA, CC013C),
-      TransitOperation = TransitOperation.transformIE013(uA, mrn, amendmentTypeFlag),
+      TransitOperation = TransitOperation.transform(uA, mrn, amendmentTypeFlag),
       Authorisation = Authorisations.transform(uA),
       CustomsOfficeOfDeparture = CustomsOffices.transformOfficeOfDeparture(uA),
       CustomsOfficeOfDestinationDeclared = CustomsOffices.transformOfficeOfDestination(uA),
@@ -63,11 +63,11 @@ class Declaration @Inject() (header: Header) {
       CustomsOfficeOfExitForTransitDeclared = CustomsOffices.transformOfficeOfExit(uA),
       HolderOfTheTransitProcedure = HolderOfTheTransitProcedure.transform(uA),
       Representative = Representative.transform(uA),
-      Guarantee = Guarantee.transformIE013(uA),
+      Guarantee = Guarantee.transform(uA),
       Consignment = Consignment.transform(uA),
       attributes = attributes
     )
 
   def attributes: Map[String, DataRecord[?]] =
-    Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString(NCTS5u461Value.toString, scope)))
+    Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString(NCTS5u461.toString, scope)))
 }
