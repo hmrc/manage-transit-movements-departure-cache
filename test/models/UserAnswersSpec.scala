@@ -71,7 +71,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
 
       "read correctly" in {
         val result = json.as[UserAnswers]
-        result shouldBe userAnswers
+        result shouldEqual userAnswers
       }
 
       "default non existent isTransitional to true" in {
@@ -94,12 +94,12 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
              |  "departureId": "$departureId"
              |}
              |""".stripMargin)
-          .as[UserAnswers] shouldBe userAnswers
+          .as[UserAnswers] shouldEqual userAnswers
       }
 
       "write correctly" in {
         val result = Json.toJson(userAnswers)
-        result shouldBe json
+        result shouldEqual json
       }
 
       "be readable as a LocalDateTime for backwards compatibility" in {
@@ -146,14 +146,138 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                |}
                |""".stripMargin)
 
-          "read correctly" in {
-            val result = json.as[UserAnswers]
-            result shouldBe userAnswers
+          "read correctly" when {
+            "data is empty" in {
+              val result = json.as[UserAnswers]
+              result shouldEqual userAnswers
+            }
+
+            "items and guarantee details at old path" in {
+              val json: JsValue = Json.parse(s"""
+                   |{
+                   |  "_id" : "$uuid",
+                   |  "lrn" : "$lrn",
+                   |  "eoriNumber" : "$eoriNumber",
+                   |  "data" : "tVWjq7/INmVWSQeX36H3nuS/mVkyalKoTLmriv77p/3a7R82VAAGMY0lVbqvwbBFhxxmoJDfn4lUOnytUr/V5KY3QQGbW2D4cH0UqreIyUE/lvwFY4G08keAxHqNtn39DnErxD92KoIHqq8Bmtd6b+Vj6kqs6SQrEBa8TBwWMq4VVpuOuvjfW/bayoGzwiXgNyfyW3Zrn+RWNChdsG/kvDKAscSBbcpGvZHAfHejjstklvJBt191UJXBnv5GQOfNBhiDpyqU+BUzkB89dcSe30+w06+GCn5jYhlKHgHVYGiq+3JzdBa9",
+                   |  "isSubmitted" : "notSubmitted",
+                   |  "tasks" : {
+                   |    "task1" : "completed",
+                   |    "task2" : "in-progress",
+                   |    "task3" : "not-started",
+                   |    "task4" : "cannot-start-yet"
+                   |  },
+                   |  "createdAt" : {
+                   |    "$$date" : {
+                   |      "$$numberLong" : "1662393524188"
+                   |    }
+                   |  },
+                   |  "lastUpdated" : {
+                   |    "$$date" : {
+                   |      "$$numberLong" : "1662546803472"
+                   |    }
+                   |  },
+                   |  "departureId": "$departureId",
+                   |  "isTransitional": true
+                   |}
+                   |""".stripMargin)
+
+              val result = json.as[UserAnswers]
+
+              val expectedData = Json.parse("""
+                  |{
+                  |  "items" : {
+                  |    "addAnotherItem" : false,
+                  |    "items" : [
+                  |      {
+                  |        "foo" : "bar"
+                  |      },
+                  |      {
+                  |        "bar" : "baz"
+                  |      }
+                  |    ]
+                  |  },
+                  |  "guaranteeDetails" : {
+                  |    "addAnotherGuarantee" : true,
+                  |    "guaranteeDetails" : [
+                  |      {
+                  |        "foo" : "bar"
+                  |      },
+                  |      {
+                  |        "bar" : "baz"
+                  |      }
+                  |    ]
+                  |  }
+                  |}
+                  |""".stripMargin)
+
+              result.metadata.data shouldEqual expectedData
+            }
+
+            "items and guarantee details at new path" in {
+              val json: JsValue = Json.parse(s"""
+                   |{
+                   |  "_id" : "$uuid",
+                   |  "lrn" : "$lrn",
+                   |  "eoriNumber" : "$eoriNumber",
+                   |  "data" : "/HrWST8ii7p2rz3lPBjtt/vmbgobSwFE2oliEQIXYgT03g2XBRxcA3QDa1D8cQE0HQ0Y6+LuFnNBKvbUVhE7WaflJ91icPu8AGV4ULi4+8RDI/eOzPGxYu03OSOcgTQnboZLABJMhMvALYetlUefu+H56odxaODcOsX1+c1DNcgxgHhho93j9AfSktwF9tnVoeoB3hX7gUQHJ5+aNMYCf1ZBVVNgzy9mtRIT3ctspAqg1Mzvi+cayyZ5dPuCh4zXIA5hRyOV1lQ5DHyo78JzTCwo/RBrs+bLRPIsg2nSvswxt6Iu4vrW",
+                   |  "isSubmitted" : "notSubmitted",
+                   |  "tasks" : {
+                   |    "task1" : "completed",
+                   |    "task2" : "in-progress",
+                   |    "task3" : "not-started",
+                   |    "task4" : "cannot-start-yet"
+                   |  },
+                   |  "createdAt" : {
+                   |    "$$date" : {
+                   |      "$$numberLong" : "1662393524188"
+                   |    }
+                   |  },
+                   |  "lastUpdated" : {
+                   |    "$$date" : {
+                   |      "$$numberLong" : "1662546803472"
+                   |    }
+                   |  },
+                   |  "departureId": "$departureId",
+                   |  "isTransitional": true
+                   |}
+                   |""".stripMargin)
+
+              val result = json.as[UserAnswers]
+
+              val expectedData = Json.parse("""
+                  |{
+                  |  "items" : {
+                  |    "addAnotherItem" : false,
+                  |    "items" : [
+                  |      {
+                  |        "foo" : "bar"
+                  |      },
+                  |      {
+                  |        "bar" : "baz"
+                  |      }
+                  |    ]
+                  |  },
+                  |  "guaranteeDetails" : {
+                  |    "addAnotherGuarantee" : true,
+                  |    "guaranteeDetails" : [
+                  |      {
+                  |        "foo" : "bar"
+                  |      },
+                  |      {
+                  |        "bar" : "baz"
+                  |      }
+                  |    ]
+                  |  }
+                  |}
+                  |""".stripMargin)
+
+              result.metadata.data shouldEqual expectedData
+            }
           }
 
           "write and read correctly" in {
             val result = Json.toJson(userAnswers).as[UserAnswers]
-            result shouldBe userAnswers
+            result shouldEqual userAnswers
           }
         }
       }
@@ -194,14 +318,185 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                |}
                |""".stripMargin)
 
-          "read correctly" in {
-            val result = json.as[UserAnswers]
-            result shouldBe userAnswers
+          "read correctly" when {
+            "data is empty" in {
+              val result = json.as[UserAnswers]
+              result shouldEqual userAnswers
+            }
+
+            "items and guarantee details at old path" in {
+              val json: JsValue = Json.parse(s"""
+                   |{
+                   |  "_id" : "$uuid",
+                   |  "lrn" : "$lrn",
+                   |  "eoriNumber" : "$eoriNumber",
+                   |  "data" : {
+                   |    "addAnotherItem" : false,
+                   |    "items" : [
+                   |      {
+                   |        "foo" : "bar"
+                   |      },
+                   |      {
+                   |        "bar" : "baz"
+                   |      }
+                   |    ],
+                   |    "addAnotherGuarantee" : true,
+                   |    "guaranteeDetails" : [
+                   |      {
+                   |        "foo" : "bar"
+                   |      },
+                   |      {
+                   |        "bar" : "baz"
+                   |      }
+                   |    ]
+                   |  },
+                   |  "isSubmitted" : "notSubmitted",
+                   |  "tasks" : {
+                   |    ".items" : "completed",
+                   |    ".addAnotherItem" : "completed",
+                   |    ".guaranteeDetails" : "completed",
+                   |    ".addAnotherGuarantee" : "completed"
+                   |  },
+                   |  "createdAt" : {
+                   |    "$$date" : {
+                   |      "$$numberLong" : "1662393524188"
+                   |    }
+                   |  },
+                   |  "lastUpdated" : {
+                   |    "$$date" : {
+                   |      "$$numberLong" : "1662546803472"
+                   |    }
+                   |  },
+                   |  "departureId": "$departureId",
+                   |  "isTransitional": true
+                   |}
+                   |""".stripMargin)
+
+              val result = json.as[UserAnswers]
+
+              val expectedData = Json.parse("""
+                  |{
+                  |  "items" : {
+                  |    "addAnotherItem" : false,
+                  |    "items" : [
+                  |      {
+                  |        "foo" : "bar"
+                  |      },
+                  |      {
+                  |        "bar" : "baz"
+                  |      }
+                  |    ]
+                  |  },
+                  |  "guaranteeDetails" : {
+                  |    "addAnotherGuarantee" : true,
+                  |    "guaranteeDetails" : [
+                  |      {
+                  |        "foo" : "bar"
+                  |      },
+                  |      {
+                  |        "bar" : "baz"
+                  |      }
+                  |    ]
+                  |  }
+                  |}
+                  |""".stripMargin)
+
+              result.metadata.data shouldEqual expectedData
+
+              result.metadata.tasks shouldEqual Map(
+                ".items"            -> Status.Completed,
+                ".guaranteeDetails" -> Status.Completed
+              )
+            }
+
+            "items and guarantee details at new path" in {
+              val json: JsValue = Json.parse(s"""
+                   |{
+                   |  "_id" : "$uuid",
+                   |  "lrn" : "$lrn",
+                   |  "eoriNumber" : "$eoriNumber",
+                   |  "data" : {
+                   |    "items" : {
+                   |      "addAnotherItem" : false,
+                   |      "items" : [
+                   |        {
+                   |          "foo" : "bar"
+                   |        },
+                   |        {
+                   |          "bar" : "baz"
+                   |        }
+                   |      ]
+                   |    },
+                   |    "guaranteeDetails" : {
+                   |      "addAnotherGuarantee" : true,
+                   |      "guaranteeDetails" : [
+                   |        {
+                   |          "foo" : "bar"
+                   |        },
+                   |        {
+                   |          "bar" : "baz"
+                   |        }
+                   |      ]
+                   |    }
+                   |  },
+                   |  "isSubmitted" : "notSubmitted",
+                   |  "tasks" : {
+                   |    "task1" : "completed",
+                   |    "task2" : "in-progress",
+                   |    "task3" : "not-started",
+                   |    "task4" : "cannot-start-yet"
+                   |  },
+                   |  "createdAt" : {
+                   |    "$$date" : {
+                   |      "$$numberLong" : "1662393524188"
+                   |    }
+                   |  },
+                   |  "lastUpdated" : {
+                   |    "$$date" : {
+                   |      "$$numberLong" : "1662546803472"
+                   |    }
+                   |  },
+                   |  "departureId": "$departureId",
+                   |  "isTransitional": true
+                   |}
+                   |""".stripMargin)
+
+              val result = json.as[UserAnswers]
+
+              val expectedData = Json.parse("""
+                  |{
+                  |  "items" : {
+                  |    "addAnotherItem" : false,
+                  |    "items" : [
+                  |      {
+                  |        "foo" : "bar"
+                  |      },
+                  |      {
+                  |        "bar" : "baz"
+                  |      }
+                  |    ]
+                  |  },
+                  |  "guaranteeDetails" : {
+                  |    "addAnotherGuarantee" : true,
+                  |    "guaranteeDetails" : [
+                  |      {
+                  |        "foo" : "bar"
+                  |      },
+                  |      {
+                  |        "bar" : "baz"
+                  |      }
+                  |    ]
+                  |  }
+                  |}
+                  |""".stripMargin)
+
+              result.metadata.data shouldEqual expectedData
+            }
           }
 
           "write correctly" in {
             val result = Json.toJson(userAnswers)
-            result shouldBe json
+            result shouldEqual json
           }
         }
       }
