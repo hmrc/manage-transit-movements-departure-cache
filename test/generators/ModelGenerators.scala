@@ -93,4 +93,9 @@ trait ModelGenerators {
         originalAttributeValue <- Gen.option(Gen.alphaNumStr)
       } yield FunctionalError(errorPointer, errorCode, errorReason, originalAttributeValue)
     }
+
+  implicit lazy val arbitraryVersion: Arbitrary[Version] =
+    Arbitrary {
+      Gen.oneOf(Version.Phase5, Version.Phase6)
+    }
 }
