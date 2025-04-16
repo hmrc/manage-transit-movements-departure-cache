@@ -37,7 +37,7 @@ class UserAnswersSummarySpec extends SpecBase {
       val id2 = UUID.randomUUID()
       val id3 = UUID.randomUUID()
 
-      val userAnswers1 = UserAnswers(Metadata("AB123", eoriNumber, SubmissionState.NotSubmitted), now, now, id1, isTransitional = false)
+      val userAnswers1 = UserAnswers(Metadata("AB123", eoriNumber, SubmissionState.NotSubmitted), now, now, id1)
       val userAnswers2 = UserAnswers(Metadata("CD123", eoriNumber, SubmissionState.Submitted), now.minus(1, DAYS), now.minus(1, DAYS), id2)
       val userAnswers3 = UserAnswers(Metadata("EF123", eoriNumber, SubmissionState.NotSubmitted), now, now, id3)
 
@@ -54,36 +54,33 @@ class UserAnswersSummarySpec extends SpecBase {
               "_links" -> Json.obj(
                 "self" -> Json.obj("href" -> controllers.routes.CacheController.get("AB123").url)
               ),
-              "createdAt"      -> now,
-              "lastUpdated"    -> now,
-              "expiresInDays"  -> 30,
-              "_id"            -> id1,
-              "isSubmitted"    -> "notSubmitted",
-              "isTransitional" -> false
+              "createdAt"     -> now,
+              "lastUpdated"   -> now,
+              "expiresInDays" -> 30,
+              "_id"           -> id1,
+              "isSubmitted"   -> "notSubmitted"
             ),
             Json.obj(
               "lrn" -> "CD123",
               "_links" -> Json.obj(
                 "self" -> Json.obj("href" -> controllers.routes.CacheController.get("CD123").url)
               ),
-              "createdAt"      -> now.minus(1, DAYS),
-              "lastUpdated"    -> now.minus(1, DAYS),
-              "expiresInDays"  -> 29,
-              "_id"            -> id2,
-              "isSubmitted"    -> "submitted",
-              "isTransitional" -> false
+              "createdAt"     -> now.minus(1, DAYS),
+              "lastUpdated"   -> now.minus(1, DAYS),
+              "expiresInDays" -> 29,
+              "_id"           -> id2,
+              "isSubmitted"   -> "submitted"
             ),
             Json.obj(
               "lrn" -> "EF123",
               "_links" -> Json.obj(
                 "self" -> Json.obj("href" -> controllers.routes.CacheController.get("EF123").url)
               ),
-              "createdAt"      -> now,
-              "lastUpdated"    -> now,
-              "expiresInDays"  -> 30,
-              "_id"            -> id3,
-              "isSubmitted"    -> "notSubmitted",
-              "isTransitional" -> false
+              "createdAt"     -> now,
+              "lastUpdated"   -> now,
+              "expiresInDays" -> 30,
+              "_id"           -> id3,
+              "isSubmitted"   -> "notSubmitted"
             )
           )
         )

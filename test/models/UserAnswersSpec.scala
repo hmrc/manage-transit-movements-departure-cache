@@ -43,8 +43,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
     createdAt = Instant.ofEpochMilli(1662393524188L),
     lastUpdated = Instant.ofEpochMilli(1662546803472L),
     id = UUID.fromString(uuid),
-    departureId = Some(departureId),
-    isTransitional = true
+    departureId = Some(departureId)
   )
 
   "User answers" when {
@@ -66,8 +65,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
           |  "createdAt" : "2022-09-05T15:58:44.188Z",
           |  "lastUpdated" : "2022-09-07T10:33:23.472Z",
           |  "isSubmitted" : "notSubmitted",
-          |  "departureId": "$departureId",
-          |  "isTransitional": true
+          |  "departureId": "$departureId"
           |}
           |""".stripMargin)
 
@@ -144,8 +142,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                |      "$$numberLong" : "1662546803472"
                |    }
                |  },
-               |  "departureId": "$departureId",
-               |  "isTransitional": true
+               |  "departureId": "$departureId"
                |}
                |""".stripMargin)
 
@@ -317,8 +314,7 @@ class UserAnswersSpec extends SpecBase with AppWithDefaultMockFixtures with Scal
                |      "$$numberLong" : "1662546803472"
                |    }
                |  },
-               |  "departureId": "$departureId",
-               |  "isTransitional": true
+               |  "departureId": "$departureId"
                |}
                |""".stripMargin)
 
