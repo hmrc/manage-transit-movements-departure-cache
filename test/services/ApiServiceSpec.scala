@@ -23,7 +23,6 @@ import generators.Generators
 import models.*
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.*
-import org.scalacheck.Arbitrary.arbitrary
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.http.Status.OK
 import play.api.inject.bind
@@ -57,7 +56,7 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
     reset(mockApiConnector)
     reset(mockDeclaration)
 
-    when(mockDeclaration.transform(any(), any(), any()))
+    when(mockDeclaration.transform(any(), any()))
       .thenReturn(xml)
   }
 
@@ -65,47 +64,41 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
 
   "submitDeclaration" must {
     "call connector" in {
-      forAll(arbitrary[Version]) {
-        version =>
-          beforeEach()
+      beforeEach()
 
-          val userAnswers = emptyUserAnswers
+      val userAnswers = emptyUserAnswers
 
-          val expectedResult = HttpResponse(OK, "")
+      val expectedResult = HttpResponse(OK, "")
 
-          when(mockApiConnector.submitDeclaration(any())(any())).thenReturn(Future.successful(expectedResult))
+      when(mockApiConnector.submitDeclaration(any())(any())).thenReturn(Future.successful(expectedResult))
 
-          val result = service.submitDeclaration(userAnswers, version).futureValue
-          result shouldEqual expectedResult
+      val result = service.submitDeclaration(userAnswers).futureValue
+      result shouldBe expectedResult
 
-          verify(mockApiConnector).submitDeclaration(eqTo(xml))(any())
-          verify(mockDeclaration).transform(eqTo(userAnswers), eqTo(MovementReferenceNumber.Empty), eqTo(version))
-      }
+      verify(mockApiConnector).submitDeclaration(eqTo(xml))(any())
+
     }
   }
 
-  "submitAmendment" must {
+  "submitAmend" must {
     val mrn = MovementReferenceNumber(Some("mrn"))
 
     "call connector" in {
-      forAll(arbitrary[Version]) {
-        version =>
-          beforeEach()
+      beforeEach()
 
-          val userAnswers = emptyUserAnswersWithDepartureId
+      val userAnswers = emptyUserAnswersWithDepartureId
 
-          val expectedResult = HttpResponse(OK, "")
+      val expectedResult = HttpResponse(OK, "")
 
-          when(mockApiConnector.getMRN(any())(any())).thenReturn(Future.successful(mrn))
-          when(mockApiConnector.submitAmendment(any(), any())(any())).thenReturn(Future.successful(expectedResult))
+      when(mockApiConnector.getMRN(any())(any())).thenReturn(Future.successful(mrn))
+      when(mockApiConnector.submitAmendment(any(), any())(any())).thenReturn(Future.successful(expectedResult))
 
-          val result = service.submitAmendment(userAnswers, departureId, version).futureValue
-          result shouldEqual expectedResult
+      val result = service.submitAmendment(userAnswers, departureId).futureValue
+      result shouldBe expectedResult
 
-          verify(mockApiConnector).getMRN(eqTo(departureId))(any())
-          verify(mockApiConnector).submitAmendment(eqTo(departureId), eqTo(xml))(any())
-          verify(mockDeclaration).transform(eqTo(userAnswers), eqTo(mrn), eqTo(version))
-      }
+      verify(mockApiConnector).getMRN(eqTo(departureId))(any())
+      verify(mockApiConnector).submitAmendment(eqTo(departureId), eqTo(xml))(any())
+
     }
   }
 
@@ -118,7 +111,7 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
           .thenReturn(Future.successful(None))
 
         val result = service.get(lrn).futureValue
-        result shouldEqual None
+        result shouldBe None
 
         verify(mockApiConnector).getDeparture(eqTo(lrn))(any())
 
@@ -140,7 +133,7 @@ class ApiServiceSpec extends SpecBase with AppWithDefaultMockFixtures with Scala
             .thenReturn(Future.successful(messages))
 
           val result = await(service.get(lrn))
-          result shouldEqual Some(messages)
+          result shouldBe Some(messages)
 
           verify(mockApiConnector).getDeparture(eqTo(lrn))(any())
           verify(mockApiConnector).getMessages(eqTo(departureId))(any())

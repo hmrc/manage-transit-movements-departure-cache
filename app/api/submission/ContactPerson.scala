@@ -16,7 +16,7 @@
 
 package api.submission
 
-import generated.*
+import generated.{ContactPersonType05, ContactPersonType06}
 import play.api.libs.functional.syntax._
 import play.api.libs.json.{__, Reads}
 
@@ -32,23 +32,23 @@ object contactPerson {
   )(apply)
 }
 
-object contactPersonType03 {
+object contactPersonType05 {
   import contactPerson._
 
-  implicit val reads: Reads[ContactPersonType03] =
-    contactPerson.reads(ContactPersonType03.apply)
+  implicit val reads: Reads[ContactPersonType05] =
+    contactPerson.reads(ContactPersonType05.apply)
 
-  implicit val optionalReads: Reads[Option[ContactPersonType03]] = (
+  implicit val optionalReads: Reads[Option[ContactPersonType05]] = (
     (__ \ name).readNullable[String] and
       (__ \ telephoneNumber).readNullable[String]
   ).tupled.map {
-    case (Some(name), Some(phoneNumber)) => Some(ContactPersonType03(name, phoneNumber, None))
+    case (Some(name), Some(phoneNumber)) => Some(ContactPersonType05(name, phoneNumber, None))
     case _                               => None
   }
 }
 
-object contactPersonType01 {
+object contactPersonType06 {
 
-  implicit val reads: Reads[ContactPersonType01] =
-    contactPerson.reads(ContactPersonType01.apply)
+  implicit val reads: Reads[ContactPersonType06] =
+    contactPerson.reads(ContactPersonType06.apply)
 }

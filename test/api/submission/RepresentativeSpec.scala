@@ -18,7 +18,7 @@ package api.submission
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import config.Constants.RepresentativeStatusCode.DirectRepresentation
-import generated.*
+import generated._
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 
@@ -60,11 +60,11 @@ class RepresentativeSpec extends SpecBase with AppWithDefaultMockFixtures {
 
             val uA: UserAnswers = json.as[UserAnswers]
 
-            val expected = RepresentativeType06(
+            val expected = RepresentativeType05(
               identificationNumber = "GB123456789000",
               status = DirectRepresentation,
               ContactPerson = Some(
-                ContactPersonType03(
+                ContactPersonType05(
                   name = "Jack",
                   phoneNumber = "+44 808 157 0192",
                   eMailAddress = None
@@ -72,9 +72,9 @@ class RepresentativeSpec extends SpecBase with AppWithDefaultMockFixtures {
               )
             )
 
-            val converted: Option[RepresentativeType06] = Representative.transform(uA)
+            val converted: Option[RepresentativeType05] = Representative.transform(uA)
 
-            converted.get shouldEqual expected
+            converted.get shouldBe expected
           }
 
           "there is not a contact person" in {
@@ -103,15 +103,15 @@ class RepresentativeSpec extends SpecBase with AppWithDefaultMockFixtures {
 
             val uA: UserAnswers = json.as[UserAnswers]
 
-            val expected = RepresentativeType06(
+            val expected = RepresentativeType05(
               identificationNumber = "GB123456789000",
               status = DirectRepresentation,
               ContactPerson = None
             )
 
-            val converted: Option[RepresentativeType06] = Representative.transform(uA)
+            val converted: Option[RepresentativeType05] = Representative.transform(uA)
 
-            converted.get shouldEqual expected
+            converted.get shouldBe expected
           }
         }
 
@@ -137,9 +137,9 @@ class RepresentativeSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val uA: UserAnswers = json.as[UserAnswers]
 
-          val converted: Option[RepresentativeType06] = Representative.transform(uA)
+          val converted: Option[RepresentativeType05] = Representative.transform(uA)
 
-          converted shouldEqual None
+          converted shouldBe None
         }
       }
     }

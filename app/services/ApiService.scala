@@ -17,9 +17,9 @@
 package services
 
 import api.submission.Declaration
-import cats.implicits.*
+import cats.implicits._
 import connectors.ApiConnector
-import models.*
+import models._
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.Inject
@@ -30,13 +30,13 @@ class ApiService @Inject() (
   declaration: Declaration
 )(implicit ec: ExecutionContext) {
 
-  def submitDeclaration(userAnswers: UserAnswers, version: Version)(implicit hc: HeaderCarrier): Future[HttpResponse] =
-    apiConnector.submitDeclaration(declaration.transform(userAnswers, MovementReferenceNumber.Empty, version))
+  def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    apiConnector.submitDeclaration(declaration.transform(userAnswers, MovementReferenceNumber.Empty))
 
-  def submitAmendment(userAnswers: UserAnswers, departureId: String, version: Version)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+  def submitAmendment(userAnswers: UserAnswers, departureId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     for {
       mrn <- apiConnector.getMRN(departureId)
-      payload = declaration.transform(userAnswers, mrn, version)
+      payload = declaration.transform(userAnswers, mrn)
       result <- apiConnector.submitAmendment(departureId, payload)
     } yield result
 

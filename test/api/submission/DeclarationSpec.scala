@@ -17,25 +17,16 @@
 package api.submission
 
 import base.SpecBase
-import models.Version
 
 class DeclarationSpec extends SpecBase {
 
   private val service = app.injector.instanceOf[Declaration]
 
   "attributes" must {
-    "assign phase ID" when {
-      "phase 5" in {
-        val result = service.attributes(Version.Phase5)
-        result.keys.size shouldEqual 1
-        result.get("@PhaseID").value.value.toString shouldBe "NCTS5.1"
-      }
-
-      "phase 6" in {
-        val result = service.attributes(Version.Phase6)
-        result.keys.size shouldEqual 1
-        result.get("@PhaseID").value.value.toString shouldBe "NCTS6"
-      }
+    "assign phase ID" in {
+      val result = service.attributes
+      result.keys.size shouldBe 1
+      result.get("@PhaseID").value.value.toString shouldBe "NCTS5.1"
     }
   }
 }

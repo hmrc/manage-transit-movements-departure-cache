@@ -34,11 +34,11 @@ class TestOnlySubmissionController @Inject() (
     extends BackendController(cc)
     with Logging {
 
-  def submit(): Action[JsValue] = actions.authenticateAndGetVersion()(parse.json) {
+  def submit(): Action[JsValue] = actions.authenticate()(parse.json) {
     request =>
       request.body.validate[UserAnswers](UserAnswers.nonSensitiveFormat orElse UserAnswers.sensitiveFormat) match {
         case JsSuccess(userAnswers, _) =>
-          Ok(declaration.transform(userAnswers, mrn = MovementReferenceNumber.Empty, request.phase))
+          Ok(declaration.transform(userAnswers, mrn = MovementReferenceNumber.Empty))
         case JsError(errors) =>
           logger.info(s"Failed to validate request body as UserAnswers: ${errors.mkString}")
           BadRequest

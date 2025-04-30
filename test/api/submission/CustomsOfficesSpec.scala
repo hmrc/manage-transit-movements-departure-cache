@@ -17,7 +17,7 @@
 package api.submission
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import generated.*
+import generated._
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 import scalaxb.XMLCalendar
@@ -62,11 +62,11 @@ class CustomsOfficesSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val uA: UserAnswers = json.as[UserAnswers]
 
-        val expected = CustomsOfficeOfDepartureType05("GB000011")
+        val expected = CustomsOfficeOfDepartureType03("GB000011")
 
-        val converted: CustomsOfficeOfDepartureType05 = CustomsOffices.transformOfficeOfDeparture(uA)
+        val converted: CustomsOfficeOfDepartureType03 = CustomsOffices.transformOfficeOfDeparture(uA)
 
-        converted shouldEqual expected
+        converted shouldBe expected
       }
 
       "transformOfficeOfDestination is called" in {
@@ -105,7 +105,7 @@ class CustomsOfficesSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val converted: CustomsOfficeOfDestinationDeclaredType01 = CustomsOffices.transformOfficeOfDestination(uA)
 
-        converted shouldEqual expected
+        converted shouldBe expected
       }
 
       "transformOfficeOfTransit is called" in {
@@ -159,21 +159,21 @@ class CustomsOfficesSpec extends SpecBase with AppWithDefaultMockFixtures {
         val uA: UserAnswers = json.as[UserAnswers]
 
         val expected = Seq(
-          CustomsOfficeOfTransitDeclaredType06(
+          CustomsOfficeOfTransitDeclaredType04(
             sequenceNumber = 1,
             referenceNumber = "IT057101",
             arrivalDateAndTimeEstimated = Some(XMLCalendar("2023-02-23T08:45:00"))
           ),
-          CustomsOfficeOfTransitDeclaredType06(
+          CustomsOfficeOfTransitDeclaredType04(
             sequenceNumber = 2,
             referenceNumber = "AT330400",
             arrivalDateAndTimeEstimated = None
           )
         )
 
-        val converted: Seq[CustomsOfficeOfTransitDeclaredType06] = CustomsOffices.transformOfficeOfTransit(uA)
+        val converted: Seq[CustomsOfficeOfTransitDeclaredType04] = CustomsOffices.transformOfficeOfTransit(uA)
 
-        converted shouldEqual expected
+        converted shouldBe expected
       }
 
       "transformOfficeOfExit is called" in {
@@ -236,7 +236,7 @@ class CustomsOfficesSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val converted: Seq[CustomsOfficeOfExitForTransitDeclaredType02] = CustomsOffices.transformOfficeOfExit(uA)
 
-        converted shouldEqual expected
+        converted shouldBe expected
       }
     }
   }

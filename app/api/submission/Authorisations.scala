@@ -16,23 +16,23 @@
 
 package api.submission
 
-import generated.*
+import generated.AuthorisationType03
 import models.UserAnswers
-import play.api.libs.functional.syntax.*
+import play.api.libs.functional.syntax._
 import play.api.libs.json.{__, Reads}
 
 object Authorisations {
 
-  def transform(uA: UserAnswers): Seq[AuthorisationType02] =
-    uA.metadata.data.as[Seq[AuthorisationType02]](authorisationsReads)
+  def transform(uA: UserAnswers): Seq[AuthorisationType03] =
+    uA.metadata.data.as[Seq[AuthorisationType03]](authorisationsReads)
 
-  implicit val authorisationsReads: Reads[Seq[AuthorisationType02]] =
-    authorisationsPath.readArray[AuthorisationType02](authorisationType02.reads)
+  implicit val authorisationsReads: Reads[Seq[AuthorisationType03]] =
+    authorisationsPath.readArray[AuthorisationType03](authorisationType03.reads)
 }
 
-object authorisationType02 {
+object authorisationType03 {
 
-  def reads(index: Int): Reads[AuthorisationType02] = {
+  def reads(index: Int): Reads[AuthorisationType03] = {
     lazy val authorisationTypeReads: Reads[String] =
       (__ \ "authorisationType" \ "code").read[String] orElse (__ \ "inferredAuthorisationType" \ "code").read[String]
 
@@ -40,6 +40,6 @@ object authorisationType02 {
       Reads.pure[BigInt](index) and
         authorisationTypeReads and
         (__ \ "authorisationReferenceNumber").read[String]
-    )(AuthorisationType02.apply)
+    )(AuthorisationType03.apply)
   }
 }

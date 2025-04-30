@@ -18,8 +18,8 @@ package api.submission
 
 import api.submission.Level.*
 import api.submission.documentType.RichDocumentJsValue
-import api.submission.houseConsignmentType10.RichHouseConsignmentType13
-import api.submission.transportEquipmentType03.RichTransportEquipmentJsValue
+import api.submission.houseConsignmentType10.RichHouseConsignmentType10
+import api.submission.transportEquipmentType06.RichTransportEquipmentJsValue
 import generated.*
 import models.UserAnswers
 import play.api.libs.functional.syntax.*
@@ -30,17 +30,17 @@ import scala.language.implicitConversions
 
 object Consignment {
 
-  def transform(uA: UserAnswers): ConsignmentType23 =
-    uA.metadata.data.as[ConsignmentType23](consignmentType23.reads).postProcess()
+  def transform(uA: UserAnswers): ConsignmentType20 =
+    uA.metadata.data.as[ConsignmentType20](consignmentType20.reads).postProcess()
 
-  implicit class RichConsignmentType23(value: ConsignmentType23) {
+  implicit class RichConsignmentType20(value: ConsignmentType20) {
 
-    def postProcess(): ConsignmentType23 = value
+    def postProcess(): ConsignmentType20 = value
       .rollUpUCR()
       .rollUpCountryOfDispatch()
       .rollUpCountryOfDestination()
 
-    def rollUpUCR(): ConsignmentType23 =
+    def rollUpUCR(): ConsignmentType20 =
       rollUp[String, String](
         consignmentLevel = _.referenceNumberUCR,
         itemLevel = _.referenceNumberUCR,
@@ -48,7 +48,7 @@ object Consignment {
         updateItemLevel = _ => _.copy(referenceNumberUCR = None)
       )(identity)
 
-    def rollUpCountryOfDispatch(): ConsignmentType23 =
+    def rollUpCountryOfDispatch(): ConsignmentType20 =
       rollUp[String, String](
         consignmentLevel = _.countryOfDispatch,
         itemLevel = _.countryOfDispatch,
@@ -56,7 +56,7 @@ object Consignment {
         updateItemLevel = _ => _.copy(countryOfDispatch = None)
       )(identity)
 
-    def rollUpCountryOfDestination(): ConsignmentType23 =
+    def rollUpCountryOfDestination(): ConsignmentType20 =
       rollUp[String, String](
         consignmentLevel = _.countryOfDestination,
         itemLevel = _.countryOfDestination,
@@ -64,14 +64,14 @@ object Consignment {
         updateItemLevel = _ => _.copy(countryOfDestination = None)
       )(identity)
 
-    def update(f: ConsignmentType23 => ConsignmentType23): ConsignmentType23 = f(value)
+    def update(f: ConsignmentType20 => ConsignmentType20): ConsignmentType20 = f(value)
 
     private def rollUp[A, B](
-      consignmentLevel: ConsignmentType23 => Option[A],
-      itemLevel: ConsignmentItemType10 => Option[B],
-      updateConsignmentLevel: Option[A] => ConsignmentType23 => ConsignmentType23,
-      updateItemLevel: Option[B] => ConsignmentItemType10 => ConsignmentItemType10
-    )(f: B => A): ConsignmentType23 =
+      consignmentLevel: ConsignmentType20 => Option[A],
+      itemLevel: ConsignmentItemType09 => Option[B],
+      updateConsignmentLevel: Option[A] => ConsignmentType20 => ConsignmentType20,
+      updateItemLevel: Option[B] => ConsignmentItemType09 => ConsignmentItemType09
+    )(f: B => A): ConsignmentType20 =
       value.HouseConsignment.flatMap(_.ConsignmentItem).map(itemLevel) match {
         case itemLevelValues if itemLevelValues.nonEmpty =>
           itemLevelValues match {
@@ -96,38 +96,46 @@ object Consignment {
           value
       }
   }
+
+  implicit class RichConsigneeType02(value: ConsigneeType02) {
+    import api.submission.addressType12.RichAddressType12
+
+    def asConsigneeType05: ConsigneeType05 = ConsigneeType05(
+      identificationNumber = value.identificationNumber,
+      name = value.name,
+      Address = value.Address.map(_.asAddressType17)
+    )
+  }
 }
 
-object consignmentType23 {
+object consignmentType20 {
 
-  implicit val reads: Reads[ConsignmentType23] = for {
-    countryOfDispatch          <- (preRequisitesPath \ "countryOfDispatch" \ "code").readNullable[String]
-    countryOfDestination       <- (preRequisitesPath \ "itemsDestinationCountry" \ "code").readNullable[String]
-    containerIndicator         <- (preRequisitesPath \ "containerIndicator").readNullable[Boolean]
-    inlandModeOfTransport      <- (transportDetailsPath \ "inlandMode" \ "code").readNullable[String]
-    modeOfTransportAtTheBorder <- (transportDetailsPath \ "borderModeOfTransport" \ "code").readNullable[String]
-    referenceNumberUCR         <- (preRequisitesPath \ "uniqueConsignmentReference").readNullable[String]
-    carrier                    <- (transportDetailsPath \ "carrierDetails").readNullable[CarrierType06](carrierType06.reads)
-    consignor                  <- (consignmentPath \ "consignor").readNullable[ConsignorType10](consignorType10.reads)
-    consignee                  <- (consignmentPath \ "consignee").readNullable[ConsigneeType05](consigneeType05.reads)
-    additionalSupplyChainActors <- (transportDetailsPath \ "supplyChainActors").readArray[AdditionalSupplyChainActorType01](
-      additionalSupplyChainActorType01.reads
-    )
-    transportEquipment         <- transportEquipmentReads
-    locationOfGoods            <- (routeDetailsPath \ "locationOfGoods").readNullable[LocationOfGoodsType04](locationOfGoodsType04.reads)
-    departureTransportMeans    <- departureTransportMeansReads
-    countriesOfRouting         <- countriesOfRoutingReads
-    activeBorderTransportMeans <- activeBorderTransportMeansReads
-    placeOfLoading             <- (loadingAndUnloadingPath \ "loading").readNullable[PlaceOfLoadingType](placeOfLoadingType.reads)
-    placeOfUnloading           <- (loadingAndUnloadingPath \ "unloading").readNullable[PlaceOfUnloadingType](placeOfUnloadingType.reads)
-    previousDocuments          <- previousDocumentsReads
-    supportingDocuments        <- supportingDocumentsReads
-    transportDocuments         <- transportDocumentsReads
-    transportCharges           <- __.read[Option[TransportChargesType01]](transportChargesType.reads)
-    houseConsignments          <- __.read[HouseConsignmentType13](houseConsignmentType10.reads()).map(Seq(_))
-    additionalReference        <- additionalReferenceReads
-    additionalInformation      <- additionalInformationReads
-  } yield ConsignmentType23(
+  implicit val reads: Reads[ConsignmentType20] = for {
+    countryOfDispatch           <- (preRequisitesPath \ "countryOfDispatch" \ "code").readNullable[String]
+    countryOfDestination        <- (preRequisitesPath \ "itemsDestinationCountry" \ "code").readNullable[String]
+    containerIndicator          <- (preRequisitesPath \ "containerIndicator").readNullable[Boolean]
+    inlandModeOfTransport       <- (transportDetailsPath \ "inlandMode" \ "code").readNullable[String]
+    modeOfTransportAtTheBorder  <- (transportDetailsPath \ "borderModeOfTransport" \ "code").readNullable[String]
+    referenceNumberUCR          <- (preRequisitesPath \ "uniqueConsignmentReference").readNullable[String]
+    carrier                     <- (transportDetailsPath \ "carrierDetails").readNullable[CarrierType04](carrierType04.reads)
+    consignor                   <- (consignmentPath \ "consignor").readNullable[ConsignorType07](consignorType07.reads)
+    consignee                   <- (consignmentPath \ "consignee").readNullable[ConsigneeType05](consigneeType05.reads)
+    additionalSupplyChainActors <- (transportDetailsPath \ "supplyChainActors").readArray[AdditionalSupplyChainActorType](additionalSupplyChainActorType.reads)
+    transportEquipment          <- transportEquipmentReads
+    locationOfGoods             <- (routeDetailsPath \ "locationOfGoods").readNullable[LocationOfGoodsType05](locationOfGoodsType05.reads)
+    departureTransportMeans     <- departureTransportMeansReads
+    countriesOfRouting          <- countriesOfRoutingReads
+    activeBorderTransportMeans  <- activeBorderTransportMeansReads
+    placeOfLoading              <- (loadingAndUnloadingPath \ "loading").readNullable[PlaceOfLoadingType03](placeOfLoadingType03.reads)
+    placeOfUnloading            <- (loadingAndUnloadingPath \ "unloading").readNullable[PlaceOfUnloadingType01](placeOfUnloadingType01.reads)
+    previousDocuments           <- previousDocumentsReads
+    supportingDocuments         <- supportingDocumentsReads
+    transportDocuments          <- transportDocumentsReads
+    transportCharges            <- __.read[Option[TransportChargesType]](transportChargesType.consignmentReads)
+    houseConsignments           <- __.read[HouseConsignmentType10](houseConsignmentType10.reads()).map(Seq(_))
+    additionalReference         <- additionalReferenceReads
+    additionalInformation       <- additionalInformationReads
+  } yield ConsignmentType20(
     countryOfDispatch = countryOfDispatch,
     countryOfDestination = countryOfDestination,
     containerIndicator = containerIndicator,
@@ -155,68 +163,68 @@ object consignmentType23 {
     HouseConsignment = houseConsignments
   )
 
-  def transportEquipmentReads: Reads[Seq[TransportEquipmentType03]] =
+  def transportEquipmentReads: Reads[Seq[TransportEquipmentType06]] =
     itemsPath.read[Seq[JsValue]].flatMap {
       items =>
-        equipmentsPath.readFilteredArray[TransportEquipmentType03](
+        equipmentsPath.readFilteredArray[TransportEquipmentType06](
           _.hasBeenAddedToItem(items)
-        )(transportEquipmentType03.reads(_, items))
+        )(transportEquipmentType06.reads(_, items))
     }
 
-  def departureTransportMeansReads: Reads[Seq[DepartureTransportMeansType01]] =
+  def departureTransportMeansReads: Reads[Seq[DepartureTransportMeansType03]] =
     (transportMeansPath \ "departure")
-      .readArray[DepartureTransportMeansType01](departureTransportMeansType01.reads)
+      .readArray[DepartureTransportMeansType03](departureTransportMeansType03.reads)
 
-  private def countriesOfRoutingReads: Reads[Seq[CountryOfRoutingOfConsignmentType02]] =
+  private def countriesOfRoutingReads: Reads[Seq[CountryOfRoutingOfConsignmentType01]] =
     (routeDetailsPath \ "routing" \ "countriesOfRouting")
-      .readArray[CountryOfRoutingOfConsignmentType02](countryOfRoutingOfConsignmentType02.reads)
+      .readArray[CountryOfRoutingOfConsignmentType01](countryOfRoutingOfConsignmentType01.reads)
 
-  def activeBorderTransportMeansReads: Reads[Seq[ActiveBorderTransportMeansType03]] =
+  def activeBorderTransportMeansReads: Reads[Seq[ActiveBorderTransportMeansType02]] =
     (transportMeansPath \ "active")
-      .readArray[ActiveBorderTransportMeansType03](activeBorderTransportMeansType03.reads)
+      .readArray[ActiveBorderTransportMeansType02](activeBorderTransportMeansType02.reads)
 
-  private def previousDocumentsReads: Reads[Seq[PreviousDocumentType05]] =
+  private def previousDocumentsReads: Reads[Seq[PreviousDocumentType09]] =
     documentsPath
-      .readFilteredArray[PreviousDocumentType05](
+      .readFilteredArray[PreviousDocumentType09](
         _.hasCorrectTypeAndLevel("Previous", ConsignmentLevel)
-      )(previousDocumentType05.reads)
+      )(previousDocumentType09.reads)
 
-  private def additionalReferenceReads: Reads[Seq[AdditionalReferenceType02]] =
+  private def additionalReferenceReads: Reads[Seq[AdditionalReferenceType05]] =
     transportDetailsAdditionalReferencePath
-      .readArray[AdditionalReferenceType02](additionalReferenceType02.reads)
+      .readArray[AdditionalReferenceType05](additionalReferenceType05.reads)
 
-  private def additionalInformationReads: Reads[Seq[AdditionalInformationType02]] =
+  private def additionalInformationReads: Reads[Seq[AdditionalInformationType03]] =
     transportDetailsAdditionalInformationPath
-      .readArray[AdditionalInformationType02](additionalInformationType02.consignmentReads)
+      .readArray[AdditionalInformationType03](additionalInformationType03.consignmentReads)
 
-  private def supportingDocumentsReads: Reads[Seq[SupportingDocumentType03]] =
+  private def supportingDocumentsReads: Reads[Seq[SupportingDocumentType05]] =
     documentsPath
-      .readFilteredArray[SupportingDocumentType03](
+      .readFilteredArray[SupportingDocumentType05](
         _.hasCorrectTypeAndLevel("Support", ConsignmentLevel)
-      )(supportingDocumentType03.reads)
+      )(supportingDocumentType05.reads)
 
-  private def transportDocumentsReads: Reads[Seq[TransportDocumentType01]] =
-    documentsPath.readFilteredArray[TransportDocumentType01](
+  private def transportDocumentsReads: Reads[Seq[TransportDocumentType04]] =
+    documentsPath.readFilteredArray[TransportDocumentType04](
       _.hasCorrectTypeAndLevel("Transport", ConsignmentLevel)
-    )(transportDocumentType01.reads)
+    )(transportDocumentType04.reads)
 }
 
-object carrierType06 {
+object carrierType04 {
 
-  implicit val reads: Reads[CarrierType06] = (
+  implicit val reads: Reads[CarrierType04] = (
     (__ \ "identificationNumber").read[String] and
-      (__ \ "contact").readNullable[ContactPersonType03](contactPersonType03.reads)
-  )(CarrierType06.apply)
+      (__ \ "contact").readNullable[ContactPersonType05](contactPersonType05.reads)
+  )(CarrierType04.apply)
 }
 
-object consignorType10 {
+object consignorType07 {
 
-  implicit val reads: Reads[ConsignorType10] = (
+  implicit val reads: Reads[ConsignorType07] = (
     (__ \ "eori").readNullable[String] and
       (__ \ "name").readNullable[String] and
-      __.read[Option[AddressType14]](addressType14.optionalReads) and
-      (__ \ "contact").readNullable[ContactPersonType03](contactPersonType03.reads)
-  )(ConsignorType10.apply)
+      __.read[Option[AddressType17]](addressType17.optionalReads) and
+      (__ \ "contact").readNullable[ContactPersonType05](contactPersonType05.reads)
+  )(ConsignorType07.apply)
 }
 
 object consigneeType05 {
@@ -224,20 +232,29 @@ object consigneeType05 {
   implicit val reads: Reads[ConsigneeType05] = (
     (__ \ "eori").readNullable[String] and
       (__ \ "name").readNullable[String] and
-      __.read[Option[AddressType14]](addressType14.optionalReads)
+      __.read[Option[AddressType17]](addressType17.optionalReads)
   )(ConsigneeType05.apply)
 }
 
-object additionalSupplyChainActorType01 {
+object consigneeType02 {
 
-  def reads(index: Int): Reads[AdditionalSupplyChainActorType01] = (
+  implicit val reads: Reads[ConsigneeType02] = (
+    (__ \ "identificationNumber").readNullable[String] and
+      (__ \ "name").readNullable[String] and
+      __.read[Option[AddressType12]](addressType12.optionalReads)
+  )(ConsigneeType02.apply)
+}
+
+object additionalSupplyChainActorType {
+
+  def reads(index: Int): Reads[AdditionalSupplyChainActorType] = (
     Reads.pure[BigInt](index) and
       (__ \ "supplyChainActorType" \ "role").read[String] and
       (__ \ "identificationNumber").read[String]
-  )(AdditionalSupplyChainActorType01.apply)
+  )(AdditionalSupplyChainActorType.apply)
 }
 
-object transportEquipmentType03 {
+object transportEquipmentType06 {
 
   private def uuidReads: Reads[UUID] =
     (__ \ "transportEquipment").read[UUID]
@@ -254,12 +271,12 @@ object transportEquipmentType03 {
   def apply(
     sequenceNumber: BigInt,
     containerIdentificationNumber: Option[String],
-    Seal: Seq[SealType01],
-    GoodsReference: Seq[GoodsReferenceType01]
-  ): TransportEquipmentType03 =
-    TransportEquipmentType03(sequenceNumber, containerIdentificationNumber, Seal.length, Seal, GoodsReference)
+    Seal: Seq[SealType05],
+    GoodsReference: Seq[GoodsReferenceType02]
+  ): TransportEquipmentType06 =
+    TransportEquipmentType06(sequenceNumber, containerIdentificationNumber, Seal.length, Seal, GoodsReference)
 
-  private def goodsReferencesReads(transportEquipmentUuid: UUID, items: Seq[JsValue]): Reads[Seq[GoodsReferenceType01]] =
+  private def goodsReferencesReads(transportEquipmentUuid: UUID, items: Seq[JsValue]): Reads[Seq[GoodsReferenceType02]] =
     Reads.pure {
       items.zipWithSequenceNumber
         .foldLeft[Seq[Int]](Nil) {
@@ -272,27 +289,27 @@ object transportEquipmentType03 {
         .zipWithSequenceNumber
         .map {
           case (declarationGoodsItemNumber, sequenceNumber) =>
-            GoodsReferenceType01(sequenceNumber, BigInt(declarationGoodsItemNumber))
+            GoodsReferenceType02(sequenceNumber, BigInt(declarationGoodsItemNumber))
         }
     }
 
-  def reads(index: Int, items: Seq[JsValue]): Reads[TransportEquipmentType03] = (
+  def reads(index: Int, items: Seq[JsValue]): Reads[TransportEquipmentType06] = (
     Reads.pure[BigInt](index) and
       (__ \ "containerIdentificationNumber").readNullable[String] and
-      (__ \ "seals").readArray[SealType01](sealType01.reads) and
+      (__ \ "seals").readArray[SealType05](sealType05.reads) and
       (__ \ "uuid").read[UUID].flatMap(goodsReferencesReads(_, items))
-  )(transportEquipmentType03.apply)
+  )(transportEquipmentType06.apply)
 }
 
-object sealType01 {
+object sealType05 {
 
-  def reads(index: Int): Reads[SealType01] = (
+  def reads(index: Int): Reads[SealType05] = (
     Reads.pure[BigInt](index) and
       (__ \ "identificationNumber").read[String]
-  )(SealType01.apply)
+  )(SealType05.apply)
 }
 
-object locationOfGoodsType04 {
+object locationOfGoodsType05 {
 
   private lazy val typeOfLocationReads: Reads[String] =
     (__ \ "typeOfLocation" \ "type").read[String] orElse
@@ -302,7 +319,7 @@ object locationOfGoodsType04 {
     (__ \ "qualifierOfIdentification" \ "qualifier").read[String] orElse
       (__ \ "inferredQualifierOfIdentification" \ "qualifier").read[String]
 
-  implicit val reads: Reads[LocationOfGoodsType04] = (
+  implicit val reads: Reads[LocationOfGoodsType05] = (
     typeOfLocationReads and
       qualifierOfIdentificationReads and
       (__ \ "identifier" \ "authorisationNumber").readNullable[String] and
@@ -310,11 +327,11 @@ object locationOfGoodsType04 {
       (__ \ "identifier" \ "unLocode").readNullable[String] and
       (__ \ "identifier" \ "customsOffice").readNullable[CustomsOfficeType02](customsOfficeType02.reads) and
       (__ \ "identifier" \ "coordinates").readNullable[GNSSType](gnssType.reads) and
-      (__ \ "identifier" \ "eori").readNullable[EconomicOperatorType02](economicOperatorType02.reads) and
-      (__ \ "identifier").read[Option[AddressType06]](addressType06.optionalReads) and
-      Reads.pure[Option[PostcodeAddressType]](None) and
-      (__ \ "contact").readNullable[ContactPersonType01](contactPersonType01.reads)
-  )(LocationOfGoodsType04.apply)
+      (__ \ "identifier" \ "eori").readNullable[EconomicOperatorType03](economicOperatorType03.reads) and
+      (__ \ "identifier").read[Option[AddressType14]](addressType14.optionalReads) and
+      Reads.pure[Option[PostcodeAddressType02]](None) and
+      (__ \ "contact").readNullable[ContactPersonType06](contactPersonType06.reads)
+  )(LocationOfGoodsType05.apply)
 }
 
 object customsOfficeType02 {
@@ -331,92 +348,97 @@ object gnssType {
   )(GNSSType.apply)
 }
 
-object economicOperatorType02 {
+object economicOperatorType03 {
 
-  implicit val reads: Reads[EconomicOperatorType02] =
-    __.read[String].map(EconomicOperatorType02.apply)
+  implicit val reads: Reads[EconomicOperatorType03] =
+    __.read[String].map(EconomicOperatorType03.apply)
 }
 
-object departureTransportMeansType01 {
+object departureTransportMeansType03 {
 
-  def reads(index: Int): Reads[DepartureTransportMeansType01] = (
+  def reads(index: Int): Reads[DepartureTransportMeansType03] = (
     Reads.pure[BigInt](index) and
-      (__ \ "identification" \ "type").read[String] and
-      (__ \ "meansIdentificationNumber").read[String] and
-      (__ \ "vehicleCountry" \ "code").read[String]
-  )(DepartureTransportMeansType01.apply)
+      (__ \ "identification" \ "type").readNullable[String] and
+      (__ \ "meansIdentificationNumber").readNullable[String] and
+      (__ \ "vehicleCountry" \ "code").readNullable[String]
+  )(DepartureTransportMeansType03.apply)
 }
 
-object countryOfRoutingOfConsignmentType02 {
+object countryOfRoutingOfConsignmentType01 {
 
-  def reads(index: Int): Reads[CountryOfRoutingOfConsignmentType02] = (
+  def reads(index: Int): Reads[CountryOfRoutingOfConsignmentType01] = (
     Reads.pure[BigInt](index) and
       (__ \ "countryOfRouting" \ "code").read[String]
-  )(CountryOfRoutingOfConsignmentType02.apply)
+  )(CountryOfRoutingOfConsignmentType01.apply)
 }
 
-object activeBorderTransportMeansType03 {
+object activeBorderTransportMeansType02 {
 
-  private lazy val identificationReads: Reads[String] =
-    (__ \ "identification" \ "code").read[String] orElse (__ \ "inferredIdentification" \ "code").read[String]
+  private lazy val identificationReads: Reads[Option[String]] =
+    ((__ \ "identification" \ "code").read[String] orElse (__ \ "inferredIdentification" \ "code").read[String])
+      .map(Option(_))
+      .orElse(Reads.pure[Option[String]](None))
 
-  def reads(index: Int): Reads[ActiveBorderTransportMeansType03] = (
+  def reads(index: Int): Reads[ActiveBorderTransportMeansType02] = (
     Reads.pure[BigInt](index) and
-      (__ \ "customsOfficeActiveBorder" \ "id").read[String] and
+      (__ \ "customsOfficeActiveBorder" \ "id").readNullable[String] and
       identificationReads and
-      (__ \ "identificationNumber").read[String] and
-      (__ \ "nationality" \ "code").read[String] and
+      (__ \ "identificationNumber").readNullable[String] and
+      (__ \ "nationality" \ "code").readNullable[String] and
       (__ \ "conveyanceReferenceNumber").readNullable[String]
-  )(ActiveBorderTransportMeansType03.apply)
+  )(ActiveBorderTransportMeansType02.apply)
 }
 
-object placeOfLoadingType {
+object placeOfLoadingType03 {
 
-  implicit val reads: Reads[PlaceOfLoadingType] = (
+  implicit val reads: Reads[PlaceOfLoadingType03] = (
     (__ \ "unLocode").readNullable[String] and
       (__ \ "additionalInformation" \ "country" \ "code").readNullable[String] and
       (__ \ "additionalInformation" \ "location").readNullable[String]
-  )(PlaceOfLoadingType.apply)
+  )(PlaceOfLoadingType03.apply)
 }
 
-object placeOfUnloadingType {
+object placeOfUnloadingType01 {
 
-  implicit val reads: Reads[PlaceOfUnloadingType] = (
+  implicit val reads: Reads[PlaceOfUnloadingType01] = (
     (__ \ "unLocode").readNullable[String] and
       (__ \ "additionalInformation" \ "country" \ "code").readNullable[String] and
       (__ \ "additionalInformation" \ "location").readNullable[String]
-  )(PlaceOfUnloadingType.apply)
+  )(PlaceOfUnloadingType01.apply)
 }
 
 object transportChargesType {
 
-  implicit val reads: Reads[Option[TransportChargesType01]] =
+  val itemReads: Reads[Option[TransportChargesType]] =
+    (__ \ "methodOfPayment" \ "method").readNullable[String].map(_.map(TransportChargesType.apply))
+
+  val consignmentReads: Reads[Option[TransportChargesType]] =
     (equipmentsAndChargesPath \ "paymentMethod" \ "method")
       .readNullable[String]
-      .map(_.map(TransportChargesType01.apply))
+      .map(_.map(TransportChargesType.apply))
 }
 
 object houseConsignmentType10 {
 
-  def reads(goodsItemNumberAcc: Int = 0): Reads[HouseConsignmentType13] =
+  def reads(goodsItemNumberAcc: Int = 0): Reads[HouseConsignmentType10] =
     for {
       documents <- documentsPath.readWithDefault[JsArray](JsArray()).map(_.value.toSeq)
-      consignmentItemReads = (goodsItemNumber: Int) => consignmentItemType10.reads(goodsItemNumber, goodsItemNumberAcc + goodsItemNumber, documents)
-      consignmentItems <- itemsPath.readArray[ConsignmentItemType10](consignmentItemReads)
-    } yield HouseConsignmentType13(
+      consignmentItemReads = (goodsItemNumber: Int) => consignmentItemType09.reads(goodsItemNumber, goodsItemNumberAcc + goodsItemNumber, documents)
+      consignmentItems <- itemsPath.readArray[ConsignmentItemType09](consignmentItemReads)
+    } yield HouseConsignmentType10(
       sequenceNumber = 1,
-      grossMass = consignmentItems.map(_.Commodity.GoodsMeasure.grossMass).sum,
+      grossMass = consignmentItems.flatMap(_.Commodity.GoodsMeasure.flatMap(_.grossMass)).sum,
       ConsignmentItem = consignmentItems
     )
 
-  implicit class RichHouseConsignmentType13(value: HouseConsignmentType13) {
+  implicit class RichHouseConsignmentType10(value: HouseConsignmentType10) {
 
-    def updateItems(f: ConsignmentItemType10 => ConsignmentItemType10): HouseConsignmentType13 =
+    def updateItems(f: ConsignmentItemType09 => ConsignmentItemType09): HouseConsignmentType10 =
       value.copy(ConsignmentItem = value.ConsignmentItem.map(f))
   }
 }
 
-object consignmentItemType10 {
+object consignmentItemType09 {
 
   /** @param goodsItemNumber
     *   should be unique to the house consignment (essentially the sequence number of an item within a house consignment)
@@ -426,7 +448,7 @@ object consignmentItemType10 {
     *   documents as provided in the documents journey
     * @return
     */
-  def reads(goodsItemNumber: Int, declarationGoodsItemNumber: Int, documents: Seq[JsValue]): Reads[ConsignmentItemType10] =
+  def reads(goodsItemNumber: Int, declarationGoodsItemNumber: Int, documents: Seq[JsValue]): Reads[ConsignmentItemType09] =
     (__ \ "documents").readWithDefault[JsArray](JsArray()).map(_.value.toSeq).flatMap {
       itemDocuments =>
         def readDocuments[T](`type`: String)(implicit rds: Int => Reads[T]): Reads[Seq[T]] =
@@ -444,36 +466,39 @@ object consignmentItemType10 {
             (__ \ "countryOfDispatch" \ "code").readNullable[String] and
             (__ \ "countryOfDestination" \ "code").readNullable[String] and
             (__ \ "uniqueConsignmentReference").readNullable[String] and
-            (__ \ "supplyChainActors").readArray[AdditionalSupplyChainActorType01](additionalSupplyChainActorType01.reads) and
-            __.read[CommodityType10](commodityType10.reads) and
-            (__ \ "packages").readArray[PackagingType01](packagingType01.reads) and
+            itemConsigneePath.readNullable[ConsigneeType02](consigneeType02.reads) and
+            (__ \ "supplyChainActors").readArray[AdditionalSupplyChainActorType](additionalSupplyChainActorType.reads) and
+            __.read[CommodityType07](commodityType07.reads) and
+            (__ \ "packages").readArray[PackagingType03](packagingType03.reads) and
             readDocuments[PreviousDocumentType08]("Previous")(previousDocumentType08.reads(goodsItemNumber, _)) and
-            readDocuments[SupportingDocumentType03]("Support")(supportingDocumentType03.reads) and
-            (__ \ "additionalReferences").readArray[AdditionalReferenceType01](additionalReferenceType01.reads) and
-            (__ \ "additionalInformationList").readArray[AdditionalInformationType02](additionalInformationType02.itemReads)
-        )(ConsignmentItemType10.apply)
+            readDocuments[SupportingDocumentType05]("Support")(supportingDocumentType05.reads) and
+            readDocuments[TransportDocumentType04]("Transport")(transportDocumentType04.reads) and
+            (__ \ "additionalReferences").readArray[AdditionalReferenceType04](additionalReferenceType04.reads) and
+            (__ \ "additionalInformationList").readArray[AdditionalInformationType03](additionalInformationType03.itemReads) and
+            __.read[Option[TransportChargesType]](transportChargesType.itemReads)
+        )(ConsignmentItemType09.apply)
     }
 }
 
-object commodityType10 {
+object commodityType07 {
 
-  implicit val reads: Reads[CommodityType10] = (
+  implicit val reads: Reads[CommodityType07] = (
     (__ \ "description").read[String] and
       (__ \ "customsUnionAndStatisticsCode").readNullable[String] and
-      __.read[Option[CommodityCodeType04]](commodityCodeType04.reads) and
+      __.read[Option[CommodityCodeType02]](commodityCodeType02.reads) and
       (__ \ "dangerousGoodsList").readArray[DangerousGoodsType01](dangerousGoodsType01.reads) and
-      __.read[GoodsMeasureType04](goodsMeasureType04.reads)
-  )(CommodityType10.apply)
+      __.readNullable[GoodsMeasureType02](goodsMeasureType02.reads)
+  )(CommodityType07.apply)
 }
 
-object commodityCodeType04 {
+object commodityCodeType02 {
 
-  implicit val reads: Reads[Option[CommodityCodeType04]] = (
+  implicit val reads: Reads[Option[CommodityCodeType02]] = (
     (__ \ "commodityCode").readNullable[String] and
       (__ \ "combinedNomenclatureCode").readNullable[String]
   ).tupled.map {
     case (Some(harmonizedSystemSubHeadingCode), combinedNomenclatureCode) =>
-      Some(CommodityCodeType04(harmonizedSystemSubHeadingCode, combinedNomenclatureCode))
+      Some(CommodityCodeType02(harmonizedSystemSubHeadingCode, combinedNomenclatureCode))
     case _ => None
   }
 }
@@ -486,23 +511,23 @@ object dangerousGoodsType01 {
   )(DangerousGoodsType01.apply)
 }
 
-object goodsMeasureType04 {
+object goodsMeasureType02 {
 
-  implicit val reads: Reads[GoodsMeasureType04] = (
-    (__ \ "grossWeight").read[BigDecimal] and
+  implicit val reads: Reads[GoodsMeasureType02] = (
+    (__ \ "grossWeight").readNullable[BigDecimal] and
       (__ \ "netWeight").readNullable[BigDecimal] and
       (__ \ "supplementaryUnits").readNullable[BigDecimal]
-  )(GoodsMeasureType04.apply)
+  )(GoodsMeasureType02.apply)
 }
 
-object packagingType01 {
+object packagingType03 {
 
-  def reads(index: Int): Reads[PackagingType01] = (
+  def reads(index: Int): Reads[PackagingType03] = (
     Reads.pure[BigInt](index) and
       (__ \ "packageType" \ "code").read[String] and
       (__ \ "numberOfPackages").readNullable[BigInt] and
       (__ \ "shippingMark").readNullable[String]
-  )(PackagingType01.apply)
+  )(PackagingType03.apply)
 }
 
 object documentType {
@@ -562,65 +587,65 @@ object previousDocumentType08 {
   )(PreviousDocumentType08.apply)
 }
 
-object previousDocumentType05 {
+object previousDocumentType09 {
 
-  def reads(index: Int): Reads[PreviousDocumentType05] = (
+  def reads(index: Int): Reads[PreviousDocumentType09] = (
     Reads.pure[BigInt](index) and
       documentType.codeReads and
       (__ \ "details" \ "documentReferenceNumber").read[String] and
       (__ \ "details" \ "additionalInformation").readNullable[String]
-  )(PreviousDocumentType05.apply)
+  )(PreviousDocumentType09.apply)
 }
 
-object additionalReferenceType02 {
+object additionalReferenceType05 {
 
-  def reads(index: Int): Reads[AdditionalReferenceType02] = (
+  def reads(index: Int): Reads[AdditionalReferenceType05] = (
     Reads.pure[BigInt](index) and
       (__ \ "type" \ "documentType").read[String] and
       (__ \ "additionalReferenceNumber").readNullable[String]
-  )(AdditionalReferenceType02.apply)
+  )(AdditionalReferenceType05.apply)
 }
 
-object supportingDocumentType03 {
+object supportingDocumentType05 {
 
-  def reads(index: Int): Reads[SupportingDocumentType03] = (
+  def reads(index: Int): Reads[SupportingDocumentType05] = (
     Reads.pure[BigInt](index) and
       (__ \ "type" \ "code").read[String] and
       (__ \ "details" \ "documentReferenceNumber").read[String] and
       (__ \ "details" \ "lineItemNumber").readNullable[BigInt] and
       (__ \ "details" \ "additionalInformation").readNullable[String]
-  )(SupportingDocumentType03.apply)
+  )(SupportingDocumentType05.apply)
 }
 
-object transportDocumentType01 {
+object transportDocumentType04 {
 
-  def reads(index: Int): Reads[TransportDocumentType01] = (
+  def reads(index: Int): Reads[TransportDocumentType04] = (
     Reads.pure[BigInt](index) and
       (__ \ "type" \ "code").read[String] and
       (__ \ "details" \ "documentReferenceNumber").read[String]
-  )(TransportDocumentType01.apply)
+  )(TransportDocumentType04.apply)
 }
 
-object additionalReferenceType01 {
+object additionalReferenceType04 {
 
-  def reads(index: Int): Reads[AdditionalReferenceType01] = (
+  def reads(index: Int): Reads[AdditionalReferenceType04] = (
     Reads.pure[BigInt](index) and
       (__ \ "additionalReference" \ "documentType").read[String] and
       (__ \ "additionalReferenceNumber").readNullable[String]
-  )(AdditionalReferenceType01.apply)
+  )(AdditionalReferenceType04.apply)
 }
 
-object additionalInformationType02 {
+object additionalInformationType03 {
 
-  def itemReads(index: Int): Reads[AdditionalInformationType02] = (
+  def itemReads(index: Int): Reads[AdditionalInformationType03] = (
     Reads.pure[BigInt](index) and
       (__ \ "additionalInformationType" \ "code").read[String] and
       (__ \ "additionalInformation").readNullable[String]
-  )(AdditionalInformationType02.apply)
+  )(AdditionalInformationType03.apply)
 
-  def consignmentReads(index: Int): Reads[AdditionalInformationType02] = (
+  def consignmentReads(index: Int): Reads[AdditionalInformationType03] = (
     Reads.pure[BigInt](index) and
       (__ \ "type" \ "code").read[String] and
       (__ \ "text").readNullable[String]
-  )(AdditionalInformationType02.apply)
+  )(AdditionalInformationType03.apply)
 }

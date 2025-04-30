@@ -23,29 +23,29 @@ import play.api.libs.json.{__, JsArray, JsObject, Reads}
 
 object CustomsOffices {
 
-  def transformOfficeOfDeparture(uA: UserAnswers): CustomsOfficeOfDepartureType05 = uA
+  def transformOfficeOfDeparture(uA: UserAnswers): CustomsOfficeOfDepartureType03 = uA
     .get[JsObject](preTaskListPath)
     .getOrElse(throw new Exception("Json did not contain pre-task-list answers"))
-    .as[CustomsOfficeOfDepartureType05](customsOfficeOfDepartureType05.reads)
+    .as[CustomsOfficeOfDepartureType03](customsOfficeOfDepartureType03.reads)
 
   def transformOfficeOfDestination(uA: UserAnswers): CustomsOfficeOfDestinationDeclaredType01 = uA
     .get[JsObject](routeDetailsPath \ "routing")
     .getOrElse(throw new Exception("Json did not contain pre-task-list answers"))
     .as[CustomsOfficeOfDestinationDeclaredType01](customsOfficeOfDestinationDeclaredType01.reads)
 
-  def transformOfficeOfTransit(uA: UserAnswers): Seq[CustomsOfficeOfTransitDeclaredType06] = uA
+  def transformOfficeOfTransit(uA: UserAnswers): Seq[CustomsOfficeOfTransitDeclaredType04] = uA
     .get[JsArray](routeDetailsPath \ "transit" \ "officesOfTransit")
-    .readValuesAs[CustomsOfficeOfTransitDeclaredType06](customsOfficeOfTransitDeclaredType06.reads)
+    .readValuesAs[CustomsOfficeOfTransitDeclaredType04](customsOfficeOfTransitDeclaredType04.reads)
 
   def transformOfficeOfExit(uA: UserAnswers): Seq[CustomsOfficeOfExitForTransitDeclaredType02] = uA
     .get[JsArray](routeDetailsPath \ "exit" \ "officesOfExit")
     .readValuesAs[CustomsOfficeOfExitForTransitDeclaredType02](customsOfficeOfExitForTransitDeclaredType02.reads)
 }
 
-object customsOfficeOfDepartureType05 {
+object customsOfficeOfDepartureType03 {
 
-  implicit val reads: Reads[CustomsOfficeOfDepartureType05] =
-    (__ \ "officeOfDeparture" \ "id").read[String].map(CustomsOfficeOfDepartureType05.apply)
+  implicit val reads: Reads[CustomsOfficeOfDepartureType03] =
+    (__ \ "officeOfDeparture" \ "id").read[String].map(CustomsOfficeOfDepartureType03.apply)
 }
 
 object customsOfficeOfDestinationDeclaredType01 {
@@ -54,13 +54,13 @@ object customsOfficeOfDestinationDeclaredType01 {
     (__ \ "officeOfDestination" \ "id").read[String].map(CustomsOfficeOfDestinationDeclaredType01.apply)
 }
 
-object customsOfficeOfTransitDeclaredType06 {
+object customsOfficeOfTransitDeclaredType04 {
 
-  def reads(index: Int): Reads[CustomsOfficeOfTransitDeclaredType06] = (
+  def reads(index: Int): Reads[CustomsOfficeOfTransitDeclaredType04] = (
     Reads.pure[BigInt](index) and
       (__ \ "officeOfTransit" \ "id").read[String] and
       (__ \ "arrivalDateTime").readNullable[String].map(stringToXMLGregorianCalendar)
-  )(CustomsOfficeOfTransitDeclaredType06.apply)
+  )(CustomsOfficeOfTransitDeclaredType04.apply)
 }
 
 object customsOfficeOfExitForTransitDeclaredType02 {
