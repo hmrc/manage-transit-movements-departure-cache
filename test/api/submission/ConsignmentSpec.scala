@@ -16,8 +16,8 @@
 
 package api.submission
 
-import api.submission.Consignment.RichConsignmentType23
-import api.submission.consignmentType23.{activeBorderTransportMeansReads, transportEquipmentReads}
+import api.submission.Consignment.RichConsignmentType20
+import api.submission.consignmentType20.{activeBorderTransportMeansReads, transportEquipmentReads}
 import base.{AppWithDefaultMockFixtures, SpecBase}
 import generated.*
 import generators.Generators
@@ -36,21 +36,21 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         val uA: UserAnswers = json.as[UserAnswers]
 
-        val converted: ConsignmentType23 = Consignment.transform(uA)
+        val converted: ConsignmentType20 = Consignment.transform(uA)
 
-        converted.countryOfDispatch shouldEqual Some("FR")
-        converted.countryOfDestination shouldEqual Some("IT")
-        converted.containerIndicator shouldEqual Some(Number1)
-        converted.inlandModeOfTransport shouldEqual Some("1")
-        converted.modeOfTransportAtTheBorder shouldEqual Some("1")
-        converted.grossMass shouldEqual 580.245
-        converted.referenceNumberUCR shouldEqual Some("ucr123")
+        converted.countryOfDispatch shouldBe Some("FR")
+        converted.countryOfDestination shouldBe Some("IT")
+        converted.containerIndicator shouldBe Some(Number1)
+        converted.inlandModeOfTransport shouldBe Some("1")
+        converted.modeOfTransportAtTheBorder shouldBe Some("1")
+        converted.grossMass shouldBe 580.245
+        converted.referenceNumberUCR shouldBe Some("ucr123")
 
-        converted.Carrier shouldEqual Some(
-          CarrierType06(
+        converted.Carrier shouldBe Some(
+          CarrierType04(
             identificationNumber = "carrier1",
             ContactPerson = Some(
-              ContactPersonType03(
+              ContactPersonType05(
                 name = "Carrier Contact",
                 phoneNumber = "+44 808 157 0192",
                 eMailAddress = None
@@ -59,12 +59,12 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           )
         )
 
-        converted.Consignor shouldEqual Some(
-          ConsignorType10(
+        converted.Consignor shouldBe Some(
+          ConsignorType07(
             identificationNumber = Some("consignor1"),
             name = Some("Mr Consignor"),
             Address = Some(
-              AddressType14(
+              AddressType17(
                 streetAndNumber = "21 Test Lane",
                 postcode = Some("NE1 1NE"),
                 city = "Newcastle upon Tyne",
@@ -72,7 +72,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             ),
             ContactPerson = Some(
-              ContactPersonType03(
+              ContactPersonType05(
                 name = "Consignor Contact",
                 phoneNumber = "+44 101 157 0192",
                 eMailAddress = None
@@ -81,12 +81,12 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           )
         )
 
-        converted.Consignee shouldEqual Some(
+        converted.Consignee shouldBe Some(
           ConsigneeType05(
             identificationNumber = Some("consignee1"),
             name = Some("Mr Consignee"),
             Address = Some(
-              AddressType14(
+              AddressType17(
                 streetAndNumber = "21 Test Rue",
                 postcode = Some("PA1 1PA"),
                 city = "Paris",
@@ -96,50 +96,50 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           )
         )
 
-        converted.AdditionalSupplyChainActor shouldEqual Seq(
-          AdditionalSupplyChainActorType01(
+        converted.AdditionalSupplyChainActor shouldBe Seq(
+          AdditionalSupplyChainActorType(
             sequenceNumber = 1,
             role = "CS",
             identificationNumber = "sca1"
           ),
-          AdditionalSupplyChainActorType01(
+          AdditionalSupplyChainActorType(
             sequenceNumber = 2,
             role = "FW",
             identificationNumber = "sca2"
           ),
-          AdditionalSupplyChainActorType01(
+          AdditionalSupplyChainActorType(
             sequenceNumber = 3,
             role = "MF",
             identificationNumber = "sca3"
           ),
-          AdditionalSupplyChainActorType01(
+          AdditionalSupplyChainActorType(
             sequenceNumber = 4,
             role = "WH",
             identificationNumber = "sca4"
           )
         )
 
-        converted.TransportEquipment shouldEqual Seq(
-          TransportEquipmentType03(
+        converted.TransportEquipment shouldBe Seq(
+          TransportEquipmentType06(
             sequenceNumber = 1,
             containerIdentificationNumber = Some("container id 1"),
             numberOfSeals = 2,
             Seal = Seq(
-              SealType01(
+              SealType05(
                 sequenceNumber = 1,
                 identifier = "seal 1"
               ),
-              SealType01(
+              SealType05(
                 sequenceNumber = 2,
                 identifier = "seal 2"
               )
             ),
             GoodsReference = Seq(
-              GoodsReferenceType01(
+              GoodsReferenceType02(
                 sequenceNumber = 1,
                 declarationGoodsItemNumber = 1
               ),
-              GoodsReferenceType01(
+              GoodsReferenceType02(
                 sequenceNumber = 2,
                 declarationGoodsItemNumber = 2
               )
@@ -147,8 +147,8 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           )
         )
 
-        converted.LocationOfGoods shouldEqual Some(
-          LocationOfGoodsType04(
+        converted.LocationOfGoods shouldBe Some(
+          LocationOfGoodsType05(
             typeOfLocation = "A",
             qualifierOfIdentification = "T",
             authorisationNumber = Some("authorisation number"),
@@ -161,9 +161,9 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 longitude = "lon"
               )
             ),
-            EconomicOperator = Some(EconomicOperatorType02(identificationNumber = "GB12345")),
+            EconomicOperator = Some(EconomicOperatorType03(identificationNumber = "GB12345")),
             Address = Some(
-              AddressType06(
+              AddressType14(
                 streetAndNumber = "21 Test Camino",
                 postcode = Some("ES1 1SE"),
                 city = "Madrid",
@@ -172,7 +172,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             ),
             PostcodeAddress = None,
             ContactPerson = Some(
-              ContactPersonType01(
+              ContactPersonType06(
                 name = "Location of goods Contact",
                 phoneNumber = "+44 202 157 0192",
                 eMailAddress = None
@@ -181,55 +181,55 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           )
         )
 
-        converted.DepartureTransportMeans shouldEqual Seq(
-          DepartureTransportMeansType01(
+        converted.DepartureTransportMeans shouldBe Seq(
+          DepartureTransportMeansType03(
             sequenceNumber = 1,
-            typeOfIdentification = "10",
-            identificationNumber = "means id number",
-            nationality = "FR"
+            typeOfIdentification = Some("10"),
+            identificationNumber = Some("means id number"),
+            nationality = Some("FR")
           )
         )
 
-        converted.CountryOfRoutingOfConsignment shouldEqual Seq(
-          CountryOfRoutingOfConsignmentType02(
+        converted.CountryOfRoutingOfConsignment shouldBe Seq(
+          CountryOfRoutingOfConsignmentType01(
             sequenceNumber = 1,
             country = "AD"
           ),
-          CountryOfRoutingOfConsignmentType02(
+          CountryOfRoutingOfConsignmentType01(
             sequenceNumber = 2,
             country = "AR"
           )
         )
 
-        converted.ActiveBorderTransportMeans shouldEqual Seq(
-          ActiveBorderTransportMeansType03(
+        converted.ActiveBorderTransportMeans shouldBe Seq(
+          ActiveBorderTransportMeansType02(
             sequenceNumber = 1,
-            customsOfficeAtBorderReferenceNumber = "IT018101",
-            typeOfIdentification = "11",
-            identificationNumber = "active id number",
-            nationality = "ES",
+            customsOfficeAtBorderReferenceNumber = Some("IT018101"),
+            typeOfIdentification = Some("11"),
+            identificationNumber = Some("active id number"),
+            nationality = Some("ES"),
             conveyanceReferenceNumber = Some("conveyance ref number")
           )
         )
 
-        converted.PlaceOfLoading shouldEqual Some(
-          PlaceOfLoadingType(
+        converted.PlaceOfLoading shouldBe Some(
+          PlaceOfLoadingType03(
             Some("AEFAT"),
             Some("Loading country"),
             Some("Loading location")
           )
         )
 
-        converted.PlaceOfUnloading shouldEqual Some(
-          PlaceOfUnloadingType(
+        converted.PlaceOfUnloading shouldBe Some(
+          PlaceOfUnloadingType01(
             Some("ADALV"),
             Some("Unloading country"),
             Some("Unloading location")
           )
         )
 
-        converted.PreviousDocument shouldEqual Seq(
-          PreviousDocumentType05(
+        converted.PreviousDocument shouldBe Seq(
+          PreviousDocumentType09(
             sequenceNumber = 1,
             typeValue = "IM",
             referenceNumber = "previous3",
@@ -237,8 +237,8 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           )
         )
 
-        converted.SupportingDocument shouldEqual Seq(
-          SupportingDocumentType03(
+        converted.SupportingDocument shouldBe Seq(
+          SupportingDocumentType05(
             sequenceNumber = 1,
             typeValue = "C673",
             referenceNumber = "support2",
@@ -247,48 +247,48 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           )
         )
 
-        converted.TransportDocument shouldEqual Seq(
-          TransportDocumentType01(
+        converted.TransportDocument shouldBe Seq(
+          TransportDocumentType04(
             sequenceNumber = 1,
             typeValue = "235",
             referenceNumber = "transport2"
           )
         )
 
-        converted.AdditionalReference shouldEqual Seq(
-          AdditionalReferenceType02(
+        converted.AdditionalReference shouldBe Seq(
+          AdditionalReferenceType05(
             sequenceNumber = 1,
             typeValue = "type123",
             referenceNumber = Some("arno1")
           ),
-          AdditionalReferenceType02(
+          AdditionalReferenceType05(
             sequenceNumber = 2,
             typeValue = "type321",
             referenceNumber = Some("1onra")
           )
         )
 
-        converted.AdditionalInformation shouldEqual Seq(
-          AdditionalInformationType02(
+        converted.AdditionalInformation shouldBe Seq(
+          AdditionalInformationType03(
             sequenceNumber = 1,
             code = "adinftype1",
             text = Some("orca")
           ),
-          AdditionalInformationType02(
+          AdditionalInformationType03(
             sequenceNumber = 2,
             code = "adinftype2",
             text = Some("acro")
           )
         )
 
-        converted.TransportCharges shouldEqual Some(
-          TransportChargesType01("A")
+        converted.TransportCharges shouldBe Some(
+          TransportChargesType("A")
         )
 
-        converted.HouseConsignment.size shouldEqual 1
+        converted.HouseConsignment.size shouldBe 1
         val ans = converted.HouseConsignment.head
 
-        val exp = HouseConsignmentType13(
+        val exp = HouseConsignmentType10(
           sequenceNumber = 1,
           countryOfDispatch = None,
           grossMass = 580.245,
@@ -304,40 +304,54 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           AdditionalInformation = Nil,
           TransportCharges = None,
           ConsignmentItem = Seq(
-            ConsignmentItemType10(
+            ConsignmentItemType09(
               goodsItemNumber = 1,
               declarationGoodsItemNumber = 1,
               declarationType = Some("T1"),
               countryOfDispatch = Some("GB"),
               countryOfDestination = Some("FR"),
               referenceNumberUCR = Some("UCR 1"),
+              Consignee = Some(
+                ConsigneeType02(
+                  identificationNumber = Some("GE00101001"),
+                  name = Some("Mr. Consignee"),
+                  Address = Some(
+                    AddressType12(
+                      streetAndNumber = "1 Merry Lane",
+                      postcode = Some("CA1 9AA"),
+                      city = "Godrics Hollow",
+                      country = "GB"
+                    )
+                  )
+                )
+              ),
               AdditionalSupplyChainActor = Seq(
-                AdditionalSupplyChainActorType01(
+                AdditionalSupplyChainActorType(
                   sequenceNumber = 1,
                   role = "CS",
                   identificationNumber = "itemSCA1"
                 ),
-                AdditionalSupplyChainActorType01(
+                AdditionalSupplyChainActorType(
                   sequenceNumber = 2,
                   role = "FW",
                   identificationNumber = "itemSCA2"
                 ),
-                AdditionalSupplyChainActorType01(
+                AdditionalSupplyChainActorType(
                   sequenceNumber = 3,
                   role = "MF",
                   identificationNumber = "itemSCA3"
                 ),
-                AdditionalSupplyChainActorType01(
+                AdditionalSupplyChainActorType(
                   sequenceNumber = 4,
                   role = "WH",
                   identificationNumber = "itemSCA4"
                 )
               ),
-              Commodity = CommodityType10(
+              Commodity = CommodityType07(
                 descriptionOfGoods = "Description 1",
                 cusCode = Some("CUS code 1"),
                 CommodityCode = Some(
-                  CommodityCodeType04(
+                  CommodityCodeType02(
                     harmonizedSystemSubHeadingCode = "commodity code 1",
                     combinedNomenclatureCode = Some("CN code 1")
                   )
@@ -352,26 +366,28 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                     UNNumber = "UN number 1_2"
                   )
                 ),
-                GoodsMeasure = GoodsMeasureType04(
-                  grossMass = BigDecimal(123.456),
-                  netMass = Some(BigDecimal(1234)),
-                  supplementaryUnits = Some(BigDecimal(12345))
+                GoodsMeasure = Some(
+                  GoodsMeasureType02(
+                    grossMass = Some(BigDecimal(123.456)),
+                    netMass = Some(BigDecimal(1234)),
+                    supplementaryUnits = Some(BigDecimal(12345))
+                  )
                 )
               ),
               Packaging = Seq(
-                PackagingType01(
+                PackagingType03(
                   sequenceNumber = 1,
                   typeOfPackages = "VL",
                   numberOfPackages = None,
                   shippingMarks = None
                 ),
-                PackagingType01(
+                PackagingType03(
                   sequenceNumber = 2,
                   typeOfPackages = "NE",
                   numberOfPackages = Some(5),
                   shippingMarks = None
                 ),
-                PackagingType01(
+                PackagingType03(
                   sequenceNumber = 3,
                   typeOfPackages = "TR",
                   numberOfPackages = None,
@@ -403,7 +419,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 )
               ),
               SupportingDocument = Seq(
-                SupportingDocumentType03(
+                SupportingDocumentType05(
                   sequenceNumber = 1,
                   typeValue = "C673",
                   referenceNumber = "support1",
@@ -411,44 +427,53 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                   complementOfInformation = Some("complement of information support1")
                 )
               ),
+              TransportDocument = Seq(
+                TransportDocumentType04(
+                  sequenceNumber = 1,
+                  typeValue = "235",
+                  referenceNumber = "transport1"
+                )
+              ),
               AdditionalReference = Seq(
-                AdditionalReferenceType01(
+                AdditionalReferenceType04(
                   sequenceNumber = 1,
                   typeValue = "ar1",
                   referenceNumber = Some("arno1")
                 ),
-                AdditionalReferenceType01(
+                AdditionalReferenceType04(
                   sequenceNumber = 2,
                   typeValue = "ar2",
                   referenceNumber = None
                 )
               ),
               AdditionalInformation = Seq(
-                AdditionalInformationType02(
+                AdditionalInformationType03(
                   sequenceNumber = 1,
                   code = "aiCode1",
                   text = Some("ai1")
                 ),
-                AdditionalInformationType02(
+                AdditionalInformationType03(
                   sequenceNumber = 2,
                   code = "aiCode2",
                   text = Some("ai2")
                 )
-              )
+              ),
+              TransportCharges = Some(TransportChargesType("A"))
             ),
-            ConsignmentItemType10(
+            ConsignmentItemType09(
               goodsItemNumber = 2,
               declarationGoodsItemNumber = 2,
               declarationType = Some("T2"),
               countryOfDispatch = Some("DE"),
               countryOfDestination = Some("ES"),
               referenceNumberUCR = Some("UCR 2"),
+              Consignee = None,
               AdditionalSupplyChainActor = Nil,
-              Commodity = CommodityType10(
+              Commodity = CommodityType07(
                 descriptionOfGoods = "Description 2",
                 cusCode = Some("CUS code 2"),
                 CommodityCode = Some(
-                  CommodityCodeType04(
+                  CommodityCodeType02(
                     harmonizedSystemSubHeadingCode = "commodity code 2",
                     combinedNomenclatureCode = Some("CN code 2")
                   )
@@ -463,34 +488,38 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                     UNNumber = "UN number 2_2"
                   )
                 ),
-                GoodsMeasure = GoodsMeasureType04(
-                  grossMass = BigDecimal(456.789),
-                  netMass = None,
-                  supplementaryUnits = None
+                GoodsMeasure = Some(
+                  GoodsMeasureType02(
+                    grossMass = Some(BigDecimal(456.789)),
+                    netMass = None,
+                    supplementaryUnits = None
+                  )
                 )
               ),
               Packaging = Nil,
               PreviousDocument = Nil,
               SupportingDocument = Nil,
+              TransportDocument = Nil,
               AdditionalReference = Seq(
-                AdditionalReferenceType01(
+                AdditionalReferenceType04(
                   sequenceNumber = 1,
                   typeValue = "ar1",
                   referenceNumber = Some("arno1")
                 )
               ),
               AdditionalInformation = Seq(
-                AdditionalInformationType02(
+                AdditionalInformationType03(
                   sequenceNumber = 1,
                   code = "aiCode1",
                   text = Some("ai1")
                 )
-              )
+              ),
+              TransportCharges = Some(TransportChargesType("A"))
             )
           )
         )
 
-        ans shouldEqual exp
+        ans shouldBe exp
       }
 
       "convert to API format without documents" in {
@@ -978,21 +1007,21 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         val uA: UserAnswers = json.as[UserAnswers]
 
-        val converted: ConsignmentType23 = Consignment.transform(uA)
+        val converted: ConsignmentType20 = Consignment.transform(uA)
 
-        converted.countryOfDispatch shouldEqual Some("FR")
-        converted.countryOfDestination shouldEqual Some("IT")
-        converted.containerIndicator shouldEqual Some(Number1)
-        converted.inlandModeOfTransport shouldEqual Some("1")
-        converted.modeOfTransportAtTheBorder shouldEqual Some("1")
-        converted.grossMass shouldEqual 580.245
-        converted.referenceNumberUCR shouldEqual Some("ucr123")
+        converted.countryOfDispatch shouldBe Some("FR")
+        converted.countryOfDestination shouldBe Some("IT")
+        converted.containerIndicator shouldBe Some(Number1)
+        converted.inlandModeOfTransport shouldBe Some("1")
+        converted.modeOfTransportAtTheBorder shouldBe Some("1")
+        converted.grossMass shouldBe 580.245
+        converted.referenceNumberUCR shouldBe Some("ucr123")
 
-        converted.Carrier shouldEqual Some(
-          CarrierType06(
+        converted.Carrier shouldBe Some(
+          CarrierType04(
             identificationNumber = "carrier1",
             ContactPerson = Some(
-              ContactPersonType03(
+              ContactPersonType05(
                 name = "Carrier Contact",
                 phoneNumber = "+44 808 157 0192",
                 eMailAddress = None
@@ -1001,12 +1030,12 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           )
         )
 
-        converted.Consignor shouldEqual Some(
-          ConsignorType10(
+        converted.Consignor shouldBe Some(
+          ConsignorType07(
             identificationNumber = Some("consignor1"),
             name = Some("Mr Consignor"),
             Address = Some(
-              AddressType14(
+              AddressType17(
                 streetAndNumber = "21 Test Lane",
                 postcode = Some("NE1 1NE"),
                 city = "Newcastle upon Tyne",
@@ -1014,7 +1043,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               )
             ),
             ContactPerson = Some(
-              ContactPersonType03(
+              ContactPersonType05(
                 name = "Consignor Contact",
                 phoneNumber = "+44 101 157 0192",
                 eMailAddress = None
@@ -1023,12 +1052,12 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           )
         )
 
-        converted.Consignee shouldEqual Some(
+        converted.Consignee shouldBe Some(
           ConsigneeType05(
             identificationNumber = Some("consignee1"),
             name = Some("Mr Consignee"),
             Address = Some(
-              AddressType14(
+              AddressType17(
                 streetAndNumber = "21 Test Rue",
                 postcode = Some("PA1 1PA"),
                 city = "Paris",
@@ -1038,50 +1067,50 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           )
         )
 
-        converted.AdditionalSupplyChainActor shouldEqual Seq(
-          AdditionalSupplyChainActorType01(
+        converted.AdditionalSupplyChainActor shouldBe Seq(
+          AdditionalSupplyChainActorType(
             sequenceNumber = 1,
             role = "CS",
             identificationNumber = "sca1"
           ),
-          AdditionalSupplyChainActorType01(
+          AdditionalSupplyChainActorType(
             sequenceNumber = 2,
             role = "FW",
             identificationNumber = "sca2"
           ),
-          AdditionalSupplyChainActorType01(
+          AdditionalSupplyChainActorType(
             sequenceNumber = 3,
             role = "MF",
             identificationNumber = "sca3"
           ),
-          AdditionalSupplyChainActorType01(
+          AdditionalSupplyChainActorType(
             sequenceNumber = 4,
             role = "WH",
             identificationNumber = "sca4"
           )
         )
 
-        converted.TransportEquipment shouldEqual Seq(
-          TransportEquipmentType03(
+        converted.TransportEquipment shouldBe Seq(
+          TransportEquipmentType06(
             sequenceNumber = 1,
             containerIdentificationNumber = Some("container id 1"),
             numberOfSeals = 2,
             Seal = Seq(
-              SealType01(
+              SealType05(
                 sequenceNumber = 1,
                 identifier = "seal 1"
               ),
-              SealType01(
+              SealType05(
                 sequenceNumber = 2,
                 identifier = "seal 2"
               )
             ),
             GoodsReference = Seq(
-              GoodsReferenceType01(
+              GoodsReferenceType02(
                 sequenceNumber = 1,
                 declarationGoodsItemNumber = 1
               ),
-              GoodsReferenceType01(
+              GoodsReferenceType02(
                 sequenceNumber = 2,
                 declarationGoodsItemNumber = 2
               )
@@ -1089,8 +1118,8 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           )
         )
 
-        converted.LocationOfGoods shouldEqual Some(
-          LocationOfGoodsType04(
+        converted.LocationOfGoods shouldBe Some(
+          LocationOfGoodsType05(
             typeOfLocation = "A",
             qualifierOfIdentification = "T",
             authorisationNumber = Some("authorisation number"),
@@ -1103,9 +1132,9 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                 longitude = "lon"
               )
             ),
-            EconomicOperator = Some(EconomicOperatorType02(identificationNumber = "GB12345")),
+            EconomicOperator = Some(EconomicOperatorType03(identificationNumber = "GB12345")),
             Address = Some(
-              AddressType06(
+              AddressType14(
                 streetAndNumber = "21 Test Camino",
                 postcode = Some("ES1 1SE"),
                 city = "Madrid",
@@ -1114,7 +1143,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             ),
             PostcodeAddress = None,
             ContactPerson = Some(
-              ContactPersonType01(
+              ContactPersonType06(
                 name = "Location of goods Contact",
                 phoneNumber = "+44 202 157 0192",
                 eMailAddress = None
@@ -1123,93 +1152,93 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           )
         )
 
-        converted.DepartureTransportMeans shouldEqual Seq(
-          DepartureTransportMeansType01(
+        converted.DepartureTransportMeans shouldBe Seq(
+          DepartureTransportMeansType03(
             sequenceNumber = 1,
-            typeOfIdentification = "10",
-            identificationNumber = "means id number",
-            nationality = "FR"
+            typeOfIdentification = Some("10"),
+            identificationNumber = Some("means id number"),
+            nationality = Some("FR")
           )
         )
 
-        converted.CountryOfRoutingOfConsignment shouldEqual Seq(
-          CountryOfRoutingOfConsignmentType02(
+        converted.CountryOfRoutingOfConsignment shouldBe Seq(
+          CountryOfRoutingOfConsignmentType01(
             sequenceNumber = 1,
             country = "AD"
           ),
-          CountryOfRoutingOfConsignmentType02(
+          CountryOfRoutingOfConsignmentType01(
             sequenceNumber = 2,
             country = "AR"
           )
         )
 
-        converted.ActiveBorderTransportMeans shouldEqual Seq(
-          ActiveBorderTransportMeansType03(
+        converted.ActiveBorderTransportMeans shouldBe Seq(
+          ActiveBorderTransportMeansType02(
             sequenceNumber = 1,
-            customsOfficeAtBorderReferenceNumber = "IT018101",
-            typeOfIdentification = "11",
-            identificationNumber = "active id number",
-            nationality = "ES",
+            customsOfficeAtBorderReferenceNumber = Some("IT018101"),
+            typeOfIdentification = Some("11"),
+            identificationNumber = Some("active id number"),
+            nationality = Some("ES"),
             conveyanceReferenceNumber = Some("conveyance ref number")
           )
         )
 
-        converted.PlaceOfLoading shouldEqual Some(
-          PlaceOfLoadingType(
+        converted.PlaceOfLoading shouldBe Some(
+          PlaceOfLoadingType03(
             Some("AEFAT"),
             Some("Loading country"),
             Some("Loading location")
           )
         )
 
-        converted.PlaceOfUnloading shouldEqual Some(
-          PlaceOfUnloadingType(
+        converted.PlaceOfUnloading shouldBe Some(
+          PlaceOfUnloadingType01(
             Some("ADALV"),
             Some("Unloading country"),
             Some("Unloading location")
           )
         )
 
-        converted.PreviousDocument shouldEqual Seq.empty
+        converted.PreviousDocument shouldBe Seq.empty
 
-        converted.SupportingDocument shouldEqual Seq.empty
+        converted.SupportingDocument shouldBe Seq.empty
 
-        converted.TransportDocument shouldEqual Seq.empty
+        converted.TransportDocument shouldBe Seq.empty
 
-        converted.AdditionalReference shouldEqual Seq(
-          AdditionalReferenceType02(
+        converted.AdditionalReference shouldBe Seq(
+          AdditionalReferenceType05(
             sequenceNumber = 1,
             typeValue = "type123",
             referenceNumber = Some("ARNO1")
           ),
-          AdditionalReferenceType02(
+          AdditionalReferenceType05(
             sequenceNumber = 2,
             typeValue = "type321",
             referenceNumber = Some("1ONRA")
           )
         )
 
-        converted.AdditionalInformation shouldEqual Seq(
-          AdditionalInformationType02(
+        converted.AdditionalInformation shouldBe Seq(
+          AdditionalInformationType03(
             sequenceNumber = 1,
             code = "ADDINFTYPE1",
             text = Some("ORCA")
           ),
-          AdditionalInformationType02(
+          AdditionalInformationType03(
             sequenceNumber = 2,
             code = "ADDINFTYPE2",
             text = Some("ACRO")
           )
         )
 
-        converted.TransportCharges shouldEqual Some(
-          TransportChargesType01("A")
+        converted.TransportCharges shouldBe Some(
+          TransportChargesType("A")
         )
 
-        converted.HouseConsignment.size shouldEqual 1
+        converted.HouseConsignment.size shouldBe 1
         val output = converted.HouseConsignment.head
 
-        val expected = HouseConsignmentType13(
+        val expected = HouseConsignmentType10(
           sequenceNumber = 1,
           countryOfDispatch = None,
           grossMass = 580.245,
@@ -1225,40 +1254,54 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
           AdditionalInformation = Nil,
           TransportCharges = None,
           ConsignmentItem = Seq(
-            ConsignmentItemType10(
+            ConsignmentItemType09(
               goodsItemNumber = 1,
               declarationGoodsItemNumber = 1,
               declarationType = Some("T1"),
               countryOfDispatch = Some("GB"),
               countryOfDestination = Some("FR"),
               referenceNumberUCR = Some("UCR 1"),
+              Consignee = Some(
+                ConsigneeType02(
+                  identificationNumber = Some("GE00101001"),
+                  name = Some("Mr. Consignee"),
+                  Address = Some(
+                    AddressType12(
+                      streetAndNumber = "1 Merry Lane",
+                      postcode = Some("CA1 9AA"),
+                      city = "Godrics Hollow",
+                      country = "GB"
+                    )
+                  )
+                )
+              ),
               AdditionalSupplyChainActor = Seq(
-                AdditionalSupplyChainActorType01(
+                AdditionalSupplyChainActorType(
                   sequenceNumber = 1,
                   role = "CS",
                   identificationNumber = "itemSCA1"
                 ),
-                AdditionalSupplyChainActorType01(
+                AdditionalSupplyChainActorType(
                   sequenceNumber = 2,
                   role = "FW",
                   identificationNumber = "itemSCA2"
                 ),
-                AdditionalSupplyChainActorType01(
+                AdditionalSupplyChainActorType(
                   sequenceNumber = 3,
                   role = "MF",
                   identificationNumber = "itemSCA3"
                 ),
-                AdditionalSupplyChainActorType01(
+                AdditionalSupplyChainActorType(
                   sequenceNumber = 4,
                   role = "WH",
                   identificationNumber = "itemSCA4"
                 )
               ),
-              Commodity = CommodityType10(
+              Commodity = CommodityType07(
                 descriptionOfGoods = "Description 1",
                 cusCode = Some("CUS code 1"),
                 CommodityCode = Some(
-                  CommodityCodeType04(
+                  CommodityCodeType02(
                     harmonizedSystemSubHeadingCode = "commodity code 1",
                     combinedNomenclatureCode = Some("CN code 1")
                   )
@@ -1273,26 +1316,28 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                     UNNumber = "UN number 1_2"
                   )
                 ),
-                GoodsMeasure = GoodsMeasureType04(
-                  grossMass = BigDecimal(123.456),
-                  netMass = Some(BigDecimal(1234)),
-                  supplementaryUnits = Some(BigDecimal(12345))
+                GoodsMeasure = Some(
+                  GoodsMeasureType02(
+                    grossMass = Some(BigDecimal(123.456)),
+                    netMass = Some(BigDecimal(1234)),
+                    supplementaryUnits = Some(BigDecimal(12345))
+                  )
                 )
               ),
               Packaging = Seq(
-                PackagingType01(
+                PackagingType03(
                   sequenceNumber = 1,
                   typeOfPackages = "VL",
                   numberOfPackages = None,
                   shippingMarks = None
                 ),
-                PackagingType01(
+                PackagingType03(
                   sequenceNumber = 2,
                   typeOfPackages = "NE",
                   numberOfPackages = Some(5),
                   shippingMarks = None
                 ),
-                PackagingType01(
+                PackagingType03(
                   sequenceNumber = 3,
                   typeOfPackages = "TR",
                   numberOfPackages = None,
@@ -1301,44 +1346,47 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               ),
               PreviousDocument = Seq.empty,
               SupportingDocument = Seq.empty,
+              TransportDocument = Seq.empty,
               AdditionalReference = Seq(
-                AdditionalReferenceType01(
+                AdditionalReferenceType04(
                   sequenceNumber = 1,
                   typeValue = "ar1",
                   referenceNumber = Some("arno1")
                 ),
-                AdditionalReferenceType01(
+                AdditionalReferenceType04(
                   sequenceNumber = 2,
                   typeValue = "ar2",
                   referenceNumber = None
                 )
               ),
               AdditionalInformation = Seq(
-                AdditionalInformationType02(
+                AdditionalInformationType03(
                   sequenceNumber = 1,
                   code = "aiCode1",
                   text = Some("ai1")
                 ),
-                AdditionalInformationType02(
+                AdditionalInformationType03(
                   sequenceNumber = 2,
                   code = "aiCode2",
                   text = Some("ai2")
                 )
-              )
+              ),
+              TransportCharges = Some(TransportChargesType("A"))
             ),
-            ConsignmentItemType10(
+            ConsignmentItemType09(
               goodsItemNumber = 2,
               declarationGoodsItemNumber = 2,
               declarationType = Some("T2"),
               countryOfDispatch = Some("DE"),
               countryOfDestination = Some("ES"),
               referenceNumberUCR = Some("UCR 2"),
+              Consignee = None,
               AdditionalSupplyChainActor = Nil,
-              Commodity = CommodityType10(
+              Commodity = CommodityType07(
                 descriptionOfGoods = "Description 2",
                 cusCode = Some("CUS code 2"),
                 CommodityCode = Some(
-                  CommodityCodeType04(
+                  CommodityCodeType02(
                     harmonizedSystemSubHeadingCode = "commodity code 2",
                     combinedNomenclatureCode = Some("CN code 2")
                   )
@@ -1353,34 +1401,38 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
                     UNNumber = "UN number 2_2"
                   )
                 ),
-                GoodsMeasure = GoodsMeasureType04(
-                  grossMass = BigDecimal(456.789),
-                  netMass = None,
-                  supplementaryUnits = None
+                GoodsMeasure = Some(
+                  GoodsMeasureType02(
+                    grossMass = Some(BigDecimal(456.789)),
+                    netMass = None,
+                    supplementaryUnits = None
+                  )
                 )
               ),
               Packaging = Nil,
               PreviousDocument = Nil,
               SupportingDocument = Nil,
+              TransportDocument = Nil,
               AdditionalReference = Seq(
-                AdditionalReferenceType01(
+                AdditionalReferenceType04(
                   sequenceNumber = 1,
                   typeValue = "ar1",
                   referenceNumber = Some("arno1")
                 )
               ),
               AdditionalInformation = Seq(
-                AdditionalInformationType02(
+                AdditionalInformationType03(
                   sequenceNumber = 1,
                   code = "aiCode1",
                   text = Some("ai1")
                 )
-              )
+              ),
+              TransportCharges = Some(TransportChargesType("A"))
             )
           )
         )
 
-        output shouldEqual expected
+        output shouldBe expected
       }
     }
 
@@ -1389,32 +1441,26 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         "every item has the same UCR" must {
           "roll up UCR to consignment level and remove them from each item" in {
-            val consignment = ConsignmentType23(
+            val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
-                HouseConsignmentType13(
+                HouseConsignmentType10(
                   sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 1",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(1)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
                       ),
                       referenceNumberUCR = Some("UCR")
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 2",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(2)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
                       ),
                       referenceNumberUCR = Some("UCR")
                     )
@@ -1425,33 +1471,27 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
             val result = consignment.postProcess()
 
-            result shouldEqual ConsignmentType23(
+            result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
               referenceNumberUCR = Some("UCR"),
               HouseConsignment = Seq(
-                HouseConsignmentType13(
+                HouseConsignmentType10(
                   sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 1",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(1)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
                       ),
                       referenceNumberUCR = None
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 2",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(2)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
                       ),
                       referenceNumberUCR = None
                     )
@@ -1464,43 +1504,34 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         "some items have the same UCR" must {
           "not roll up UCR to consignment level" in {
-            val consignment = ConsignmentType23(
+            val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
-                HouseConsignmentType13(
+                HouseConsignmentType10(
                   sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 1",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(1)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
                       ),
                       referenceNumberUCR = Some("UCR")
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 2",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(2)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
                       ),
                       referenceNumberUCR = Some("UCR")
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 3,
                       declarationGoodsItemNumber = BigInt(3),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 3",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(3)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 3"
                       ),
                       referenceNumberUCR = None
                     )
@@ -1511,49 +1542,40 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
             val result = consignment.postProcess()
 
-            result shouldEqual consignment
+            result shouldBe consignment
           }
         }
 
         "no items have the same UCR" must {
           "not roll up UCR to consignment level" in {
-            val consignment = ConsignmentType23(
+            val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
-                HouseConsignmentType13(
+                HouseConsignmentType10(
                   sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 1",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(1)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
                       ),
                       referenceNumberUCR = Some("UCR1")
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 2",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(2)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
                       ),
                       referenceNumberUCR = Some("UCR2")
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 3,
                       declarationGoodsItemNumber = BigInt(3),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 3",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(3)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 3"
                       ),
                       referenceNumberUCR = Some("UCR3")
                     )
@@ -1564,7 +1586,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
             val result = consignment.postProcess()
 
-            result shouldEqual consignment
+            result shouldBe consignment
           }
         }
       }
@@ -1573,32 +1595,26 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         "every item has the same country of dispatch" must {
           "roll up country of dispatch to consignment level and remove them from each item" in {
-            val consignment = ConsignmentType23(
+            val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
-                HouseConsignmentType13(
+                HouseConsignmentType10(
                   sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 1",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(1)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
                       ),
                       countryOfDispatch = Some("GB")
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 2",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(2)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
                       ),
                       countryOfDispatch = Some("GB")
                     )
@@ -1609,33 +1625,27 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
             val result = consignment.postProcess()
 
-            result shouldEqual ConsignmentType23(
+            result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
               countryOfDispatch = Some("GB"),
               HouseConsignment = Seq(
-                HouseConsignmentType13(
+                HouseConsignmentType10(
                   sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 1",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(1)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
                       ),
                       countryOfDispatch = None
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 2",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(2)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
                       ),
                       countryOfDispatch = None
                     )
@@ -1648,43 +1658,34 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         "some items have the same country of dispatch" must {
           "not roll up country of dispatch to consignment level" in {
-            val consignment = ConsignmentType23(
+            val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
-                HouseConsignmentType13(
+                HouseConsignmentType10(
                   sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 1",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(1)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
                       ),
                       countryOfDispatch = Some("GB")
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 2",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(2)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
                       ),
                       countryOfDispatch = Some("GB")
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 3,
                       declarationGoodsItemNumber = BigInt(3),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 3",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(3)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 3"
                       ),
                       countryOfDispatch = None
                     )
@@ -1695,49 +1696,40 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
             val result = consignment.postProcess()
 
-            result shouldEqual consignment
+            result shouldBe consignment
           }
         }
 
         "no items have the same country of dispatch" must {
           "not roll up country of dispatch to consignment level" in {
-            val consignment = ConsignmentType23(
+            val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
-                HouseConsignmentType13(
+                HouseConsignmentType10(
                   sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 1",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(1)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
                       ),
                       countryOfDispatch = Some("GB")
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 2",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(2)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
                       ),
                       countryOfDispatch = Some("FR")
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 3,
                       declarationGoodsItemNumber = BigInt(3),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 3",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(3)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 3"
                       ),
                       countryOfDispatch = Some("ES")
                     )
@@ -1748,7 +1740,7 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
             val result = consignment.postProcess()
 
-            result shouldEqual consignment
+            result shouldBe consignment
           }
         }
       }
@@ -1757,32 +1749,26 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         "every item has the same country of destination" must {
           "roll up country of destination to consignment level and remove them from each item" in {
-            val consignment = ConsignmentType23(
+            val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
-                HouseConsignmentType13(
+                HouseConsignmentType10(
                   sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 1",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(1)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
                       ),
                       countryOfDestination = Some("GB")
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 2",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(2)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
                       ),
                       countryOfDestination = Some("GB")
                     )
@@ -1793,33 +1779,27 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
             val result = consignment.postProcess()
 
-            result shouldEqual ConsignmentType23(
+            result shouldBe ConsignmentType20(
               grossMass = BigDecimal(1),
               countryOfDestination = Some("GB"),
               HouseConsignment = Seq(
-                HouseConsignmentType13(
+                HouseConsignmentType10(
                   sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 1",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(1)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
                       ),
                       countryOfDestination = None
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 2",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(2)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
                       ),
                       countryOfDestination = None
                     )
@@ -1832,43 +1812,34 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
         "some items have the same country of destination" must {
           "not roll up country of destination to consignment level" in {
-            val consignment = ConsignmentType23(
+            val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
-                HouseConsignmentType13(
+                HouseConsignmentType10(
                   sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 1",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(1)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
                       ),
                       countryOfDestination = Some("GB")
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 2",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(2)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
                       ),
                       countryOfDestination = Some("GB")
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 3,
                       declarationGoodsItemNumber = BigInt(3),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 3",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(3)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 3"
                       ),
                       countryOfDestination = None
                     )
@@ -1879,49 +1850,40 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
             val result = consignment.postProcess()
 
-            result shouldEqual consignment
+            result shouldBe consignment
           }
         }
 
         "no items have the same country of dispatch" must {
           "not roll up country of dispatch to consignment level" in {
-            val consignment = ConsignmentType23(
+            val consignment = ConsignmentType20(
               grossMass = BigDecimal(1),
               HouseConsignment = Seq(
-                HouseConsignmentType13(
+                HouseConsignmentType10(
                   sequenceNumber = 1,
                   grossMass = BigDecimal(1),
                   ConsignmentItem = Seq(
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 1,
                       declarationGoodsItemNumber = BigInt(1),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 1",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(1)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 1"
                       ),
                       countryOfDispatch = Some("GB")
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 2,
                       declarationGoodsItemNumber = BigInt(2),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 2",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(2)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 2"
                       ),
                       countryOfDispatch = Some("FR")
                     ),
-                    ConsignmentItemType10(
+                    ConsignmentItemType09(
                       goodsItemNumber = 3,
                       declarationGoodsItemNumber = BigInt(3),
-                      Commodity = CommodityType10(
-                        descriptionOfGoods = "Item 3",
-                        GoodsMeasure = GoodsMeasureType04(
-                          grossMass = BigDecimal(3)
-                        )
+                      Commodity = CommodityType07(
+                        descriptionOfGoods = "Item 3"
                       ),
                       countryOfDispatch = Some("ES")
                     )
@@ -1932,13 +1894,13 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
 
             val result = consignment.postProcess()
 
-            result shouldEqual consignment
+            result shouldBe consignment
           }
         }
       }
     }
 
-    "activeBorderTransportMeansType03 reads is called" when {
+    "activeBorderTransportMeansType02 reads is called" when {
 
       "identification is not inferred" in {
         val json: JsValue = Json.parse(s"""
@@ -1962,6 +1924,12 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             |            "desc" : "Spain"
             |          },
             |          "conveyanceReferenceNumber" : "conveyance ref number"
+            |        },
+            |        {
+            |          "identification" : {
+            |            "code": "80",
+            |            "description": "European Vessel Identification Number (ENI Code)"
+            |          }
             |        }
             |      ]
             |    }
@@ -1969,17 +1937,25 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             |}
             |""".stripMargin)
 
-        val result: Seq[ActiveBorderTransportMeansType03] =
-          json.as[Seq[ActiveBorderTransportMeansType03]](activeBorderTransportMeansReads)
+        val result: Seq[ActiveBorderTransportMeansType02] =
+          json.as[Seq[ActiveBorderTransportMeansType02]](activeBorderTransportMeansReads)
 
-        result shouldEqual Seq(
-          ActiveBorderTransportMeansType03(
+        result shouldBe Seq(
+          ActiveBorderTransportMeansType02(
             sequenceNumber = 1,
-            customsOfficeAtBorderReferenceNumber = "IT018101",
-            typeOfIdentification = "10",
-            identificationNumber = "active id number",
-            nationality = "ES",
+            customsOfficeAtBorderReferenceNumber = Some("IT018101"),
+            typeOfIdentification = Some("10"),
+            identificationNumber = Some("active id number"),
+            nationality = Some("ES"),
             conveyanceReferenceNumber = Some("conveyance ref number")
+          ),
+          ActiveBorderTransportMeansType02(
+            sequenceNumber = 2,
+            customsOfficeAtBorderReferenceNumber = None,
+            typeOfIdentification = Some("80"),
+            identificationNumber = None,
+            nationality = None,
+            conveyanceReferenceNumber = None
           )
         )
       }
@@ -2006,6 +1982,12 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             |            "desc" : "Spain"
             |          },
             |          "conveyanceReferenceNumber" : "conveyance ref number"
+            |        },
+            |        {
+            |          "identification" : {
+            |            "code": "80",
+            |            "description": "European Vessel Identification Number (ENI Code)"
+            |          }
             |        }
             |      ]
             |    }
@@ -2013,23 +1995,85 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             |}
             |""".stripMargin)
 
-        val result: Seq[ActiveBorderTransportMeansType03] =
-          json.as[Seq[ActiveBorderTransportMeansType03]](activeBorderTransportMeansReads)
+        val result: Seq[ActiveBorderTransportMeansType02] =
+          json.as[Seq[ActiveBorderTransportMeansType02]](activeBorderTransportMeansReads)
 
-        result shouldEqual Seq(
-          ActiveBorderTransportMeansType03(
+        result shouldBe Seq(
+          ActiveBorderTransportMeansType02(
             sequenceNumber = 1,
-            customsOfficeAtBorderReferenceNumber = "IT018101",
-            typeOfIdentification = "21",
-            identificationNumber = "active id number",
-            nationality = "ES",
+            customsOfficeAtBorderReferenceNumber = Some("IT018101"),
+            typeOfIdentification = Some("21"),
+            identificationNumber = Some("active id number"),
+            nationality = Some("ES"),
             conveyanceReferenceNumber = Some("conveyance ref number")
+          ),
+          ActiveBorderTransportMeansType02(
+            sequenceNumber = 2,
+            customsOfficeAtBorderReferenceNumber = None,
+            typeOfIdentification = Some("80"),
+            identificationNumber = None,
+            nationality = None,
+            conveyanceReferenceNumber = None
+          )
+        )
+      }
+
+      "identification is undefined" in {
+        val json: JsValue = Json.parse(s"""
+            |{
+            |  "transportDetails" : {
+            |    "transportMeans" : {
+            |      "active" : [
+            |        {
+            |          "identificationNumber" : "active id number",
+            |          "customsOfficeActiveBorder" : {
+            |            "id" : "IT018101",
+            |            "name" : "Aeroporto Bari - Palese",
+            |            "phoneNumber" : "0039 0805316196"
+            |          },
+            |          "nationality" : {
+            |            "code" : "ES",
+            |            "desc" : "Spain"
+            |          },
+            |          "conveyanceReferenceNumber" : "conveyance ref number"
+            |        },
+            |        {
+            |          "identification" : {
+            |            "code": "80",
+            |            "description": "European Vessel Identification Number (ENI Code)"
+            |          }
+            |        }
+            |      ]
+            |    }
+            |  }
+            |}
+            |""".stripMargin)
+
+        val result: Seq[ActiveBorderTransportMeansType02] =
+          json.as[Seq[ActiveBorderTransportMeansType02]](activeBorderTransportMeansReads)
+
+        result shouldBe Seq(
+          ActiveBorderTransportMeansType02(
+            sequenceNumber = 1,
+            customsOfficeAtBorderReferenceNumber = Some("IT018101"),
+            typeOfIdentification = None,
+            identificationNumber = Some("active id number"),
+            nationality = Some("ES"),
+            conveyanceReferenceNumber = Some("conveyance ref number")
+          ),
+          ActiveBorderTransportMeansType02(
+            sequenceNumber = 2,
+            customsOfficeAtBorderReferenceNumber = None,
+            typeOfIdentification = Some("80"),
+            identificationNumber = None,
+            nationality = None,
+            conveyanceReferenceNumber = None
           )
         )
       }
     }
 
-    "locationOfGoodsType04 reads is called" when {
+    "locationOfGoodsType05 reads is called" when {
       "type of location and qualifier of identification is not inferred" in {
         val json = Json.parse(s"""
              |{
@@ -2048,9 +2092,9 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
              |}
              |""".stripMargin)
 
-        val result = json.as[LocationOfGoodsType04](locationOfGoodsType04.reads)
+        val result = json.as[LocationOfGoodsType05](locationOfGoodsType05.reads)
 
-        result shouldEqual LocationOfGoodsType04(
+        result shouldBe LocationOfGoodsType05(
           typeOfLocation = "C",
           qualifierOfIdentification = "U",
           authorisationNumber = None,
@@ -2084,9 +2128,9 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
              |}
              |""".stripMargin)
 
-        val result = json.as[LocationOfGoodsType04](locationOfGoodsType04.reads)
+        val result = json.as[LocationOfGoodsType05](locationOfGoodsType05.reads)
 
-        result shouldEqual LocationOfGoodsType04(
+        result shouldBe LocationOfGoodsType05(
           typeOfLocation = "B",
           qualifierOfIdentification = "Y",
           authorisationNumber = Some("authorisation number"),
@@ -2119,9 +2163,9 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             |}
             |""".stripMargin)
 
-        val result = json.as[Seq[TransportEquipmentType03]](transportEquipmentReads)
+        val result = json.as[Seq[TransportEquipmentType06]](transportEquipmentReads)
 
-        result shouldEqual Nil
+        result shouldBe Nil
       }
 
       "there is one transport equipment" in {
@@ -2162,21 +2206,21 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             |}
             |""".stripMargin)
 
-        val result = json.as[Seq[TransportEquipmentType03]](transportEquipmentReads)
+        val result = json.as[Seq[TransportEquipmentType06]](transportEquipmentReads)
 
-        result shouldEqual Seq(
-          TransportEquipmentType03(
+        result shouldBe Seq(
+          TransportEquipmentType06(
             sequenceNumber = 1,
             containerIdentificationNumber = Some("container id 1"),
             numberOfSeals = BigInt(2),
             Seal = Seq(
-              SealType01(1, "seal 1"),
-              SealType01(2, "seal 2")
+              SealType05(1, "seal 1"),
+              SealType05(2, "seal 2")
             ),
             GoodsReference = Seq(
-              GoodsReferenceType01(1, 1),
-              GoodsReferenceType01(2, 2),
-              GoodsReferenceType01(3, 3)
+              GoodsReferenceType02(1, 1),
+              GoodsReferenceType02(2, 2),
+              GoodsReferenceType02(3, 3)
             )
           )
         )
@@ -2227,35 +2271,35 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               |}
               |""".stripMargin)
 
-          val result = json.as[Seq[TransportEquipmentType03]](transportEquipmentReads)
+          val result = json.as[Seq[TransportEquipmentType06]](transportEquipmentReads)
 
-          result shouldEqual Seq(
-            TransportEquipmentType03(
+          result shouldBe Seq(
+            TransportEquipmentType06(
               sequenceNumber = 1,
               containerIdentificationNumber = Some("container id 1"),
               numberOfSeals = BigInt(0),
               Seal = Nil,
               GoodsReference = Seq(
-                GoodsReferenceType01(1, 3)
+                GoodsReferenceType02(1, 3)
               )
             ),
-            TransportEquipmentType03(
+            TransportEquipmentType06(
               sequenceNumber = 2,
               containerIdentificationNumber = Some("container id 2"),
               numberOfSeals = BigInt(0),
               Seal = Nil,
               GoodsReference = Seq(
-                GoodsReferenceType01(1, 2)
+                GoodsReferenceType02(1, 2)
               )
             ),
-            TransportEquipmentType03(
+            TransportEquipmentType06(
               sequenceNumber = 3,
               containerIdentificationNumber = Some("container id 3"),
               numberOfSeals = BigInt(0),
               Seal = Nil,
               GoodsReference = Seq(
-                GoodsReferenceType01(1, 1),
-                GoodsReferenceType01(2, 4)
+                GoodsReferenceType02(1, 1),
+                GoodsReferenceType02(2, 4)
               )
             )
           )
@@ -2299,25 +2343,25 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
               |}
               |""".stripMargin)
 
-          val result = json.as[Seq[TransportEquipmentType03]](transportEquipmentReads)
+          val result = json.as[Seq[TransportEquipmentType06]](transportEquipmentReads)
 
-          result shouldEqual Seq(
-            TransportEquipmentType03(
+          result shouldBe Seq(
+            TransportEquipmentType06(
               sequenceNumber = 1,
               containerIdentificationNumber = Some("container id 1"),
               numberOfSeals = BigInt(0),
               Seal = Nil,
               GoodsReference = Seq(
-                GoodsReferenceType01(1, 1)
+                GoodsReferenceType02(1, 1)
               )
             ),
-            TransportEquipmentType03(
+            TransportEquipmentType06(
               sequenceNumber = 2,
               containerIdentificationNumber = Some("container id 3"),
               numberOfSeals = BigInt(0),
               Seal = Nil,
               GoodsReference = Seq(
-                GoodsReferenceType01(1, 2)
+                GoodsReferenceType02(1, 2)
               )
             )
           )
@@ -2325,50 +2369,34 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
       }
     }
 
-    "commodityType10 reads is called" when {
+    "commodityType07 reads is called" when {
       "commodity code defined" in {
         val json = Json.parse("""
             |{
             |  "description" : "Description",
             |  "commodityCode" : "commodity code",
-            |  "combinedNomenclatureCode" : "CN code",
-            |  "grossWeight" : 123.456
+            |  "combinedNomenclatureCode" : "CN code"
             |}
             |""".stripMargin)
 
-        val result = json.as[CommodityType10](commodityType10.reads)
+        val result = json.as[CommodityType07](commodityType07.reads)
 
-        result shouldEqual CommodityType10(
-          descriptionOfGoods = "Description",
-          CommodityCode = Some(
-            CommodityCodeType04(
-              harmonizedSystemSubHeadingCode = "commodity code",
-              combinedNomenclatureCode = Some("CN code")
-            )
-          ),
-          GoodsMeasure = GoodsMeasureType04(
-            grossMass = BigDecimal(123.456)
-          )
+        result.CommodityCode.value shouldBe CommodityCodeType02(
+          harmonizedSystemSubHeadingCode = "commodity code",
+          combinedNomenclatureCode = Some("CN code")
         )
       }
 
       "commodity code undefined" in {
         val json = Json.parse("""
             |{
-            |  "description" : "Description",
-            |  "grossWeight" : 123.456
+            |  "description" : "Description"
             |}
             |""".stripMargin)
 
-        val result = json.as[CommodityType10](commodityType10.reads)
+        val result = json.as[CommodityType07](commodityType07.reads)
 
-        result shouldEqual CommodityType10(
-          descriptionOfGoods = "Description",
-          CommodityCode = None,
-          GoodsMeasure = GoodsMeasureType04(
-            grossMass = BigDecimal(123.456)
-          )
-        )
+        result.CommodityCode shouldBe None
       }
     }
 
@@ -2380,9 +2408,9 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             |}
             |""".stripMargin)
 
-        val result = json.as[Seq[DepartureTransportMeansType01]](consignmentType23.departureTransportMeansReads)
+        val result = json.as[Seq[DepartureTransportMeansType03]](consignmentType20.departureTransportMeansReads)
 
-        result shouldEqual Nil
+        result shouldBe Nil
       }
 
       "there is a departure transport means" in {
@@ -2408,14 +2436,14 @@ class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Gene
             |}
             |""".stripMargin)
 
-        val result = json.as[Seq[DepartureTransportMeansType01]](consignmentType23.departureTransportMeansReads)
+        val result = json.as[Seq[DepartureTransportMeansType03]](consignmentType20.departureTransportMeansReads)
 
-        result shouldEqual Seq(
-          DepartureTransportMeansType01(
+        result shouldBe Seq(
+          DepartureTransportMeansType03(
             sequenceNumber = 1,
-            typeOfIdentification = "10",
-            identificationNumber = "means id number",
-            nationality = "FR"
+            typeOfIdentification = Some("10"),
+            identificationNumber = Some("means id number"),
+            nationality = Some("FR")
           )
         )
       }

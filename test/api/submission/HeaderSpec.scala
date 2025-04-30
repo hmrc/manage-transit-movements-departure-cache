@@ -17,7 +17,7 @@
 package api.submission
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import generated.*
+import generated._
 import models.UserAnswers
 import org.mockito.Mockito.{reset, when}
 import org.scalacheck.Gen
@@ -95,12 +95,12 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
 
                 val result = header.message(uA("GB"), CC015C)
 
-                result.messageSender shouldEqual eoriNumber
-                result.messageRecipient shouldEqual "NTA.GB"
-                result.preparationDateAndTime shouldEqual XMLCalendar("2020-01-01T00:00:00")
-                result.messageIdentification shouldEqual messageIdentification
-                result.messageType shouldEqual CC015C
-                result.correlationIdentifier shouldEqual None
+                result.messageSender shouldBe eoriNumber
+                result.messageRecipient shouldBe "NTA.GB"
+                result.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
+                result.messageIdentification shouldBe messageIdentification
+                result.messageType shouldBe CC015C
+                result.correlationIdentifier shouldBe None
             }
           }
 
@@ -112,12 +112,12 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
 
                 val result = header.message(uA("XI"), CC015C)
 
-                result.messageSender shouldEqual eoriNumber
-                result.messageRecipient shouldEqual "NTA.XI"
-                result.preparationDateAndTime shouldEqual XMLCalendar("2020-01-01T00:00:00")
-                result.messageIdentification shouldEqual messageIdentification
-                result.messageType shouldEqual CC015C
-                result.correlationIdentifier shouldEqual None
+                result.messageSender shouldBe eoriNumber
+                result.messageRecipient shouldBe "NTA.XI"
+                result.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
+                result.messageIdentification shouldBe messageIdentification
+                result.messageType shouldBe CC015C
+                result.correlationIdentifier shouldBe None
             }
           }
         }
@@ -131,12 +131,12 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
 
                 val result = header.message(uA("GB"), CC013C)
 
-                result.messageSender shouldEqual eoriNumber
-                result.messageRecipient shouldEqual "NTA.GB"
-                result.preparationDateAndTime shouldEqual XMLCalendar("2020-01-01T00:00:00")
-                result.messageIdentification shouldEqual messageIdentification
-                result.messageType shouldEqual CC013C
-                result.correlationIdentifier shouldEqual None
+                result.messageSender shouldBe eoriNumber
+                result.messageRecipient shouldBe "NTA.GB"
+                result.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
+                result.messageIdentification shouldBe messageIdentification
+                result.messageType shouldBe CC013C
+                result.correlationIdentifier shouldBe None
             }
           }
 
@@ -148,12 +148,12 @@ class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaChec
 
                 val result = header.message(uA("XI"), CC013C)
 
-                result.messageSender shouldEqual eoriNumber
-                result.messageRecipient shouldEqual "NTA.XI"
-                result.preparationDateAndTime shouldEqual XMLCalendar("2020-01-01T00:00:00")
-                result.messageIdentification shouldEqual messageIdentification
-                result.messageType shouldEqual CC013C
-                result.correlationIdentifier shouldEqual None
+                result.messageSender shouldBe eoriNumber
+                result.messageRecipient shouldBe "NTA.XI"
+                result.preparationDateAndTime shouldBe XMLCalendar("2020-01-01T00:00:00")
+                result.messageIdentification shouldBe messageIdentification
+                result.messageType shouldBe CC013C
+                result.correlationIdentifier shouldBe None
             }
           }
         }

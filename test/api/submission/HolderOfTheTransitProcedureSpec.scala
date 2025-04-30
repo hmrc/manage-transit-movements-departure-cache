@@ -17,7 +17,7 @@
 package api.submission
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import generated.*
+import generated._
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 
@@ -69,12 +69,12 @@ class HolderOfTheTransitProcedureSpec extends SpecBase with AppWithDefaultMockFi
 
           val uA: UserAnswers = json.as[UserAnswers]
 
-          val expected = HolderOfTheTransitProcedureType23(
+          val expected = HolderOfTheTransitProcedureType14(
             identificationNumber = Some("GB123456789000"),
             TIRHolderIdentificationNumber = None,
             name = Some("John Doe"),
             Address = Some(
-              AddressType14(
+              AddressType17(
                 streetAndNumber = "21 Test Lane",
                 postcode = Some("NE1 1NE"),
                 city = "Newcastle upon Tyne",
@@ -82,7 +82,7 @@ class HolderOfTheTransitProcedureSpec extends SpecBase with AppWithDefaultMockFi
               )
             ),
             ContactPerson = Some(
-              ContactPersonType03(
+              ContactPersonType05(
                 name = "Joe Bloggs",
                 phoneNumber = "+44 808 157 0192",
                 eMailAddress = None
@@ -90,9 +90,9 @@ class HolderOfTheTransitProcedureSpec extends SpecBase with AppWithDefaultMockFi
             )
           )
 
-          val converted: HolderOfTheTransitProcedureType23 = HolderOfTheTransitProcedure.transform(uA)
+          val converted: HolderOfTheTransitProcedureType14 = HolderOfTheTransitProcedure.transform(uA)
 
-          converted shouldEqual expected
+          converted shouldBe expected
         }
 
         "there is a TIR id, no address and not a contact person" in {
@@ -126,7 +126,7 @@ class HolderOfTheTransitProcedureSpec extends SpecBase with AppWithDefaultMockFi
 
           val uA: UserAnswers = json.as[UserAnswers]
 
-          val expected = HolderOfTheTransitProcedureType23(
+          val expected = HolderOfTheTransitProcedureType14(
             identificationNumber = None,
             TIRHolderIdentificationNumber = Some("AAA/999/99999"),
             name = Some("John Doe"),
@@ -134,9 +134,9 @@ class HolderOfTheTransitProcedureSpec extends SpecBase with AppWithDefaultMockFi
             ContactPerson = None
           )
 
-          val converted: HolderOfTheTransitProcedureType23 = HolderOfTheTransitProcedure.transform(uA)
+          val converted: HolderOfTheTransitProcedureType14 = HolderOfTheTransitProcedure.transform(uA)
 
-          converted shouldEqual expected
+          converted shouldBe expected
         }
       }
 

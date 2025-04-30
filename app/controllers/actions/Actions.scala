@@ -16,20 +16,16 @@
 
 package controllers.actions
 
-import models.request.{AuthenticatedRequest, VersionedRequest}
+import models.request.AuthenticatedRequest
 import play.api.mvc.{ActionBuilder, AnyContent, DefaultActionBuilder}
 
 import javax.inject.Inject
 
 class Actions @Inject() (
   buildDefault: DefaultActionBuilder,
-  authenticateActionProvider: AuthenticateActionProvider,
-  versionedAction: VersionedAction
+  authenticateActionProvider: AuthenticateActionProvider
 ) {
 
   def authenticate(): ActionBuilder[AuthenticatedRequest, AnyContent] =
     buildDefault andThen authenticateActionProvider()
-
-  def authenticateAndGetVersion(): ActionBuilder[VersionedRequest, AnyContent] =
-    authenticate() andThen versionedAction
 }
