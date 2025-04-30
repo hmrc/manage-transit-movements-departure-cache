@@ -16,25 +16,25 @@
 
 package api.submission
 
-import generated.{TransitOperationType04, TransitOperationType06}
+import generated.*
 import models.UserAnswers
 import play.api.libs.json.Reads
 
 object TransitOperation {
 
-  def transform(uA: UserAnswers): TransitOperationType06 =
-    uA.metadata.data.as[TransitOperationType06](transitOperationType06.reads(uA.lrn))
+  def transform(uA: UserAnswers): TransitOperationType03 =
+    uA.metadata.data.as[TransitOperationType03](transitOperationType03.reads(uA.lrn))
 
-  def transformIE013(uA: UserAnswers, mrn: Option[String], amendmentTypeFlag: Boolean): TransitOperationType04 =
-    uA.metadata.data.as[TransitOperationType04](transitOperationType04.reads(uA.lrn, mrn, amendmentTypeFlag))
+  def transform(uA: UserAnswers, mrn: Option[String], amendmentTypeFlag: Boolean): TransitOperationType02 =
+    uA.metadata.data.as[TransitOperationType02](transitOperationType02.reads(uA.lrn, mrn, amendmentTypeFlag))
 }
 
-object transitOperationType04 {
+object transitOperationType02 {
 
-  def reads(lrn: String, mrn: Option[String], amendmentTypeFlag: Boolean): Reads[TransitOperationType04] =
+  def reads(lrn: String, mrn: Option[String], amendmentTypeFlag: Boolean): Reads[TransitOperationType02] =
     CommonTransitOperation.reads.map(
       readsData =>
-        TransitOperationType04(
+        TransitOperationType02(
           LRN = if (mrn.isDefined) None else Some(lrn),
           MRN = mrn,
           declarationType = readsData.declarationType,
@@ -52,12 +52,12 @@ object transitOperationType04 {
     )
 }
 
-object transitOperationType06 {
+object transitOperationType03 {
 
-  def reads(lrn: String): Reads[TransitOperationType06] =
+  def reads(lrn: String): Reads[TransitOperationType03] =
     CommonTransitOperation.reads.map(
       readsData =>
-        TransitOperationType06(
+        TransitOperationType03(
           LRN = lrn,
           declarationType = readsData.declarationType,
           additionalDeclarationType = readsData.additionalDeclarationType,

@@ -14,22 +14,30 @@
  * limitations under the License.
  */
 
-package controllers.actions
+package models
 
-import models.request.{AuthenticatedRequest, VersionedRequest}
-import play.api.mvc.{ActionBuilder, AnyContent, DefaultActionBuilder}
+import generated.*
 
-import javax.inject.Inject
+import scala.util.{Failure, Success, Try}
 
-class Actions @Inject() (
-  buildDefault: DefaultActionBuilder,
-  authenticateActionProvider: AuthenticateActionProvider,
-  versionedAction: VersionedAction
-) {
+sealed trait Version {
+  val id: PhaseIDtype
+}
 
-  def authenticate(): ActionBuilder[AuthenticatedRequest, AnyContent] =
-    buildDefault andThen authenticateActionProvider()
+object Version {
 
-  def authenticateAndGetVersion(): ActionBuilder[VersionedRequest, AnyContent] =
-    authenticate() andThen versionedAction
+  case object Phase5 extends Version {
+    override val id: PhaseIDtype = NCTS5u461
+  }
+
+  case object Phase6 extends Version {
+    override val id: PhaseIDtype = NCTS6
+  }
+
+  def apply(value: Option[String]): Try[Version] =
+    value match {
+      case Some("2.0")        => Success(Phase6)
+      case Some("1.0") | None => Success(Phase5)
+      case Some(x)            => Failure(new Exception(s"$x is not a valid version"))
+    }
 }

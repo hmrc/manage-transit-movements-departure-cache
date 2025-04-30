@@ -26,9 +26,9 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   "TransitOperation" when {
 
-    "transform is called" when {
+    "transform (IE015) is called" when {
 
-      import generated.TransitOperationType06
+      import generated.TransitOperationType03
 
       "no security type" must {
 
@@ -84,7 +84,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected =
-            TransitOperationType06(
+            TransitOperationType03(
               LRN = lrn,
               declarationType = "TIR",
               additionalDeclarationType = "A",
@@ -100,7 +100,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val converted = TransitOperation.transform(uA)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
 
       }
@@ -153,7 +153,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected =
-            TransitOperationType06(
+            TransitOperationType03(
               LRN = lrn,
               declarationType = "TIR",
               additionalDeclarationType = "D",
@@ -169,7 +169,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val converted = TransitOperation.transform(uA)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
 
       }
@@ -222,7 +222,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected =
-            TransitOperationType06(
+            TransitOperationType03(
               LRN = lrn,
               declarationType = "TIR",
               additionalDeclarationType = "A",
@@ -238,7 +238,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val converted = TransitOperation.transform(uA)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
 
       }
@@ -291,7 +291,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected =
-            TransitOperationType06(
+            TransitOperationType03(
               LRN = lrn,
               declarationType = "TIR",
               additionalDeclarationType = "A",
@@ -307,7 +307,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val converted = TransitOperation.transform(uA)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
 
       }
@@ -354,7 +354,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected =
-            TransitOperationType06(
+            TransitOperationType03(
               LRN = lrn,
               declarationType = "TIR",
               additionalDeclarationType = "A",
@@ -370,15 +370,15 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val converted = TransitOperation.transform(uA)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
       }
 
     }
 
-    "transformIE013 is called" when {
+    "transform (IE013) is called" when {
 
-      import generated.TransitOperationType04
+      import generated.TransitOperationType02
 
       "MRN is defined" must {
         "convert to API format" in {
@@ -434,7 +434,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
           val mrn = "38VYQTYFU3T0KUTUM3"
 
           val expected =
-            TransitOperationType04(
+            TransitOperationType02(
               LRN = None,
               MRN = Some(mrn),
               declarationType = "TIR",
@@ -450,9 +450,9 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = Some(mrn), amendmentTypeFlag = false)
+          val converted = TransitOperation.transform(uA, mrn = Some(mrn), amendmentTypeFlag = false)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
       }
 
@@ -508,7 +508,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected =
-            TransitOperationType04(
+            TransitOperationType02(
               LRN = Some(lrn),
               MRN = None,
               declarationType = "TIR",
@@ -524,9 +524,9 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = None, amendmentTypeFlag = false)
+          val converted = TransitOperation.transform(uA, mrn = None, amendmentTypeFlag = false)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
       }
 
@@ -584,7 +584,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
           val mrn = "38VYQTYFU3T0KUTUM3"
 
           val expected =
-            TransitOperationType04(
+            TransitOperationType02(
               LRN = None,
               MRN = Some(mrn),
               declarationType = "TIR",
@@ -600,9 +600,9 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = Some(mrn), amendmentTypeFlag = true)
+          val converted = TransitOperation.transform(uA, mrn = Some(mrn), amendmentTypeFlag = true)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
       }
 
@@ -660,7 +660,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
           val mrn = "38VYQTYFU3T0KUTUM3"
 
           val expected =
-            TransitOperationType04(
+            TransitOperationType02(
               LRN = None,
               MRN = Some(mrn),
               declarationType = "TIR",
@@ -676,9 +676,9 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = Some(mrn), amendmentTypeFlag = false)
+          val converted = TransitOperation.transform(uA, mrn = Some(mrn), amendmentTypeFlag = false)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
       }
 
@@ -736,7 +736,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected =
-            TransitOperationType04(
+            TransitOperationType02(
               LRN = Some(lrn),
               MRN = None,
               declarationType = "TIR",
@@ -752,9 +752,9 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = None, amendmentTypeFlag = false)
+          val converted = TransitOperation.transform(uA, mrn = None, amendmentTypeFlag = false)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
 
       }
@@ -807,7 +807,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected =
-            TransitOperationType04(
+            TransitOperationType02(
               LRN = Some(lrn),
               MRN = None,
               declarationType = "TIR",
@@ -823,9 +823,9 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = None, amendmentTypeFlag = false)
+          val converted = TransitOperation.transform(uA, mrn = None, amendmentTypeFlag = false)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
 
       }
@@ -878,7 +878,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected =
-            TransitOperationType04(
+            TransitOperationType02(
               LRN = Some(lrn),
               MRN = None,
               declarationType = "TIR",
@@ -894,9 +894,9 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = None, amendmentTypeFlag = false)
+          val converted = TransitOperation.transform(uA, mrn = None, amendmentTypeFlag = false)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
 
       }
@@ -949,7 +949,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected =
-            TransitOperationType04(
+            TransitOperationType02(
               LRN = Some(lrn),
               MRN = None,
               declarationType = "TIR",
@@ -965,9 +965,9 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = Some(XMLCalendar("2022-07-15"))
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = None, amendmentTypeFlag = false)
+          val converted = TransitOperation.transform(uA, mrn = None, amendmentTypeFlag = false)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
 
       }
@@ -1014,7 +1014,7 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected =
-            TransitOperationType04(
+            TransitOperationType02(
               LRN = Some(lrn),
               MRN = None,
               declarationType = "TIR",
@@ -1030,9 +1030,9 @@ class TransitOperationSpec extends SpecBase with AppWithDefaultMockFixtures {
               limitDate = None
             )
 
-          val converted = TransitOperation.transformIE013(uA, mrn = None, amendmentTypeFlag = false)
+          val converted = TransitOperation.transform(uA, mrn = None, amendmentTypeFlag = false)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
       }
 

@@ -16,20 +16,20 @@
 
 package controllers.actions
 
+import models.Version
 import models.request.{AuthenticatedRequest, VersionedRequest}
-import play.api.mvc.{ActionBuilder, AnyContent, DefaultActionBuilder}
+import play.api.mvc.Results.BadRequest
+import play.api.mvc.{ActionRefiner, Result}
 
 import javax.inject.Inject
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Failure, Success}
 
-class Actions @Inject() (
-  buildDefault: DefaultActionBuilder,
-  authenticateActionProvider: AuthenticateActionProvider,
-  versionedAction: VersionedAction
-) {
+class VersionedAction @Inject() (implicit val executionContext: ExecutionContext) extends ActionRefiner[AuthenticatedRequest, VersionedRequest] {
 
-  def authenticate(): ActionBuilder[AuthenticatedRequest, AnyContent] =
-    buildDefault andThen authenticateActionProvider()
-
-  def authenticateAndGetVersion(): ActionBuilder[VersionedRequest, AnyContent] =
-    authenticate() andThen versionedAction
+  override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, VersionedRequest[A]]] =
+    Version(request.headers.get("API-Version")) match {
+      case Success(version)   => Future.successful(Right(VersionedRequest(request, version)))
+      case Failure(exception) => Future.successful(Left(BadRequest(exception.getMessage)))
+    }
 }

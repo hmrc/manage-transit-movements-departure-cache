@@ -17,7 +17,7 @@
 package api.submission
 
 import base.{AppWithDefaultMockFixtures, SpecBase}
-import generated._
+import generated.*
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 
@@ -79,7 +79,7 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected = Seq(
-            GuaranteeType02(
+            GuaranteeType05(
               sequenceNumber = 1,
               guaranteeType = "1",
               otherGuaranteeReference = Some("otherRefNo1"),
@@ -88,12 +88,12 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
                   sequenceNumber = 1,
                   GRN = Some("refNo1"),
                   accessCode = Some("1234"),
-                  amountToBeCovered = Some(1000),
-                  currency = Some("GBP")
+                  amountToBeCovered = 1000,
+                  currency = "GBP"
                 )
               )
             ),
-            GuaranteeType02(
+            GuaranteeType05(
               sequenceNumber = 2,
               guaranteeType = "A",
               otherGuaranteeReference = Some("otherRefNo2"),
@@ -102,16 +102,16 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
                   sequenceNumber = 1,
                   GRN = Some("refNo2"),
                   accessCode = Some("5678"),
-                  amountToBeCovered = Some(2000),
-                  currency = Some("EUR")
+                  amountToBeCovered = 2000,
+                  currency = "EUR"
                 )
               )
             )
           )
 
-          val converted: Seq[GuaranteeType02] = Guarantee.transform(uA)
+          val converted: Seq[GuaranteeType05] = Guarantee.transform(uA)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
 
         "multiple instances of guarantee types with different other references" in {
@@ -188,7 +188,7 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected = Seq(
-            GuaranteeType02(
+            GuaranteeType05(
               sequenceNumber = 1,
               guaranteeType = "3",
               otherGuaranteeReference = Some("3_1"),
@@ -197,12 +197,12 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
                   sequenceNumber = 1,
                   GRN = None,
                   accessCode = Some("1234"),
-                  amountToBeCovered = Some(1000),
-                  currency = Some("GBP")
+                  amountToBeCovered = 1000,
+                  currency = "GBP"
                 )
               )
             ),
-            GuaranteeType02(
+            GuaranteeType05(
               sequenceNumber = 2,
               guaranteeType = "3",
               otherGuaranteeReference = Some("3_2"),
@@ -211,12 +211,12 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
                   sequenceNumber = 1,
                   GRN = None,
                   accessCode = Some("5678"),
-                  amountToBeCovered = Some(2000),
-                  currency = Some("EUR")
+                  amountToBeCovered = 2000,
+                  currency = "EUR"
                 )
               )
             ),
-            GuaranteeType02(
+            GuaranteeType05(
               sequenceNumber = 3,
               guaranteeType = "8",
               otherGuaranteeReference = Some("8_1"),
@@ -225,12 +225,12 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
                   sequenceNumber = 1,
                   GRN = None,
                   accessCode = Some("1234"),
-                  amountToBeCovered = Some(1000),
-                  currency = Some("GBP")
+                  amountToBeCovered = 1000,
+                  currency = "GBP"
                 )
               )
             ),
-            GuaranteeType02(
+            GuaranteeType05(
               sequenceNumber = 4,
               guaranteeType = "8",
               otherGuaranteeReference = Some("8_2"),
@@ -239,16 +239,16 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
                   sequenceNumber = 1,
                   GRN = None,
                   accessCode = Some("5678"),
-                  amountToBeCovered = Some(2000),
-                  currency = Some("EUR")
+                  amountToBeCovered = 2000,
+                  currency = "EUR"
                 )
               )
             )
           )
 
-          val converted: Seq[GuaranteeType02] = Guarantee.transform(uA)
+          val converted: Seq[GuaranteeType05] = Guarantee.transform(uA)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
 
         "multiple instances of guarantee types with same other references" in {
@@ -325,7 +325,7 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected = Seq(
-            GuaranteeType02(
+            GuaranteeType05(
               sequenceNumber = 1,
               guaranteeType = "3",
               otherGuaranteeReference = Some("3"),
@@ -334,19 +334,19 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
                   sequenceNumber = 1,
                   GRN = None,
                   accessCode = Some("1234"),
-                  amountToBeCovered = Some(1000),
-                  currency = Some("GBP")
+                  amountToBeCovered = 1000,
+                  currency = "GBP"
                 ),
                 GuaranteeReferenceType03(
                   sequenceNumber = 2,
                   GRN = None,
                   accessCode = Some("5678"),
-                  amountToBeCovered = Some(2000),
-                  currency = Some("EUR")
+                  amountToBeCovered = 2000,
+                  currency = "EUR"
                 )
               )
             ),
-            GuaranteeType02(
+            GuaranteeType05(
               sequenceNumber = 2,
               guaranteeType = "8",
               otherGuaranteeReference = Some("8"),
@@ -355,23 +355,23 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
                   sequenceNumber = 1,
                   GRN = None,
                   accessCode = Some("1234"),
-                  amountToBeCovered = Some(1000),
-                  currency = Some("GBP")
+                  amountToBeCovered = 1000,
+                  currency = "GBP"
                 ),
                 GuaranteeReferenceType03(
                   sequenceNumber = 2,
                   GRN = None,
                   accessCode = Some("5678"),
-                  amountToBeCovered = Some(2000),
-                  currency = Some("EUR")
+                  amountToBeCovered = 2000,
+                  currency = "EUR"
                 )
               )
             )
           )
 
-          val converted: Seq[GuaranteeType02] = Guarantee.transform(uA)
+          val converted: Seq[GuaranteeType05] = Guarantee.transform(uA)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
 
         "multiple instances of guarantee types with no other references" in {
@@ -434,28 +434,13 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected = Seq(
-            GuaranteeType02(
+            GuaranteeType05(
               sequenceNumber = 1,
               guaranteeType = "3",
               otherGuaranteeReference = None,
-              GuaranteeReference = Seq(
-                GuaranteeReferenceType03(
-                  sequenceNumber = 1,
-                  GRN = None,
-                  accessCode = None,
-                  amountToBeCovered = None,
-                  currency = None
-                ),
-                GuaranteeReferenceType03(
-                  sequenceNumber = 2,
-                  GRN = None,
-                  accessCode = None,
-                  amountToBeCovered = None,
-                  currency = None
-                )
-              )
+              GuaranteeReference = Nil
             ),
-            GuaranteeType02(
+            GuaranteeType05(
               sequenceNumber = 2,
               guaranteeType = "0",
               otherGuaranteeReference = None,
@@ -464,23 +449,23 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
                   sequenceNumber = 1,
                   GRN = Some("0_1"),
                   accessCode = Some("1234"),
-                  amountToBeCovered = Some(1000),
-                  currency = Some("GBP")
+                  amountToBeCovered = 1000,
+                  currency = "GBP"
                 ),
                 GuaranteeReferenceType03(
                   sequenceNumber = 2,
                   GRN = Some("0_2"),
                   accessCode = Some("5678"),
-                  amountToBeCovered = Some(2000),
-                  currency = Some("EUR")
+                  amountToBeCovered = 2000,
+                  currency = "EUR"
                 )
               )
             )
           )
 
-          val converted: Seq[GuaranteeType02] = Guarantee.transform(uA)
+          val converted: Seq[GuaranteeType05] = Guarantee.transform(uA)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
       }
     }
@@ -535,39 +520,39 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected = Seq(
-            GuaranteeType01(
+            GuaranteeType05(
               sequenceNumber = 1,
-              guaranteeType = Some("1"),
+              guaranteeType = "1",
               otherGuaranteeReference = Some("otherRefNo1"),
               GuaranteeReference = Seq(
                 GuaranteeReferenceType03(
                   sequenceNumber = 1,
                   GRN = Some("refNo1"),
                   accessCode = Some("1234"),
-                  amountToBeCovered = Some(1000),
-                  currency = Some("GBP")
+                  amountToBeCovered = 1000,
+                  currency = "GBP"
                 )
               )
             ),
-            GuaranteeType01(
+            GuaranteeType05(
               sequenceNumber = 2,
-              guaranteeType = Some("A"),
+              guaranteeType = "A",
               otherGuaranteeReference = Some("otherRefNo2"),
               GuaranteeReference = Seq(
                 GuaranteeReferenceType03(
                   sequenceNumber = 1,
                   GRN = Some("refNo2"),
                   accessCode = Some("5678"),
-                  amountToBeCovered = Some(2000),
-                  currency = Some("EUR")
+                  amountToBeCovered = 2000,
+                  currency = "EUR"
                 )
               )
             )
           )
 
-          val converted: Seq[GuaranteeType01] = Guarantee.transformIE013(uA)
+          val converted: Seq[GuaranteeType05] = Guarantee.transform(uA)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
 
         "multiple instances of guarantee types with different other references" in {
@@ -636,67 +621,67 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected = Seq(
-            GuaranteeType01(
+            GuaranteeType05(
               sequenceNumber = 1,
-              guaranteeType = Some("3"),
+              guaranteeType = "3",
               otherGuaranteeReference = Some("3_1"),
               GuaranteeReference = Seq(
                 GuaranteeReferenceType03(
                   sequenceNumber = 1,
                   GRN = None,
                   accessCode = Some("1234"),
-                  amountToBeCovered = Some(1000),
-                  currency = Some("GBP")
+                  amountToBeCovered = 1000,
+                  currency = "GBP"
                 )
               )
             ),
-            GuaranteeType01(
+            GuaranteeType05(
               sequenceNumber = 2,
-              guaranteeType = Some("3"),
+              guaranteeType = "3",
               otherGuaranteeReference = Some("3_2"),
               GuaranteeReference = Seq(
                 GuaranteeReferenceType03(
                   sequenceNumber = 1,
                   GRN = None,
                   accessCode = Some("5678"),
-                  amountToBeCovered = Some(2000),
-                  currency = Some("EUR")
+                  amountToBeCovered = 2000,
+                  currency = "EUR"
                 )
               )
             ),
-            GuaranteeType01(
+            GuaranteeType05(
               sequenceNumber = 3,
-              guaranteeType = Some("8"),
+              guaranteeType = "8",
               otherGuaranteeReference = Some("8_1"),
               GuaranteeReference = Seq(
                 GuaranteeReferenceType03(
                   sequenceNumber = 1,
                   GRN = None,
                   accessCode = Some("1234"),
-                  amountToBeCovered = Some(1000),
-                  currency = Some("GBP")
+                  amountToBeCovered = 1000,
+                  currency = "GBP"
                 )
               )
             ),
-            GuaranteeType01(
+            GuaranteeType05(
               sequenceNumber = 4,
-              guaranteeType = Some("8"),
+              guaranteeType = "8",
               otherGuaranteeReference = Some("8_2"),
               GuaranteeReference = Seq(
                 GuaranteeReferenceType03(
                   sequenceNumber = 1,
                   GRN = None,
                   accessCode = Some("5678"),
-                  amountToBeCovered = Some(2000),
-                  currency = Some("EUR")
+                  amountToBeCovered = 2000,
+                  currency = "EUR"
                 )
               )
             )
           )
 
-          val converted: Seq[GuaranteeType01] = Guarantee.transformIE013(uA)
+          val converted: Seq[GuaranteeType05] = Guarantee.transform(uA)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
 
         "multiple instances of guarantee types with same other references" in {
@@ -765,53 +750,53 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected = Seq(
-            GuaranteeType01(
+            GuaranteeType05(
               sequenceNumber = 1,
-              guaranteeType = Some("3"),
+              guaranteeType = "3",
               otherGuaranteeReference = Some("3"),
               GuaranteeReference = Seq(
                 GuaranteeReferenceType03(
                   sequenceNumber = 1,
                   GRN = None,
                   accessCode = Some("1234"),
-                  amountToBeCovered = Some(1000),
-                  currency = Some("GBP")
+                  amountToBeCovered = 1000,
+                  currency = "GBP"
                 ),
                 GuaranteeReferenceType03(
                   sequenceNumber = 2,
                   GRN = None,
                   accessCode = Some("5678"),
-                  amountToBeCovered = Some(2000),
-                  currency = Some("EUR")
+                  amountToBeCovered = 2000,
+                  currency = "EUR"
                 )
               )
             ),
-            GuaranteeType01(
+            GuaranteeType05(
               sequenceNumber = 2,
-              guaranteeType = Some("8"),
+              guaranteeType = "8",
               otherGuaranteeReference = Some("8"),
               GuaranteeReference = Seq(
                 GuaranteeReferenceType03(
                   sequenceNumber = 1,
                   GRN = None,
                   accessCode = Some("1234"),
-                  amountToBeCovered = Some(1000),
-                  currency = Some("GBP")
+                  amountToBeCovered = 1000,
+                  currency = "GBP"
                 ),
                 GuaranteeReferenceType03(
                   sequenceNumber = 2,
                   GRN = None,
                   accessCode = Some("5678"),
-                  amountToBeCovered = Some(2000),
-                  currency = Some("EUR")
+                  amountToBeCovered = 2000,
+                  currency = "EUR"
                 )
               )
             )
           )
 
-          val converted: Seq[GuaranteeType01] = Guarantee.transformIE013(uA)
+          val converted: Seq[GuaranteeType05] = Guarantee.transform(uA)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
 
         "multiple instances of guarantee types with no other references" in {
@@ -866,56 +851,40 @@ class GuaranteeSpec extends SpecBase with AppWithDefaultMockFixtures {
           val uA: UserAnswers = json.as[UserAnswers]
 
           val expected = Seq(
-            GuaranteeType01(
+            GuaranteeType05(
               sequenceNumber = 1,
-              guaranteeType = Some("3"),
+              guaranteeType = "3",
               otherGuaranteeReference = None,
-              GuaranteeReference = Seq(
-                GuaranteeReferenceType03(
-                  sequenceNumber = 1,
-                  GRN = None,
-                  accessCode = None,
-                  amountToBeCovered = None,
-                  currency = None
-                ),
-                GuaranteeReferenceType03(
-                  sequenceNumber = 2,
-                  GRN = None,
-                  accessCode = None,
-                  amountToBeCovered = None,
-                  currency = None
-                )
-              )
+              GuaranteeReference = Nil
             ),
-            GuaranteeType01(
+            GuaranteeType05(
               sequenceNumber = 2,
-              guaranteeType = Some("0"),
+              guaranteeType = "0",
               otherGuaranteeReference = None,
               GuaranteeReference = Seq(
                 GuaranteeReferenceType03(
                   sequenceNumber = 1,
                   GRN = Some("0_1"),
                   accessCode = Some("1234"),
-                  amountToBeCovered = Some(1000),
-                  currency = Some("GBP")
+                  amountToBeCovered = 1000,
+                  currency = "GBP"
                 ),
                 GuaranteeReferenceType03(
                   sequenceNumber = 2,
                   GRN = Some("0_2"),
                   accessCode = Some("5678"),
-                  amountToBeCovered = Some(2000),
-                  currency = Some("EUR")
+                  amountToBeCovered = 2000,
+                  currency = "EUR"
                 )
               )
             )
           )
 
-          val converted: Seq[GuaranteeType01] = Guarantee.transformIE013(uA)
+          val converted: Seq[GuaranteeType05] = Guarantee.transform(uA)
 
-          converted shouldBe expected
+          converted shouldEqual expected
         }
       }
     }
-
   }
 }
