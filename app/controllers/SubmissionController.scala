@@ -50,7 +50,7 @@ class SubmissionController @Inject() (
     s"SubmissionController:$method:${args.mkString(":")} - $message"
 
   def post(): Action[JsValue] =
-    actions.authenticate().async(parse.json) {
+    actions.authenticateAndGetVersion().async(parse.json) {
       implicit request =>
         import request.*
         val auditType = DeclarationData
@@ -60,7 +60,7 @@ class SubmissionController @Inject() (
               userAnswers <- OptionT(cacheRepository.get(lrn, eoriNumber))
               result <- OptionT.liftF {
                 apiService
-                  .submitDeclaration(userAnswers)
+                  .submitDeclaration(userAnswers, phase)
                   .flatMap(responseToResult(userAnswers, _, None, DeclarationData))
               }
             } yield result
@@ -78,7 +78,7 @@ class SubmissionController @Inject() (
     }
 
   def postAmendment(): Action[JsValue] =
-    actions.authenticate().async(parse.json) {
+    actions.authenticateAndGetVersion().async(parse.json) {
       implicit request =>
         import request.*
         val auditType = DeclarationAmendment
@@ -89,7 +89,7 @@ class SubmissionController @Inject() (
               departureId <- OptionT.fromOption[Future](userAnswers.departureId)
               result <- OptionT.liftF {
                 apiService
-                  .submitAmendment(userAnswers, departureId)
+                  .submitAmendment(userAnswers, departureId, phase)
                   .flatMap(responseToResult(userAnswers, _, Some(departureId), auditType))
               }
             } yield result

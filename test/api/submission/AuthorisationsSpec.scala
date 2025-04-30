@@ -74,26 +74,26 @@ class AuthorisationsSpec extends SpecBase with AppWithDefaultMockFixtures with S
         val uA: UserAnswers = json.as[UserAnswers]
 
         val expected = Seq(
-          AuthorisationType03(
+          AuthorisationType02(
             sequenceNumber = 1,
             typeValue = "C524",
             referenceNumber = "TRD1"
           ),
-          AuthorisationType03(
+          AuthorisationType02(
             sequenceNumber = 2,
             typeValue = "C523",
             referenceNumber = "SSE1"
           ),
-          AuthorisationType03(
+          AuthorisationType02(
             sequenceNumber = 3,
             typeValue = "C521",
             referenceNumber = "ACR1"
           )
         )
 
-        val converted: Seq[AuthorisationType03] = Authorisations.transform(uA)
+        val converted: Seq[AuthorisationType02] = Authorisations.transform(uA)
 
-        converted shouldBe expected
+        converted shouldEqual expected
       }
     }
   }
