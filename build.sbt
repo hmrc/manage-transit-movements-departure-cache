@@ -24,7 +24,6 @@ lazy val microservice = Project(appName, file("."))
     Compile / scalaxb / scalaxbDispatchVersion := "1.1.3",
     Compile / scalaxb / scalaxbPackageName := "generated"
   )
-  .settings(resolvers += Resolver.jcenterRepo)
   .settings(CodeCoverageSettings.settings *)
 
 lazy val it = project
