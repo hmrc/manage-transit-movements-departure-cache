@@ -16,26 +16,26 @@
 
 package api.submission
 
-import generated.{AddressType17, ContactPersonType05, HolderOfTheTransitProcedureType14}
+import generated.*
 import models.UserAnswers
-import play.api.libs.functional.syntax._
+import play.api.libs.functional.syntax.*
 import play.api.libs.json.{__, JsObject, Reads}
 
 object HolderOfTheTransitProcedure {
 
-  def transform(uA: UserAnswers): HolderOfTheTransitProcedureType14 = uA
+  def transform(uA: UserAnswers): HolderOfTheTransitProcedureType23 = uA
     .get[JsObject](traderDetailsPath \ "holderOfTransit")
     .getOrElse(throw new Exception("Json did not contain holder of transit answers"))
-    .as[HolderOfTheTransitProcedureType14](holderOfTheTransitProcedureType14.reads)
+    .as[HolderOfTheTransitProcedureType23](holderOfTheTransitProcedureType23.reads)
 }
 
-object holderOfTheTransitProcedureType14 {
+object holderOfTheTransitProcedureType23 {
 
-  implicit val reads: Reads[HolderOfTheTransitProcedureType14] = (
+  implicit val reads: Reads[HolderOfTheTransitProcedureType23] = (
     (__ \ "eori").readNullable[String] and
       (__ \ "tirIdentification").readNullable[String] and
       (__ \ "name").readNullable[String] and
-      __.read[Option[AddressType17]](addressType17.optionalReads) and
-      (__ \ "contact").readNullable[ContactPersonType05](contactPersonType05.reads)
-  )(HolderOfTheTransitProcedureType14.apply)
+      __.read[Option[AddressType14]](addressType14.optionalReads) and
+      (__ \ "contact").readNullable[ContactPersonType03](contactPersonType03.reads)
+  )(HolderOfTheTransitProcedureType23.apply)
 }

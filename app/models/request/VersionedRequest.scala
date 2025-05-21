@@ -14,22 +14,12 @@
  * limitations under the License.
  */
 
-package controllers.actions
+package models.request
 
-import models.request.{AuthenticatedRequest, VersionedRequest}
-import play.api.mvc.{ActionBuilder, AnyContent, DefaultActionBuilder}
+import models.Version
+import play.api.mvc.WrappedRequest
 
-import javax.inject.Inject
+case class VersionedRequest[A](request: AuthenticatedRequest[A], phase: Version) extends WrappedRequest[A](request) {
 
-class Actions @Inject() (
-  buildDefault: DefaultActionBuilder,
-  authenticateActionProvider: AuthenticateActionProvider,
-  versionedAction: VersionedAction
-) {
-
-  def authenticate(): ActionBuilder[AuthenticatedRequest, AnyContent] =
-    buildDefault andThen authenticateActionProvider()
-
-  def authenticateAndGetVersion(): ActionBuilder[VersionedRequest, AnyContent] =
-    authenticate() andThen versionedAction
+  val eoriNumber: String = request.eoriNumber
 }

@@ -16,47 +16,16 @@
 
 package api.submission
 
-import generated.{GuaranteeReferenceType03, GuaranteeType01, GuaranteeType02}
+import generated.*
 import models.UserAnswers
-import play.api.libs.functional.syntax._
+import play.api.libs.functional.syntax.*
 import play.api.libs.json.{__, JsArray, Reads}
 
 object Guarantee {
 
-  private case class GuaranteeType(
-    sequenceNumber: BigInt,
-    guaranteeType: String,
-    otherGuaranteeReference: Option[String] = None,
-    GuaranteeReference: Seq[GuaranteeReferenceType03] = Nil
-  ) {
-
-    def asGuaranteeType01: GuaranteeType01 =
-      GuaranteeType01(sequenceNumber, Some(guaranteeType), otherGuaranteeReference, GuaranteeReference)
-
-    def asGuaranteeType02: GuaranteeType02 =
-      GuaranteeType02(sequenceNumber, guaranteeType, otherGuaranteeReference, GuaranteeReference)
-  }
-
-  private object GuaranteeType {
-
-    def reads(index: Int): Reads[GuaranteeType] =
-      (
-        Reads.pure[BigInt](index) and
-          (__ \ "guaranteeType" \ "code").read[String] and
-          (__ \ "otherReference").readNullable[String] and
-          __.read[GuaranteeReferenceType03](guaranteeReferenceType03.reads(index)).map(Seq(_))
-      )(GuaranteeType.apply)
-  }
-
-  def transform(uA: UserAnswers): Seq[GuaranteeType02] =
-    transform[GuaranteeType02](uA)(_.asGuaranteeType02)
-
-  def transformIE013(uA: UserAnswers): Seq[GuaranteeType01] =
-    transform[GuaranteeType01](uA)(_.asGuaranteeType01)
-
-  private def transform[T](uA: UserAnswers)(f: GuaranteeType => T): Seq[T] =
+  def transform(uA: UserAnswers): Seq[GuaranteeType05] =
     uA.get[JsArray](guaranteesPath)
-      .readValuesAs[GuaranteeType](GuaranteeType.reads)
+      .readValuesAs[GuaranteeType05](guaranteeType05.reads)
       .groupByPreserveOrder {
         x =>
           (x.guaranteeType, x.otherGuaranteeReference)
@@ -64,30 +33,41 @@ object Guarantee {
       .zipWithSequenceNumber
       .map {
         case (((guaranteeType, otherGuaranteeReference), guarantees), index) =>
-          GuaranteeType(
+          GuaranteeType05(
             sequenceNumber = index,
             guaranteeType = guaranteeType,
             otherGuaranteeReference = otherGuaranteeReference,
-            GuaranteeReference = guaranteeReference(guarantees)
+            GuaranteeReference = guarantees.flatMap(_.GuaranteeReference).toSeq.zipWithSequenceNumber.map {
+              case (guaranteeReference, index) =>
+                guaranteeReference.copy(sequenceNumber = index)
+            }
           )
       }
-      .map(f)
+}
 
-  private def guaranteeReference(guarantees: Iterable[GuaranteeType]): Seq[GuaranteeReferenceType03] =
-    guarantees.flatMap(_.GuaranteeReference).toSeq.zipWithSequenceNumber.map {
-      case (guaranteeReference, index) =>
-        guaranteeReference.copy(sequenceNumber = index)
-    }
+object guaranteeType05 {
+
+  def reads(index: Int): Reads[GuaranteeType05] =
+    (
+      Reads.pure[BigInt](index) and
+        (__ \ "guaranteeType" \ "code").read[String] and
+        (__ \ "otherReference").readNullable[String] and
+        __.read[Option[GuaranteeReferenceType03]](guaranteeReferenceType03.reads(index)).map(_.toSeq)
+    )(GuaranteeType05.apply)
 }
 
 object guaranteeReferenceType03 {
 
-  def reads(index: Int): Reads[GuaranteeReferenceType03] =
+  def reads(index: Int): Reads[Option[GuaranteeReferenceType03]] =
     (
       Reads.pure[BigInt](index) and
         (__ \ "referenceNumber").readNullable[String] and
         (__ \ "accessCode").readNullable[String] and
         (__ \ "liabilityAmount").readNullable[BigDecimal] and
         (__ \ "currency" \ "currency").readNullable[String]
-    )(GuaranteeReferenceType03.apply)
+    ).tupled.map {
+      case (sequenceNumber, grn, accessCode, Some(amountToBeCovered), Some(currency)) =>
+        Some(GuaranteeReferenceType03(sequenceNumber, grn, accessCode, amountToBeCovered, currency))
+      case _ => None
+    }
 }

@@ -16,8 +16,8 @@
 
 package api.submission
 
-import generated.{AddressType12, AddressType14, AddressType17, PostcodeAddressType02}
-import play.api.libs.functional.syntax._
+import generated.*
+import play.api.libs.functional.syntax.*
 import play.api.libs.json.{__, Reads}
 
 object addressType {
@@ -34,39 +34,14 @@ object addressType {
   }
 }
 
+object addressType06 {
+
+  implicit val optionalReads: Reads[Option[AddressType06]] =
+    addressType.optionalReads(AddressType06.apply)
+}
+
 object addressType14 {
 
   implicit val optionalReads: Reads[Option[AddressType14]] =
     addressType.optionalReads(AddressType14.apply)
-}
-
-object addressType17 {
-
-  implicit val optionalReads: Reads[Option[AddressType17]] =
-    addressType.optionalReads(AddressType17.apply)
-}
-
-object postcodeAddressType02 {
-
-  implicit val reads: Reads[PostcodeAddressType02] = (
-    (__ \ "streetNumber").readNullable[String] and
-      (__ \ "postalCode").read[String] and
-      (__ \ "country" \ "code").read[String]
-  )(PostcodeAddressType02.apply)
-}
-
-object addressType12 {
-
-  implicit val optionalReads: Reads[Option[AddressType12]] =
-    addressType.optionalReads(AddressType12.apply)
-
-  implicit class RichAddressType12(value: AddressType12) {
-
-    def asAddressType17: AddressType17 = AddressType17(
-      streetAndNumber = value.streetAndNumber,
-      postcode = value.postcode,
-      city = value.city,
-      country = value.country
-    )
-  }
 }
