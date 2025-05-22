@@ -43,7 +43,8 @@ class CacheRepository @Inject() (
       mongoComponent = mongoComponent,
       collectionName = CacheRepository.collectionName,
       domainFormat = UserAnswers.sensitiveFormat,
-      indexes = CacheRepository.indexes(appConfig)
+      indexes = CacheRepository.indexes(appConfig),
+      replaceIndexes = appConfig.replaceIndexes
     ) {
 
   def get(lrn: String, eoriNumber: String): Future[Option[UserAnswers]] = {
