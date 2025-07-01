@@ -25,6 +25,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.ExecutionContext
+import scala.util.control.NonFatal
 
 @Singleton()
 class SessionController @Inject() (
@@ -49,7 +50,7 @@ class SessionController @Inject() (
             Ok
         }
         .recover {
-          case e =>
+          case NonFatal(e) =>
             logger.error("Failed to delete draft and locks", e)
             InternalServerError
         }

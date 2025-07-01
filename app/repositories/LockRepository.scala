@@ -38,7 +38,8 @@ class LockRepository @Inject() (
       mongoComponent = mongoComponent,
       collectionName = LockRepository.name,
       domainFormat = Lock.format,
-      indexes = LockRepository.indexes(appConfig)
+      indexes = LockRepository.indexes(appConfig),
+      replaceIndexes = appConfig.replaceIndexes
     ) {
 
   private def insertNewLock(lock: Lock): Future[Boolean] =

@@ -29,6 +29,7 @@ import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NonFatal
 
 @Singleton()
 class CacheController @Inject() (
@@ -92,7 +93,7 @@ class CacheController @Inject() (
           InternalServerError
       }
       .recover {
-        case e =>
+        case NonFatal(e) =>
           logger.error("Failed to write user answers to mongo", e)
           InternalServerError
       }
@@ -111,7 +112,7 @@ class CacheController @Inject() (
           .map(_.toHateoas(dateTimeService.expiresInDays))
           .map(Ok(_))
           .recover {
-            case e =>
+            case NonFatal(e) =>
               logger.error("Failed to read user answers summary from mongo", e)
               InternalServerError
           }
@@ -137,7 +138,7 @@ class CacheController @Inject() (
               NotFound
           }
           .recover {
-            case e =>
+            case NonFatal(e) =>
               logger.error("Failed to read user answers from mongo", e)
               InternalServerError
           }
