@@ -279,7 +279,7 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
     }
 
     "return 400" when {
-      "no invalid API-Version header" in {
+      "invalid API-Version header" in {
         val request = FakeRequest(GET, routes.SubmissionController.get(lrn).url)
           .withHeaders("API-Version" -> "foo")
 
