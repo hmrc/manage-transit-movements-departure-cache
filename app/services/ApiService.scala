@@ -30,20 +30,20 @@ class ApiService @Inject() (
   declaration: Declaration
 )(implicit ec: ExecutionContext) {
 
-  def submitDeclaration(userAnswers: UserAnswers, version: Version)(implicit hc: HeaderCarrier): Future[HttpResponse] =
-    apiConnector.submitDeclaration(declaration.transform(userAnswers, MovementReferenceNumber.Empty, version))
+  def submitDeclaration(userAnswers: UserAnswers, version: Phase)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    apiConnector.submitDeclaration(declaration.transform(userAnswers, MovementReferenceNumber.Empty, version), version)
 
-  def submitAmendment(userAnswers: UserAnswers, departureId: String, version: Version)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+  def submitAmendment(userAnswers: UserAnswers, departureId: String, version: Phase)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     for {
-      mrn <- apiConnector.getMRN(departureId)
+      mrn <- apiConnector.getMRN(departureId, version)
       payload = declaration.transform(userAnswers, mrn, version)
-      result <- apiConnector.submitAmendment(departureId, payload)
+      result <- apiConnector.submitAmendment(departureId, payload, version)
     } yield result
 
-  def get(lrn: String)(implicit hc: HeaderCarrier): Future[Option[Messages]] =
-    apiConnector.getDeparture(lrn).flatMap {
+  def get(lrn: String, version: Phase)(implicit hc: HeaderCarrier): Future[Option[Messages]] =
+    apiConnector.getDeparture(lrn, version).flatMap {
       _.traverse {
-        departure => apiConnector.getMessages(departure.id)
+        departure => apiConnector.getMessages(departure.id, version)
       }
     }
 }

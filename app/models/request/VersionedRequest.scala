@@ -16,10 +16,10 @@
 
 package models.request
 
-import models.Version
+import models.Phase
 import play.api.mvc.WrappedRequest
 
-case class VersionedRequest[A](request: AuthenticatedRequest[A], phase: Version) extends WrappedRequest[A](request) {
+case class VersionedRequest[A](request: AuthenticatedRequest[A], phase: Phase) extends WrappedRequest[A](request) {
 
   val eoriNumber: String = request.eoriNumber
 }

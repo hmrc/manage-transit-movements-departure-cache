@@ -94,8 +94,8 @@ trait ModelGenerators {
       } yield FunctionalError(errorPointer, errorCode, errorReason, originalAttributeValue)
     }
 
-  implicit lazy val arbitraryVersion: Arbitrary[Version] =
+  implicit lazy val arbitraryVersion: Arbitrary[Phase] =
     Arbitrary {
-      Gen.oneOf(Version.Phase5, Version.Phase6)
+      Gen.oneOf(Phase.Phase5, Phase.Phase6)
     }
 }

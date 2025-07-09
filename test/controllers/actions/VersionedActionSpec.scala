@@ -17,7 +17,7 @@
 package controllers.actions
 
 import base.SpecBase
-import models.Version
+import models.Phase
 import models.request.{AuthenticatedRequest, VersionedRequest}
 import play.api.mvc.*
 import play.api.mvc.Results.BadRequest
@@ -43,7 +43,7 @@ class VersionedActionSpec extends SpecBase {
         val authenticatedRequest = AuthenticatedRequest(request, "EORINumber")
         val result               = action.callRefine(authenticatedRequest).futureValue
 
-        result.value shouldEqual VersionedRequest(authenticatedRequest, Version.Phase5)
+        result.value shouldEqual VersionedRequest(authenticatedRequest, Phase.Phase5)
       }
     }
 
@@ -55,7 +55,7 @@ class VersionedActionSpec extends SpecBase {
         val authenticatedRequest = AuthenticatedRequest(request, "EORINumber")
         val result               = action.callRefine(authenticatedRequest).futureValue
 
-        result.value shouldEqual VersionedRequest(authenticatedRequest, Version.Phase6)
+        result.value shouldEqual VersionedRequest(authenticatedRequest, Phase.Phase6)
       }
     }
 
@@ -66,7 +66,7 @@ class VersionedActionSpec extends SpecBase {
         val authenticatedRequest = AuthenticatedRequest(fakeRequest, "EORINumber")
         val result               = action.callRefine(authenticatedRequest).futureValue
 
-        result.value shouldEqual VersionedRequest(authenticatedRequest, Version.Phase5)
+        result.value shouldEqual VersionedRequest(authenticatedRequest, Phase.Phase5)
       }
     }
 

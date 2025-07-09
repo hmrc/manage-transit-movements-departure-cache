@@ -18,7 +18,7 @@ package api.submission
 
 import generated.*
 import models.SubmissionState.{Amendment, GuaranteeAmendment}
-import models.{MovementReferenceNumber, UserAnswers, Version}
+import models.{MovementReferenceNumber, Phase, UserAnswers}
 import scalaxb.DataRecord
 import scalaxb.`package`.toXML
 
@@ -29,14 +29,14 @@ class Declaration @Inject() (header: Header) {
 
   private val scope: NamespaceBinding = scalaxb.toScope(Some("ncts") -> "http://ncts.dgtaxud.ec")
 
-  def transform(uA: UserAnswers, mrn: MovementReferenceNumber, version: Version): NodeSeq =
+  def transform(uA: UserAnswers, mrn: MovementReferenceNumber, version: Phase): NodeSeq =
     uA.metadata.isSubmitted match {
       case Amendment          => toXML(IE013(uA, mrn.value, amendmentTypeFlag = false, version), s"ncts:$CC013C", scope)
       case GuaranteeAmendment => toXML(IE013(uA, mrn.value, amendmentTypeFlag = true, version), s"ncts:$CC013C", scope)
       case _                  => toXML(IE015(uA, version), s"ncts:${CC015C.toString}", scope)
     }
 
-  private def IE015(uA: UserAnswers, version: Version): CC015CType =
+  private def IE015(uA: UserAnswers, version: Phase): CC015CType =
     CC015CType(
       messageSequence1 = header.message(uA, CC015C),
       TransitOperation = TransitOperation.transform(uA),
@@ -52,7 +52,7 @@ class Declaration @Inject() (header: Header) {
       attributes = attributes(version)
     )
 
-  private def IE013(uA: UserAnswers, mrn: Option[String], amendmentTypeFlag: Boolean, version: Version): CC013CType =
+  private def IE013(uA: UserAnswers, mrn: Option[String], amendmentTypeFlag: Boolean, version: Phase): CC013CType =
     CC013CType(
       messageSequence1 = header.message(uA, CC013C),
       TransitOperation = TransitOperation.transform(uA, mrn, amendmentTypeFlag),
@@ -68,6 +68,6 @@ class Declaration @Inject() (header: Header) {
       attributes = attributes(version)
     )
 
-  def attributes(version: Version): Map[String, DataRecord[?]] =
+  def attributes(version: Phase): Map[String, DataRecord[?]] =
     Map("@PhaseID" -> DataRecord(PhaseIDtype.fromString(version.id.toString, scope)))
 }

@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import models.Version
+import models.Phase
 import models.request.{AuthenticatedRequest, VersionedRequest}
 import play.api.mvc.Results.BadRequest
 import play.api.mvc.{ActionRefiner, Result}
@@ -28,7 +28,7 @@ import scala.util.{Failure, Success}
 class VersionedAction @Inject() (implicit val executionContext: ExecutionContext) extends ActionRefiner[AuthenticatedRequest, VersionedRequest] {
 
   override protected def refine[A](request: AuthenticatedRequest[A]): Future[Either[Result, VersionedRequest[A]]] =
-    Version(request.headers.get("API-Version")) match {
+    Phase(request.headers.get("API-Version")) match {
       case Success(version)   => Future.successful(Right(VersionedRequest(request, version)))
       case Failure(exception) => Future.successful(Left(BadRequest(exception.getMessage)))
     }

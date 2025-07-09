@@ -17,7 +17,7 @@
 package api.submission
 
 import base.SpecBase
-import models.Version
+import models.Phase
 
 class DeclarationSpec extends SpecBase {
 
@@ -26,13 +26,13 @@ class DeclarationSpec extends SpecBase {
   "attributes" must {
     "assign phase ID" when {
       "phase 5" in {
-        val result = service.attributes(Version.Phase5)
+        val result = service.attributes(Phase.Phase5)
         result.keys.size shouldEqual 1
         result.get("@PhaseID").value.value.toString shouldBe "NCTS5.1"
       }
 
       "phase 6" in {
-        val result = service.attributes(Version.Phase6)
+        val result = service.attributes(Phase.Phase6)
         result.keys.size shouldEqual 1
         result.get("@PhaseID").value.value.toString shouldBe "NCTS6"
       }

@@ -20,21 +20,22 @@ import generated.*
 
 import scala.util.{Failure, Success, Try}
 
-sealed trait Version {
+sealed trait Phase {
   val id: PhaseIDtype
+  val apiVersion: String = "2.1"
 }
 
-object Version {
+object Phase {
 
-  case object Phase5 extends Version {
+  case object Phase5 extends Phase {
     override val id: PhaseIDtype = NCTS5u461
   }
 
-  case object Phase6 extends Version {
+  case object Phase6 extends Phase {
     override val id: PhaseIDtype = NCTS6
   }
 
-  def apply(value: Option[String]): Try[Version] =
+  def apply(value: Option[String]): Try[Phase] =
     value match {
       case Some("2.0")        => Success(Phase6)
       case Some("1.0") | None => Success(Phase5)

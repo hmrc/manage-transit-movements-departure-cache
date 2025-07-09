@@ -20,35 +20,35 @@ import base.SpecBase
 
 import scala.util.Success
 
-class VersionSpec extends SpecBase {
+class PhaseSpec extends SpecBase {
 
-  "Version" when {
+  "Phase" when {
 
     "apply" when {
       "version is 1.0" must {
         "return Success(Phase5)" in {
-          val result = Version.apply(Some("1.0"))
-          result shouldEqual Success(Version.Phase5)
+          val result = Phase.apply(Some("1.0"))
+          result shouldEqual Success(Phase.Phase5)
         }
       }
 
       "version is 2.0" must {
         "return Some(Phase6)" in {
-          val result = Version.apply(Some("2.0"))
-          result shouldEqual Success(Version.Phase6)
+          val result = Phase.apply(Some("2.0"))
+          result shouldEqual Success(Phase.Phase6)
         }
       }
 
       "version is undefined" must {
         "return Some(Phase5)" in {
-          val result = Version.apply(None)
-          result shouldEqual Success(Version.Phase5)
+          val result = Phase.apply(None)
+          result shouldEqual Success(Phase.Phase5)
         }
       }
 
       "version is unexpected value" must {
         "return None" in {
-          val result = Version.apply(Some("foo"))
+          val result = Phase.apply(Some("foo"))
           result.failed.get.getMessage shouldEqual "foo is not a valid version"
         }
       }
@@ -57,14 +57,14 @@ class VersionSpec extends SpecBase {
     "id" when {
       "Phase5" must {
         "return NCTS5.1" in {
-          val result = Version.Phase5.id
+          val result = Phase.Phase5.id
           result.toString shouldEqual "NCTS5.1"
         }
       }
 
       "Phase6" must {
         "return NCTS6" in {
-          val result = Version.Phase6.id
+          val result = Phase.Phase6.id
           result.toString shouldEqual "NCTS6"
         }
       }
