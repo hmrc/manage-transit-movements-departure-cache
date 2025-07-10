@@ -17,9 +17,9 @@
 package services
 
 import api.submission.Declaration
-import cats.implicits._
+import cats.implicits.*
 import connectors.ApiConnector
-import models._
+import models.*
 import uk.gov.hmrc.http.{HeaderCarrier, HttpResponse}
 
 import javax.inject.Inject
@@ -30,20 +30,20 @@ class ApiService @Inject() (
   declaration: Declaration
 )(implicit ec: ExecutionContext) {
 
-  def submitDeclaration(userAnswers: UserAnswers)(implicit hc: HeaderCarrier): Future[HttpResponse] =
-    apiConnector.submitDeclaration(declaration.transform(userAnswers, MovementReferenceNumber.Empty))
+  def submitDeclaration(userAnswers: UserAnswers, version: Phase)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+    apiConnector.submitDeclaration(declaration.transform(userAnswers, MovementReferenceNumber.Empty, version), version)
 
-  def submitAmendment(userAnswers: UserAnswers, departureId: String)(implicit hc: HeaderCarrier): Future[HttpResponse] =
+  def submitAmendment(userAnswers: UserAnswers, departureId: String, version: Phase)(implicit hc: HeaderCarrier): Future[HttpResponse] =
     for {
-      mrn <- apiConnector.getMRN(departureId)
-      payload = declaration.transform(userAnswers, mrn)
-      result <- apiConnector.submitAmendment(departureId, payload)
+      mrn <- apiConnector.getMRN(departureId, version)
+      payload = declaration.transform(userAnswers, mrn, version)
+      result <- apiConnector.submitAmendment(departureId, payload, version)
     } yield result
 
-  def get(lrn: String)(implicit hc: HeaderCarrier): Future[Option[Messages]] =
-    apiConnector.getDeparture(lrn).flatMap {
+  def get(lrn: String, version: Phase)(implicit hc: HeaderCarrier): Future[Option[Messages]] =
+    apiConnector.getDeparture(lrn, version).flatMap {
       _.traverse {
-        departure => apiConnector.getMessages(departure.id)
+        departure => apiConnector.getMessages(departure.id, version)
       }
     }
 }

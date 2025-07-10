@@ -17,26 +17,26 @@
 package api.submission
 
 import config.Constants.RepresentativeStatusCode.DirectRepresentation
-import generated.{ContactPersonType05, RepresentativeType05}
+import generated.*
 import models.UserAnswers
-import play.api.libs.functional.syntax._
+import play.api.libs.functional.syntax.*
 import play.api.libs.json.{__, JsObject, Reads}
 
 object Representative {
 
-  def transform(uA: UserAnswers): Option[RepresentativeType05] = uA
+  def transform(uA: UserAnswers): Option[RepresentativeType06] = uA
     .get[JsObject](traderDetailsPath \ "representative")
-    .readValueAs[RepresentativeType05](representativeType05.reads)
+    .readValueAs[RepresentativeType06](representativeType06.reads)
 }
 
-object representativeType05 {
+object representativeType06 {
 
-  implicit val reads: Reads[RepresentativeType05] = (
+  implicit val reads: Reads[RepresentativeType06] = (
     (__ \ "eori").read[String] and
-      __.read[Option[ContactPersonType05]](contactPersonType05.optionalReads)
+      __.read[Option[ContactPersonType03]](contactPersonType03.optionalReads)
   ).apply {
     (identificationNumber, ContactPerson) =>
-      RepresentativeType05(
+      RepresentativeType06(
         identificationNumber = identificationNumber,
         status = DirectRepresentation,
         ContactPerson = ContactPerson

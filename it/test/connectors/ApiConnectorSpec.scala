@@ -16,12 +16,13 @@
 
 package connectors
 
-import com.github.tomakehurst.wiremock.client.WireMock._
+import com.github.tomakehurst.wiremock.client.WireMock.*
 import itbase.{ItSpecBase, WireMockServerHandler}
-import models._
+import models.*
+import models.Phase.Phase5
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
-import play.api.test.Helpers._
+import play.api.test.Helpers.*
 import uk.gov.hmrc.http.HeaderCarrier
 
 import scala.xml.NodeSeq
@@ -85,7 +86,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
 
         val expectedResult = Some(Departure(departureId, lrn))
 
-        await(connector.getDeparture(lrn)) shouldBe expectedResult
+        await(connector.getDeparture(lrn, Phase5)) shouldEqual expectedResult
       }
     }
 
@@ -121,7 +122,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             .willReturn(okJson(responseJson.toString()))
         )
 
-        await(connector.getMRN(departureId)) shouldBe MovementReferenceNumber(Some(mrn))
+        await(connector.getMRN(departureId, Phase5)) shouldEqual MovementReferenceNumber(Some(mrn))
       }
     }
 
@@ -191,7 +192,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
           )
         )
 
-        await(connector.getMessages(departureId)) shouldBe expectedResult
+        await(connector.getMessages(departureId, Phase5)) shouldEqual expectedResult
       }
     }
 
@@ -226,8 +227,8 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
               .willReturn(okJson(expected))
           )
 
-          val res = await(connector.submitDeclaration(payload))
-          res.status shouldBe OK
+          val res = await(connector.submitDeclaration(payload, Phase5))
+          res.status shouldEqual OK
         }
 
         "bad request" in {
@@ -237,8 +238,8 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
               .willReturn(badRequest())
           )
 
-          val res = await(connector.submitDeclaration(payload))
-          res.status shouldBe BAD_REQUEST
+          val res = await(connector.submitDeclaration(payload, Phase5))
+          res.status shouldEqual BAD_REQUEST
         }
 
         "internal server error" in {
@@ -248,8 +249,8 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
               .willReturn(serverError())
           )
 
-          val res = await(connector.submitDeclaration(payload))
-          res.status shouldBe INTERNAL_SERVER_ERROR
+          val res = await(connector.submitDeclaration(payload, Phase5))
+          res.status shouldEqual INTERNAL_SERVER_ERROR
         }
       }
 
@@ -268,8 +269,8 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
               .willReturn(okJson(expected))
           )
 
-          val res = await(connector.submitAmendment(departureId, payload))
-          res.status shouldBe OK
+          val res = await(connector.submitAmendment(departureId, payload, Phase5))
+          res.status shouldEqual OK
         }
 
         "bad request" in {
@@ -279,8 +280,8 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
               .willReturn(badRequest())
           )
 
-          val res = await(connector.submitAmendment(departureId, payload))
-          res.status shouldBe BAD_REQUEST
+          val res = await(connector.submitAmendment(departureId, payload, Phase5))
+          res.status shouldEqual BAD_REQUEST
         }
 
         "internal server error" in {
@@ -290,8 +291,8 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
               .willReturn(serverError())
           )
 
-          val res = await(connector.submitAmendment(departureId, payload))
-          res.status shouldBe INTERNAL_SERVER_ERROR
+          val res = await(connector.submitAmendment(departureId, payload, Phase5))
+          res.status shouldEqual INTERNAL_SERVER_ERROR
         }
       }
     }

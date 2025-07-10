@@ -17,13 +17,13 @@
 package connectors
 
 import config.AppConfig
-import models.{Departure, Departures, Messages, MovementReferenceNumber}
+import models.*
 import play.api.Logging
-import play.api.http.HeaderNames._
-import uk.gov.hmrc.http.HttpReads.Implicits._
+import play.api.http.HeaderNames.*
+import play.api.libs.ws.XMLBodyWritables.*
+import uk.gov.hmrc.http.HttpReads.Implicits.*
 import uk.gov.hmrc.http.client.HttpClientV2
 import uk.gov.hmrc.http.{HeaderCarrier, HttpErrorFunctions, HttpResponse, StringContextOps}
-import play.api.libs.ws.XMLBodyWritables._
 
 import java.net.URL
 import javax.inject.Inject
@@ -32,49 +32,50 @@ import scala.xml.NodeSeq
 
 class ApiConnector @Inject() (http: HttpClientV2)(implicit ec: ExecutionContext, appConfig: AppConfig) extends HttpErrorFunctions with Logging {
 
-  def getDeparture(lrn: String)(implicit hc: HeaderCarrier): Future[Option[Departure]] = {
+  def getDeparture(lrn: String, version: Phase)(implicit hc: HeaderCarrier): Future[Option[Departure]] = {
     val url = url"${appConfig.apiUrl}/movements/departures"
     http
       .get(url)
       .transform(_.withQueryStringParameters("localReferenceNumber" -> lrn))
-      .setHeader(ACCEPT -> s"application/vnd.hmrc.2.1+json")
+      .setHeader(ACCEPT -> s"application/vnd.hmrc.${version.apiVersion}+json")
       .execute[Departures]
       .map(_.departures.headOption)
   }
 
-  def getMRN(departureId: String)(implicit hc: HeaderCarrier): Future[MovementReferenceNumber] = {
+  def getMRN(departureId: String, version: Phase)(implicit hc: HeaderCarrier): Future[MovementReferenceNumber] = {
     val url = url"${appConfig.apiUrl}/movements/departures/$departureId"
     http
       .get(url)
-      .setHeader(ACCEPT -> s"application/vnd.hmrc.2.1+json")
+      .setHeader(ACCEPT -> s"application/vnd.hmrc.${version.apiVersion}+json")
       .execute[MovementReferenceNumber]
   }
 
-  def getMessages(departureId: String)(implicit hc: HeaderCarrier): Future[Messages] = {
+  def getMessages(departureId: String, version: Phase)(implicit hc: HeaderCarrier): Future[Messages] = {
     val url = url"${appConfig.apiUrl}/movements/departures/$departureId/messages"
     http
       .get(url)
-      .setHeader(ACCEPT -> s"application/vnd.hmrc.2.1+json")
+      .setHeader(ACCEPT -> s"application/vnd.hmrc.${version.apiVersion}+json")
       .execute[Messages]
   }
 
-  def submitAmendment(departureId: String, xml: NodeSeq)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def submitAmendment(departureId: String, xml: NodeSeq, version: Phase)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val url = url"${appConfig.apiUrl}/movements/departures/$departureId/messages"
-    submit(url, xml)
+    submit(url, xml, version)
   }
 
-  def submitDeclaration(xml: NodeSeq)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
+  def submitDeclaration(xml: NodeSeq, version: Phase)(implicit hc: HeaderCarrier): Future[HttpResponse] = {
     val url = url"${appConfig.apiUrl}/movements/departures"
-    submit(url, xml)
+    submit(url, xml, version)
   }
 
   private def submit(
     url: URL,
-    xml: NodeSeq
+    xml: NodeSeq,
+    version: Phase
   )(implicit hc: HeaderCarrier): Future[HttpResponse] =
     http
       .post(url)
-      .setHeader(ACCEPT -> s"application/vnd.hmrc.2.1+json")
+      .setHeader(ACCEPT -> s"application/vnd.hmrc.${version.apiVersion}+json")
       .setHeader(CONTENT_TYPE -> "application/xml")
       .withBody(xml)
       .execute[HttpResponse]
