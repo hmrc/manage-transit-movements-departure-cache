@@ -47,34 +47,34 @@ class SubmissionStateSpec extends AnyFreeSpec with Generators with Matchers with
       "must bind" - {
         "when not submitted" in {
           val result = SubmissionState.queryStringBindable.bind("state", Map("state" -> Seq("notSubmitted")))
-          result mustBe Some(Right(SubmissionState.NotSubmitted))
+          result.get.value mustEqual SubmissionState.NotSubmitted
         }
 
         "when submitted" in {
           val result = SubmissionState.queryStringBindable.bind("state", Map("state" -> Seq("submitted")))
-          result mustBe Some(Right(SubmissionState.Submitted))
+          result.get.value mustEqual SubmissionState.Submitted
         }
 
         "when rejected (pending changes)" in {
           val result = SubmissionState.queryStringBindable.bind("state", Map("state" -> Seq("rejectedPendingChanges")))
-          result mustBe Some(Right(SubmissionState.RejectedPendingChanges))
+          result.get.value mustEqual SubmissionState.RejectedPendingChanges
         }
       }
 
       "must unbind" - {
         "when not submitted" in {
           val result = SubmissionState.queryStringBindable.unbind("state", SubmissionState.NotSubmitted)
-          result mustBe "notSubmitted"
+          result mustEqual "notSubmitted"
         }
 
         "when submitted" in {
           val result = SubmissionState.queryStringBindable.unbind("state", SubmissionState.Submitted)
-          result mustBe "submitted"
+          result mustEqual "submitted"
         }
 
         "when rejected (pending changes)" in {
           val result = SubmissionState.queryStringBindable.unbind("state", SubmissionState.RejectedPendingChanges)
-          result mustBe "rejectedPendingChanges"
+          result mustEqual "rejectedPendingChanges"
         }
       }
     }

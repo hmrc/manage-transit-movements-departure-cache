@@ -33,7 +33,7 @@ class LockRepositorySpec extends LockRepositorySpecBase {
 
         val result = repository.lock("session1", "eoriNumber", "lrn").futureValue
 
-        result shouldBe true
+        result shouldEqual true
       }
 
       "update lock when sessionId is the same as lock" in {
@@ -46,8 +46,8 @@ class LockRepositorySpec extends LockRepositorySpecBase {
 
         val numberOfDocs: Long = repository.collection.countDocuments().head().futureValue
 
-        lockResult shouldBe true
-        numberOfDocs shouldBe 1
+        lockResult shouldEqual true
+        numberOfDocs shouldEqual 1
 
         val lock2 = findAll().futureValue.head
         lock2.lastUpdated.isAfter(lock1.lastUpdated) shouldEqual true
@@ -63,8 +63,8 @@ class LockRepositorySpec extends LockRepositorySpecBase {
 
         val numberOfDocs: Long = repository.collection.countDocuments().head().futureValue
 
-        result shouldBe false
-        numberOfDocs shouldBe 1
+        result shouldEqual false
+        numberOfDocs shouldEqual 1
 
         findAll().futureValue.head.sessionId shouldEqual "session1"
       }
@@ -90,8 +90,8 @@ class LockRepositorySpec extends LockRepositorySpecBase {
 
         val numberOfDocs: Long = repository.collection.countDocuments().head().futureValue
 
-        result shouldBe true
-        numberOfDocs shouldBe 0
+        result shouldEqual true
+        numberOfDocs shouldEqual 0
       }
     }
 
@@ -109,8 +109,8 @@ class LockRepositorySpec extends LockRepositorySpecBase {
 
         val numberOfDocs: Long = repository.collection.countDocuments().head().futureValue
 
-        result shouldBe true
-        numberOfDocs shouldBe 0
+        result shouldEqual true
+        numberOfDocs shouldEqual 0
       }
     }
   }

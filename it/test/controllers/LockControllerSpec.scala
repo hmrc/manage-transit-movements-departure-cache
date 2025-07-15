@@ -32,7 +32,7 @@ class LockControllerSpec extends LockRepositorySpecBase {
         .get()
         .futureValue
 
-      response.status shouldBe 200
+      response.status shouldEqual 200
     }
 
     "respond with BadRequest status without sessionId" in {
@@ -41,7 +41,7 @@ class LockControllerSpec extends LockRepositorySpecBase {
         .get()
         .futureValue
 
-      response.status shouldBe 400
+      response.status shouldEqual 400
     }
   }
 
@@ -56,7 +56,7 @@ class LockControllerSpec extends LockRepositorySpecBase {
         .get()
         .futureValue
 
-      response.status shouldBe 200
+      response.status shouldEqual 200
     }
 
     "respond with BadRequest status without sessionId" in {
@@ -65,7 +65,7 @@ class LockControllerSpec extends LockRepositorySpecBase {
         .get()
         .futureValue
 
-      response.status shouldBe 400
+      response.status shouldEqual 400
     }
   }
 }

@@ -58,7 +58,7 @@ class SessionServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       whenReady[Unit, Assertion](future) {
         result =>
-          result shouldBe ()
+          result shouldEqual ()
       }
     }
 

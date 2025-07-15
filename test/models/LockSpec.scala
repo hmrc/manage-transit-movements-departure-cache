@@ -54,12 +54,12 @@ class LockSpec extends SpecBase {
 
     "deserialise to Lock" in {
       val result = json.as[Lock]
-      result shouldBe lock
+      result shouldEqual lock
     }
 
     "serialise to json" in {
       val result = Json.toJson(json)
-      result shouldBe json
+      result shouldEqual json
     }
   }
 }

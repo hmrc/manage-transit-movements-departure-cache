@@ -28,11 +28,11 @@ class DateTimeServiceSpec extends SpecBase {
   "expiresInDays" should {
 
     "return correct days for a date today" in {
-      service.expiresInDays(Instant.now()) shouldBe 30L
+      service.expiresInDays(Instant.now()) shouldEqual 30L
     }
 
     "return correct days for a date 5 days ago" in {
-      service.expiresInDays(Instant.now().minus(5, DAYS)) shouldBe 25L
+      service.expiresInDays(Instant.now().minus(5, DAYS)) shouldEqual 25L
     }
   }
 

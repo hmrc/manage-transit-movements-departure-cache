@@ -28,13 +28,13 @@ class DeclarationSpec extends SpecBase {
       "phase 5" in {
         val result = service.attributes(Phase.Phase5)
         result.keys.size shouldEqual 1
-        result.get("@PhaseID").value.value.toString shouldBe "NCTS5.1"
+        result.get("@PhaseID").value.value.toString shouldEqual "NCTS5.1"
       }
 
       "phase 6" in {
         val result = service.attributes(Phase.Phase6)
         result.keys.size shouldEqual 1
-        result.get("@PhaseID").value.value.toString shouldBe "NCTS6"
+        result.get("@PhaseID").value.value.toString shouldEqual "NCTS6"
       }
     }
   }

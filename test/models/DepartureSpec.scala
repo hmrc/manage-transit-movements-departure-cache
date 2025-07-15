@@ -46,7 +46,7 @@ class DepartureSpec extends SpecBase with ScalaCheckPropertyChecks with Generato
             |""".stripMargin)
 
         val result = json.as[Departure]
-        result shouldBe Departure(departureId, lrn)
+        result shouldEqual Departure(departureId, lrn)
     }
   }
 }

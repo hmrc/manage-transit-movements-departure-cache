@@ -53,7 +53,7 @@ class LockControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val result = route(app, request).value
 
-        status(result) shouldBe OK
+        status(result) shouldEqual OK
       }
     }
 
@@ -67,7 +67,7 @@ class LockControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val result = route(app, request).value
 
-        status(result) shouldBe LOCKED
+        status(result) shouldEqual LOCKED
       }
     }
 
@@ -78,7 +78,7 @@ class LockControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val result = route(app, request).value
 
-        status(result) shouldBe BAD_REQUEST
+        status(result) shouldEqual BAD_REQUEST
       }
     }
   }
@@ -94,7 +94,7 @@ class LockControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val result = route(app, request).value
 
-        status(result) shouldBe OK
+        status(result) shouldEqual OK
       }
     }
 
@@ -108,7 +108,7 @@ class LockControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val result = route(app, request).value
 
-        status(result) shouldBe INTERNAL_SERVER_ERROR
+        status(result) shouldEqual INTERNAL_SERVER_ERROR
       }
     }
 
@@ -121,7 +121,7 @@ class LockControllerSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val result = route(app, request).value
 
-        status(result) shouldBe BAD_REQUEST
+        status(result) shouldEqual BAD_REQUEST
       }
     }
   }

@@ -65,7 +65,7 @@ class SessionControllerSpec extends SpecBase with AppWithDefaultMockFixtures wit
 
         val result = route(app, request).value
 
-        status(result) shouldBe OK
+        status(result) shouldEqual OK
 
         val auditType = DepartureDraftDeleted
         verify(mockSessionService).deleteUserAnswersAndLocks(eqTo(eoriNumber), eqTo(lrn))
@@ -82,7 +82,7 @@ class SessionControllerSpec extends SpecBase with AppWithDefaultMockFixtures wit
 
         val result = route(app, request).value
 
-        status(result) shouldBe INTERNAL_SERVER_ERROR
+        status(result) shouldEqual INTERNAL_SERVER_ERROR
 
         verify(mockSessionService).deleteUserAnswersAndLocks(eqTo(eoriNumber), eqTo(lrn))
         verifyNoInteractions(mockAuditService)

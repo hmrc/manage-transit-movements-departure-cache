@@ -40,10 +40,10 @@ class SessionControllerSpec extends RepositorySpecBase with CleanMongoCollection
           .delete()
           .futureValue
 
-        response.status shouldBe 200
+        response.status shouldEqual 200
 
-        cacheRepository.get(lrn, eoriNumber).futureValue shouldBe None
-        lockRepository.findLocks(eoriNumber, lrn).futureValue shouldBe None
+        cacheRepository.get(lrn, eoriNumber).futureValue shouldEqual None
+        lockRepository.findLocks(eoriNumber, lrn).futureValue shouldEqual None
       }
     }
 
@@ -56,10 +56,10 @@ class SessionControllerSpec extends RepositorySpecBase with CleanMongoCollection
           .delete()
           .futureValue
 
-        response.status shouldBe 200
+        response.status shouldEqual 200
 
-        cacheRepository.get(lrn, eoriNumber).futureValue shouldBe None
-        lockRepository.findLocks(eoriNumber, lrn).futureValue shouldBe None
+        cacheRepository.get(lrn, eoriNumber).futureValue shouldEqual None
+        lockRepository.findLocks(eoriNumber, lrn).futureValue shouldEqual None
       }
     }
 
@@ -70,7 +70,7 @@ class SessionControllerSpec extends RepositorySpecBase with CleanMongoCollection
           .delete()
           .futureValue
 
-        response.status shouldBe 200
+        response.status shouldEqual 200
       }
     }
   }
