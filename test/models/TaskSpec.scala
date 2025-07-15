@@ -24,67 +24,67 @@ class TaskSpec extends SpecBase with ScalaCheckPropertyChecks {
 
   "PreTaskList" must {
     "have correct taskName" in {
-      PreTaskList.taskName shouldBe ".preTaskList"
+      PreTaskList.taskName shouldEqual ".preTaskList"
     }
   }
 
   "TraderDetails" must {
     "have correct taskName" in {
-      TraderDetails.taskName shouldBe ".traderDetails"
+      TraderDetails.taskName shouldEqual ".traderDetails"
     }
 
     "resolve to String" in {
-      TraderDetails.toString shouldBe "Trader details"
+      TraderDetails.toString shouldEqual "Trader details"
     }
   }
 
   "RouteDetails" must {
     "have correct taskName" in {
-      RouteDetails.taskName shouldBe ".routeDetails"
+      RouteDetails.taskName shouldEqual ".routeDetails"
     }
 
     "resolve to String" in {
-      RouteDetails.toString shouldBe "Route details"
+      RouteDetails.toString shouldEqual "Route details"
     }
   }
 
   "TransportDetails" must {
     "have correct taskName" in {
-      TransportDetails.taskName shouldBe ".transportDetails"
+      TransportDetails.taskName shouldEqual ".transportDetails"
     }
 
     "resolve to String" in {
-      TransportDetails.toString shouldBe "Transport details"
+      TransportDetails.toString shouldEqual "Transport details"
     }
   }
 
   "GuaranteeDetails" must {
     "have correct taskName" in {
-      GuaranteeDetails.taskName shouldBe ".guaranteeDetails"
+      GuaranteeDetails.taskName shouldEqual ".guaranteeDetails"
     }
 
     "resolve to String" in {
-      GuaranteeDetails.toString shouldBe "Guarantee details"
+      GuaranteeDetails.toString shouldEqual "Guarantee details"
     }
   }
 
   "Documents" must {
     "have correct taskName" in {
-      Documents.taskName shouldBe ".documents"
+      Documents.taskName shouldEqual ".documents"
     }
 
     "resolve to String" in {
-      Documents.toString shouldBe "Documents"
+      Documents.toString shouldEqual "Documents"
     }
   }
 
   "Items" must {
     "have correct taskName" in {
-      Items.taskName shouldBe ".items"
+      Items.taskName shouldEqual ".items"
     }
 
     "resolve to String" in {
-      Items.toString shouldBe "Items"
+      Items.toString shouldEqual "Items"
     }
   }
 }

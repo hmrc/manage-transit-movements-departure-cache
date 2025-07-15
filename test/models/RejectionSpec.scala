@@ -41,7 +41,7 @@ class RejectionSpec extends SpecBase with ScalaCheckPropertyChecks {
 
             val result = json.validate[Rejection].get
 
-            result shouldBe IE055Rejection(departureId)
+            result shouldEqual IE055Rejection(departureId)
         }
       }
 
@@ -65,7 +65,7 @@ class RejectionSpec extends SpecBase with ScalaCheckPropertyChecks {
 
                 val result = json.validate[Rejection].get
 
-                result shouldBe IE056Rejection(
+                result shouldEqual IE056Rejection(
                   departureId,
                   AmendmentRejection,
                   Seq(
@@ -90,7 +90,7 @@ class RejectionSpec extends SpecBase with ScalaCheckPropertyChecks {
 
                 val result = json.validate[Rejection].get
 
-                result shouldBe IE056Rejection(
+                result shouldEqual IE056Rejection(
                   departureId,
                   AmendmentRejection,
                   Seq()
@@ -117,7 +117,7 @@ class RejectionSpec extends SpecBase with ScalaCheckPropertyChecks {
 
                 val result = json.validate[Rejection].get
 
-                result shouldBe IE056Rejection(
+                result shouldEqual IE056Rejection(
                   departureId,
                   DeclarationRejection,
                   Seq(
@@ -142,7 +142,7 @@ class RejectionSpec extends SpecBase with ScalaCheckPropertyChecks {
 
                 val result = json.validate[Rejection].get
 
-                result shouldBe IE056Rejection(
+                result shouldEqual IE056Rejection(
                   departureId,
                   DeclarationRejection,
                   Seq()

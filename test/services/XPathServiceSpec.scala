@@ -61,7 +61,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
 
-          result shouldBe true
+          result shouldEqual true
 
           verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         }
@@ -82,7 +82,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
             val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
 
-            result shouldBe true
+            result shouldEqual true
 
             verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
           }
@@ -99,7 +99,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
 
-          result shouldBe false
+          result shouldEqual false
 
           verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         }
@@ -113,7 +113,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
 
-          result shouldBe false
+          result shouldEqual false
 
           verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         }
@@ -132,7 +132,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
             val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
 
-            result shouldBe false
+            result shouldEqual false
 
             verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
           }
@@ -149,7 +149,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
 
-          result shouldBe false
+          result shouldEqual false
 
           verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         }
@@ -167,7 +167,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
 
-          result shouldBe false
+          result shouldEqual false
 
           verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
         }
@@ -195,8 +195,8 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
         val result = service.handleRejection(userAnswers, rejection)
 
-        result.metadata.isSubmitted shouldBe SubmissionState.GuaranteeAmendment
-        result.metadata.tasks shouldBe Map(
+        result.metadata.isSubmitted shouldEqual SubmissionState.GuaranteeAmendment
+        result.metadata.tasks shouldEqual Map(
           PreTaskList.taskName      -> Status.Unavailable,
           TraderDetails.taskName    -> Status.Unavailable,
           RouteDetails.taskName     -> Status.Unavailable,
@@ -205,7 +205,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
           Items.taskName            -> Status.Unavailable,
           GuaranteeDetails.taskName -> Status.Error
         )
-        result.departureId shouldBe Some(departureId)
+        result.departureId shouldEqual Some(departureId)
       }
 
       "IE056 rejection" when {
@@ -222,8 +222,8 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val result = service.handleRejection(userAnswers, rejection)
 
-          result.metadata.isSubmitted shouldBe SubmissionState.Amendment
-          result.metadata.tasks shouldBe Map(
+          result.metadata.isSubmitted shouldEqual SubmissionState.Amendment
+          result.metadata.tasks shouldEqual Map(
             PreTaskList.taskName      -> Status.Completed,
             TraderDetails.taskName    -> Status.Error,
             RouteDetails.taskName     -> Status.Completed,
@@ -232,7 +232,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
             Items.taskName            -> Status.Completed,
             GuaranteeDetails.taskName -> Status.Completed
           )
-          result.departureId shouldBe Some(departureId)
+          result.departureId shouldEqual Some(departureId)
         }
 
         "015 business rejection type" in {
@@ -248,8 +248,8 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
           val result = service.handleRejection(userAnswers, rejection)
 
-          result.metadata.isSubmitted shouldBe SubmissionState.RejectedPendingChanges
-          result.metadata.tasks shouldBe Map(
+          result.metadata.isSubmitted shouldEqual SubmissionState.RejectedPendingChanges
+          result.metadata.tasks shouldEqual Map(
             PreTaskList.taskName      -> Status.Completed,
             TraderDetails.taskName    -> Status.Error,
             RouteDetails.taskName     -> Status.Completed,
@@ -258,7 +258,7 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
             Items.taskName            -> Status.Completed,
             GuaranteeDetails.taskName -> Status.Completed
           )
-          result.departureId shouldBe None
+          result.departureId should not be defined
         }
       }
     }
@@ -270,8 +270,8 @@ class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
 
       val result = service.prepareForAmendment(userAnswers, departureId)
 
-      result.metadata.isSubmitted shouldBe SubmissionState.Amendment
-      result.departureId shouldBe Some(departureId)
+      result.metadata.isSubmitted shouldEqual SubmissionState.Amendment
+      result.departureId shouldEqual Some(departureId)
     }
   }
 }

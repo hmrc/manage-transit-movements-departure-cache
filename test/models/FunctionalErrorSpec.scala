@@ -44,7 +44,7 @@ class FunctionalErrorSpec extends SpecBase with ScalaCheckPropertyChecks with Ge
           originalAttributeValue = Some("GB635733627000")
         )
 
-        result.get.shouldBe(expectedResult)
+        result.get.shouldEqual(expectedResult)
       }
 
       "originalAttributeValue undefined" in {
@@ -65,7 +65,7 @@ class FunctionalErrorSpec extends SpecBase with ScalaCheckPropertyChecks with Ge
           originalAttributeValue = None
         )
 
-        result.get.shouldBe(expectedResult)
+        result.get.shouldEqual(expectedResult)
       }
     }
   }
@@ -92,7 +92,7 @@ class FunctionalErrorSpec extends SpecBase with ScalaCheckPropertyChecks with Ge
             |}
             |""".stripMargin)
 
-        result.shouldBe(expectedResult)
+        result.shouldEqual(expectedResult)
       }
     }
   }

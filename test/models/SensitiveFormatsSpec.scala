@@ -36,7 +36,7 @@ class SensitiveFormatsSpec extends SpecBase with AppWithDefaultMockFixtures {
           running(app) {
             val sensitiveFormats = app.injector.instanceOf[SensitiveFormats]
             val result           = Json.toJson(encryptedValue).as[JsObject](sensitiveFormats.jsObjectReads)
-            result shouldBe decryptedValue
+            result shouldEqual decryptedValue
           }
         }
 
@@ -48,7 +48,7 @@ class SensitiveFormatsSpec extends SpecBase with AppWithDefaultMockFixtures {
           running(app) {
             val sensitiveFormats = app.injector.instanceOf[SensitiveFormats]
             val result           = Json.toJson(decryptedValue).as[JsObject](sensitiveFormats.jsObjectReads)
-            result shouldBe decryptedValue
+            result shouldEqual decryptedValue
           }
         }
       }
@@ -62,7 +62,7 @@ class SensitiveFormatsSpec extends SpecBase with AppWithDefaultMockFixtures {
           running(app) {
             val sensitiveFormats = app.injector.instanceOf[SensitiveFormats]
             val result           = Json.toJson(encryptedValue).as[JsObject](sensitiveFormats.jsObjectReads)
-            result shouldBe decryptedValue
+            result shouldEqual decryptedValue
           }
         }
 
@@ -74,7 +74,7 @@ class SensitiveFormatsSpec extends SpecBase with AppWithDefaultMockFixtures {
           running(app) {
             val sensitiveFormats = app.injector.instanceOf[SensitiveFormats]
             val result           = Json.toJson(decryptedValue).as[JsObject](sensitiveFormats.jsObjectReads)
-            result shouldBe decryptedValue
+            result shouldEqual decryptedValue
           }
         }
       }
@@ -104,7 +104,7 @@ class SensitiveFormatsSpec extends SpecBase with AppWithDefaultMockFixtures {
           running(app) {
             val sensitiveFormats = app.injector.instanceOf[SensitiveFormats]
             val result           = Json.toJson(decryptedValue)(sensitiveFormats.jsObjectWrites)
-            result shouldBe decryptedValue
+            result shouldEqual decryptedValue
           }
         }
       }

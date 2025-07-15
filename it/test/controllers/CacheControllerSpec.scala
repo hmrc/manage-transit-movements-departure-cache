@@ -39,7 +39,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
           .get()
           .futureValue
 
-        response.status shouldBe 404
+        response.status shouldEqual 404
       }
     }
 
@@ -53,15 +53,15 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
           .get()
           .futureValue
 
-        response.status shouldBe 200
+        response.status shouldEqual 200
 
-        response.json.as[UserAnswers].metadata shouldBe userAnswers.metadata
+        response.json.as[UserAnswers].metadata shouldEqual userAnswers.metadata
 
-        response.json.as[UserAnswers].createdAt shouldBe userAnswers.createdAt.truncatedTo(
+        response.json.as[UserAnswers].createdAt shouldEqual userAnswers.createdAt.truncatedTo(
           java.time.temporal.ChronoUnit.MILLIS
         )
 
-        response.json.as[UserAnswers].lastUpdated shouldBe userAnswers.lastUpdated.truncatedTo(
+        response.json.as[UserAnswers].lastUpdated shouldEqual userAnswers.lastUpdated.truncatedTo(
           java.time.temporal.ChronoUnit.MILLIS
         )
       }
@@ -81,14 +81,14 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
           .post(Json.toJson(emptyMetadata))
           .futureValue
 
-        response.status shouldBe 200
+        response.status shouldEqual 200
 
         val results = findAll().futureValue
-        results.size shouldBe 1
+        results.size shouldEqual 1
         val result = results.head
-        result.lrn shouldBe metadata.lrn
-        result.eoriNumber shouldBe metadata.eoriNumber
-        result.metadata shouldBe metadata
+        result.lrn shouldEqual metadata.lrn
+        result.eoriNumber shouldEqual metadata.eoriNumber
+        result.metadata shouldEqual metadata
       }
     }
 
@@ -99,7 +99,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
           .post(Json.obj())
           .futureValue
 
-        response.status shouldBe 400
+        response.status shouldEqual 400
       }
     }
 
@@ -110,7 +110,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
           .post(JsString("foo"))
           .futureValue
 
-        response.status shouldBe 400
+        response.status shouldEqual 400
       }
     }
 
@@ -124,7 +124,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
           .post(Json.toJson(userAnswers))
           .futureValue
 
-        response.status shouldBe 403
+        response.status shouldEqual 403
       }
     }
   }
@@ -140,14 +140,14 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
           .put(JsString(lrn))
           .futureValue
 
-        response.status shouldBe 200
+        response.status shouldEqual 200
 
         val filters = Filters.and(
           Filters.eq("lrn", lrn),
           Filters.eq("eoriNumber", eoriNumber)
         )
         val results = find(filters).futureValue
-        results.size shouldBe 1
+        results.size shouldEqual 1
       }
     }
 
@@ -158,7 +158,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
           .put(Json.obj())
           .futureValue
 
-        response.status shouldBe 400
+        response.status shouldEqual 400
       }
     }
 
@@ -169,7 +169,7 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
           .put(Json.obj("foo" -> "bar"))
           .futureValue
 
-        response.status shouldBe 400
+        response.status shouldEqual 400
       }
     }
   }
@@ -202,19 +202,19 @@ class CacheControllerSpec extends CacheRepositorySpecBase {
           .get()
           .futureValue
 
-        response.status shouldBe 200
+        response.status shouldEqual 200
 
-        (response.json \ "userAnswers").as[Seq[JsObject]].length shouldBe 2
+        (response.json \ "userAnswers").as[Seq[JsObject]].length shouldEqual 2
 
         val lrnResults = response.json \ "userAnswers" \\ "lrn"
 
-        lrnResults.head.validate[String].get shouldBe "AB123"
-        lrnResults(1).validate[String].get shouldBe "CD123"
+        lrnResults.head.validate[String].get shouldEqual "AB123"
+        lrnResults(1).validate[String].get shouldEqual "CD123"
 
         val urlResults = response.json \ "userAnswers" \\ "_links"
 
-        (urlResults.head \ "self" \ "href").validate[String].get shouldBe controllers.routes.CacheController.get("AB123").url
-        (urlResults(1) \ "self" \ "href").validate[String].get shouldBe controllers.routes.CacheController.get("CD123").url
+        (urlResults.head \ "self" \ "href").validate[String].get shouldEqual controllers.routes.CacheController.get("AB123").url
+        (urlResults(1) \ "self" \ "href").validate[String].get shouldEqual controllers.routes.CacheController.get("CD123").url
       }
     }
   }
