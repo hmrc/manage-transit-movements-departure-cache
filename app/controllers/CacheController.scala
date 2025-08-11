@@ -16,6 +16,7 @@
 
 package controllers
 
+import config.AppConfig
 import controllers.actions.Actions
 import models.*
 import models.AuditType.*
@@ -39,7 +40,8 @@ class CacheController @Inject() (
   auditService: AuditService,
   metricsService: MetricsService,
   xPathService: XPathService,
-  dateTimeService: DateTimeService
+  dateTimeService: DateTimeService,
+  config: AppConfig
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
@@ -109,7 +111,7 @@ class CacheController @Inject() (
       implicit request =>
         cacheRepository
           .getAll(request.eoriNumber, lrn, state, limit, skip, sortBy)
-          .map(_.toHateoas(dateTimeService.expiresInDays))
+          .map(_.toHateoas(dateTimeService.timestamp, config.mongoTtlInDays))
           .map(Ok(_))
           .recover {
             case NonFatal(e) =>

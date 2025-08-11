@@ -16,30 +16,20 @@
 
 package base
 
-import config.AppConfig
-import models.{Metadata, SensitiveFormats, SubmissionState, UserAnswers}
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
+import models.{Metadata, SubmissionState, UserAnswers}
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 import org.scalatest.{EitherValues, OptionValues}
 import org.scalatestplus.mockito.MockitoSugar
-import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.mvc.AnyContent
 import play.api.test.FakeRequest
 import uk.gov.hmrc.http.HeaderCarrier
 
-import java.time.{Clock, Instant}
+import java.time.Instant
 import java.util.UUID
 
-trait SpecBase
-    extends AnyWordSpec
-    with Matchers
-    with MockitoSugar
-    with GuiceOneAppPerSuite
-    with OptionValues
-    with EitherValues
-    with ScalaFutures
-    with IntegrationPatience {
+trait SpecBase extends AnyWordSpec with Matchers with MockitoSugar with OptionValues with EitherValues with ScalaFutures {
 
   val lrn        = "lrn"
   val eoriNumber = "eori"
@@ -53,9 +43,5 @@ trait SpecBase
   val emptyUserAnswersWithDepartureId: UserAnswers = emptyUserAnswers.copy(departureId = Some(departureId))
 
   def fakeRequest: FakeRequest[AnyContent] = FakeRequest("", "")
-
-  implicit lazy val appConfig: AppConfig               = app.injector.instanceOf[AppConfig]
-  implicit lazy val clock: Clock                       = app.injector.instanceOf[Clock]
-  implicit lazy val sensitiveFormats: SensitiveFormats = app.injector.instanceOf[SensitiveFormats]
 
 }

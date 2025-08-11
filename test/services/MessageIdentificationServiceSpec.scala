@@ -16,11 +16,11 @@
 
 package services
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 
-class MessageIdentificationServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
+class MessageIdentificationServiceSpec extends SpecBase {
 
-  private val service = app.injector.instanceOf[MessageIdentificationService]
+  private val service = new MessageIdentificationService()
 
   "randomIdentifier" must {
     "generate a random string of 35 characters" in {

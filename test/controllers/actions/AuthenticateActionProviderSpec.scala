@@ -16,7 +16,7 @@
 
 package controllers.actions
 
-import base.SpecBase
+import base.{AppWithDefaultMockFixtures, SpecBase}
 import config.AppConfig
 import models.request.AuthenticatedRequest
 import org.mockito.ArgumentMatchers.any
@@ -30,7 +30,7 @@ import uk.gov.hmrc.auth.core.*
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class AuthenticateActionProviderSpec extends SpecBase {
+class AuthenticateActionProviderSpec extends SpecBase with AppWithDefaultMockFixtures {
 
   def baseApplication: GuiceApplicationBuilder =
     new GuiceApplicationBuilder()

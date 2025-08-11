@@ -18,11 +18,12 @@ package models
 
 import play.api.libs.json.{JsObject, Json}
 
-import java.time.Instant
+import java.time.temporal.ChronoUnit.DAYS
+import java.time.{Duration, Instant}
 
 case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers], totalMovements: Int, totalMatchingMovements: Int) {
 
-  def toHateoas(expiresInDays: Instant => Long): JsObject =
+  def toHateoas(timestamp: Instant, mongoTtlInDays: Int): JsObject =
     Json.obj(
       "eoriNumber"             -> eoriNumber,
       "totalMovements"         -> totalMovements,
@@ -34,11 +35,13 @@ case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers],
             "_links" -> Json.obj(
               "self" -> Json.obj("href" -> controllers.routes.CacheController.get(userAnswer.lrn).url)
             ),
-            "createdAt"     -> userAnswer.createdAt,
-            "lastUpdated"   -> userAnswer.lastUpdated,
-            "expiresInDays" -> expiresInDays(userAnswer.createdAt),
-            "_id"           -> userAnswer.id,
-            "isSubmitted"   -> userAnswer.metadata.isSubmitted
+            "createdAt"   -> userAnswer.createdAt,
+            "lastUpdated" -> userAnswer.lastUpdated,
+            "expiresInDays" -> {
+              Duration.between(timestamp, userAnswer.createdAt.plus(mongoTtlInDays, DAYS)).toDays + 1
+            },
+            "_id"         -> userAnswer.id,
+            "isSubmitted" -> userAnswer.metadata.isSubmitted
           )
       }
     )

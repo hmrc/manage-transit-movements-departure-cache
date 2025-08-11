@@ -16,40 +16,24 @@
 
 package api.submission
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 import generated.*
 import models.UserAnswers
-import org.mockito.Mockito.{reset, when}
+import org.mockito.Mockito.when
 import org.scalacheck.Gen
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import scalaxb.XMLCalendar
 import services.{DateTimeService, MessageIdentificationService}
 
 import java.time.LocalDateTime
 
-class HeaderSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaCheckPropertyChecks {
+class HeaderSpec extends SpecBase with ScalaCheckPropertyChecks {
 
   private lazy val mockDateTimeService              = mock[DateTimeService]
   private lazy val mockMessageIdentificationService = mock[MessageIdentificationService]
 
-  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
-    super
-      .guiceApplicationBuilder()
-      .overrides(
-        bind[DateTimeService].toInstance(mockDateTimeService),
-        bind[MessageIdentificationService].toInstance(mockMessageIdentificationService)
-      )
-
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-    reset(mockDateTimeService)
-    reset(mockMessageIdentificationService)
-  }
-
-  private val header: Header = app.injector.instanceOf[Header]
+  private val header: Header = new Header(mockDateTimeService, mockMessageIdentificationService)
 
   private val dateTime: LocalDateTime =
     LocalDateTime.of(2020, 1, 1, 0, 0, 0)

@@ -18,7 +18,6 @@ package models
 
 import base.SpecBase
 import play.api.libs.json.Json
-import services.DateTimeService
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit.DAYS
@@ -26,13 +25,11 @@ import java.util.UUID
 
 class UserAnswersSummarySpec extends SpecBase {
 
-  private val dateTimeService = app.injector.instanceOf[DateTimeService]
-
   "toHateoas" must {
 
     "turn an UserAnswersSummary to hateos json object" in {
 
-      val now = Instant.now(clock)
+      val now = Instant.now()
       val id1 = UUID.randomUUID()
       val id2 = UUID.randomUUID()
       val id3 = UUID.randomUUID()
@@ -85,7 +82,7 @@ class UserAnswersSummarySpec extends SpecBase {
           )
         )
 
-      userAnswersSummary.toHateoas(dateTimeService.expiresInDays) shouldEqual expectedResult
+      userAnswersSummary.toHateoas(Instant.now(), 30) shouldEqual expectedResult
     }
   }
 }
