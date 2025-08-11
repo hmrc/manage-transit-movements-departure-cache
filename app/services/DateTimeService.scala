@@ -34,5 +34,11 @@ class DateTimeService @Inject() (
   def nMinutesAgo(minutes: Int): Instant = timestamp.minus(minutes, MINUTES)
 
   def expiresInDays(createdAt: Instant): Long =
-    Duration.between(timestamp, createdAt.plus(config.mongoTtlInDays, DAYS)).toDays + 1
+    DateTimeService.expiresInDays(timestamp, createdAt, config.mongoTtlInDays)
+}
+
+object DateTimeService {
+
+  def expiresInDays(timestamp: Instant, createdAt: Instant, mongoTtlInDays: Int): Long =
+    Duration.between(timestamp, createdAt.plus(mongoTtlInDays, DAYS)).toDays + 1
 }

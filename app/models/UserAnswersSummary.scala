@@ -17,9 +17,9 @@
 package models
 
 import play.api.libs.json.{JsObject, Json}
+import services.DateTimeService
 
-import java.time.temporal.ChronoUnit.DAYS
-import java.time.{Duration, Instant}
+import java.time.Instant
 
 case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers], totalMovements: Int, totalMatchingMovements: Int) {
 
@@ -38,7 +38,7 @@ case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers],
             "createdAt"   -> userAnswer.createdAt,
             "lastUpdated" -> userAnswer.lastUpdated,
             "expiresInDays" -> {
-              Duration.between(timestamp, userAnswer.createdAt.plus(mongoTtlInDays, DAYS)).toDays + 1
+              DateTimeService.expiresInDays(timestamp, userAnswer.createdAt, mongoTtlInDays)
             },
             "_id"         -> userAnswer.id,
             "isSubmitted" -> userAnswer.metadata.isSubmitted
