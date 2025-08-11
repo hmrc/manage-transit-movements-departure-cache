@@ -16,14 +16,23 @@
 
 package base
 
+import config.AppConfig
 import controllers.actions.*
+import models.SensitiveFormats
 import org.scalatest.{BeforeAndAfterEach, TestSuite}
+import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.Application
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 
-trait AppWithDefaultMockFixtures extends BeforeAndAfterEach {
+import java.time.Clock
+
+trait AppWithDefaultMockFixtures extends GuiceOneAppPerSuite with BeforeAndAfterEach {
   self: TestSuite & SpecBase =>
+
+  implicit lazy val appConfig: AppConfig               = app.injector.instanceOf[AppConfig]
+  implicit lazy val clock: Clock                       = app.injector.instanceOf[Clock]
+  implicit lazy val sensitiveFormats: SensitiveFormats = app.injector.instanceOf[SensitiveFormats]
 
   override def fakeApplication(): Application =
     guiceApplicationBuilder()

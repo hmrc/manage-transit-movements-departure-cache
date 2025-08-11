@@ -16,13 +16,13 @@
 
 package api.submission
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
-import generated._
+import base.SpecBase
+import generated.*
 import models.UserAnswers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import play.api.libs.json.{JsValue, Json}
 
-class AuthorisationsSpec extends SpecBase with AppWithDefaultMockFixtures with ScalaCheckPropertyChecks {
+class AuthorisationsSpec extends SpecBase with ScalaCheckPropertyChecks {
 
   "Authorisations" when {
 

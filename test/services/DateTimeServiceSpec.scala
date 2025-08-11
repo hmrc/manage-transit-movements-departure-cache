@@ -17,21 +17,28 @@
 package services
 
 import base.SpecBase
+import config.AppConfig
+import org.mockito.Mockito.when
 
-import java.time.Instant
 import java.time.temporal.ChronoUnit.DAYS
+import java.time.{Clock, Instant}
 
 class DateTimeServiceSpec extends SpecBase {
 
-  private val service = app.injector.instanceOf[DateTimeService]
+  private val fakeClock  = Clock.systemUTC()
+  private val mockConfig = mock[AppConfig]
+
+  private val service = new DateTimeService(fakeClock, mockConfig)
 
   "expiresInDays" should {
 
     "return correct days for a date today" in {
+      when(mockConfig.mongoTtlInDays).thenReturn(30)
       service.expiresInDays(Instant.now()) shouldEqual 30L
     }
 
     "return correct days for a date 5 days ago" in {
+      when(mockConfig.mongoTtlInDays).thenReturn(30)
       service.expiresInDays(Instant.now().minus(5, DAYS)) shouldEqual 25L
     }
   }

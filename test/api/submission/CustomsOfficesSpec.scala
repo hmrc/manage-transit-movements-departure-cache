@@ -16,13 +16,13 @@
 
 package api.submission
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 import generated.*
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 import scalaxb.XMLCalendar
 
-class CustomsOfficesSpec extends SpecBase with AppWithDefaultMockFixtures {
+class CustomsOfficesSpec extends SpecBase {
 
   "CustomsOffices" must {
 

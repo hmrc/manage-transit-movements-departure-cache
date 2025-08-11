@@ -16,33 +16,28 @@
 
 package services
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 import models.*
 import models.Rejection.*
 import models.Task.*
 import org.mockito.ArgumentMatchers.{any, eq as eqTo}
 import org.mockito.Mockito.{reset, verify, when}
-import play.api.inject.bind
-import play.api.inject.guice.GuiceApplicationBuilder
+import org.scalatest.BeforeAndAfterEach
 import repositories.CacheRepository
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-class XPathServiceSpec extends SpecBase with AppWithDefaultMockFixtures {
+class XPathServiceSpec extends SpecBase with BeforeAndAfterEach {
 
   private val mockCacheRepository: CacheRepository = mock[CacheRepository]
-
-  override def guiceApplicationBuilder(): GuiceApplicationBuilder =
-    super
-      .guiceApplicationBuilder()
-      .overrides(bind[CacheRepository].toInstance(mockCacheRepository))
 
   override def beforeEach(): Unit = {
     super.beforeEach()
     reset(mockCacheRepository)
   }
 
-  private val service = app.injector.instanceOf[XPathService]
+  private val service = new XPathService(mockCacheRepository)
 
   private val unamendableXPath = XPath("/CC014C")
 

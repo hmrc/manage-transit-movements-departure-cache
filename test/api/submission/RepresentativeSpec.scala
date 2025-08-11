@@ -16,13 +16,13 @@
 
 package api.submission
 
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 import config.Constants.RepresentativeStatusCode.DirectRepresentation
 import generated.*
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 
-class RepresentativeSpec extends SpecBase with AppWithDefaultMockFixtures {
+class RepresentativeSpec extends SpecBase {
 
   "Guarantee" when {
 

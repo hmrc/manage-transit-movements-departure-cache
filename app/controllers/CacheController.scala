@@ -24,7 +24,7 @@ import play.api.Logging
 import play.api.libs.json.*
 import play.api.mvc.{Action, AnyContent, ControllerComponents}
 import repositories.CacheRepository
-import services.{AuditService, DateTimeService, MetricsService, XPathService}
+import services.*
 import uk.gov.hmrc.play.bootstrap.backend.controller.BackendController
 
 import javax.inject.{Inject, Singleton}
@@ -39,7 +39,8 @@ class CacheController @Inject() (
   auditService: AuditService,
   metricsService: MetricsService,
   xPathService: XPathService,
-  dateTimeService: DateTimeService
+  dateTimeService: DateTimeService,
+  userAnswersSummaryService: UserAnswersSummaryService
 )(implicit ec: ExecutionContext)
     extends BackendController(cc)
     with Logging {
@@ -109,7 +110,7 @@ class CacheController @Inject() (
       implicit request =>
         cacheRepository
           .getAll(request.eoriNumber, lrn, state, limit, skip, sortBy)
-          .map(_.toHateoas(dateTimeService.expiresInDays))
+          .map(userAnswersSummaryService.toHateoas)
           .map(Ok(_))
           .recover {
             case NonFatal(e) =>

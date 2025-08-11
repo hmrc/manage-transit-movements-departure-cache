@@ -17,24 +17,41 @@
 package api.submission
 
 import base.SpecBase
+import generated.MESSAGESequence
+import generators.Generators
 import models.Phase
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
+import org.scalacheck.Arbitrary.arbitrary
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class DeclarationSpec extends SpecBase {
+class DeclarationSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
 
-  private val service = app.injector.instanceOf[Declaration]
+  private val mockHeader = mock[Header]
+
+  private val service = new Declaration(mockHeader)
 
   "attributes" must {
     "assign phase ID" when {
       "phase 5" in {
-        val result = service.attributes(Phase.Phase5)
-        result.keys.size shouldEqual 1
-        result.get("@PhaseID").value.value.toString shouldEqual "NCTS5.1"
+        forAll(arbitrary[MESSAGESequence]) {
+          messageSequence =>
+            when(mockHeader.message(any(), any())).thenReturn(messageSequence)
+
+            val result = service.attributes(Phase.Phase5)
+            result.keys.size shouldEqual 1
+            result.get("@PhaseID").value.value.toString shouldEqual "NCTS5.1"
+        }
       }
 
       "phase 6" in {
-        val result = service.attributes(Phase.Phase6)
-        result.keys.size shouldEqual 1
-        result.get("@PhaseID").value.value.toString shouldEqual "NCTS6"
+        forAll(arbitrary[MESSAGESequence]) {
+          messageSequence =>
+            when(mockHeader.message(any(), any())).thenReturn(messageSequence)
+            val result = service.attributes(Phase.Phase6)
+            result.keys.size shouldEqual 1
+            result.get("@PhaseID").value.value.toString shouldEqual "NCTS6"
+        }
       }
     }
   }

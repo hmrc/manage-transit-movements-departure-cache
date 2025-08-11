@@ -16,9 +16,13 @@
 
 package generators
 
+import generated.*
 import models.*
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.{Arbitrary, Gen}
+import scalaxb.XMLCalendar
+
+import javax.xml.datatype.XMLGregorianCalendar
 
 trait ModelGenerators {
   self: Generators =>
@@ -97,5 +101,34 @@ trait ModelGenerators {
   implicit lazy val arbitraryVersion: Arbitrary[Phase] =
     Arbitrary {
       Gen.oneOf(Phase.Phase5, Phase.Phase6)
+    }
+
+  implicit lazy val arbitraryMessageSequence: Arbitrary[MESSAGESequence] =
+    Arbitrary {
+      for {
+        messageSender          <- Gen.alphaNumStr
+        messageRecipient       <- Gen.alphaNumStr
+        preparationDateAndTime <- arbitrary[XMLGregorianCalendar]
+        messageIdentification  <- Gen.alphaNumStr
+        messageType            <- arbitrary[MessageTypes]
+        correlationIdentifier  <- Gen.option(Gen.alphaNumStr)
+      } yield MESSAGESequence(
+        messageSender = messageSender,
+        messageRecipient = messageRecipient,
+        preparationDateAndTime = preparationDateAndTime,
+        messageIdentification = messageIdentification,
+        messageType = messageType,
+        correlationIdentifier = correlationIdentifier
+      )
+    }
+
+  implicit lazy val arbitraryMessageType: Arbitrary[MessageTypes] =
+    Arbitrary {
+      Gen.oneOf(CC013C, CC015C)
+    }
+
+  implicit lazy val arbitraryXMLGregorianCalendar: Arbitrary[XMLGregorianCalendar] =
+    Arbitrary {
+      Gen.const(XMLCalendar("2025-08-11"))
     }
 }

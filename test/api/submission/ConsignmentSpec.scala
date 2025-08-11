@@ -18,13 +18,13 @@ package api.submission
 
 import api.submission.Consignment.RichConsignmentType23
 import api.submission.consignmentType23.{activeBorderTransportMeansReads, transportEquipmentReads}
-import base.{AppWithDefaultMockFixtures, SpecBase}
+import base.SpecBase
 import generated.*
 import generators.Generators
 import models.UserAnswers
 import play.api.libs.json.{JsValue, Json}
 
-class ConsignmentSpec extends SpecBase with AppWithDefaultMockFixtures with Generators {
+class ConsignmentSpec extends SpecBase with Generators {
 
   "Consignment" when {
 
