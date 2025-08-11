@@ -16,34 +16,9 @@
 
 package models
 
-import play.api.libs.json.{JsObject, Json}
-import services.DateTimeService
-
-import java.time.Instant
-
-case class UserAnswersSummary(eoriNumber: String, userAnswers: Seq[UserAnswers], totalMovements: Int, totalMatchingMovements: Int) {
-
-  def toHateoas(timestamp: Instant, mongoTtlInDays: Int): JsObject =
-    Json.obj(
-      "eoriNumber"             -> eoriNumber,
-      "totalMovements"         -> totalMovements,
-      "totalMatchingMovements" -> totalMatchingMovements,
-      "userAnswers" -> userAnswers.map {
-        userAnswer =>
-          Json.obj(
-            "lrn" -> userAnswer.lrn,
-            "_links" -> Json.obj(
-              "self" -> Json.obj("href" -> controllers.routes.CacheController.get(userAnswer.lrn).url)
-            ),
-            "createdAt"   -> userAnswer.createdAt,
-            "lastUpdated" -> userAnswer.lastUpdated,
-            "expiresInDays" -> {
-              DateTimeService.expiresInDays(timestamp, userAnswer.createdAt, mongoTtlInDays)
-            },
-            "_id"         -> userAnswer.id,
-            "isSubmitted" -> userAnswer.metadata.isSubmitted
-          )
-      }
-    )
-
-}
+case class UserAnswersSummary(
+  eoriNumber: String,
+  userAnswers: Seq[UserAnswers],
+  totalMovements: Int,
+  totalMatchingMovements: Int
+)

@@ -14,16 +14,21 @@
  * limitations under the License.
  */
 
-package models
+package services
 
 import base.SpecBase
+import models.{Metadata, SubmissionState, UserAnswers, UserAnswersSummary}
+import org.mockito.ArgumentMatchers.any
+import org.mockito.Mockito.when
 import play.api.libs.json.Json
 
 import java.time.Instant
 import java.time.temporal.ChronoUnit.DAYS
 import java.util.UUID
 
-class UserAnswersSummarySpec extends SpecBase {
+class UserAnswersSummaryServiceSpec extends SpecBase {
+
+  private val mockDateTimeService = mock[DateTimeService]
 
   "toHateoas" must {
 
@@ -39,6 +44,13 @@ class UserAnswersSummarySpec extends SpecBase {
       val userAnswers3 = UserAnswers(Metadata("EF123", eoriNumber, SubmissionState.NotSubmitted), now, now, id3)
 
       val userAnswersSummary = UserAnswersSummary(eoriNumber, Seq(userAnswers1, userAnswers2, userAnswers3), 3, 3)
+
+      val service = new UserAnswersSummaryService(mockDateTimeService)
+
+      when(mockDateTimeService.expiresInDays(any()))
+        .thenReturn(30L)
+        .thenReturn(29L)
+        .thenReturn(30L)
 
       val expectedResult =
         Json.obj(
@@ -82,7 +94,7 @@ class UserAnswersSummarySpec extends SpecBase {
           )
         )
 
-      userAnswersSummary.toHateoas(Instant.now(), 30) shouldEqual expectedResult
+      service.toHateoas(userAnswersSummary) shouldEqual expectedResult
     }
   }
 }
