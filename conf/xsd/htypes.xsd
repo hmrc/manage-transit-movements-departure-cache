@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://ncts.dgtaxud.ec" xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning" elementFormDefault="unqualified" attributeFormDefault="unqualified" version="60.4.9" vc:minVersion="1.1" targetNamespace="http://ncts.dgtaxud.ec">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns="http://ncts.dgtaxud.ec" xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning" elementFormDefault="unqualified" attributeFormDefault="unqualified" version="60.4.16" vc:minVersion="1.1" targetNamespace="http://ncts.dgtaxud.ec">
   <!--=======================================================-->
   <!--============= Message Header Definition  ==============-->
   <!--=======================================================-->
