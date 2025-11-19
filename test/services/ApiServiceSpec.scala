@@ -111,7 +111,7 @@ class ApiServiceSpec extends SpecBase with BeforeAndAfterEach with ScalaCheckPro
             when(mockApiConnector.getDeparture(any(), any())(any()))
               .thenReturn(Future.successful(None))
 
-            val result = service.get(lrn, version).futureValue
+            val result = await(service.get(lrn, version))
             result shouldEqual None
 
             verify(mockApiConnector).getDeparture(eqTo(lrn), eqTo(version))(any())
