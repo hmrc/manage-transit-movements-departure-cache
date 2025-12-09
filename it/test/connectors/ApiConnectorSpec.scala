@@ -19,7 +19,7 @@ package connectors
 import com.github.tomakehurst.wiremock.client.WireMock.*
 import itbase.{ItSpecBase, WireMockServerHandler}
 import models.*
-import models.Phase.Phase5
+import models.Phase.{Phase5, Phase6}
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json.{JsValue, Json}
 import play.api.test.Helpers.*
@@ -77,7 +77,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
            |}
            |""".stripMargin)
 
-      "return Departures" in {
+      "return Departures in phase 5" in {
         server.stubFor(
           get(urlEqualTo(url))
             .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
@@ -87,6 +87,18 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
         val expectedResult = Some(Departure(departureId, lrn))
 
         await(connector.getDeparture(lrn, Phase5)) shouldEqual expectedResult
+      }
+
+      "return Departures in phase 6" in {
+        server.stubFor(
+          get(urlEqualTo(url))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.3.0+json"))
+            .willReturn(okJson(responseJson.toString()))
+        )
+
+        val expectedResult = Some(Departure(departureId, lrn))
+
+        await(connector.getDeparture(lrn, Phase6)) shouldEqual expectedResult
       }
     }
 
@@ -115,7 +127,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
            |}
            |""".stripMargin)
 
-      "return MRN" in {
+      "return MRN in phase 5" in {
         server.stubFor(
           get(urlEqualTo(url))
             .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
@@ -123,6 +135,16 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
         )
 
         await(connector.getMRN(departureId, Phase5)) shouldEqual MovementReferenceNumber(Some(mrn))
+      }
+
+      "return MRN in phase 6" in {
+        server.stubFor(
+          get(urlEqualTo(url))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.3.0+json"))
+            .willReturn(okJson(responseJson.toString()))
+        )
+
+        await(connector.getMRN(departureId, Phase6)) shouldEqual MovementReferenceNumber(Some(mrn))
       }
     }
 
@@ -174,7 +196,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
           |}
           |""".stripMargin)
 
-      "return messages" in {
+      "return messages in phase 5" in {
         server.stubFor(
           get(urlEqualTo(url))
             .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
@@ -193,6 +215,27 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
         )
 
         await(connector.getMessages(departureId, Phase5)) shouldEqual expectedResult
+      }
+
+      "return messages in phase 6" in {
+        server.stubFor(
+          get(urlEqualTo(url))
+            .withHeader(ACCEPT, equalTo("application/vnd.hmrc.3.0+json"))
+            .willReturn(okJson(responseJson.toString()))
+        )
+
+        val expectedResult = Messages(
+          messages = Seq(
+            Message(
+              `type` = "IE015"
+            ),
+            Message(
+              `type` = "IE013"
+            )
+          )
+        )
+
+        await(connector.getMessages(departureId, Phase6)) shouldEqual expectedResult
       }
     }
 
@@ -220,7 +263,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             <foo>bar</foo>
           </ncts:CC015C>
 
-        "success" in {
+        "success in phase 5" in {
           server.stubFor(
             post(urlEqualTo(url))
               .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
@@ -231,7 +274,18 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
           res.status shouldEqual OK
         }
 
-        "bad request" in {
+        "success in phase 6" in {
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.3.0+json"))
+              .willReturn(okJson(expected))
+          )
+
+          val res = await(connector.submitDeclaration(payload, Phase6))
+          res.status shouldEqual OK
+        }
+
+        "bad request in phase 5" in {
           server.stubFor(
             post(urlEqualTo(url))
               .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
@@ -242,7 +296,18 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
           res.status shouldEqual BAD_REQUEST
         }
 
-        "internal server error" in {
+        "bad request in phase 6" in {
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.3.0+json"))
+              .willReturn(badRequest())
+          )
+
+          val res = await(connector.submitDeclaration(payload, Phase6))
+          res.status shouldEqual BAD_REQUEST
+        }
+
+        "internal server error in phase 5" in {
           server.stubFor(
             post(urlEqualTo(url))
               .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
@@ -250,6 +315,17 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
           )
 
           val res = await(connector.submitDeclaration(payload, Phase5))
+          res.status shouldEqual INTERNAL_SERVER_ERROR
+        }
+
+        "internal server error in phase 6" in {
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.3.0+json"))
+              .willReturn(serverError())
+          )
+
+          val res = await(connector.submitDeclaration(payload, Phase6))
           res.status shouldEqual INTERNAL_SERVER_ERROR
         }
       }
@@ -262,7 +338,7 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
             <foo>bar</foo>
           </ncts:CC013C>
 
-        "success" in {
+        "success in phase 5" in {
           server.stubFor(
             post(urlEqualTo(url))
               .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
@@ -273,7 +349,18 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
           res.status shouldEqual OK
         }
 
-        "bad request" in {
+        "success in phase 6" in {
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.3.0+json"))
+              .willReturn(okJson(expected))
+          )
+
+          val res = await(connector.submitAmendment(departureId, payload, Phase6))
+          res.status shouldEqual OK
+        }
+
+        "bad request in phase 5" in {
           server.stubFor(
             post(urlEqualTo(url))
               .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
@@ -284,7 +371,18 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
           res.status shouldEqual BAD_REQUEST
         }
 
-        "internal server error" in {
+        "bad request in phase 6" in {
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.3.0+json"))
+              .willReturn(badRequest())
+          )
+
+          val res = await(connector.submitAmendment(departureId, payload, Phase6))
+          res.status shouldEqual BAD_REQUEST
+        }
+
+        "internal server error in phase 5" in {
           server.stubFor(
             post(urlEqualTo(url))
               .withHeader(ACCEPT, equalTo("application/vnd.hmrc.2.1+json"))
@@ -292,6 +390,17 @@ class ApiConnectorSpec extends ItSpecBase with WireMockServerHandler {
           )
 
           val res = await(connector.submitAmendment(departureId, payload, Phase5))
+          res.status shouldEqual INTERNAL_SERVER_ERROR
+        }
+
+        "internal server error in phase 6" in {
+          server.stubFor(
+            post(urlEqualTo(url))
+              .withHeader(ACCEPT, equalTo("application/vnd.hmrc.3.0+json"))
+              .willReturn(serverError())
+          )
+
+          val res = await(connector.submitAmendment(departureId, payload, Phase6))
           res.status shouldEqual INTERNAL_SERVER_ERROR
         }
       }

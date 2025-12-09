@@ -22,17 +22,19 @@ import scala.util.{Failure, Success, Try}
 
 sealed trait Phase {
   val id: PhaseIDtype
-  val apiVersion: String = "2.1"
+  val apiVersion: String
 }
 
 object Phase {
 
   case object Phase5 extends Phase {
-    override val id: PhaseIDtype = NCTS5u461
+    override val id: PhaseIDtype    = NCTS5u461
+    override val apiVersion: String = "2.1"
   }
 
   case object Phase6 extends Phase {
-    override val id: PhaseIDtype = NCTS6
+    override val id: PhaseIDtype    = NCTS6
+    override val apiVersion: String = "3.0"
   }
 
   def apply(value: Option[String]): Try[Phase] =
