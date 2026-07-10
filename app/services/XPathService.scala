@@ -36,11 +36,18 @@ class XPathService @Inject() (
         isDeclarationCached(lrn, eoriNumber)
       case Rejection.IE056Rejection(departureId, businessRejectionType, errorPointers) =>
         isDeclarationAmendable(lrn, eoriNumber, errorPointers)
+      case Rejection.IE022Rejection(departureId, errorPointers) =>
+        isDeclarationAmendmentAmendable(lrn, eoriNumber, errorPointers)
     }
 
   private def isDeclarationAmendable(lrn: String, eoriNumber: String, xPaths: Seq[XPath]): Future[Boolean] =
     isDeclarationCached(lrn, eoriNumber).map {
       _ && xPaths.exists(_.isAmendable)
+    }
+
+  private def isDeclarationAmendmentAmendable(lrn: String, eoriNumber: String, xPaths: Seq[Option[XPath]]): Future[Boolean] =
+    isDeclarationCached(lrn, eoriNumber).map {
+      _ && xPaths.flatten.exists(_.isAmendable)
     }
 
   private def isDeclarationCached(lrn: String, eoriNumber: String): Future[Boolean] =
@@ -71,6 +78,9 @@ class XPathService @Inject() (
               .updateTasks(tasks)
               .updateStatus(SubmissionState.RejectedPendingChanges)
         }
+      case Rejection.IE022Rejection(departureId, errorPointers) =>
+        val tasks = userAnswers.metadata.tasks ++ errorPointers.flatten.toList.flatMap(_.taskError).toMap
+        prepareForAmendment(userAnswers.updateTasks(tasks), departureId)
     }
 
   def prepareForAmendment(userAnswers: UserAnswers, departureId: String): UserAnswers =
