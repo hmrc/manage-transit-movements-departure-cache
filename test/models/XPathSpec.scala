@@ -233,6 +233,13 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
       }
     }
 
+    "when /CC013C/Consignment/PreviousDocument[1]/referenceNumber" must {
+      "return Documents" in {
+        val xPath = XPath("/CC013C/Consignment/PreviousDocument[1]/referenceNumber")
+        xPath.task.value shouldEqual Documents
+      }
+    }
+
     "when /CC015C/Consignment/HouseConsignment[5]/ConsignmentItem[10]/consignor" must {
       "return Items" in {
         val xPath = XPath("/CC015C/Consignment/HouseConsignment[50]/ConsignmentItem[10]/consignor")
@@ -331,6 +338,13 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
       }
     }
 
+    "when /CC013C/Consignment/HouseConsignment[5]/ConsignmentItem[10]/PreviousDocument[22]/referenceNumber" must {
+      "return Documents" in {
+        val xPath = XPath("/CC013C/Consignment/HouseConsignment[5]/ConsignmentItem[10]/PreviousDocument[22]/referenceNumber")
+        xPath.task.value shouldEqual Documents
+      }
+    }
+
     "when /CC015C/Consignment/AdditionalReference" must {
       "return TransportDetails" in {
         val xPath = XPath("/CC015C/Consignment/AdditionalReference")
@@ -386,6 +400,13 @@ class XPathSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
     "return Some((.documents, Status.Value.Error))" when {
       "xPath.task returns Documents" in {
         val xPath = s"/CC015C/Consignment/PreviousDocument[1]/type"
+        XPath(xPath).taskError.value shouldEqual (".documents", Status.Error)
+      }
+    }
+
+    "return Some((.documents, Status.Value.Error)) when IE022 error" when {
+      "xPath.task returns Documents" in {
+        val xPath = s"/CC013C/Consignment/PreviousDocument[1]/referenceNumber"
         XPath(xPath).taskError.value shouldEqual (".documents", Status.Error)
       }
     }

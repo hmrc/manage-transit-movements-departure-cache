@@ -81,7 +81,8 @@ trait ModelGenerators {
       "/CC015C/Consignment/modeOfTransportAtTheBorder",
       "/CC015C/Consignment/referenceNumberUCR",
       "/CC015C/Consignment/CountryOfRoutingOfConsignment/country",
-      "/CC015C/Consignment/TransportCharges/paymentMethod"
+      "/CC015C/Consignment/TransportCharges/paymentMethod",
+      "/CC013C/Consignment/PreviousDocument[1]/referenceNumber"
     )
     for {
       value <- Gen.oneOf(validXPaths)

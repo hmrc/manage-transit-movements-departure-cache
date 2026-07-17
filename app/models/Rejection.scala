@@ -43,6 +43,8 @@ object Rejection {
 
   case class IE056Rejection(departureId: String, businessRejectionType: BusinessRejectionType, errorPointers: Seq[XPath]) extends Rejection
 
+  case class IE022Rejection(departureId: String, errorPointers: Seq[Option[XPath]]) extends Rejection
+
   implicit val reads: Reads[Rejection] =
     (__ \ "type").read[String].flatMap {
       case "IE055" =>
@@ -53,6 +55,11 @@ object Rejection {
             (__ \ "businessRejectionType").read[BusinessRejectionType] and
             (__ \ "errorPointers").read[Seq[XPath]]
         )(IE056Rejection.apply)
+      case "IE022" =>
+        (
+          (__ \ "departureId").read[String] and
+            (__ \ "errorPointers").read[Seq[Option[XPath]]]
+        )(IE022Rejection.apply)
       case value => Reads.failed(s"Unexpected rejection type: $value")
     }
 }
