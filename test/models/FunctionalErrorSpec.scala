@@ -23,7 +23,7 @@ import play.api.libs.json.Json
 
 class FunctionalErrorSpec extends SpecBase with ScalaCheckPropertyChecks with Generators {
 
-  "reads" should {
+  "readsFunctionalError" should {
     "deserialise" when {
       "originalAttributeValue defined" in {
         val json = Json.parse("""
@@ -70,13 +70,87 @@ class FunctionalErrorSpec extends SpecBase with ScalaCheckPropertyChecks with Ge
     }
   }
 
-  "writes" should {
+  "readsAmendmentFunctionalError" should {
+    "deserialise" when {
+      "originalAttributeValue defined" in {
+        val json = Json.parse("""
+            |{
+            |  "errorPointer": "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
+            |  "errorCode": "12",
+            |  "errorReason": "BR20004",
+            |  "originalAttributeValue": "GB635733627000"
+            |}
+            |""".stripMargin)
+
+        val result = json.validate[AmendmentFunctionalErrorType]
+
+        val expectedResult = AmendmentFunctionalErrorType(
+          errorPointer = Some(XPath("/CC015C/HolderOfTheTransitProcedure/identificationNumber")),
+          errorCode = "12",
+          errorReason = Some("BR20004"),
+          originalAttributeValue = Some("GB635733627000")
+        )
+
+        result.get.shouldEqual(expectedResult)
+      }
+
+      "originalAttributeValue undefined" in {
+        val json = Json.parse("""
+            |{
+            |  "errorPointer": "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
+            |  "errorCode": "12",
+            |  "errorReason": "BR20005"
+            |}
+            |""".stripMargin)
+
+        val result = json.validate[AmendmentFunctionalErrorType]
+
+        val expectedResult = AmendmentFunctionalErrorType(
+          errorPointer = Some(XPath("/CC015C/HolderOfTheTransitProcedure/identificationNumber")),
+          errorCode = "12",
+          errorReason = Some("BR20005"),
+          originalAttributeValue = None
+        )
+
+        result.get.shouldEqual(expectedResult)
+      }
+    }
+  }
+
+  "writesFunctionalError" should {
     "serialise" when {
       "options defined" in {
         val functionalError = FunctionalError(
           errorPointer = XPath("/CC015C/HolderOfTheTransitProcedure/identificationNumber"),
           errorCode = "12",
           errorReason = "BR20004",
+          originalAttributeValue = Some("GB635733627000")
+        )
+
+        val result = Json.toJson(functionalError)
+
+        val expectedResult = Json.parse("""
+            |{
+            |  "error" : "12",
+            |  "businessRuleId" : "BR20004",
+            |  "section" : "Trader details",
+            |  "invalidDataItem" : "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
+            |  "invalidAnswer" : "GB635733627000"
+            |}
+            |""".stripMargin)
+
+        result.shouldEqual(expectedResult)
+      }
+    }
+  }
+
+  "writesAmendmentFunctionalError" should {
+    "serialise" when {
+      "options defined" in {
+        val functionalError = AmendmentFunctionalErrorType(
+          errorPointer = Some(XPath("/CC015C/HolderOfTheTransitProcedure/identificationNumber")),
+          errorCode = "12",
+          errorReason = Some("BR20004"),
           originalAttributeValue = Some("GB635733627000")
         )
 

@@ -160,4 +160,17 @@ class SubmissionController @Inject() (
           BadRequest
       }
   }
+
+  def rejectionAmendment(): Action[JsValue] = actions.authenticate()(parse.json) {
+    implicit request =>
+      import request.*
+      body.validate[Seq[AmendmentFunctionalErrorType]] match {
+        case JsSuccess(value, _) =>
+          val json = value.map(Json.toJson(_))
+          Ok(JsArray(json))
+        case JsError(errors) =>
+          logger.warn(log("rejectionAmendment", s"Failed to validate request body as functional errors: $errors", eoriNumber))
+          BadRequest
+      }
+  }
 }

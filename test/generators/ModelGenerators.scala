@@ -99,6 +99,16 @@ trait ModelGenerators {
       } yield FunctionalError(errorPointer, errorCode, errorReason, originalAttributeValue)
     }
 
+  implicit lazy val arbitraryAmendmentFunctionalError: Arbitrary[AmendmentFunctionalErrorType] =
+    Arbitrary {
+      for {
+        errorPointer           <- Gen.option(arbitrary[XPath])
+        errorCode              <- Gen.alphaNumStr
+        errorReason            <- Gen.option(Gen.alphaNumStr)
+        originalAttributeValue <- Gen.option(Gen.alphaNumStr)
+      } yield AmendmentFunctionalErrorType(errorPointer, errorCode, errorReason, originalAttributeValue)
+    }
+
   implicit lazy val arbitraryVersion: Arbitrary[Phase] =
     Arbitrary {
       Gen.oneOf(Phase.Phase5, Phase.Phase6)

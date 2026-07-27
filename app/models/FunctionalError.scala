@@ -31,6 +31,15 @@ case class FunctionalError(
   def section: Option[String] = errorPointer.task.map(_.toString)
 }
 
+case class AmendmentFunctionalErrorType(
+  errorPointer: Option[XPath],
+  errorCode: String,
+  errorReason: Option[String],
+  originalAttributeValue: Option[String]
+) {
+  def section: Option[String] = errorPointer.flatMap(_.task).map(_.toString)
+}
+
 object FunctionalError {
 
   implicit val reads: Reads[FunctionalError] = Json.reads[FunctionalError]
@@ -50,4 +59,26 @@ object FunctionalError {
        functionalError.originalAttributeValue
       )
   )
+}
+
+object AmendmentFunctionalErrorType {
+
+  implicit val reads: Reads[AmendmentFunctionalErrorType] = Json.reads[AmendmentFunctionalErrorType]
+
+  implicit val writes: Writes[AmendmentFunctionalErrorType] = (
+    (__ \ "error").write[String] and
+      (__ \ "businessRuleId").writeNullable[String] and
+      (__ \ "section").writeNullable[String] and
+      (__ \ "invalidDataItem").writeNullable[String] and
+      (__ \ "invalidAnswer").writeNullable[String]
+  )(
+    functionalError =>
+      (functionalError.errorCode,
+       functionalError.errorReason,
+       functionalError.section,
+       functionalError.errorPointer.map(_.value),
+       functionalError.originalAttributeValue
+      )
+  )
+
 }

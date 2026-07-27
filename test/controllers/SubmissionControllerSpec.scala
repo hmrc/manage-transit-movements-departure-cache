@@ -375,4 +375,70 @@ class SubmissionControllerSpec extends SpecBase with AppWithDefaultMockFixtures 
       }
     }
   }
+
+  "rejectionAmendment" should {
+    "return 200" when {
+      "functional error conversion is successful" in {
+        val functionalErrors = Json.parse("""
+            |[
+            |  {
+            |    "errorPointer" : "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
+            |    "errorCode" : "12"
+            |  },
+            |  {
+            |    "errorPointer" : "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
+            |    "errorCode" : "12",
+            |    "errorReason" : "BR20004",
+            |    "originalAttributeValue" : "GB635733627000"
+            |  }
+            |]
+            |""".stripMargin)
+
+        val request = FakeRequest(POST, routes.SubmissionController.rejectionAmendment().url)
+          .withJsonBody(functionalErrors)
+
+        val result = route(app, request).value
+
+        val expectedResult = Json.parse("""
+            |[
+            |  {
+            |    "error" : "12",
+            |    "section" : "Trader details",
+            |    "invalidDataItem" : "/CC015C/HolderOfTheTransitProcedure/identificationNumber"
+            |  },
+            |  {
+            |    "error" : "12",
+            |    "businessRuleId" : "BR20004",
+            |    "section" : "Trader details",
+            |    "invalidDataItem" : "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
+            |    "invalidAnswer" : "GB635733627000"
+            |  }
+            |]
+            |""".stripMargin)
+
+        status(result) shouldEqual OK
+        contentAsJson(result) shouldEqual expectedResult
+      }
+    }
+
+    "return 400" when {
+      "request body is invalid" in {
+        val request = FakeRequest(POST, routes.SubmissionController.rejectionAmendment().url)
+          .withJsonBody(JsString("foo"))
+
+        val result = route(app, request).value
+
+        status(result) shouldEqual BAD_REQUEST
+      }
+
+      "request body is empty" in {
+        val request = FakeRequest(POST, routes.SubmissionController.rejectionAmendment().url)
+          .withJsonBody(Json.obj())
+
+        val result = route(app, request).value
+
+        status(result) shouldEqual BAD_REQUEST
+      }
+    }
+  }
 }
