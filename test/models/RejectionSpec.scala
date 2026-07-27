@@ -151,6 +151,55 @@ class RejectionSpec extends SpecBase with ScalaCheckPropertyChecks {
           }
         }
       }
+
+      "IE022 rejection" when {
+
+        "error pointers is not empty" in {
+          forAll(Gen.alphaNumStr) {
+            departureId =>
+              val json = Json.parse(s"""
+                     |{
+                     |  "departureId" : "$departureId",
+                     |  "type" : "IE022",
+                     |  "errorPointers" : [
+                     |    "foo",
+                     |    "bar"
+                     |  ]
+                     |}
+                     |""".stripMargin)
+
+              val result = json.validate[Rejection].get
+
+              result shouldEqual IE022Rejection(
+                departureId,
+                Seq(
+                  Some(XPath("foo")),
+                  Some(XPath("bar"))
+                )
+              )
+          }
+        }
+
+        "error pointers is empty" in {
+          forAll(Gen.alphaNumStr) {
+            departureId =>
+              val json = Json.parse(s"""
+                     |{
+                     |  "departureId" : "$departureId",
+                     |  "type" : "IE022",
+                     |  "errorPointers" : []
+                     |}
+                     |""".stripMargin)
+
+              val result = json.validate[Rejection].get
+
+              result shouldEqual IE022Rejection(
+                departureId,
+                Seq()
+              )
+          }
+        }
+      }
     }
 
     "fail to deserialise" when {

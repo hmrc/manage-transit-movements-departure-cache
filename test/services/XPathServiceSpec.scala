@@ -43,6 +43,8 @@ class XPathServiceSpec extends SpecBase with BeforeAndAfterEach {
 
   private val amendableXPath = XPath("/CC015C/Authorisation[1]/referenceNumber")
 
+  private val amendableXPathIE022 = XPath("/CC013C/Consignment/PreviousDocument[1]/referenceNumber")
+
   "isRejectionAmendable" must {
 
     "return true" when {
@@ -73,6 +75,27 @@ class XPathServiceSpec extends SpecBase with BeforeAndAfterEach {
               departureId,
               BusinessRejectionType.AmendmentRejection,
               Seq(amendableXPath)
+            )
+
+            val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
+
+            result shouldEqual true
+
+            verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+          }
+        }
+      }
+
+      "IE022 rejection" when {
+        "a document exists in the cache for the given LRN and EORI" when {
+          "at least one of the errors is amendable" in {
+            val userAnswers = emptyUserAnswers.updateStatus(SubmissionState.Submitted)
+
+            when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
+
+            val rejection = IE022Rejection(
+              departureId,
+              Seq(Some(amendableXPathIE022))
             )
 
             val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
@@ -158,6 +181,58 @@ class XPathServiceSpec extends SpecBase with BeforeAndAfterEach {
             departureId,
             BusinessRejectionType.AmendmentRejection,
             Seq(amendableXPath)
+          )
+
+          val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
+
+          result shouldEqual false
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        }
+      }
+
+      "IE022 rejection" when {
+        "a document exists in the cache for the given LRN and EORI" when {
+          "no errors are amendable" in {
+            val userAnswers = emptyUserAnswers.updateStatus(SubmissionState.Submitted)
+            when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
+
+            val rejection = IE022Rejection(
+              departureId,
+              Seq(Some(unamendableXPath))
+            )
+
+            val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
+
+            result shouldEqual false
+
+            verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+          }
+        }
+
+        "a document doesn't exist in the cache for the given LRN and EORI" in {
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(None))
+
+          val rejection = IE022Rejection(
+            departureId,
+            Seq(Some(amendableXPathIE022))
+          )
+
+          val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
+
+          result shouldEqual false
+
+          verify(mockCacheRepository).get(eqTo(lrn), eqTo(eoriNumber))
+        }
+
+        "a document exists in the cache with status NotSubmitted" in {
+          val userAnswers = emptyUserAnswers.updateStatus(SubmissionState.NotSubmitted)
+
+          when(mockCacheRepository.get(any(), any())).thenReturn(Future.successful(Some(userAnswers)))
+
+          val rejection = IE022Rejection(
+            departureId,
+            Seq(Some(amendableXPathIE022))
           )
 
           val result = service.isRejectionAmendable(lrn, eoriNumber, rejection).futureValue
@@ -255,6 +330,31 @@ class XPathServiceSpec extends SpecBase with BeforeAndAfterEach {
           )
           result.departureId should not be defined
         }
+      }
+
+      "IE022 rejection" in {
+        val userAnswers = emptyUserAnswers.updateTasks(tasks)
+
+        val rejection = IE022Rejection(
+          departureId,
+          Seq(
+            Some(XPath("/CC013C/Consignment/PreviousDocument[1]/referenceNumber"))
+          )
+        )
+
+        val result = service.handleRejection(userAnswers, rejection)
+
+        result.metadata.isSubmitted shouldEqual SubmissionState.Amendment
+        result.metadata.tasks shouldEqual Map(
+          PreTaskList.taskName      -> Status.Completed,
+          TraderDetails.taskName    -> Status.Completed,
+          RouteDetails.taskName     -> Status.Completed,
+          TransportDetails.taskName -> Status.Completed,
+          Documents.taskName        -> Status.Error,
+          Items.taskName            -> Status.Completed,
+          GuaranteeDetails.taskName -> Status.Completed
+        )
+        result.departureId shouldEqual Some(departureId)
       }
     }
   }

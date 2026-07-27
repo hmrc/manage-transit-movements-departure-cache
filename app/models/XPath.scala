@@ -100,5 +100,6 @@ case class XPath(value: String) {
 
 object XPath {
 
-  implicit val reads: Reads[XPath] = __.read[String].map(XPath(_))
+  implicit val reads: Reads[XPath]               = __.read[String].map(XPath(_))
+  implicit val optionReads: Reads[Option[XPath]] = Reads.optionWithNull[XPath]
 }
