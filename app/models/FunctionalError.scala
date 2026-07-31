@@ -22,13 +22,13 @@ import play.api.libs.json.*
 import scala.annotation.tailrec
 
 case class FunctionalError(
-  errorPointer: XPath,
+  errorPointer: Option[XPath],
   errorCode: String,
-  errorReason: String,
+  errorReason: Option[String],
   originalAttributeValue: Option[String]
 ) {
 
-  def section: Option[String] = errorPointer.task.map(_.toString)
+  def section: Option[String] = errorPointer.flatMap(_.task).map(_.toString)
 }
 
 object FunctionalError {
@@ -37,16 +37,16 @@ object FunctionalError {
 
   implicit val writes: Writes[FunctionalError] = (
     (__ \ "error").write[String] and
-      (__ \ "businessRuleId").write[String] and
+      (__ \ "businessRuleId").writeNullable[String] and
       (__ \ "section").writeNullable[String] and
-      (__ \ "invalidDataItem").write[String] and
+      (__ \ "invalidDataItem").writeNullable[String] and
       (__ \ "invalidAnswer").writeNullable[String]
   )(
     functionalError =>
       (functionalError.errorCode,
        functionalError.errorReason,
        functionalError.section,
-       functionalError.errorPointer.value,
+       functionalError.errorPointer.map(_.value),
        functionalError.originalAttributeValue
       )
   )
