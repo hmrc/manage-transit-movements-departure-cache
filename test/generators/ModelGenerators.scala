@@ -92,9 +92,9 @@ trait ModelGenerators {
   implicit lazy val arbitraryFunctionalError: Arbitrary[FunctionalError] =
     Arbitrary {
       for {
-        errorPointer           <- arbitrary[XPath]
+        errorPointer           <- Gen.option(arbitrary[XPath])
         errorCode              <- Gen.alphaNumStr
-        errorReason            <- Gen.alphaNumStr
+        errorReason            <- Gen.option(Gen.alphaNumStr)
         originalAttributeValue <- Gen.option(Gen.alphaNumStr)
       } yield FunctionalError(errorPointer, errorCode, errorReason, originalAttributeValue)
     }

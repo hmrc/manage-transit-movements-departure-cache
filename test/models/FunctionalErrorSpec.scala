@@ -25,22 +25,64 @@ class FunctionalErrorSpec extends SpecBase with ScalaCheckPropertyChecks with Ge
 
   "reads" should {
     "deserialise" when {
-      "originalAttributeValue defined" in {
+      "options are defined" in {
         val json = Json.parse("""
-            |{
-            |  "errorPointer": "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
-            |  "errorCode": "12",
-            |  "errorReason": "BR20004",
-            |  "originalAttributeValue": "GB635733627000"
-            |}
-            |""".stripMargin)
+                                |{
+                                |  "errorPointer": "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
+                                |  "errorCode": "12",
+                                |  "errorReason": "BR20004",
+                                |  "originalAttributeValue": "GB635733627000"
+                                |}
+                                |""".stripMargin)
 
         val result = json.validate[FunctionalError]
 
         val expectedResult = FunctionalError(
-          errorPointer = XPath("/CC015C/HolderOfTheTransitProcedure/identificationNumber"),
+          errorPointer = Some(XPath("/CC015C/HolderOfTheTransitProcedure/identificationNumber")),
           errorCode = "12",
-          errorReason = "BR20004",
+          errorReason = Some("BR20004"),
+          originalAttributeValue = Some("GB635733627000")
+        )
+
+        result.get.shouldEqual(expectedResult)
+      }
+
+      "errorPointer undefined" in {
+        val json = Json.parse("""
+                                |{
+                                |  "errorCode": "12",
+                                |  "errorReason": "BR20005",
+                                |  "originalAttributeValue": "GB635733627000"
+                                |}
+                                |""".stripMargin)
+
+        val result = json.validate[FunctionalError]
+
+        val expectedResult = FunctionalError(
+          errorPointer = None,
+          errorCode = "12",
+          errorReason = Some("BR20005"),
+          originalAttributeValue = Some("GB635733627000")
+        )
+
+        result.get.shouldEqual(expectedResult)
+      }
+
+      "errorReason undefined" in {
+        val json = Json.parse("""
+                                |{
+                                |  "errorPointer": "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
+                                |  "errorCode": "12",
+                                |  "originalAttributeValue": "GB635733627000"
+                                |}
+                                |""".stripMargin)
+
+        val result = json.validate[FunctionalError]
+
+        val expectedResult = FunctionalError(
+          errorPointer = Some(XPath("/CC015C/HolderOfTheTransitProcedure/identificationNumber")),
+          errorCode = "12",
+          errorReason = None,
           originalAttributeValue = Some("GB635733627000")
         )
 
@@ -49,19 +91,19 @@ class FunctionalErrorSpec extends SpecBase with ScalaCheckPropertyChecks with Ge
 
       "originalAttributeValue undefined" in {
         val json = Json.parse("""
-            |{
-            |  "errorPointer": "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
-            |  "errorCode": "12",
-            |  "errorReason": "BR20005"
-            |}
-            |""".stripMargin)
+                                |{
+                                |  "errorPointer": "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
+                                |  "errorCode": "12",
+                                |  "errorReason": "BR20005"
+                                |}
+                                |""".stripMargin)
 
         val result = json.validate[FunctionalError]
 
         val expectedResult = FunctionalError(
-          errorPointer = XPath("/CC015C/HolderOfTheTransitProcedure/identificationNumber"),
+          errorPointer = Some(XPath("/CC015C/HolderOfTheTransitProcedure/identificationNumber")),
           errorCode = "12",
-          errorReason = "BR20005",
+          errorReason = Some("BR20005"),
           originalAttributeValue = None
         )
 
@@ -74,23 +116,23 @@ class FunctionalErrorSpec extends SpecBase with ScalaCheckPropertyChecks with Ge
     "serialise" when {
       "options defined" in {
         val functionalError = FunctionalError(
-          errorPointer = XPath("/CC015C/HolderOfTheTransitProcedure/identificationNumber"),
+          errorPointer = Some(XPath("/CC015C/HolderOfTheTransitProcedure/identificationNumber")),
           errorCode = "12",
-          errorReason = "BR20004",
+          errorReason = Some("BR20004"),
           originalAttributeValue = Some("GB635733627000")
         )
 
         val result = Json.toJson(functionalError)
 
         val expectedResult = Json.parse("""
-            |{
-            |  "error" : "12",
-            |  "businessRuleId" : "BR20004",
-            |  "section" : "Trader details",
-            |  "invalidDataItem" : "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
-            |  "invalidAnswer" : "GB635733627000"
-            |}
-            |""".stripMargin)
+                                          |{
+                                          |  "error" : "12",
+                                          |  "businessRuleId" : "BR20004",
+                                          |  "section" : "Trader details",
+                                          |  "invalidDataItem" : "/CC015C/HolderOfTheTransitProcedure/identificationNumber",
+                                          |  "invalidAnswer" : "GB635733627000"
+                                          |}
+                                          |""".stripMargin)
 
         result.shouldEqual(expectedResult)
       }
