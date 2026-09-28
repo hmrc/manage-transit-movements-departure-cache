@@ -297,7 +297,14 @@ class ConsignmentSpec extends SpecBase with Generators {
           Consignee = None,
           AdditionalSupplyChainActor = Nil,
           DepartureTransportMeans = Nil,
-          PreviousDocument = Nil,
+          PreviousDocument = Seq(
+            PreviousDocumentType06(
+              sequenceNumber = 1,
+              typeValue = "N830",
+              referenceNumber = "previousExport3",
+              complementOfInformation = Some("complement of information previousExport3")
+            )
+          ),
           SupportingDocument = Nil,
           TransportDocument = Nil,
           AdditionalReference = Nil,
@@ -2805,6 +2812,20 @@ class ConsignmentSpec extends SpecBase with Generators {
          |            "uuid" : "a3184d85-9860-4258-b5ce-28201f0407d3",
          |            "addAdditionalInformationYesNo" : true,
          |            "additionalInformation" : "complement of information previous3"
+         |          }
+         |        },
+         |        {
+         |          "attachToAllItems" : true,
+         |          "type" : {
+         |            "type" : "PreviousExport",
+         |            "code" : "N830",
+         |            "description" : "Goods declaration for exportation"
+         |          },
+         |          "details" : {
+         |            "documentReferenceNumber" : "previousExport3",
+         |            "uuid" : "bfc2b744-a1b1-4038-94a7-eb12637bbf58",
+         |            "addAdditionalInformationYesNo" : true,
+         |            "additionalInformation" : "complement of information previousExport3"
          |          }
          |        }
          |      ]
