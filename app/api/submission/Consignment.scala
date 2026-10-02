@@ -402,12 +402,20 @@ object houseConsignmentType10 {
     for {
       documents <- documentsPath.readWithDefault[JsArray](JsArray()).map(_.value.toSeq)
       consignmentItemReads = (goodsItemNumber: Int) => consignmentItemType10.reads(goodsItemNumber, goodsItemNumberAcc + goodsItemNumber, documents)
-      consignmentItems <- itemsPath.readArray[ConsignmentItemType10](consignmentItemReads)
+      consignmentItems  <- itemsPath.readArray[ConsignmentItemType10](consignmentItemReads)
+      previousDocuments <- previousDocumentExportReads
     } yield HouseConsignmentType13(
       sequenceNumber = 1,
       grossMass = consignmentItems.map(_.Commodity.GoodsMeasure.grossMass).sum,
+      PreviousDocument = previousDocuments,
       ConsignmentItem = consignmentItems
     )
+
+  private def previousDocumentExportReads: Reads[Seq[PreviousDocumentType06]] =
+    documentsPath
+      .readFilteredArray[PreviousDocumentType06](
+        _.hasCorrectTypeAndLevel("PreviousExport", ConsignmentLevel)
+      )(previousDocumentType06.reads)
 
   implicit class RichHouseConsignmentType13(value: HouseConsignmentType13) {
 
@@ -570,6 +578,16 @@ object previousDocumentType05 {
       (__ \ "details" \ "documentReferenceNumber").read[String] and
       (__ \ "details" \ "additionalInformation").readNullable[String]
   )(PreviousDocumentType05.apply)
+}
+
+object previousDocumentType06 {
+
+  def reads(index: Int): Reads[PreviousDocumentType06] = (
+    Reads.pure[BigInt](index) and
+      documentType.codeReads and
+      (__ \ "details" \ "documentReferenceNumber").read[String] and
+      (__ \ "details" \ "additionalInformation").readNullable[String]
+  )(PreviousDocumentType06.apply)
 }
 
 object additionalReferenceType02 {
