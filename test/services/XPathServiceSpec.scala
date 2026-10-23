@@ -332,29 +332,55 @@ class XPathServiceSpec extends SpecBase with BeforeAndAfterEach {
         }
       }
 
-      "IE022 rejection" in {
+      "IE022 rejection" when {
         val userAnswers = emptyUserAnswers.updateTasks(tasks)
 
-        val rejection = IE022Rejection(
-          departureId,
-          Seq(
-            Some(XPath("/CC013C/Consignment/PreviousDocument[1]/referenceNumber"))
+        "error pointers is present" in {
+          val rejection = IE022Rejection(
+            departureId,
+            Seq(
+              Some(XPath("/CC013C/Consignment/PreviousDocument[1]/referenceNumber"))
+            )
           )
-        )
 
-        val result = service.handleRejection(userAnswers, rejection)
+          val result = service.handleRejection(userAnswers, rejection)
 
-        result.metadata.isSubmitted shouldEqual SubmissionState.Amendment
-        result.metadata.tasks shouldEqual Map(
-          PreTaskList.taskName      -> Status.Completed,
-          TraderDetails.taskName    -> Status.Completed,
-          RouteDetails.taskName     -> Status.Completed,
-          TransportDetails.taskName -> Status.Completed,
-          Documents.taskName        -> Status.Error,
-          Items.taskName            -> Status.Completed,
-          GuaranteeDetails.taskName -> Status.Completed
-        )
-        result.departureId shouldEqual Some(departureId)
+          result.metadata.isSubmitted shouldEqual SubmissionState.Amendment
+          result.metadata.tasks shouldEqual Map(
+            PreTaskList.taskName      -> Status.Completed,
+            TraderDetails.taskName    -> Status.Completed,
+            RouteDetails.taskName     -> Status.Completed,
+            TransportDetails.taskName -> Status.Completed,
+            Documents.taskName        -> Status.Error,
+            Items.taskName            -> Status.Completed,
+            GuaranteeDetails.taskName -> Status.Completed
+          )
+          result.departureId shouldEqual Some(departureId)
+        }
+
+        "error pointers is not present" in {
+          val rejection = IE022Rejection(
+            departureId,
+            Seq(
+              None
+            )
+          )
+
+          val result = service.handleRejection(userAnswers, rejection)
+
+          result.metadata.isSubmitted shouldEqual SubmissionState.Amendment
+          result.metadata.tasks shouldEqual Map(
+            PreTaskList.taskName      -> Status.Completed,
+            TraderDetails.taskName    -> Status.Completed,
+            RouteDetails.taskName     -> Status.Completed,
+            TransportDetails.taskName -> Status.Completed,
+            Documents.taskName        -> Status.Error,
+            Items.taskName            -> Status.Completed,
+            GuaranteeDetails.taskName -> Status.Completed
+          )
+          result.departureId shouldEqual Some(departureId)
+        }
+
       }
     }
   }

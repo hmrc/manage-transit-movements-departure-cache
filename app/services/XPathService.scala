@@ -79,7 +79,8 @@ class XPathService @Inject() (
               .updateStatus(SubmissionState.RejectedPendingChanges)
         }
       case Rejection.IE022Rejection(departureId, errorPointers) =>
-        val tasks = userAnswers.metadata.tasks ++ errorPointers.flatten.toList.flatMap(_.taskError).toMap
+        // IE022 functional error does not contain errorPointer so hardcoded to always show Documents as Errored section
+        val tasks = userAnswers.metadata.tasks ++ errorPointers.flatten.toList.flatMap(_.taskError).toMap ++ Seq(Documents.taskError).toMap
         prepareForAmendment(userAnswers.updateTasks(tasks), departureId)
     }
 
